@@ -13,7 +13,6 @@ function App() {
           throw new Error('Function not implemented.')
         } } />
       </div>
-      <h1>XBid</h1>
       <AuctionList />
     </>
   )

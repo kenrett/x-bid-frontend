@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { getAuctions } from "../api/auctions";
-import type { Auction } from "../types/auction";
+import { getAuction, getAuctions } from "../api/auctions";
+import type { AuctionData } from "../types/auction";
+import { Auction } from "./Auction";
 
 const AuctionList = () => {
-  const [auctions, setAuctions] = useState<Auction[]>([]);
+  const [auctions, setAuctions] = useState<AuctionData[]>([]);
+  const [selectedAuction, setSelectedAuction] = useState<AuctionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,29 +26,46 @@ const AuctionList = () => {
     fetchAuctions();
   }, []);
 
+  const handleBack = () => {
+    setSelectedAuction(null);
+  };
+
   if (loading) {
     return <div>Loading auctions...</div>;
   }
+
+  // if (selectedAuction) {
+  //   return <AuctionDetails auction={selectedAuction} onBack={handleBack} />;
+  // }
 
   if (error) {
     return <div>{error}</div>;
   }
 
+  const handleAuctionClick = async (id: number) => {
+    setLoading(true);
+    try {
+      const data = await getAuction(id);
+      setSelectedAuction(data);
+    } catch (error) {
+      console.error('Error fetching auction details:', error);
+    }
+    setLoading(false);
+  };
+
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Auctions</h1>
       {auctions.length === 0 ? (
         <p>No auctions found.</p>
       ) : (
-        <ul>
-          {auctions.map((auction, index) => (
-            <li key={index} className="mb-2 p-2 border rounded">
-              <h2 className="text-xl">{auction.title}</h2>
-              <p>{auction.description}</p>
-              <p>Current Price: ${auction.current_price}</p>
-            </li>
-          ))}
-        </ul>
+        <div className="container mx-auto p-4">
+          <h1 className="text-3xl font-bold mb-6 text-center">Current Auctions</h1>
+          <div className="flex flex-wrap gap-4 justify-center">
+            {auctions.map((auction) => (
+              <Auction key={auction.id} {...auction} onClick={handleAuctionClick} />
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

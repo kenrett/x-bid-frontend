@@ -1,6 +1,7 @@
 export type AuctionStatus = 'inactive' | 'active' | 'scheduled' | 'complete';
 
-export interface Auction {
+export interface AuctionData {
+  id: number;
   title: string;
   description: string;
   current_price: number;
