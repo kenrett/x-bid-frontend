@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getAuction, getAuctions } from "../api/auctions";
 import type { AuctionData } from "../types/auction";
 import { Auction } from "./Auction";
+import { AuctionDetail } from "./AuctionDetail";
 
 const AuctionList = () => {
   const [auctions, setAuctions] = useState<AuctionData[]>([]);
@@ -34,9 +35,9 @@ const AuctionList = () => {
     return <div>Loading auctions...</div>;
   }
 
-  // if (selectedAuction) {
-  //   return <AuctionDetails auction={selectedAuction} onBack={handleBack} />;
-  // }
+  if (selectedAuction) {
+    return <AuctionDetail auction={selectedAuction} onBack={handleBack} />;
+  }
 
   if (error) {
     return <div>{error}</div>;
