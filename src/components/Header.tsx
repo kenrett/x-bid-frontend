@@ -1,11 +1,11 @@
+import { useState, useEffect } from "react";
 import logo from "../assets/xbid_logo.png";
-// import type { User } from "../types";
-// import { UserRole } from "../types";
+import { useAuth } from "../hooks/useAuth";
+import { Bars3Icon } from "@heroicons/react/24/outline";
+import { NavItem } from "./NavItem";
 
 interface HeaderProps {
-  // user: User | null;
   onSignInClick: () => void;
-  onSignOut: () => void;
 }
 
 const STRINGS = {
@@ -14,28 +14,89 @@ const STRINGS = {
   SIGN_IN: "Sign In",
 };
 
-// export function Header({ user, onSignInClick, onSignOut }: HeaderProps) {
-export function Header({onSignInClick, onSignOut }: HeaderProps) {
-  // const isAdmin = user?.role === UserRole.Admin;
-  console.log("Loading Header...")
+export function Header({ onSignInClick }: HeaderProps) {
+  const navItems = [
+    { name: "Auctions", href: "/auctions" },
+    { name: "How It Works", href: "/how_it_works" },
+    { name: "About", href: "/about" },
+  ];
+
+  const getActiveItem = () => {
+    return navItems.find(item => window.location.pathname === item.href)?.name || "";
+  }
+
+  const [activeItem, setActiveItem] = useState(getActiveItem);
+
+  useEffect(() => {
+    const onLocationChange = () => {
+      setActiveItem(getActiveItem());
+    };
+
+    window.addEventListener('popstate', onLocationChange);
+    return () => {
+      window.removeEventListener('popstate', onLocationChange);
+    };
+  }, []);
+
+  const { user, logout } = useAuth();
   return (
-    // <header className={`w-full border-2 border-black flex items-center justify-between ${isAdmin ? 'bg-red-500' : ''}`}>
-    <header className={`w-full border-2 border-black flex items-center justify-between}`}>
-      <div>
-        <a href="/">
+    <nav className={`bg-white border-gray-200`}>
+      <div className={`max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4`}>
+        <a className={`flex items-center space-x-3 rtl:space-x-reverse`} href="/">
           <img src={logo} alt="X-Bid Logo" className="h-36" />
         </a>
+        <button 
+          data-collapse-toggle="navbar-default"
+          type="button"
+          className={`inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600`}
+          aria-controls="navbar-default"
+          aria-expanded="false"
+        >
+          <span className={`sr-only`}>Open main menu</span>
+          <Bars3Icon className="w-6 h-6" />
+        </button>
+        <div
+          className={`hidden w-full md:block md:w-auto`}
+          id="navbar-default"
+        >
+          <ul
+            className={`font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:items-center md:space-x-2 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white`}
+            onMouseLeave={() => setActiveItem(getActiveItem())}
+          >
+            {navItems.map((item) => (
+              <NavItem
+                key={item.name}
+                href={item.href}
+                isActive={activeItem === item.name}
+                onHover={() => setActiveItem(item.name)}
+              >
+                {item.name}
+              </NavItem>
+            ))}
+
+            <li className="md:ml-4">
+              {user ? (
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-gray-600 hidden lg:block">{user.email}</span>
+                  <button
+                    onClick={logout}
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    {STRINGS.LOG_OUT}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={onSignInClick}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  {STRINGS.SIGN_IN}
+                </button>
+              )}
+            </li>
+          </ul>
+        </div>
       </div>
-      <div className="flex items-center space-x-4 pr-4">
-        {/* {user ? ( */}
-          {/* <>
-            <span className="text-black">{STRINGS.GREETING}, {user.email_address}!</span>
-            <button onClick={onSignOut} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">{STRINGS.LOG_OUT}</button>
-          </>
-        ) : (
-          <button onClick={onSignInClick} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">{STRINGS.SIGN_IN}</button>
-        )} */}
-      </div>
-    </header>
+    </nav>
   );
 }
