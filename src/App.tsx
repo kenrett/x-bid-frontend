@@ -1,16 +1,18 @@
-import { useState } from 'react'
+import { Routes, Route } from 'react-router-dom';
 import './App.css'
 import AuctionList from './components/AuctionList'
-import {Header} from './components/Header'
+import { HowItWorks } from './components/HowItWorks';
+import { Layout } from './components/Layout';
 
 function App() {
-  const [isLoginModalOpen, setLoginModalOpen] = useState(false);
-
   return (
-    <>
-      <Header onSignInClick={() => setLoginModalOpen(true)} />
-      <AuctionList />
-    </>
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<AuctionList />} />
+        <Route path="auctions" element={<AuctionList />} />
+        <Route path="how_it_works" element={<HowItWorks />} />
+      </Route>
+    </Routes>
   )
 }
 
