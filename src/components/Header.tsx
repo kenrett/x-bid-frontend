@@ -4,17 +4,13 @@ import { useAuth } from "../hooks/useAuth";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { NavItem } from "./NavItem";
 
-interface HeaderProps {
-  onSignInClick: () => void;
-}
-
 const STRINGS = {
   GREETING: "Hello",
   LOG_OUT: "Log Out",
   SIGN_IN: "Sign In",
 };
 
-export function Header({ onSignInClick }: HeaderProps) {
+export function Header() {
   const navItems = [
     { name: "Auctions", href: "/auctions" },
     { name: "How It Works", href: "/how_it_works" },
@@ -86,12 +82,12 @@ export function Header({ onSignInClick }: HeaderProps) {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={onSignInClick}
+                <a
+                  href="/login"
                   className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   {STRINGS.SIGN_IN}
-                </button>
+                </a>
               )}
             </li>
           </ul>
