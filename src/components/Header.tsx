@@ -1,6 +1,6 @@
 import logo from "../assets/xbid_logo.png";
 import { useAuth } from "../hooks/useAuth";
-import { Bars3Icon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, ArrowRightEndOnRectangleIcon } from "@heroicons/react/24/outline";
 import { NavItem } from "./NavItem";
 import { Link } from "react-router-dom";
 
@@ -15,6 +15,7 @@ export function Header() {
     { name: "Auctions", href: "/auctions" },
     { name: "How It Works", href: "/how-it-works" },
     { name: "About", href: "/about" },
+    { name: "Buy Bids", href: "/buy-bids" },
   ];
 
   const { user, logout } = useAuth();
@@ -55,7 +56,7 @@ export function Header() {
                     onClick={logout}
                     className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
-                    <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                    <ArrowRightEndOnRectangleIcon className="w-5 h-5" />
                     {STRINGS.LOG_OUT}
                   </button>
                 </div>

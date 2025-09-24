@@ -71,7 +71,7 @@ export const HowItWorks = () => {
             </ul>
             <p className="mb-2 text-gray-600">The objective is simple: be the last one standing when time expires.</p>
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="font-semibold text-blue-800">Pro Tip: Dominate with the QuiverBidder</h4>
+              <h4 className="font-semibold text-blue-800">Pro Tip: Dominate with the Wingman</h4>
               <p className="text-blue-700">Define your limit, and our system will strategically place bids for you in the crucial final moments. It's the ultimate tool for securing victory while you maintain your composure.</p>
             </div>
           </div>
@@ -118,7 +118,7 @@ export const HowItWorks = () => {
             <ul className="list-disc pl-5 text-gray-600 space-y-2">
               <li><span className="font-semibold">Bids are Non-Refundable:</span> Every bid is a commitment. It's the price of admission to the game, win or lose.</li>
               <li><span className="font-semibold">This Is a Game of Strategy:</span> Victory isn't about luck; it's about timing, observing your rivals, and knowing the precise moment to strike.</li>
-              <li><span className="font-semibold">Didn't Win? There's Always a Second Chance:</span> Many auctions feature a "Buy It Now" option. If you don't secure the win, you can often apply the value of your spent Bids toward purchasing the item at its retail price. You never have to leave unsatisfied.</li>
+              <li><span className="font-semibold">Didn't Win? There's Always a Second Chance:</span> Many auctions feature a "Morning After" option. If you don't secure the win, you can often apply the value of your spent Bids toward purchasing the item at its retail price. You never have to leave unsatisfied.</li>
             </ul>
           </div>
         </div>

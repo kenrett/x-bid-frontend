@@ -5,6 +5,7 @@ import { HowItWorks } from './components/HowItWorks';
 import { About } from './components/About';
 import { LoginForm } from './components/LoginForm';
 import { SignUpForm } from './components/SignUpForm';
+import { BuyBids } from './components/BuyBids';
 import { Layout } from './components/Layout';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="auctions" element={<AuctionList />} />
         <Route path="how-it-works" element={<HowItWorks />} />
         <Route path="about" element={<About />} />
+        <Route path="buy-bids" element={<BuyBids />} />
       </Route>
       <Route path="/login" element={<LoginForm />} />
       <Route path="/signup" element={<SignUpForm />} />
