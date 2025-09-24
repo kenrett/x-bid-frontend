@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import client from '../api/client'; // We'll use the raw client for the login endpoint
 
@@ -69,7 +69,7 @@ export const LoginForm = () => {
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
           <div className="text-sm font-medium text-gray-500">
-            Not registered? <a href="/signup" className="text-blue-700 hover:underline">Create account</a>
+            Not registered? <Link to="/signup" className="text-blue-700 hover:underline">Create account</Link>
           </div>
         </form>
       </div>

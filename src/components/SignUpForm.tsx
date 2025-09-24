@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import client from '../api/client';
 
 export const SignUpForm = () => {
@@ -58,7 +58,7 @@ export const SignUpForm = () => {
             {loading ? 'Creating account...' : 'Create account'}
           </button>
           <div className="text-sm font-medium text-gray-500">
-            Already have an account? <a href="/login" className="text-blue-700 hover:underline">Sign in</a>
+            Already have an account? <Link to="/login" className="text-blue-700 hover:underline">Sign in</Link>
           </div>
         </form>
       </div>

@@ -1,27 +1,28 @@
 import clsx from "clsx";
+import { NavLink } from "react-router-dom";
 
 interface NavItemProps {
-  href: string;
-  isActive: boolean;
-  onHover: () => void;
+  to: string;
   children: React.ReactNode;
 }
 
-export const NavItem = ({ href, isActive, onHover, children }: NavItemProps) => {
+export const NavItem = ({ to, children }: NavItemProps) => {
   return (
-    <li className="relative" onMouseEnter={onHover}>
-      <a
-        href={href}
-        className={clsx(
+    <li className="relative">
+      <NavLink
+        to={to}
+        className={({ isActive }) => clsx(
           "block relative py-2 px-3 transition-all duration-300 ease-in-out",
           isActive ? "text-red-900 -translate-y-[5px]" : "text-gray-900 hover:text-blue-600"
         )}
       >
-        {children}
-      </a>
-      {isActive && (
-        <div className="absolute inset-0 bg-blue-600 rounded-md -z-10" />
-      )}
+        {({ isActive }) => (
+          <>
+            {children}
+            {isActive && <div className="absolute inset-0 bg-blue-600 rounded-md -z-10" />}
+          </>
+        )}
+      </NavLink>
     </li>
   );
 };

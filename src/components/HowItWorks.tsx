@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export const HowItWorks = () => {
   return (
     <div className="container mx-auto p-4 md:p-8">
@@ -123,9 +125,9 @@ export const HowItWorks = () => {
       </div>
 
       <div className="text-center mt-10">
-        <a href="/auctions" className="inline-block bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors">
+        <Link to="/auctions" className="inline-block bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors">
           Ready to play? Find your first conquest.
-        </a>
+        </Link>
       </div>
     </div>
   );
