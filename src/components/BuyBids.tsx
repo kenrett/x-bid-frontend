@@ -46,11 +46,11 @@ export const BuyBids = () => {
   }
 
   if (loading) {
-    return <div className="text-center p-8">Loading bid packs...</div>;
+    return <div className="font-sans bg-[#0d0d1a] text-gray-400 text-lg text-center p-8 min-h-screen">Loading bid packs...</div>;
   }
 
   if (error) {
-    return <div className="text-center p-8 text-red-600">{error}</div>;
+    return <div className="font-sans bg-[#0d0d1a] text-red-400 text-lg text-center p-8 min-h-screen">{error}</div>;
   }
 
   const handleBuy = (packName: string) => {
@@ -60,62 +60,56 @@ export const BuyBids = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">
-          Stock Up on Bids
-        </h1>
-        <p className="text-lg text-gray-600">
-          More bids mean more chances to win. Choose your pack.
-        </p>
-      </div>
+    <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4">
+      <div className="container mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="font-serif text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
+            Arm Yourself
+          </h1>
+          <p className="text-lg md:text-xl text-gray-400">
+            More bids mean more power. Choose your pack and dominate the floor.
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
-        {bidPacks.map((pack, index) => (
-          <div
-            key={pack.id}
-            className={`group bg-white rounded-xl p-6 flex flex-col text-center shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${
-              pack.highlight
-                ? "bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-500 relative"
-                : "border border-gray-200"
-            }`}
-            style={{ animation: `fadeInUp 0.5s ${index * 0.1}s ease-out both` }}
-          >
-            {pack.highlight && (
-              <div className="absolute -top-4 right-4 bg-blue-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg transform rotate-6">
-                MOST POPULAR
-              </div>
-            )}
-            <h2 className="text-2xl font-bold text-gray-800 tracking-tight">
-              {pack.name}
-            </h2>
-            <p className="text-sm text-gray-500 mb-4 h-10">
-              {pack.description}
-            </p>
-            <div className="my-4">
-              <span className="text-5xl font-extrabold text-gray-900">
-                {pack.bids}
-              </span>
-              <span className="text-xl font-medium text-gray-600"> Bids</span>
-            </div>
-            <div className="text-4xl font-bold text-gray-900 mb-2">
-              ${Number(pack.price).toFixed(2)}
-            </div>
-            <p className="text-gray-500 mb-6 font-medium">
-              ({pack.pricePerBid}/Bid)
-            </p>
-            <button
-              onClick={() => handleBuy(pack.name)}
-              className={`mt-auto w-full font-bold py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg ${
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+          {bidPacks.map((pack, index) => (
+            <div
+              key={pack.id}
+              className={`group flex flex-col text-center bg-[#1a0d2e]/50 backdrop-blur-sm border rounded-2xl p-6 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl ${
                 pack.highlight
-                  ? "bg-blue-600 text-white hover:bg-blue-700 transform hover:-translate-y-0.5"
-                  : "bg-gray-200 text-gray-800 hover:bg-gray-300 transform hover:-translate-y-0.5"
+                  ? "border-pink-500 hover:shadow-pink-500/20 relative"
+                  : "border-white/10 hover:shadow-purple-500/20"
               }`}
+              style={{ animation: `fadeInUp 0.5s ${index * 0.1}s ease-out both` }}
             >
-              Buy Now
-            </button>
-          </div>
-        ))}
+              {pack.highlight && (
+                <div className="absolute -top-4 right-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg transform rotate-6">
+                  BEST VALUE
+                </div>
+              )}
+              <h2 className="font-serif text-3xl font-bold text-white tracking-tight">
+                {pack.name}
+              </h2>
+              <p className="text-sm text-gray-400 mb-4 h-10">{pack.description}</p>
+              <div className="my-4">
+                <span className="text-6xl font-extrabold text-white">{pack.bids}</span>
+                <span className="text-xl font-medium text-gray-400"> Bids</span>
+              </div>
+              <div className="text-4xl font-bold text-white mb-2">${Number(pack.price).toFixed(2)}</div>
+              <p className="text-pink-400 mb-6 font-medium">({pack.pricePerBid}/Bid)</p>
+              <button
+                onClick={() => handleBuy(pack.name)}
+                className={`mt-auto w-full font-bold py-3 px-6 rounded-full transition-all duration-300 shadow-md hover:shadow-lg ${
+                  pack.highlight
+                    ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white transform hover:scale-105"
+                    : "bg-white/10 text-white hover:bg-white/20 transform hover:-translate-y-0.5"
+                }`}
+              >
+                Acquire Pack
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -55,15 +55,22 @@ const AuctionList = () => {
   };
 
   return (
-    <div>
+    <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4">
       {auctions.length === 0 ? (
-        <p>No auctions found.</p>
+        <p className="text-center text-gray-400">No auctions found.</p>
       ) : (
         <div className="container mx-auto p-4">
-          <h1 className="text-3xl font-bold mb-6 text-center">Current Auctions</h1>
-          <div className="flex flex-wrap gap-4 justify-center">
-            {auctions.map((auction) => (
-              <Auction key={auction.id} {...auction} onClick={handleAuctionClick} />
+          <div className="text-center mb-12">
+            <h1 className="font-serif text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
+              Your Next Obsession
+            </h1>
+            <p className="text-lg md:text-xl text-gray-400">
+              The chase is on. Find your prize and make your move.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {auctions.map((auction, index) => (
+              <Auction key={auction.id} {...auction} onClick={handleAuctionClick} index={index} />
             ))}
           </div>
         </div>
