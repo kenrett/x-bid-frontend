@@ -1,6 +1,5 @@
 import logo from "../assets/xbid_logo_high_res.png";
 import { Link } from "react-router-dom";
-
 export const About = () => {
   return (
     <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased">

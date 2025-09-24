@@ -1,6 +1,5 @@
 import type { AuctionData } from "../types/auction";
 import { useAuth } from "../hooks/useAuth";
-
 interface AuctionDetailProps {
   auction: AuctionData;
   onBack: () => void;

@@ -3,7 +3,6 @@ import { useAuth } from "../hooks/useAuth";
 import { Link } from "react-router-dom";
 import type { BidPack } from "../types/bidPack";
 import client from "../api/client";
-
 export const BuyBids = () => {
   const { user } = useAuth();
   const [bidPacks, setBidPacks] = useState<BidPack[]>([]);
@@ -32,14 +31,14 @@ export const BuyBids = () => {
 
   if (!user) {
     return (
-      <div className="text-center p-8">
-        <h2 className="text-2xl font-bold mb-4">Please Log In</h2>
-        <p className="mb-4">You need to be logged in to purchase bids.</p>
+      <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4 text-center">
+        <h2 className="font-serif text-4xl font-bold mb-4 text-white">Your Arsenal Awaits</h2>
+        <p className="mb-6 text-lg text-gray-400">Log in to arm yourself for the auction floor.</p>
         <Link
           to="/login"
-          className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+          className="inline-block text-lg bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20"
         >
-          Log In
+          Log In to Continue
         </Link>
       </div>
     );

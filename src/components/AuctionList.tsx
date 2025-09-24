@@ -3,7 +3,6 @@ import { getAuction, getAuctions } from "../api/auctions";
 import type { AuctionData } from "../types/auction";
 import { Auction } from "./Auction";
 import { AuctionDetail } from "./AuctionDetail";
-
 const AuctionList = () => {
   const [auctions, setAuctions] = useState<AuctionData[]>([]);
   const [selectedAuction, setSelectedAuction] = useState<AuctionData | null>(null);

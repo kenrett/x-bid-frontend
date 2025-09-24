@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-
 // NOTE: This component is designed to visually match the 'AboutXBid.jsx' component.
 // It assumes the same font setup (Montserrat for sans-serif, Playfair Display for serif).
 // For the accordion to be interactive, you would need to add state management (e.g., useState)

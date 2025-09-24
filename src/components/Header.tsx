@@ -3,11 +3,36 @@ import { useAuth } from "../hooks/useAuth";
 import { Bars3Icon, ArrowRightEndOnRectangleIcon } from "@heroicons/react/24/outline";
 import { NavItem } from "./NavItem";
 import { Link } from "react-router-dom";
+import { cva } from "class-variance-authority";
 
 const STRINGS = {
   GREETING: "Hello",
   LOG_OUT: "Log Out",
   SIGN_IN: "Sign In",
+};
+
+const variants = {
+  nav: cva("bg-[#0d0d1a] border-b border-white/10 sticky top-0 z-50"),
+  container: cva("max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"),
+  logoLink: cva("relative flex items-center justify-center w-60 h-34"),
+  logoSpotlight: cva(
+    "absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.15)_0%,rgba(255,255,255,0)_50%)] -z-0"
+  ),
+  logoImage: cva(
+    "relative h-50 drop-shadow-[0_0_25px_rgba(255,105,180,0.8)] transition-transform duration-300 hover:scale-105"
+  ),
+  mobileMenuButton: cva(
+    "inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-400 rounded-lg md:hidden hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500"
+  ),
+  navList: cva(
+    "font-medium flex flex-col p-4 md:p-0 mt-4 border border-white/10 rounded-lg bg-[#0d0d1a] md:flex-row md:items-center md:space-x-2 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-[#0d0d1a]"
+  ),
+  logoutButton: cva(
+    "flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-300 bg-white/10 border border-white/10 rounded-lg hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors duration-300"
+  ),
+  signInLink: cva(
+    "inline-block text-sm bg-[#ff69b4] text-[#1a0d2e] px-4 py-2 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20"
+  ),
 };
 
 export function Header() {
@@ -20,15 +45,18 @@ export function Header() {
 
   const { user, logout } = useAuth();
   return (
-    <nav className={`bg-white border-gray-200`}>
-      <div className={`max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4`}>
-        <Link to="/" className={`flex items-center space-x-3 rtl:space-x-reverse`}>
-          <img src={logo} alt="X-Bid Logo" className="h-36" />
+    <nav className={variants.nav()}>
+      <div className={variants.container()}>
+        <Link to="/" className={variants.logoLink()}>
+          <div className={variants.logoSpotlight()} style={{ transform: 'scale(3)' }}></div>
+          <img 
+            src={logo} alt="X-Bid Logo" 
+            className={variants.logoImage()} />
         </Link>
         <button 
           data-collapse-toggle="navbar-default"
           type="button"
-          className={`inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600`}
+          className={variants.mobileMenuButton()}
           aria-controls="navbar-default"
           aria-expanded="false"
         >
@@ -36,12 +64,10 @@ export function Header() {
           <Bars3Icon className="w-6 h-6" />
         </button>
         <div
-          className="hidden w-full md:block md:w-auto"
+          className="hidden w-full md:block md:w-auto animate-fadeInUp"
           id="navbar-default"
         >
-          <ul
-            className={`font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:items-center md:space-x-2 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white`}
-          >
+          <ul className={variants.navList()}>
             {navItems.map((item) => (
               <NavItem key={item.name} to={item.href}>
                 {item.name}
@@ -51,19 +77,19 @@ export function Header() {
             <li className="md:ml-4">
               {user ? (
                 <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-600 hidden lg:block">{user.email}</span>
+                  <span className="text-sm text-gray-300 hidden lg:block">{user.email}</span>
                   <button
                     onClick={logout}
-                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className={variants.logoutButton()}
                   >
                     <ArrowRightEndOnRectangleIcon className="w-5 h-5" />
                     {STRINGS.LOG_OUT}
                   </button>
                 </div>
               ) : (
-                <Link
+                <Link 
                   to="/login"
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className={variants.signInLink()}
                 >
                   {STRINGS.SIGN_IN}
                 </Link>
