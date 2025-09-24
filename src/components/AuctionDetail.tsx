@@ -1,4 +1,5 @@
 import type { AuctionData } from "../types/auction";
+import { useAuth } from "../hooks/useAuth";
 
 interface AuctionDetailProps {
   auction: AuctionData;
@@ -6,6 +7,8 @@ interface AuctionDetailProps {
 }
 
 export function AuctionDetail({ auction, onBack }: AuctionDetailProps) {
+  const { user } = useAuth();
+
   return (
     <div className="container mx-auto p-4">
       <button onClick={onBack} className="mb-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded">
@@ -18,6 +21,11 @@ export function AuctionDetail({ auction, onBack }: AuctionDetailProps) {
         <p className="text-2xl font-semibold text-green-600">
           Starting at: ${auction.current_price.toFixed(2)}
         </p>
+        {user && !user.is_admin && (
+          <button className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+            Bid Now
+          </button>
+        )}
       </div>
     </div>
   );
