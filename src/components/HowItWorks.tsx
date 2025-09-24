@@ -1,133 +1,123 @@
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
+
+// NOTE: This component is designed to visually match the 'AboutXBid.jsx' component.
+// It assumes the same font setup (Montserrat for sans-serif, Playfair Display for serif).
+// For the accordion to be interactive, you would need to add state management (e.g., useState)
+// in a real React application to toggle the visibility of the content panels.
 
 export const HowItWorks = () => {
+  const steps = [
+    {
+      title: "Step 1: Arm Yourself",
+      content: (
+        <>
+          <p className="mb-4 text-gray-300">First, create your complimentary account. To play, you don't use cash directly. You acquire 'Bids' in packages—your currency for the thrill of the chase. Each move costs one Bid from your balance.</p>
+          <ul className="list-disc pl-5 text-gray-300 space-y-2">
+            <li><span className="font-semibold text-pink-400">A Taste of the Action:</span> We'll give you complimentary Bids just for joining. Your first fix is on us.</li>
+            <li><span className="font-semibold text-pink-400">Load Up:</span> Visit our "Buy Bids" page to stock your arsenal. The larger the pack, the more potent your power.</li>
+          </ul>
+        </>
+      )
+    },
+    {
+      title: "Step 2: Find Your Fixation",
+      content: (
+        <>
+          <p className="mb-2 text-gray-300">Explore our gallery of temptations. We feature everything from the latest tech and exclusive gift cards to high-end home appliances. Every item is untouched, in its original, factory-sealed packaging, waiting for a worthy winner.</p>
+          <p className="text-gray-300">Select an auction to reveal its details, including the current price and the heart-pounding countdown timer.</p>
+        </>
+      )
+    },
+    {
+      title: "Step 3: Make Your Move",
+      content: (
+        <>
+          <p className="mb-4 text-gray-300">This is where the seduction begins. Every auction features a countdown timer starting from as little as 10 seconds.</p>
+          <ul className="list-disc pl-5 text-gray-300 space-y-2 mb-6">
+            <li><span className="font-semibold text-pink-400">Raise the Price by a Penny:</span> A subtle move with a powerful impact.</li>
+            <li><span className="font-semibold text-pink-400">Reset the Timer:</span> When you strike, the clock resets, teasing your rivals and daring them to challenge you.</li>
+          </ul>
+          <div className="p-6 bg-[#1a0d2e]/60 border border-purple-500/50 rounded-2xl shadow-lg">
+            <h4 className="font-serif font-bold text-xl text-purple-400">Pro Tip: Dominate with The Wingman</h4>
+            <p className="text-gray-300">Our auto-bidder is your secret weapon. Define your limit, and our system strategically places bids for you in the crucial final moments. It's the ultimate tool for securing victory while you maintain an aura of cool composure.</p>
+          </div>
+        </>
+      )
+    },
+    {
+      title: "Step 4: The Ecstasy of the Score",
+      content: (
+        <>
+          <p className="mb-4 text-gray-300">If your bid is the last one when the timer hits zero, you've won. Congratulations. You've earned the right to claim your prize at its final, often shockingly low, auction price.</p>
+          <div className="p-6 bg-gradient-to-br from-green-900/20 to-green-800/10 border border-green-400/50 rounded-2xl shadow-lg text-left">
+            <h4 className="font-serif font-bold text-xl text-green-300">Example of a Win:</h4>
+            <p className="text-gray-300 mb-3">You desire a new pair of headphones (Retail: $250). You commit 40 bids (e.g., at $0.50 each). The clock runs out. You are the final bidder. The auction closes at a mere $12.34.</p>
+            <h5 className="font-semibold text-green-300">Your Total Cost:</h5>
+            <ul className="list-none text-gray-300 text-sm">
+              <li>Cost of Bids Used: 40 × $0.50 = <strong className="text-white">$20.00</strong></li>
+              <li>Final Auction Price: <strong className="text-white">$12.34</strong></li>
+              <li>Shipping & Handling: <strong className="text-white">$9.99</strong></li>
+              <li className="font-bold border-t border-green-300/50 mt-2 pt-2 text-base">Total You Pay: $20.00 + $12.34 + $9.99 = <strong className="text-white">$42.33</strong></li>
+            </ul>
+            <p className="mt-3 font-bold text-green-300 text-lg">You've just claimed a $250 prize for less than $43. That's the XBid high.</p>
+          </div>
+        </>
+      )
+    },
+     {
+      title: "The Rules of Engagement",
+      content: (
+        <>
+          <ul className="list-disc pl-5 text-gray-300 space-y-3">
+            <li><span className="font-semibold text-pink-400">Bids are Non-Refundable:</span> Every bid is a commitment. It's the price of admission to the game, win or lose. The thrill is in the risk.</li>
+            <li><span className="font-semibold text-pink-400">This Is a Game of Strategy:</span> Victory isn't luck; it's timing, observing your rivals, and knowing the precise moment to strike.</li>
+            <li><span className="font-semibold text-pink-400">Didn't Win? The "Morning After" Awaits:</span> Many auctions feature a 'Buy Now' option. If you don't secure the win, you can often apply the value of your spent Bids toward purchasing the item at its retail price. You never have to leave unsatisfied.</li>
+          </ul>
+        </>
+      )
+    }
+  ];
+
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">The Art of the Win</h1>
-        <p className="text-lg text-gray-600">Score Premium, Untouched Goods for a Steal.</p>
-      </div>
-
-      <div className="max-w-3xl mx-auto mb-8">
-        <p className="text-gray-700 mb-4">
-          Welcome to X-Bid. You're moments away from acquiring incredible deals on pristine, factory-sealed products. This isn't your standard auction. Here, the action is fast, the pulse is high, and the satisfaction of saving is immense.
-        </p>
-        <p className="text-gray-700 font-semibold">
-          Here’s our simple, 4-step guide to mastering the game.
-        </p>
-      </div>
-
-      <div id="accordion-flush" data-accordion="collapse" data-active-classes="bg-white text-gray-900" data-inactive-classes="text-gray-500">
-        {/* Step 1 */}
-        <h2 id="accordion-flush-heading-1">
-          <button type="button" className="flex items-center justify-between w-full py-5 font-medium rtl:text-right text-gray-500 border-b border-gray-200 gap-3" data-accordion-target="#accordion-flush-body-1" aria-expanded="true" aria-controls="accordion-flush-body-1">
-            <span>Step 1: Indulge Your Desire</span>
-            <svg data-accordion-icon className="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5 5 1 1 5"/>
-            </svg>
-          </button>
-        </h2>
-        <div id="accordion-flush-body-1" className="hidden" aria-labelledby="accordion-flush-heading-1">
-          <div className="py-5 border-b border-gray-200">
-            <p className="mb-2 text-gray-600">First, create your account. It's complimentary and takes only a moment. To play, you don't use cash directly. Instead, you acquire "Bids" in packages—think of them as your currency for the thrill of the chase. Each move you make costs one Bid from your balance.</p>
-            <ul className="list-disc pl-5 text-gray-600 space-y-1">
-              <li><span className="font-semibold">Welcome Bonus:</span> We'll give you a taste of the action with complimentary Bids just for joining.</li>
-              <li><span className="font-semibold">Purchase a Bid Pack:</span> Visit our "Buy Bids" page to load up. The larger the pack, the more potent your bidding power becomes.</li>
-            </ul>
-          </div>
+    <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4">
+      <div className="container mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="font-serif text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
+            The Seduction of the Steal
+          </h1>
+          <p className="text-lg md:text-xl text-gray-400">Master the Art of the Win. Score Premium Goods for a Fraction of the Price.</p>
         </div>
 
-        {/* Step 2 */}
-        <h2 id="accordion-flush-heading-2">
-          <button type="button" className="flex items-center justify-between w-full py-5 font-medium rtl:text-right text-gray-500 border-b border-gray-200 gap-3" data-accordion-target="#accordion-flush-body-2" aria-expanded="false" aria-controls="accordion-flush-body-2">
-            <span>Step 2: Find Your Fix</span>
-            <svg data-accordion-icon className="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5 5 1 1 5"/>
-            </svg>
-          </button>
-        </h2>
-        <div id="accordion-flush-body-2" className="hidden" aria-labelledby="accordion-flush-heading-2">
-          <div className="py-5 border-b border-gray-200">
-            <p className="mb-2 text-gray-600">Peruse our curated selection of desirable items. We feature everything from the latest tech and exclusive gift cards to high-end home appliances. Every item is untouched, in its original, factory-sealed packaging.</p>
-            <p className="text-gray-600">Select an auction to reveal its details, including the current price and the heart-pounding countdown timer.</p>
-          </div>
+        <div className="max-w-4xl mx-auto mb-12 text-center">
+          <p className="text-gray-300 leading-relaxed">
+            Welcome to XBid. You're moments away from acquiring incredible deals on pristine, factory-sealed products. This isn't your standard auction. Here, the action is fast, the pulse is high, and the satisfaction of the win is exquisite. Follow our guide to mastering the game.
+          </p>
         </div>
 
-        {/* Step 3 */}
-        <h2 id="accordion-flush-heading-3">
-          <button type="button" className="flex items-center justify-between w-full py-5 font-medium rtl:text-right text-gray-500 border-b border-gray-200 gap-3" data-accordion-target="#accordion-flush-body-3" aria-expanded="false" aria-controls="accordion-flush-body-3">
-            <span>Step 3: Make Your Move</span>
-            <svg data-accordion-icon className="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5 5 1 1 5"/>
-            </svg>
-          </button>
-        </h2>
-        <div id="accordion-flush-body-3" className="hidden" aria-labelledby="accordion-flush-heading-3">
-          <div className="py-5 border-b border-gray-200">
-            <p className="mb-2 text-gray-600">This is where the seduction begins. Every auction features a countdown timer starting from just 10 seconds.</p>
-            <ul className="list-disc pl-5 text-gray-600 space-y-1 mb-4">
-              <li><span className="font-semibold">Each Bid Raises the Price by a Penny:</span> A subtle move with a powerful impact.</li>
-              <li><span className="font-semibold">Each Bid Resets the Timer:</span> When you make your move, the clock resets, giving others a moment to respond to your challenge.</li>
-            </ul>
-            <p className="mb-2 text-gray-600">The objective is simple: be the last one standing when time expires.</p>
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="font-semibold text-blue-800">Pro Tip: Dominate with the Wingman</h4>
-              <p className="text-blue-700">Define your limit, and our system will strategically place bids for you in the crucial final moments. It's the ultimate tool for securing victory while you maintain your composure.</p>
+        {/* Accordion */}
+        <div className="max-w-4xl mx-auto space-y-4">
+          {steps.map((step, index) => (
+            <div key={index} className="bg-[#1a0d2e]/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
+              <details className="group" open={index === 0}>
+                <summary className="flex items-center justify-between w-full p-6 font-semibold text-xl text-left cursor-pointer transition-colors duration-300 group-hover:bg-white/5">
+                  <span className="text-pink-400">{step.title}</span>
+                  <svg className="w-5 h-5 text-gray-400 transition-transform duration-300 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </summary>
+                <div className="p-6 pt-0 text-gray-300 leading-relaxed">
+                  {step.content}
+                </div>
+              </details>
             </div>
-          </div>
+          ))}
         </div>
 
-        {/* Step 4 */}
-        <h2 id="accordion-flush-heading-4">
-          <button type="button" className="flex items-center justify-between w-full py-5 font-medium rtl:text-right text-gray-500 border-b border-gray-200 gap-3" data-accordion-target="#accordion-flush-body-4" aria-expanded="false" aria-controls="accordion-flush-body-4">
-            <span>Step 4: The Ultimate Score!</span>
-            <svg data-accordion-icon className="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5 5 1 1 5"/>
-            </svg>
-          </button>
-        </h2>
-        <div id="accordion-flush-body-4" className="hidden" aria-labelledby="accordion-flush-heading-4">
-          <div className="py-5 border-b border-gray-200">
-            <p className="mb-2 text-gray-600">If your bid is the last one when the timer hits zero, you've won. Congratulations. You've earned the right to purchase the item at its final, often shockingly low, auction price.</p>
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-              <h4 className="font-semibold text-green-800">Example of a Win:</h4>
-              <p className="text-green-700 mb-2">You desire a new pair of headphones (Retail: $250). You commit 40 bids (e.g., at $0.50 each). The clock runs out. You are the final bidder. The auction closes at a mere $12.34.</p>
-              <h5 className="font-semibold text-green-800">Your Total Cost:</h5>
-              <ul className="list-none text-green-700">
-                <li>Cost of Bids Used: 40 × $0.50 = <strong>$20.00</strong></li>
-                <li>Final Auction Price: <strong>$12.34</strong></li>
-                <li>Shipping & Handling: <strong>$9.99</strong></li>
-                <li className="font-bold border-t border-green-300 mt-1 pt-1">Total You Pay: $20.00 + $12.34 + $9.99 = <strong>$42.33</strong></li>
-              </ul>
-              <p className="mt-2 font-bold text-green-800">You've just claimed a $250 prize for less than $43.</p>
-            </div>
-          </div>
+        <div className="text-center mt-16">
+          <Link to="/auctions" className="inline-block text-lg md:text-xl bg-[#ff69b4] text-[#1a0d2e] px-10 py-4 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20">
+            Ready to Play? Find Your First Conquest.
+          </Link>
         </div>
-
-        {/* Key Things to Remember */}
-        <h2 id="accordion-flush-heading-5">
-          <button type="button" className="flex items-center justify-between w-full py-5 font-medium rtl:text-right text-gray-500 border-b border-gray-200 gap-3" data-accordion-target="#accordion-flush-body-5" aria-expanded="false" aria-controls="accordion-flush-body-5">
-            <span>Key Things to Remember</span>
-            <svg data-accordion-icon className="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5 5 1 1 5"/>
-            </svg>
-          </button>
-        </h2>
-        <div id="accordion-flush-body-5" className="hidden" aria-labelledby="accordion-flush-heading-5">
-          <div className="py-5 border-b border-gray-200">
-            <ul className="list-disc pl-5 text-gray-600 space-y-2">
-              <li><span className="font-semibold">Bids are Non-Refundable:</span> Every bid is a commitment. It's the price of admission to the game, win or lose.</li>
-              <li><span className="font-semibold">This Is a Game of Strategy:</span> Victory isn't about luck; it's about timing, observing your rivals, and knowing the precise moment to strike.</li>
-              <li><span className="font-semibold">Didn't Win? There's Always a Second Chance:</span> Many auctions feature a "Morning After" option. If you don't secure the win, you can often apply the value of your spent Bids toward purchasing the item at its retail price. You never have to leave unsatisfied.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div className="text-center mt-10">
-        <Link to="/auctions" className="inline-block bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 transition-colors">
-          Ready to play? Find your first conquest.
-        </Link>
       </div>
     </div>
   );

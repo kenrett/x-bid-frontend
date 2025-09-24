@@ -1,4 +1,4 @@
-import logo from "../assets/xbid_logo.png";
+import logo from "../assets/xbid_logo_high_res.png";
 import { useAuth } from "../hooks/useAuth";
 import { Bars3Icon, ArrowRightEndOnRectangleIcon } from "@heroicons/react/24/outline";
 import { NavItem } from "./NavItem";
@@ -13,9 +13,9 @@ const STRINGS = {
 export function Header() {
   const navItems = [
     { name: "Auctions", href: "/auctions" },
+    { name: "Buy Bids", href: "/buy-bids" },
     { name: "How It Works", href: "/how-it-works" },
     { name: "About", href: "/about" },
-    { name: "Buy Bids", href: "/buy-bids" },
   ];
 
   const { user, logout } = useAuth();
