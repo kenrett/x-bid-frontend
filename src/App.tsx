@@ -1,27 +1,33 @@
-import { Routes, Route } from 'react-router-dom';
-import './App.css'
-import AuctionList from './components/AuctionList'
-import { HowItWorks } from './components/HowItWorks';
-import { About } from './components/About';
-import { LoginForm } from './components/LoginForm';
-import { SignUpForm } from './components/SignUpForm';
-import { BuyBids } from './components/BuyBids';
-import { Layout } from './components/Layout';
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Layout } from "./components/Layout";
+import AuctionList from "./components/AuctionList";
+import { AuctionDetail } from "./components/AuctionDetail";
+import { LoginForm } from "./components/LoginForm";
+import { SignUpForm } from "./components/SignUpForm";
+import { About } from "./components/About";
+import { HowItWorks } from "./components/HowItWorks";
+import { BuyBids } from "./components/BuyBids";
+
+const router = createBrowserRouter([
+  {
+    element: <Layout />,
+    children: [
+      { path: "/", element: <AuctionList /> },
+      { path: "/auctions", element: <AuctionList /> },
+      { path: "/auctions/:id", element: <AuctionDetail /> },
+      { path: "/login", element: <LoginForm /> },
+      { path: "/signup", element: <SignUpForm /> },
+      { path: "/about", element: <About /> },
+      { path: "/how-it-works", element: <HowItWorks /> },
+      { path: "/buy-bids", element: <BuyBids /> },
+    ],
+  },
+]);
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route index element={<AuctionList />} />
-        <Route path="auctions" element={<AuctionList />} />
-        <Route path="how-it-works" element={<HowItWorks />} />
-        <Route path="about" element={<About />} />
-        <Route path="buy-bids" element={<BuyBids />} />
-      </Route>
-      <Route path="/login" element={<LoginForm />} />
-      <Route path="/signup" element={<SignUpForm />} />
-    </Routes>
-  )
+    <RouterProvider router={router} />
+  );
 }
 
-export default App
+export default App;

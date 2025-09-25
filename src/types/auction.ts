@@ -8,4 +8,6 @@ export interface AuctionData {
   image_url: string;
   status: AuctionStatus;
   start_date: string;
+  highest_bidder_id: number;
+  bids: number;
 }

@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { getAuction, getAuctions } from "../api/auctions";
+import { getAuctions } from "../api/auctions";
 import type { AuctionData } from "../types/auction";
 import { Auction } from "./Auction";
-import { AuctionDetail } from "./AuctionDetail";
+import { useNavigate } from "react-router-dom";
 const AuctionList = () => {
   const [auctions, setAuctions] = useState<AuctionData[]>([]);
-  const [selectedAuction, setSelectedAuction] = useState<AuctionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAuctions = async () => {
@@ -26,31 +26,12 @@ const AuctionList = () => {
     fetchAuctions();
   }, []);
 
-  const handleBack = () => {
-    setSelectedAuction(null);
-  };
-
   if (loading) {
     return <div>Loading auctions...</div>;
   }
 
-  if (selectedAuction) {
-    return <AuctionDetail auction={selectedAuction} onBack={handleBack} />;
-  }
-
   if (error) {
     return <div>{error}</div>;
-  }
-
-  const handleAuctionClick = async (id: number) => {
-    setLoading(true);
-    try {
-      const data = await getAuction(id);
-      setSelectedAuction(data);
-    } catch (error) {
-      console.error('Error fetching auction details:', error);
-    }
-    setLoading(false);
   };
 
   return (
@@ -69,7 +50,7 @@ const AuctionList = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {auctions.map((auction, index) => (
-              <Auction key={auction.id} {...auction} onClick={handleAuctionClick} index={index} />
+              <Auction key={auction.id} {...auction} onClick={(id) => navigate(`/auctions/${id}`)} index={index} />
             ))}
           </div>
         </div>
