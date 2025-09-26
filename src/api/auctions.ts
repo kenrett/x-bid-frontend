@@ -3,6 +3,7 @@ import type { AuctionData } from "../types/auction";
 
 export const getAuctions = async () => {
   const res = await client.get<AuctionData[]>("/auctions");
+
   // Rails serializes decimal values as strings. We need to convert them to numbers.
   return res.data.map((auction) => ({
     ...auction,

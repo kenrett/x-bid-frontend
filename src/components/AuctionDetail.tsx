@@ -6,7 +6,9 @@ import { useAuctionChannel } from "@/hooks/useAuctionChannel";
 import { BidHistory } from "./BidHistory";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { useParams, useNavigate } from "react-router-dom";
-import { getAuction } from "@/api/auctions";
+import { getAuction } from "../api/auctions";
+import { placeBid } from "../api/bids";
+import { isAxiosError } from "axios";
 
 export function AuctionDetail() {
   const { id } = useParams();
@@ -79,6 +81,29 @@ function AuctionView({ auction }: { auction: AuctionData }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const bids = Array.isArray(auction.bids) ? auction.bids : [];
+  const [isBidding, setIsBidding] = useState(false);
+  const [bidError, setBidError] = useState<string | null>(null);
+
+  const handlePlaceBid = async () => {
+    if (!auction) return;
+
+    setIsBidding(true);
+    setBidError(null);
+    try {
+      await placeBid(auction.id);
+      // No need to update state here. The websocket broadcast will handle it.
+    } catch (err) {
+      if (isAxiosError(err) && err.response?.data?.error) {
+        setBidError(err.response.data.error);
+      } else {
+        setBidError("An unexpected error occurred while placing your bid.");
+      }
+      console.error("Failed to place bid:", err);
+    } finally {
+      // Add a small delay to prevent spamming and give feedback to the user
+      setTimeout(() => setIsBidding(false), 1000);
+    }
+  };
 
   return (
     <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4">
@@ -123,9 +148,18 @@ function AuctionView({ auction }: { auction: AuctionData }) {
             </div>
             {auction.status === "active" && user && !user.is_admin && (
               <>
+                {bidError && (
+                  <div className="p-4 bg-red-900/50 border border-red-500/50 text-red-300 rounded-lg text-center">
+                    {bidError}
+                  </div>
+                )}
                 <BidHistory bids={bids} />
-                <button className="mt-4 w-full text-lg bg-[#ff69b4] text-[#1a0d2e] px-10 py-4 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20">
-                  Place Your Bid
+                <button
+                  onClick={handlePlaceBid}
+                  disabled={isBidding}
+                  className="mt-4 w-full text-lg bg-[#ff69b4] text-[#1a0d2e] px-10 py-4 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20 disabled:bg-gray-500 disabled:cursor-not-allowed disabled:shadow-none disabled:scale-100"
+                >
+                  {isBidding ? "Placing Bid..." : "Place Your Bid"}
                 </button>
               </>
             )}

@@ -1,4 +1,5 @@
 export type AuctionStatus = 'inactive' | 'active' | 'scheduled' | 'complete';
+import type { Bid } from './bid';
 
 export interface AuctionData {
   id: number;
@@ -9,5 +10,5 @@ export interface AuctionData {
   status: AuctionStatus;
   start_date: string;
   highest_bidder_id: number;
-  bids: number;
+  bids: Bid[] | number;
 }
