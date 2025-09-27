@@ -12,6 +12,16 @@ import { BidHistory } from "./BidHistory";
 import type { AuctionData } from "../types/auction";
 
 // -------------------- Custom Hook --------------------
+
+/**
+ * A "headless" component that subscribes to the auction channel.
+ * This ensures the useAuctionChannel hook is only called with a valid ID.
+ */
+function AuctionChannelSubscriber({ auctionId, onData }: { auctionId: number, onData: (data: any) => void }) {
+  useAuctionChannel(auctionId, onData);
+  return null; // This component does not render anything
+}
+
 function useAuctionDetail(id: string | undefined) {
   const { user } = useAuth();
   const [auction, setAuction] = useState<AuctionData | null>(null);
@@ -38,36 +48,20 @@ function useAuctionDetail(id: string | undefined) {
     fetchAuction();
   }, [id]);
 
-  // Subscribe to auction updates
-  const handleAuctionData = useCallback(
-    (data: { current_price?: number; highest_bidder_id?: number }) => {
-      setAuction((prev) =>
-        prev
-          ? {
-              ...prev,
-              current_price: data.current_price ?? prev.current_price,
-              highest_bidder_id: data.highest_bidder_id ?? prev.highest_bidder_id,
-            }
-          : prev
-      );
-    },
-    []
-  );
-
-  useAuctionChannel(auction?.id ?? null, handleAuctionData);
-
-  // Place bid
   const placeUserBid = async () => {
-    if (!auction || isBidding || user?.id === auction.highest_bidder_id) return;
+    // The `user` object is guaranteed to exist here because the bid button
+    // is only rendered for authenticated users.
+    if (!auction || !user || isBidding || user.id === auction.highest_bidder_id) return;
 
     setIsBidding(true);
     setBidError(null);
     try {
       await placeBid(auction.id);
       // Optimistic update
-      setAuction((prev) =>
-        prev ? { ...prev, highest_bidder_id: user.id } : prev
-      );
+      setAuction((prev) => {
+        if (!prev) return prev;
+        return { ...prev, highest_bidder_id: user.id };
+      });
     } catch (err) {
       if (isAxiosError(err) && err.response?.data?.error) {
         setBidError(err.response.data.error);
@@ -113,18 +107,37 @@ export function AuctionDetail() {
     setAuction,
   } = useAuctionDetail(id);
 
+  // Subscribe to auction updates
+  const handleAuctionData = useCallback(
+    (data: { current_price?: number; highest_bidder_id?: number }) => {
+      setAuction((prev) =>
+        prev
+          ? {
+              ...prev,
+              current_price: data.current_price ?? prev.current_price,
+              highest_bidder_id:
+                data.highest_bidder_id ?? prev.highest_bidder_id,
+            }
+          : prev
+      );
+    },
+    [setAuction]
+  );
+
   if (loading || !auction) return <LoadingScreen />;
   if (error) return <ErrorScreen message={error} />;
 
   return (
-    <AuctionView
-      auction={auction}
-      user={user}
-      isBidding={isBidding}
-      bidError={bidError}
-      onPlaceBid={placeUserBid}
-      setAuction={setAuction}
-    />
+    <>
+      <AuctionChannelSubscriber auctionId={auction.id} onData={handleAuctionData} />
+      <AuctionView
+        auction={auction}
+        user={user}
+        isBidding={isBidding}
+        bidError={bidError}
+        onPlaceBid={placeUserBid}
+      />
+    </>
   );
 }
 
@@ -135,7 +148,6 @@ interface AuctionViewProps {
   isBidding: boolean;
   bidError: string | null;
   onPlaceBid: () => void;
-  setAuction: React.Dispatch<React.SetStateAction<AuctionData | null>>;
 }
 
 function AuctionView({

@@ -16,8 +16,8 @@ export function useAuctionChannel(
     const subscription = cable.subscriptions.create(
       { channel: "AuctionChannel", auction_id: auctionId },
       {
-        received: (data) => {
-          onReceived(data as AuctionChannelData);
+        received: (data: AuctionChannelData) => {
+          onReceived(data);
         },
       }
     );
