@@ -92,6 +92,16 @@ export function AuctionDetail() {
     setAuction((prev) => (prev ? { ...prev, status: "complete" } : prev));
   }, [setAuction]);
 
+  // Debug function to reset the timer
+  const handleResetTimer = useCallback(() => {
+    setAuction((prev) => {
+      if (!prev) return null;
+      const newEndTime = new Date(Date.now() + 10000).toISOString();
+      // Also reset status to active in case the auction had ended
+      return { ...prev, end_time: newEndTime, status: "active" };
+    });
+  }, [setAuction]);
+
   if (loading || !auction) return <LoadingScreen />;
   if (error) return <ErrorScreen message={error} />;
 
@@ -109,6 +119,15 @@ export function AuctionDetail() {
         bids={bids}
         onLatestBid={handleLatestBid}
       />
+      {process.env.NODE_ENV === "development" && (
+        <button
+          onClick={handleResetTimer}
+          className="fixed bottom-4 right-4 bg-yellow-500 text-black px-4 py-2 rounded-lg font-bold shadow-lg z-50 hover:bg-yellow-400 transition-colors"
+          title="Resets auction timer to 10 seconds"
+        >
+          Reset Timer (Debug)
+        </button>
+      )}
     </>
   );
 }
