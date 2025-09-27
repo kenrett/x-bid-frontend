@@ -9,6 +9,7 @@ export interface AuctionData {
   image_url: string;
   status: AuctionStatus;
   start_date: string;
+  end_time: string;
   highest_bidder_id: number;
   bids: Bid[] | number;
 }
