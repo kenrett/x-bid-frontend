@@ -1,13 +1,16 @@
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 import { useAuctionChannel } from "@/hooks/useAuctionChannel";
 import { useAuctionDetail } from "@/hooks/useAuctionDetail";
 import { AuctionView } from "./AuctionView";
+import type { Bid } from "../types/bid";
 
 interface AuctionUpdateData {
   current_price?: number;
   highest_bidder_id?: number;
+  end_time?: string;
+  bid?: Bid;
 }
 
 // -------------------- UI Components --------------------
@@ -52,8 +55,10 @@ export function AuctionDetail() {
     bidError,
     highestBidderUsername,
     placeUserBid,
+    handleLatestBid,
     setAuction,
   } = useAuctionDetail(id);
+  const [bids, setBids] = useState<Bid[]>([]);
 
   // Subscribe to auction updates
   const handleAuctionData = useCallback(
@@ -64,12 +69,28 @@ export function AuctionDetail() {
               ...prev,
               current_price: data.current_price ?? prev.current_price,
               highest_bidder_id: data.highest_bidder_id ?? prev.highest_bidder_id,
+              end_time: data.end_time ?? prev.end_time,
             }
           : prev
       );
+      if (data.bid) {
+        setBids((prevBids) => [data.bid!, ...prevBids]);
+      }
     },
     [setAuction]
   );
+
+  // Set initial bids once auction data is loaded
+  useEffect(() => {
+    if (auction?.bids && Array.isArray(auction.bids)) {
+      setBids(auction.bids);
+    }
+  }, [auction?.bids]);
+
+  // Callback for when the timer ends
+  const onTimerEnd = useCallback(() => {
+    setAuction((prev) => (prev ? { ...prev, status: "complete" } : prev));
+  }, [setAuction]);
 
   if (loading || !auction) return <LoadingScreen />;
   if (error) return <ErrorScreen message={error} />;
@@ -84,7 +105,9 @@ export function AuctionDetail() {
         bidError={bidError}
         highestBidderUsername={highestBidderUsername}
         onPlaceBid={placeUserBid}
-        onLatestBid={() => {}}
+        onTimerEnd={onTimerEnd}
+        bids={bids}
+        onLatestBid={handleLatestBid}
       />
     </>
   );

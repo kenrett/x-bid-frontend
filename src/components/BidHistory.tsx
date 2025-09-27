@@ -1,7 +1,5 @@
-import { useAuctionChannel } from "@/hooks/useAuctionChannel";
-import { useState, useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import type { Bid } from "../types/bid";
-import { getBidHistory } from "@/api/bids";
 
  interface BidItemProps {
    bid: Bid;
@@ -23,47 +21,17 @@ import { getBidHistory } from "@/api/bids";
 // It informs its parent of the latest bid via the `onLatestBid` callback.
  
  interface BidHistoryProps {
-   auctionId: number;
+   bids: Bid[];
    onLatestBid: (bid: Bid | null) => void;
  }
  
- export const BidHistory = ({ auctionId, onLatestBid }: BidHistoryProps) => {
-   const [bids, setBids] = useState<Bid[]>([]);
-   const [loading, setLoading] = useState(true);
-   const [error, setError] = useState<string | null>(null);
+ export const BidHistory = ({ bids, onLatestBid }: BidHistoryProps) => {
  
-   const handleNewBid = useCallback((data: { bid?: Bid }) => {
-     const newBid = data.bid;
-     if (newBid) {
-       // Prepend the new bid and notify the parent component.
-       setBids(prevBids => [newBid, ...prevBids]);
-       onLatestBid(newBid);
-     }
-   }, [onLatestBid]);
- 
-   useAuctionChannel(auctionId, handleNewBid);
- 
+   // On initial load or when bids update, inform the parent of the most recent bid.
    useEffect(() => {
-     const fetchBids = async () => {
-       try {
-         setLoading(true);
-         const fetchedBids = await getBidHistory(auctionId);
-         setBids(fetchedBids);
-         // On initial load, inform the parent of the most recent bid.
-         onLatestBid(fetchedBids.length > 0 ? fetchedBids[0] : null);
-       } catch (err) {
-         setError("Failed to fetch bid history.");
-         console.error(err);
-       } finally {
-         setLoading(false);
-       }
-     };
- 
-     fetchBids();
-   }, [auctionId, onLatestBid]);
- 
-   if (loading) return <div className="text-center text-gray-500 py-4">Loading bid history...</div>;
-   if (error) return <div className="text-center text-red-400 py-4">{error}</div>;
+     onLatestBid(bids.length > 0 ? bids[0] : null);
+   }, [bids, onLatestBid]);
+
    if (bids.length === 0) {
      return (
        <div className="text-center text-gray-500 py-4">No bids yet.</div>

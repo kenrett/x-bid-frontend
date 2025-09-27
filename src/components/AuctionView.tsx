@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 
+import { Countdown } from "./Countdown";
 import { BidHistory } from "./BidHistory";
 
 import type { AuctionData } from "../types/auction";
@@ -13,6 +14,8 @@ interface AuctionViewProps {
   bidError: string | null;
   highestBidderUsername: string | null;
   onPlaceBid: () => void;
+  onTimerEnd: () => void;
+  bids: Bid[];
   onLatestBid: (bid: Bid | null) => void;
 }
 
@@ -23,6 +26,8 @@ export function AuctionView({
   bidError,
   highestBidderUsername,
   onPlaceBid,
+  onTimerEnd,
+  bids,
   onLatestBid,
 }: AuctionViewProps) {
   const navigate = useNavigate();
@@ -60,11 +65,24 @@ export function AuctionView({
             </p>
 
             {/* Price + Highest Bidder */}
-            <div className="p-6 bg-white/5 rounded-2xl border border-white/10 space-y-4">
-              <div className="text-3xl font-bold text-pink-400">
-                Current Price: ${auction.current_price.toFixed(2)}
+            <div className="p-6 bg-white/5 rounded-2xl border border-white/10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center sm:text-left">
+                <div>
+                  <div className="text-sm text-gray-400 uppercase tracking-wider">Current Price</div>
+                  <div className="text-3xl font-bold text-pink-400">
+                    ${auction.current_price.toFixed(2)}
+                  </div>
+                </div>
+                <div className="sm:text-right">
+                  <div className="text-sm text-gray-400 uppercase tracking-wider">Time Remaining</div>
+                  <Countdown
+                    endTime={auction.end_time}
+                    status={auction.status}
+                    onEnd={onTimerEnd}
+                  />
+                </div>
               </div>
-              <div className="text-gray-300">
+              <div className="mt-4 pt-4 border-t border-white/10 text-gray-300 text-center sm:text-left">
                 Highest Bidder:{" "}
                 {highestBidderUsername ? (
                   <span className="font-semibold text-purple-400">{highestBidderUsername}</span>
@@ -82,7 +100,7 @@ export function AuctionView({
                     {bidError}
                   </div>
                 )}
-                <BidHistory auctionId={auction.id} onLatestBid={onLatestBid} />
+                <BidHistory bids={bids} onLatestBid={onLatestBid} />
                 <button
                   onClick={onPlaceBid}
                   disabled={isBidding || user?.id === auction.highest_bidder_id}

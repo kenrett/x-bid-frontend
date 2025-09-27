@@ -35,6 +35,14 @@ export function useAuctionDetail(id: string | undefined) {
     fetchAuction();
   }, [id]);
 
+  // Set initial highest bidder username from fetched bids
+  useEffect(() => {
+    if (auction?.bids && Array.isArray(auction.bids) && auction.bids.length > 0) {
+      // The first bid in the array is the most recent one
+      setHighestBidderUsername(auction.bids[0].username);
+    }
+  }, [auction]);
+
   // Callback to update the highest bidder from BidHistory
   const handleLatestBid = useCallback((bid: Bid | null) => {
     setHighestBidderUsername(bid?.username ?? null);
@@ -47,11 +55,16 @@ export function useAuctionDetail(id: string | undefined) {
     setIsBidding(true);
     setBidError(null);
     try {
-      await placeBid(auction.id);
+      const updatedAuction = await placeBid(auction.id);
       // Optimistic update
       setAuction((prev) => {
         if (!prev) return prev;
-        return { ...prev, highest_bidder_id: user.id };
+        return {
+          ...prev,
+          highest_bidder_id: user.id,
+          // Use the new end_time from the API response for an instant timer reset
+          end_time: updatedAuction.end_time,
+        };
       });
       setHighestBidderUsername(user.name);
     } catch (err) {
