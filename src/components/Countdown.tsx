@@ -27,27 +27,27 @@ function formatTime(milliseconds: number): string {
 }
 
 export function Countdown({ endTime, status, onEnd }: CountdownProps) {
-  const calculateRemaining = useCallback(() => {
-    return new Date(endTime).getTime() - Date.now();
-  }, [endTime]);
-
-  const [timeRemaining, setTimeRemaining] = useState(() => formatTime(calculateRemaining()));
+  const [timeRemaining, setTimeRemaining] = useState(() => {
+    const remaining = new Date(endTime).getTime() - Date.now();
+    return formatTime(remaining);
+  });
 
   useEffect(() => {
     if (status !== "active") {
       setTimeRemaining(status === "complete" ? "Auction Ended" : "00:00");
       return;
     }
+    const calculateRemaining = () => new Date(endTime).getTime() - Date.now();
 
-    // Immediately update the timer when endTime changes, without waiting for the interval.
+    // Reset immediately when endTime changes
     setTimeRemaining(formatTime(calculateRemaining()));
 
     const intervalId = setInterval(() => {
-      const remaining = new Date(endTime).getTime() - Date.now();
+      const remaining = calculateRemaining();
 
       if (remaining <= 0) {
         clearInterval(intervalId);
-        setTimeRemaining("Auction Ended");
+        setTimeRemaining("00:00");
         onEnd();
       } else {
         setTimeRemaining(formatTime(remaining));
@@ -55,7 +55,7 @@ export function Countdown({ endTime, status, onEnd }: CountdownProps) {
     }, 1000);
 
     return () => clearInterval(intervalId);
-  }, [endTime, status, onEnd, calculateRemaining]);
+  }, [endTime, status, onEnd]);
 
   return <div className="text-3xl font-bold text-white">{timeRemaining}</div>;
 }

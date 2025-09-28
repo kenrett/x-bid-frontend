@@ -1,17 +1,8 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback } from "react";
 import { useParams } from "react-router-dom";
 
-import { useAuctionChannel } from "@/hooks/useAuctionChannel";
-import { useAuctionDetail } from "@/hooks/useAuctionDetail";
 import { AuctionView } from "./AuctionView";
-import type { Bid } from "../types/bid";
-
-interface AuctionUpdateData {
-  current_price?: number;
-  highest_bidder_id?: number;
-  end_time?: string;
-  bid?: Bid;
-}
+import { useAuctionDetail } from "@/hooks/useAuctionDetail";
 
 // -------------------- UI Components --------------------
 
@@ -19,13 +10,6 @@ interface AuctionUpdateData {
  * A "headless" component that subscribes to the auction channel.
  * This ensures the useAuctionChannel hook is only called with a valid ID.
  */
-function AuctionChannelSubscriber({
-  auctionId,
-  onData,
-}: { auctionId: number; onData: (data: AuctionUpdateData) => void }) {
-  useAuctionChannel(auctionId, onData);
-  return null; // This component does not render anything
-}
 
 function LoadingScreen() {
   return (
@@ -44,6 +28,7 @@ function ErrorScreen({ message }: { message: string }) {
 }
 
 // -------------------- Main Component --------------------
+
 export function AuctionDetail() {
   const { id } = useParams();
   const {
@@ -55,49 +40,21 @@ export function AuctionDetail() {
     bidError,
     highestBidderUsername,
     placeUserBid,
-    handleLatestBid,
-    setAuction,
+    bids,
   } = useAuctionDetail(id);
-  const [bids, setBids] = useState<Bid[]>([]);
-
-  // Subscribe to auction updates
-  const handleAuctionData = useCallback(
-    (data: AuctionUpdateData) => {
-      setAuction((prev) =>
-        prev
-          ? {
-              ...prev,
-              current_price: data.current_price ?? prev.current_price,
-              highest_bidder_id: data.highest_bidder_id ?? prev.highest_bidder_id,
-              end_time: data.end_time ?? prev.end_time,
-            }
-          : prev
-      );
-      if (data.bid) {
-        setBids((prevBids) => [data.bid!, ...prevBids]);
-      }
-    },
-    [setAuction]
-  );
-
-  // Set initial bids once auction data is loaded
-  useEffect(() => {
-    if (auction?.bids && Array.isArray(auction.bids)) {
-      setBids(auction.bids);
-    }
-  }, [auction?.bids]);
 
   // Callback for when the timer ends
   const onTimerEnd = useCallback(() => {
-    setAuction((prev) => (prev ? { ...prev, status: "complete" } : prev));
-  }, [setAuction]);
+    // The hook now handles status changes via WebSocket, but a manual
+    // update on timer end can be a good fallback.
+    // For now, we rely on the server broadcast.
+  }, []);
 
   if (loading || !auction) return <LoadingScreen />;
   if (error) return <ErrorScreen message={error} />;
 
   return (
     <>
-      <AuctionChannelSubscriber auctionId={auction.id} onData={handleAuctionData} />
       <AuctionView
         auction={auction}
         user={user}
@@ -107,7 +64,6 @@ export function AuctionDetail() {
         onPlaceBid={placeUserBid}
         onTimerEnd={onTimerEnd}
         bids={bids}
-        onLatestBid={handleLatestBid}
       />
     </>
   );

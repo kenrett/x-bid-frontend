@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import client from '../api/client'; // We'll use the raw client for the login endpoint
 
@@ -9,6 +9,7 @@ export const LoginForm = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,7 +21,8 @@ export const LoginForm = () => {
       const response = await client.post('/login', { email_address, password });
       const { token, user } = response.data;
       login(token, user);
-      navigate('/auctions'); // Redirect to auctions page on successful login
+      const redirectTo = searchParams.get('redirect') || '/auctions';
+      navigate(redirectTo); // Redirect on successful login
     } catch (err) {
       setError('Invalid email or password. Please try again.');
       console.error(err);

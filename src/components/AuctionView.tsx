@@ -16,7 +16,6 @@ interface AuctionViewProps {
   onPlaceBid: () => void;
   onTimerEnd: () => void;
   bids: Bid[];
-  onLatestBid: (bid: Bid | null) => void;
 }
 
 export function AuctionView({
@@ -28,7 +27,6 @@ export function AuctionView({
   onPlaceBid,
   onTimerEnd,
   bids,
-  onLatestBid,
 }: AuctionViewProps) {
   const navigate = useNavigate();
 
@@ -70,7 +68,7 @@ export function AuctionView({
                 <div>
                   <div className="text-sm text-gray-400 uppercase tracking-wider">Current Price</div>
                   <div className="text-3xl font-bold text-pink-400">
-                    ${auction.current_price.toFixed(2)}
+                    ${Number(auction.current_price).toFixed(2)}
                   </div>
                 </div>
                 <div className="sm:text-right">
@@ -100,15 +98,15 @@ export function AuctionView({
                     {bidError}
                   </div>
                 )}
-                <BidHistory bids={bids} onLatestBid={onLatestBid} />
+                <BidHistory bids={bids} />
                 <button
                   onClick={onPlaceBid}
-                  disabled={isBidding || user?.id === auction.highest_bidder_id}
+                  disabled={isBidding || Number(user?.id) === Number(auction.highest_bidder_id)}
                   className="mt-4 w-full text-lg bg-[#ff69b4] text-[#1a0d2e] px-10 py-4 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20 disabled:bg-gray-500 disabled:cursor-not-allowed disabled:shadow-none disabled:scale-100"
                 >
                   {isBidding
                     ? "Placing Bid..."
-                    : user?.id === auction.highest_bidder_id
+                    : Number(user?.id) === Number(auction.highest_bidder_id)
                     ? "You are the highest bidder"
                     : "Place Your Bid"}
                 </button>

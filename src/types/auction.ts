@@ -11,5 +11,6 @@ export interface AuctionData {
   start_date: string;
   end_time: string;
   highest_bidder_id: number;
+  winning_user_name?: string | null;
   bids: Bid[] | number;
 }

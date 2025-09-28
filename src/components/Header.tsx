@@ -2,7 +2,7 @@ import logo from "../assets/xbid_logo_high_res.png";
 import { useAuth } from "../hooks/useAuth";
 import { Bars3Icon, ArrowRightEndOnRectangleIcon } from "@heroicons/react/24/outline";
 import { NavItem } from "./NavItem";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { cva } from "class-variance-authority";
 
 const STRINGS = {
@@ -44,6 +44,7 @@ export function Header() {
   ];
 
   const { user, logout } = useAuth();
+  const location = useLocation();
   return (
     <nav className={variants.nav()}>
       <div className={variants.container()}>
@@ -88,7 +89,7 @@ export function Header() {
                 </div>
               ) : (
                 <Link 
-                  to="/login"
+                  to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
                   className={variants.signInLink()}
                 >
                   {STRINGS.SIGN_IN}

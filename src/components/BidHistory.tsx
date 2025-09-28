@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import type { Bid } from "../types/bid";
 
  interface BidItemProps {
@@ -21,16 +20,10 @@ import type { Bid } from "../types/bid";
 // It informs its parent of the latest bid via the `onLatestBid` callback.
  
  interface BidHistoryProps {
-   bids: Bid[];
-   onLatestBid: (bid: Bid | null) => void;
+   bids: Bid[]; 
  }
  
- export const BidHistory = ({ bids, onLatestBid }: BidHistoryProps) => {
- 
-   // On initial load or when bids update, inform the parent of the most recent bid.
-   useEffect(() => {
-     onLatestBid(bids.length > 0 ? bids[0] : null);
-   }, [bids, onLatestBid]);
+ export const BidHistory = ({ bids }: BidHistoryProps) => {
 
    if (bids.length === 0) {
      return (
