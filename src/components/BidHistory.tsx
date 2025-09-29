@@ -30,7 +30,7 @@ import type { Bid } from "../types/bid";
        <div className="text-center text-gray-500 py-4">No bids yet.</div>
      );
    }
- 
+
    return (
      <div>
        <h2 className="text-2xl font-bold mb-4 text-white">Bid History</h2>

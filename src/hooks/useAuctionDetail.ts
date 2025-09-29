@@ -4,18 +4,33 @@ import { isAxiosError } from "axios";
 import { useAuth } from "./useAuth";
 import { getAuction } from "../api/auctions";
 import { placeBid, getBidHistory } from "../api/bids";
+import { useAuctionChannel } from "./useAuctionChannel";
 
 import type { AuctionData } from "../types/auction";
 import type { Bid } from "../types/bid";
-import { useAuctionChannel } from "./useAuctionChannel";
 
+/**
+ * Defines the shape of the state for an auction detail page.
+ * This includes the auction data, bid history, loading/error states,
+ * and states related to placing a bid.
+ */
 interface AuctionState {
+  /** The main auction data object. */
   auction: AuctionData | null;
+  /** A list of bids placed on the auction. */
   bids: Bid[];
+  /** True when initially fetching auction data. */
   loading: boolean;
+  /** Holds any error message from fetching data. */
   error: string | null;
+  /** True when a bid is currently being placed. */
   isBidding: boolean;
+  /** Holds any error message from placing a bid. */
   bidError: string | null;
+  /** The username of the current highest bidder. */
+  highestBidderUsername: string | null;
+  /** The ID of the last user to place a bid, used to prevent race conditions. */
+  lastBidderId: number | null;
 }
 
 type AuctionAction =
@@ -28,73 +43,131 @@ type AuctionAction =
   | { type: "BID_END" }
   | { type: "CHANNEL_UPDATE"; payload: { data: any } };
 
+/**
+ * Reducer function to manage the state of the auction detail page.
+ * It handles state transitions based on dispatched actions.
+ * @param state - The current state.
+ * @param action - The action to be processed.
+ */
 function auctionReducer(state: AuctionState, action: AuctionAction): AuctionState {
+  // Group console logs for readability for each action processed by the reducer.
+  console.group(`[auctionReducer] Action: ${action.type}`);
+  console.log('[auctionReducer] State before:', { ...state });
+  // Log the payload if it exists to see what data is coming in.
+  if ('payload' in action) {
+    console.log('[auctionReducer] Action payload:', action.payload);
+  }
+
+  let nextState: AuctionState;
+
   switch (action.type) {
     case "FETCH_INIT":
-      return { ...state, loading: true, error: null };
+      nextState = { ...state, loading: true, error: null };
+      break;
     case "FETCH_SUCCESS": {
       const { auction, bids } = action.payload;
-      return { ...state, loading: false, auction, bids };
+      nextState = { ...state, loading: false, auction, bids, highestBidderUsername: auction.winning_user_name };
+      break;
     }
     case "FETCH_FAILURE":
-      return { ...state, loading: false, error: action.payload };
+      nextState = { ...state, loading: false, error: action.payload };
+      break;
     case "BID_START":
-      return { ...state, isBidding: true, bidError: null };
+      nextState = { ...state, isBidding: true, bidError: null };
+      break;
     case "BID_SUCCESS": {
       const { updatedAuction, newBid } = action.payload;
-      return {
+      nextState = {
         ...state,
         auction: state.auction ? { ...state.auction, ...updatedAuction } : null,
         bids: [newBid, ...state.bids],
+        highestBidderUsername: newBid.username,
+        isBidding: false, // Reset the bidding flag
+        lastBidderId: newBid.user_id, // Set the last bidder ID to prevent race conditions
       };
+      break;
     }
-    case "BID_FAILURE":
-      return { ...state, bidError: action.payload };
-    case "BID_END":
-      return { ...state, isBidding: false };
+    case "BID_FAILURE": {
+      // On failure, re-enable bidding and show an error.
+      nextState = { ...state, isBidding: false, bidError: action.payload };
+      break;
+    } case "BID_END":
+      nextState = { ...state, isBidding: false };
+      break;
     case "CHANNEL_UPDATE": {
       const { data } = action.payload;
-      if (!state.auction) return state;
+      if (!state.auction) {
+        nextState = state;
+        break;
+      }
+      // If the channel update is for the user who just bid, ignore it to prevent state overwrites.
+      if (data.bid && data.bid.user_id === state.lastBidderId) {
+        console.log('[auctionReducer] Ignoring own bid update from channel.');
+        nextState = { ...state, lastBidderId: null };
+        break;
+      }
       
       // Create a new auction object with updated real-time data
       const updatedAuction = {
         ...state.auction,
-        current_price: data.current_price ?? state.auction.current_price,
+        current_price: data.current_price ?? state.auction.current_price, // Use nullish coalescing
         highest_bidder_id: data.highest_bidder_id ?? state.auction.highest_bidder_id,
         end_time: data.end_time ?? state.auction.end_time,
       };
-
       let updatedBids = [...state.bids];
       if (data.bid && !updatedBids.some(b => b.id === data.bid.id)) {
         const incomingBid = data.bid as Bid;
         updatedBids = [incomingBid, ...updatedBids];
       }
-
-      return { ...state, auction: updatedAuction, bids: updatedBids };
+      // Return a completely new state object to guarantee a re-render.
+      nextState = {
+        ...state,
+        auction: updatedAuction,
+        bids: updatedBids,
+        highestBidderUsername: data.highest_bidder_name ?? state.highestBidderUsername,
+        lastBidderId: null, // Reset last bidder ID on any external update
+      };
+      break;
     }
     default:
-      return state;
+      nextState = state;
   }
+
+  console.log('[auctionReducer] State after:', { ...nextState });
+  console.groupEnd();
+  return nextState;
 }
 
-const initialState: AuctionState = { auction: null, bids: [], loading: true, error: null, isBidding: false, bidError: null };
+/**
+ * The initial state for the auction reducer.
+ */
+const initialState: AuctionState = { auction: null, bids: [], loading: true, error: null, isBidding: false, bidError: null, highestBidderUsername: null, lastBidderId: null };
 
-export function useAuctionDetail(id: string | undefined) {
+/**
+ * A custom hook to manage the state and logic for an auction detail page.
+ * It fetches auction data, handles real-time updates via WebSockets, and provides
+ * a function to place bids.
+ * @param auctionId - The ID of the auction to display.
+ */
+export function useAuctionDetail(auctionId: number) {
+  // Get the current authenticated user.
   const { user } = useAuth();
+  // Initialize the state and dispatch function using the reducer.
   const [state, dispatch] = useReducer(auctionReducer, initialState);
 
-  // Fetch auction details on mount
+  // Effect to fetch initial auction details and bid history when the component mounts or auctionId changes.
   useEffect(() => {
-    if (!id) return;
+    // Don't fetch if the auctionId is not valid.
+    if (!auctionId) return;
     const fetchAuction = async () => {
       dispatch({ type: "FETCH_INIT" });
       try {
         // Fetch auction details and bid history in parallel
         const [auctionData, bidHistoryResponse] = await Promise.all([
-          getAuction(Number(id)),
-          getBidHistory(Number(id)),
+          getAuction(auctionId),
+          getBidHistory(auctionId),
         ]);
-        // Combine the auction data with the winning user from the bid history
+        // Augment the auction data with the winning user info from the bid history response.
         auctionData.highest_bidder_id = bidHistoryResponse.auction.winning_user_id ?? auctionData.highest_bidder_id;
         auctionData.winning_user_name = bidHistoryResponse.auction.winning_user_name;
         const bidHistory = bidHistoryResponse.bids;
@@ -105,64 +178,83 @@ export function useAuctionDetail(id: string | undefined) {
       }
     };
     fetchAuction();
-  }, [id]);
+  }, [auctionId]);
 
-  // Handle real-time updates from the AuctionChannel
-  const auctionId = Number(id);
+  /**
+   * Callback function to handle real-time data received from the AuctionChannel WebSocket.
+   * It dispatches a CHANNEL_UPDATE action to update the state.
+   */
   const onChannelData = useCallback((data: any) => {
+    console.log('%c[onChannelData] Received WebSocket data:', 'color: green', data);
     if (auctionId > 0) {
       dispatch({ type: "CHANNEL_UPDATE", payload: { data } });
     }
-  }, [auctionId]); // Dependency on auctionId ensures we don't use a stale ID
+  }, [auctionId, dispatch]);
 
-  useAuctionChannel(auctionId, onChannelData);
+  // Subscribe to the auction's WebSocket channel for real-time updates.
+  const auctionSubscription = useAuctionChannel(auctionId, onChannelData);
 
-  // Place a bid
+  /**
+   * Function to place a bid on the current auction.
+   * It performs several checks before attempting to place the bid.
+   */
   const placeUserBid = async () => {
-    if (!state.auction || !user || state.isBidding || user.id === state.auction.highest_bidder_id) return;
+    // Log the state at the moment the user attempts to place a bid.
+    console.log('%c[placeUserBid] Attempting to place bid...', 'color: blue');
+    console.log('[placeUserBid] Current state:', {
+      auctionId: state.auction?.id,
+      isBidding: state.isBidding,
+      currentHighestBidderId: state.auction?.highest_bidder_id,
+      userId: user?.id,
+      isSelf: user?.id === state.auction?.highest_bidder_id,
+    });
+    // Pre-conditions: ensure auction exists, user is logged in, not already bidding,
+    // user is not the current highest bidder, and WebSocket subscription is active.
+    // The user cannot be the current highest bidder.
+    if (!state.auction || !user || state.isBidding || user.id === state.auction.highest_bidder_id || !auctionSubscription) {
+      console.error("Cannot place bid. Conditions not met or not subscribed.");
+      return;
+    }
 
     dispatch({ type: "BID_START" });
+    // Temporarily stop the stream to prevent receiving our own bid update immediately.
+    auctionSubscription.perform('stop_stream');
     try {
-      // The API now returns both the updated auction and the new bid
+      // Call the API to place the bid. It returns the updated auction data and the new bid object.
       const { auction: updatedAuctionData, bid: newBid } = await placeBid(state.auction.id);
 
-      const updatedAuction = {
-        highest_bidder_id: updatedAuctionData.highest_bidder_id,
-        current_price: updatedAuctionData.current_price,
-        end_time: updatedAuctionData.end_time,
-      };
+      // The API response for the auction has `highest_bidder` (string), not `highest_bidder_id`.
+      // The `newBid` object, however, contains the correct `user_id` of the highest bidder.
+      // We use that to construct the payload for our optimistic update.
+      const updatedAuctionWithId = { ...updatedAuctionData, highest_bidder_id: newBid.user_id };
 
+      // Dispatch success action with the new data.
       dispatch({
         type: "BID_SUCCESS",
-        // We use the authoritative data from the API response
-        payload: { updatedAuction, newBid },
+        // Pass the partial auction update and the new bid directly to the reducer.
+        payload: { updatedAuction: updatedAuctionWithId, newBid: newBid },
       });
     } catch (err) {
+      // Handle specific API errors or generic errors.
       if (isAxiosError(err) && err.response?.data?.error) {
         dispatch({ type: "BID_FAILURE", payload: err.response.data.error });
       } else {
         dispatch({ type: "BID_FAILURE", payload: "An unexpected error occurred while placing your bid." });
       }
     } finally {
-      dispatch({ type: "BID_END" });
+      // Ensure the WebSocket stream is restarted and bidding state is reset, regardless of success or failure.
+      if (auctionSubscription) {
+        auctionSubscription.perform('start_stream');
+      }
     }
   };
 
-  const highestBidderUsername = useMemo(() => {
-    if (!state.auction || !state.auction.highest_bidder_id) return null;
-    // On initial load, the backend provides the winner's name directly.
-    if (state.auction.winning_user_name) return state.auction.winning_user_name;
-
-    if (state.bids.length === 0) return null;
-
-    // Find the most recent bid from the highest bidder to get their username
-    const highestBid = state.bids.find(bid => bid.user_id === state.auction!.highest_bidder_id);
-    return highestBid?.username ?? null;
-  }, [state.auction, state.bids]);
-
+  /**
+   * Return the complete state, the current user, and the function to place a bid.
+   * This provides all necessary data and actions to the component using the hook.
+   */
   return {
     ...state,
-    highestBidderUsername,
     user,
     placeUserBid,
   };

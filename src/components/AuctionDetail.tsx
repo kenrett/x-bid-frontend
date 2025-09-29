@@ -30,7 +30,8 @@ function ErrorScreen({ message }: { message: string }) {
 // -------------------- Main Component --------------------
 
 export function AuctionDetail() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
+  const auctionId = id ? parseInt(id, 10) : 0;
   const {
     auction,
     loading,
@@ -41,7 +42,7 @@ export function AuctionDetail() {
     highestBidderUsername,
     placeUserBid,
     bids,
-  } = useAuctionDetail(id);
+  } = useAuctionDetail(auctionId);
 
   // Callback for when the timer ends
   const onTimerEnd = useCallback(() => {
