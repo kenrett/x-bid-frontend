@@ -64,3 +64,39 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
 -   `npm run build`: Bundles the app for production.
 -   `npm run lint`: Lints the codebase using ESLint.
 -   `npm run preview`: Serves the production build locally for preview.
+
+## 🧱 Architecture
+
+### Error Handling with `ErrorBoundary`
+
+This application uses a global `ErrorBoundary` component to catch and gracefully handle JavaScript errors that occur during rendering in any part of the component tree. This prevents the entire application from crashing and provides a user-friendly fallback UI.
+
+#### Features
+
+*   **Graceful Fallback UI**: Displays a clean, user-friendly error screen instead of a white page.
+*   **Error Logging**: Automatically logs errors to the console and is configured to send them to an external monitoring service (see `src/services/logger.ts`).
+*   **Recovery Options**: Provides "Try Again" and "Reload Page" buttons to allow users to recover from the error state.
+*   **Route-based Reset**: The error boundary automatically resets when the user navigates to a new page, allowing them to continue using other parts of the application.
+
+#### Usage
+
+To ensure it covers the entire application, the `ErrorBoundary` wraps the main `<App />` component within the application's entry point (`src/main.tsx`).
+
+By providing a unique `key` to the `ErrorBoundary` that changes with the location, we ensure that if a user navigates away from a broken route, the error boundary component is re-mounted, clearing the error state.
+
+Here is the integration example from `src/main.tsx`:
+
+```tsx
+import { BrowserRouter, useLocation } from 'react-router-dom';
+
+const AppWrapper = () => {
+  const location = useLocation();
+  return (
+    <ErrorBoundary key={location.pathname}>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </ErrorBoundary>
+  );
+};
+```
