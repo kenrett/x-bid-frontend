@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Layout } from "./components/Layout";
-import AuctionList from "./components/AuctionList";
+import AuctionList from "./components/AuctionDetail/AuctionList";
 import { AuctionDetail } from "./components/AuctionDetail";
 import { LoginForm } from "./components/LoginForm";
 import { SignUpForm } from "./components/SignUpForm";

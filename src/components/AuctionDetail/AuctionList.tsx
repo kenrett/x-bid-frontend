@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { getAuctions } from "../api/auctions";
-import type { AuctionData } from "../types/auction";
-import { Auction } from "./Auction";
+import { getAuctions } from "../../api/auctions";
+import type { AuctionData } from "../../types/auction";
+import { Auction } from "../Auction";
 import { useNavigate } from "react-router-dom";
 const AuctionList = () => {
   const [auctions, setAuctions] = useState<AuctionData[]>([]);
