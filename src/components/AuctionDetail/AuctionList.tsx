@@ -27,11 +27,11 @@ const AuctionList = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading auctions...</div>;
+    return <div role="status">Loading auctions...</div>;
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return <div role="alert">{error}</div>;
   };
 
   return (

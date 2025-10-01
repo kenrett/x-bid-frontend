@@ -66,14 +66,20 @@ export function AuctionView({
             <div className="p-6 bg-white/5 rounded-2xl border border-white/10">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center sm:text-left">
                 <div>
-                  <div className="text-sm text-gray-400 uppercase tracking-wider">Current Price</div>
-                  <div className="text-3xl font-bold text-pink-400">
+                  <div id="current-price-label" className="text-sm text-gray-400 uppercase tracking-wider">Current Price</div>
+                  <div
+                    className="text-3xl font-bold text-pink-400"
+                    aria-labelledby="current-price-label"
+                    aria-live="polite"
+                  >
                     ${Number(auction.current_price).toFixed(2)}
                   </div>
                 </div>
                 <div className="sm:text-right">
                   <div className="text-sm text-gray-400 uppercase tracking-wider">Time Remaining</div>
                   <Countdown
+                    // Assuming Countdown handles its own live announcements.
+                    // If not, it should also have aria-live="polite".
                     endTime={auction.end_time}
                     status={auction.status}
                     onEnd={onTimerEnd}
@@ -81,7 +87,11 @@ export function AuctionView({
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t border-white/10 text-gray-300 text-center sm:text-left">
-                Highest Bidder:{" "}
+                <span
+                  aria-live="polite"
+                >
+                  Highest Bidder:{" "}
+                </span>
                 {highestBidderUsername ? (
                   <span className="font-semibold text-purple-400">{highestBidderUsername}</span>
                 ) : (
@@ -94,7 +104,10 @@ export function AuctionView({
             {auction.status === "active" && user && !user.is_admin && (
               <>
                 {bidError && (
-                  <div className="p-4 bg-red-900/50 border border-red-500/50 text-red-300 rounded-lg text-center">
+                  <div
+                    className="p-4 bg-red-900/50 border border-red-500/50 text-red-300 rounded-lg text-center"
+                    role="alert"
+                  >
                     {bidError}
                   </div>
                 )}
