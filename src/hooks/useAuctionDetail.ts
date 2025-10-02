@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useMemo, useCallback } from "react";
+import { useEffect, useReducer, useCallback } from "react";
 import { isAxiosError } from "axios";
 
 import { useAuth } from "./useAuth";
@@ -15,21 +15,13 @@ import type { Bid } from "../types/bid";
  * and states related to placing a bid.
  */
 interface AuctionState {
-  /** The main auction data object. */
   auction: AuctionData | null;
-  /** A list of bids placed on the auction. */
   bids: Bid[];
-  /** True when initially fetching auction data. */
   loading: boolean;
-  /** Holds any error message from fetching data. */
   error: string | null;
-  /** True when a bid is currently being placed. */
   isBidding: boolean;
-  /** Holds any error message from placing a bid. */
   bidError: string | null;
-  /** The username of the current highest bidder. */
   highestBidderUsername: string | null;
-  /** The ID of the last user to place a bid, used to prevent race conditions. */
   lastBidderId: number | null;
 }
 
@@ -199,7 +191,7 @@ export function useAuctionDetail(auctionId: number) {
    * It performs several checks before attempting to place the bid.
    */
   const placeUserBid = async () => {
-    // Log the state at the moment the user attempts to place a bid.
+    // Log the state at the moment the user attempts to place a bid. 
     console.log('%c[placeUserBid] Attempting to place bid...', 'color: blue');
     console.log('[placeUserBid] Current state:', {
       auctionId: state.auction?.id,
@@ -228,6 +220,9 @@ export function useAuctionDetail(auctionId: number) {
       // We use that to construct the payload for our optimistic update.
       const updatedAuctionWithId = { ...updatedAuctionData, highest_bidder_id: newBid.user_id };
 
+      // Manually add the username to the newBid object for the optimistic update
+      newBid.username = user!.name;
+
       // Dispatch success action with the new data.
       dispatch({
         type: "BID_SUCCESS",
@@ -249,7 +244,7 @@ export function useAuctionDetail(auctionId: number) {
     }
   };
 
-  /**
+  /** 
    * Return the complete state, the current user, and the function to place a bid.
    * This provides all necessary data and actions to the component using the hook.
    */

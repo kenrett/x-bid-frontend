@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getAuctions } from "../../api/auctions";
 import type { AuctionData } from "../../types/auction";
 import { Auction } from "../Auction";
@@ -25,7 +25,11 @@ const AuctionList = () => {
 
     fetchAuctions();
   }, []);
-
+  
+  const handleAuctionClick = useCallback((id: number) => {
+    navigate(`/auctions/${id}`);
+  }, [navigate]);
+  
   if (loading) {
     return <div role="status">Loading auctions...</div>;
   }
@@ -33,7 +37,7 @@ const AuctionList = () => {
   if (error) {
     return <div role="alert">{error}</div>;
   };
-
+  
   return (
     <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4">
       {auctions.length === 0 ? (
@@ -50,7 +54,7 @@ const AuctionList = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {auctions.map((auction, index) => (
-              <Auction key={auction.id} {...auction} onClick={(id) => navigate(`/auctions/${id}`)} index={index} />
+              <Auction key={auction.id} {...auction} onClick={handleAuctionClick} index={index} />
             ))}
           </div>
         </div>

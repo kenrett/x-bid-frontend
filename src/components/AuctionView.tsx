@@ -1,8 +1,9 @@
+import { memo, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 
 import { Countdown } from "./Countdown";
-import { BidHistory } from "./BidHistory";
+const BidHistory = lazy(() => import("./BidHistory").then(module => ({ default: module.BidHistory })));
 
 import type { AuctionData } from "../types/auction";
 import type { Bid } from "../types/bid";
@@ -18,7 +19,7 @@ interface AuctionViewProps {
   bids: Bid[];
 }
 
-export function AuctionView({
+const AuctionViewComponent = ({
   auction,
   user,
   isBidding,
@@ -27,7 +28,7 @@ export function AuctionView({
   onPlaceBid,
   onTimerEnd,
   bids,
-}: AuctionViewProps) {
+}: AuctionViewProps) => {
   const navigate = useNavigate();
 
   return (
@@ -111,7 +112,9 @@ export function AuctionView({
                     {bidError}
                   </div>
                 )}
-                <BidHistory bids={bids} />
+                <Suspense fallback={<div className="text-center text-gray-400">Loading bid history...</div>}>
+                  <BidHistory bids={bids} />
+                </Suspense>
                 <button
                   onClick={onPlaceBid}
                   disabled={isBidding || Number(user?.id) === Number(auction.highest_bidder_id)}
@@ -131,3 +134,5 @@ export function AuctionView({
     </div>
   );
 }
+
+export const AuctionView = memo(AuctionViewComponent);
