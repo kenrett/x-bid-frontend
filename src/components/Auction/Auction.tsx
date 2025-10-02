@@ -21,7 +21,9 @@ export function Auction({
     <div
       onClick={() => onClick(id)}
       className="group cursor-pointer bg-[#1a0d2e]/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#a020f0]/20"
-      style={{ animation: `fadeInUp 0.5s ${index * 0.1}s ease-out both` }}
+      style={{
+        animation: `fadeInUp 0.5s ${(index * 0.1).toFixed(1)}s ease-out both`,
+      }}
     >
       <img src={image_url} alt={title} className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-105" />
       <div className="p-5">

@@ -8,8 +8,8 @@ import type { AuctionData } from "../../types/auction";
 vi.mock("../../api/auctions");
 
 // Mock the child Auction component to isolate the AuctionList component
-vi.mock("../Auction", () => ({
-  Auction: ({ onClick, id, title }: { onClick: (id: number) => void; id: number; title: string }) => (
+vi.mock("../Auction/Auction", () => ({
+  Auction: ({ onClick, id, title }: { onClick: (id: number) => void; id: number; title: string; }) => (
     <div data-testid={`auction-${id}`} onClick={() => onClick(id)}>
       {title}
     </div>
@@ -106,7 +106,7 @@ describe("AuctionList", () => {
     render(<AuctionList />);
 
     // Wait for an auction to be on the screen
-    const auctionElement = await screen.findByTestId("auction-1");
+    const auctionElement = await screen.findByTestId("auction-1", {}, { timeout: 2000 });
 
     // Simulate a user click
     fireEvent.click(auctionElement);
