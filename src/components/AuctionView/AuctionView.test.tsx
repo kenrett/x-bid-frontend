@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { AuctionView } from "./AuctionView";
@@ -21,7 +21,7 @@ vi.mock("./Countdown", () => ({
 }));
 
 // Mock the lazy-loaded BidHistory component
-vi.mock("../BidHistory", () => ({
+vi.mock("../BidHistory/BidHistory", () => ({
   BidHistory: ({ bids }: { bids: Bid[] }) => (
     <div data-testid="bid-history">Bids: {bids.length}</div>
   ),
@@ -66,12 +66,16 @@ describe("AuctionView Component", () => {
     vi.clearAllMocks();
   });
 
-  it("renders auction details correctly", () => {
+  it("renders auction details correctly", async () => {
     renderComponent();
     expect(screen.getByRole("heading", { name: "Vintage Masterpiece" })).toBeInTheDocument();
     expect(screen.getByText("A truly unique item.")).toBeInTheDocument();
     expect(screen.getByText("$250.00")).toBeInTheDocument();
     expect(screen.getByAltText("Vintage Masterpiece")).toHaveAttribute("src", "/test-image.jpg");
+
+    // Wait for the lazy-loaded component to resolve to prevent `act` warnings.
+    // This ensures all async updates are flushed before the test ends.
+    await screen.findByTestId("bid-history");
   });
 
   it("renders the highest bidder's name when available", () => {

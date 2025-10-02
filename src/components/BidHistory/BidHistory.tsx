@@ -1,4 +1,4 @@
-import type { Bid } from "../types/bid";
+import type { Bid } from "../../types/bid";
 
  interface BidItemProps {
    bid: Bid;

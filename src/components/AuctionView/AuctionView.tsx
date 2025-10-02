@@ -4,7 +4,7 @@ import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 
 import { Countdown } from "../Countdown"; // Assuming Countdown is a named export
 const BidHistory = lazy(() =>
-  import("../BidHistory").then((module) => ({ default: module.BidHistory }))
+  import("../BidHistory/BidHistory").then((module) => ({ default: module.BidHistory }))
 );
 
 import type { AuctionData } from "../../types/auction";
