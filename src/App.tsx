@@ -2,7 +2,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import AuctionList from "./components/AuctionList/AuctionList";
 import { AuctionDetail } from "./components/AuctionDetail/AuctionDetail";
-import { LoginForm } from "./components/LoginForm";
+import { LoginForm } from "./components/LoginForm/LoginForm";
 import { SignUpForm } from "./components/SignUpForm";
 import { About } from "./components/About/About";
 import { HowItWorks } from "./components/HowItWorks";
