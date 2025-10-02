@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useParams } from "react-router-dom";
 
-import { AuctionView } from "./AuctionView";
+import { AuctionView } from "../AuctionView";
 import { useAuctionDetail } from "@/hooks/useAuctionDetail";
 
 // -------------------- UI Components --------------------
@@ -51,8 +51,9 @@ export function AuctionDetail() {
     // For now, we rely on the server broadcast.
   }, []);
 
-  if (loading || !auction) return <LoadingScreen />;
   if (error) return <ErrorScreen message={error} />;
+  // Show loading screen if we are fetching or if there's no error but the auction hasn't loaded yet.
+  if (loading || !auction) return <LoadingScreen />;
 
   return (
     <>
