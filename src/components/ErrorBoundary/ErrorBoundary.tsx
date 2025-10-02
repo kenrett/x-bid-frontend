@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import { logError } from "../services/logger";
+import { logError } from "../../services/logger";
 
 interface Props {
   /** The content to render when there is no error. */

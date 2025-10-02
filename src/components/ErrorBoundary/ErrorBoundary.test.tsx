@@ -1,10 +1,10 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import ErrorBoundary from "./ErrorBoundary";
-import { logError } from "../services/logger";
+import { logError } from "../../services/logger";
 
 // Mock the logger service
-vi.mock("../services/logger", () => ({
+vi.mock("../../services/logger", () => ({
   logError: vi.fn(),
 }));
 

@@ -1,4 +1,4 @@
-import logo from "../assets/xbid_logo_high_res.png";
+import logo from "../../assets/xbid_logo_high_res.png";
 import { Link } from "react-router-dom";
 export const About = () => {
   return (
