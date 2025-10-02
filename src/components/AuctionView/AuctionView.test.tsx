@@ -16,7 +16,7 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-vi.mock("./Countdown", () => ({
+vi.mock("../Countdown/Countdown", () => ({
   Countdown: ({ status }: { status: string }) => <div>Status: {status}</div>,
 }));
 

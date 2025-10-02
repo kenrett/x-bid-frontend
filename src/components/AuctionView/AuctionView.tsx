@@ -2,7 +2,7 @@ import { memo, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 
-import { Countdown } from "../Countdown"; // Assuming Countdown is a named export
+import { Countdown } from "../Countdown/Countdown"; // Assuming Countdown is a named export
 const BidHistory = lazy(() =>
   import("../BidHistory/BidHistory").then((module) => ({ default: module.BidHistory }))
 );

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import type { AuctionStatus } from "../types/auction";
+import type { AuctionStatus } from "../../types/auction";
 
 interface CountdownProps {
   endTime: string;
@@ -38,23 +38,33 @@ export function Countdown({ endTime, status, onEnd }: CountdownProps) {
       return;
     }
     const calculateRemaining = () => new Date(endTime).getTime() - Date.now();
+    let intervalId: NodeJS.Timeout | undefined;
 
-    // Reset immediately when endTime changes
-    setTimeRemaining(formatTime(calculateRemaining()));
+    const initialRemaining = calculateRemaining();
 
-    const intervalId = setInterval(() => {
-      const remaining = calculateRemaining();
+    if (initialRemaining > 0) {
+      setTimeRemaining(formatTime(initialRemaining));
 
-      if (remaining <= 0) {
-        clearInterval(intervalId);
-        setTimeRemaining("00:00");
-        onEnd();
-      } else {
-        setTimeRemaining(formatTime(remaining));
-      }
-    }, 1000);
+      intervalId = setInterval(() => {
+        const remaining = calculateRemaining();
 
-    return () => clearInterval(intervalId);
+        if (remaining > 0) {
+          setTimeRemaining(formatTime(remaining));
+        } else {
+          clearInterval(intervalId!); // Stop the timer.
+          setTimeRemaining("00:00");
+          onEnd(); // Call the onEnd callback once
+        }
+      }, 1000);
+    } else {
+      // If initial remaining is 0 or negative, just set to "00:00" and call onEnd if status is active
+      setTimeRemaining("00:00");
+      if (status === "active") onEnd(); // Only call onEnd if it was supposed to be active
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [endTime, status, onEnd]);
 
   return <div className="text-3xl font-bold text-white">{timeRemaining}</div>;
