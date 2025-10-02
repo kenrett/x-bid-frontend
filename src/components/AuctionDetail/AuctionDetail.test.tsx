@@ -13,7 +13,7 @@ vi.mock("react-router-dom", async () => {
     useParams: vi.fn(),
   };
 });
-vi.mock("../AuctionView", () => ({
+vi.mock("../AuctionView/AuctionView", () => ({
   // Replace AuctionView with a simple div for these tests
   AuctionView: (props: { auction: { title: string } }) => (
     <div data-testid="auction-view">{props.auction.title}</div>

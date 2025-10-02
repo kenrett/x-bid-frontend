@@ -2,11 +2,13 @@ import { memo, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 
-import { Countdown } from "./Countdown";
-const BidHistory = lazy(() => import("./BidHistory").then(module => ({ default: module.BidHistory })));
+import { Countdown } from "../Countdown"; // Assuming Countdown is a named export
+const BidHistory = lazy(() =>
+  import("../BidHistory").then((module) => ({ default: module.BidHistory }))
+);
 
-import type { AuctionData } from "../types/auction";
-import type { Bid } from "../types/bid";
+import type { AuctionData } from "../../types/auction";
+import type { Bid } from "../../types/bid";
 
 interface AuctionViewProps {
   auction: AuctionData;
@@ -87,7 +89,10 @@ const AuctionViewComponent = ({
                   />
                 </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-white/10 text-gray-300 text-center sm:text-left">
+              <div
+                className="mt-4 pt-4 border-t border-white/10 text-gray-300 text-center sm:text-left"
+                data-testid="highest-bidder-info"
+              >
                 <span
                   aria-live="polite"
                 >
