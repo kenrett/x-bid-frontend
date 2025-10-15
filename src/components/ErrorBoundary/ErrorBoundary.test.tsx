@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import ErrorBoundary from "./ErrorBoundary";
 import { logError } from "../../services/logger";
@@ -81,7 +82,7 @@ describe("ErrorBoundary", () => {
     expect(screen.queryByText("Something went wrong.")).not.toBeInTheDocument();
   });
 
-  it('should attempt to re-render the children when "Try Again" is clicked', () => {
+  it('should attempt to re-render the children when "Try Again" is clicked', async () => {
     const { rerender } = render(
       <ErrorBoundary>
         <ControllableCrashingComponent shouldThrow={true} />
@@ -98,16 +99,17 @@ describe("ErrorBoundary", () => {
       </ErrorBoundary>
     );
 
-    // Click the "Try Again" button
+    const user = userEvent.setup();
     const tryAgainButton = screen.getByRole("button", { name: /try again/i });
-    fireEvent.click(tryAgainButton);
+    await user.click(tryAgainButton);
 
-    // Verify the children are now rendered successfully
-    expect(screen.getByText("Rendered successfully")).toBeInTheDocument();
-    expect(screen.queryByText("Something went wrong.")).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Rendered successfully")).toBeInTheDocument();
+      expect(screen.queryByText("Something went wrong.")).not.toBeInTheDocument();
+    });
   });
 
-  it('should call window.location.reload when "Reload Page" is clicked', () => {
+  it('should call window.location.reload when "Reload Page" is clicked', async () => {
     const reloadMock = vi.fn();
     vi.stubGlobal('location', { reload: reloadMock });
 
@@ -117,11 +119,10 @@ describe("ErrorBoundary", () => {
       </ErrorBoundary>
     );
 
-    // Click the "Reload Page" button
     const reloadButton = screen.getByRole("button", { name: /reload page/i });
-    fireEvent.click(reloadButton);
+    const user = userEvent.setup();
+    await user.click(reloadButton);
 
-    // Verify window.location.reload was called
     expect(reloadMock).toHaveBeenCalledTimes(1);
   });
 });

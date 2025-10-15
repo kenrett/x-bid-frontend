@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { BuyBids } from "./BuyBids";
@@ -99,28 +99,23 @@ describe("BuyBids Component", () => {
       expect(screen.queryByText("Loading bid packs...")).not.toBeInTheDocument();
     });
 
-    it("should call alert when an 'Acquire Pack' button is clicked", async () => {
-      const alertMock = vi.spyOn(window, "alert").mockImplementation(() => {});
+    it("should call the purchase API when an 'Acquire Pack' button is clicked", async () => {
       mockedClient.get.mockResolvedValue({ data: mockBidPacks });
+      mockedClient.post.mockResolvedValue({ data: { success: true } });
       renderComponent();
 
       // Find the button within the "Starter Pack"
-      const starterPack = await screen.findByText("Starter Pack");
-      const acquireButton = within(starterPack.parentElement!).getByRole("button", {
+      const starterPackCard = (await screen.findByText("Starter Pack")).parentElement!;
+      const acquireButton = within(starterPackCard).getByRole("button", {
         name: /acquire pack/i,
       });
 
       fireEvent.click(acquireButton);
 
-      expect(alertMock).toHaveBeenCalledTimes(1);
-      expect(alertMock).toHaveBeenCalledWith(
-        'Purchase functionality for "Starter Pack" is not yet implemented.'
-      );
+      expect(mockedClient.post).toHaveBeenCalledTimes(1);
+      expect(mockedClient.post).toHaveBeenCalledWith("bid_packs/1/purchase", {
+        user_id: mockUser.id,
+      });
     });
   });
 });
-
-// Helper to get parent element for `within` query
-const within = (element: HTMLElement) => {
-  return require("@testing-library/react").within(element);
-};

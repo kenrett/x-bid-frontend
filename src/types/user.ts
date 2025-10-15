@@ -1,4 +1,5 @@
 export interface User {
+  bidCredits: number;
   id: number;
   email: string;
   name: string;

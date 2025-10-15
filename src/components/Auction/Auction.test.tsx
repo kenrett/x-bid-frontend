@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { Auction } from "./Auction";
 
@@ -38,17 +39,13 @@ describe("Auction Component", () => {
     expect(image).toHaveAttribute("src", "https://example.com/poster.jpg");
   });
 
-  it("calls the onClick handler with the correct id when clicked", () => {
+  it("calls the onClick handler with the correct id when clicked", async () => {
     const handleClick = vi.fn();
+    const user = userEvent.setup();
     render(<Auction {...mockAuctionProps} onClick={handleClick} />);
 
-    const component = screen.getByRole("heading", {
-      name: /Vintage Space Poster/i,
-    }).parentElement?.parentElement;
-
-    if (component) {
-      fireEvent.click(component);
-    }
+    const component = screen.getByTestId(`auction-card-${mockAuctionProps.id}`);
+    await user.click(component);
 
     expect(handleClick).toHaveBeenCalledTimes(1);
     expect(handleClick).toHaveBeenCalledWith(101);
@@ -56,8 +53,7 @@ describe("Auction Component", () => {
 
   it("applies the correct animation delay based on the index prop", () => {
     render(<Auction {...mockAuctionProps} index={3} />);
-
-    const component = screen.getByRole("heading").parentElement?.parentElement;
+    const component = screen.getByTestId(`auction-card-${mockAuctionProps.id}`);
 
     expect(component).toHaveStyle("animation: fadeInUp 0.5s 0.3s ease-out both");
   });

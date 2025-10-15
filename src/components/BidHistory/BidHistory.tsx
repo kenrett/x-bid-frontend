@@ -24,7 +24,6 @@ import type { Bid } from "../../types/bid";
  }
  
  export const BidHistory = ({ bids }: BidHistoryProps) => {
-
    if (bids.length === 0) {
      return (
        <div className="text-center text-gray-500 py-4">No bids yet.</div>

@@ -75,19 +75,21 @@ export function Header() {
                 {item.name}
               </NavItem>
             ))}
-
-            <li className="md:ml-4">
               {user ? (
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-300 hidden lg:block">{user.email}</span>
-                  <button
-                    onClick={logout}
-                    className={variants.logoutButton()}
-                  >
-                    <ArrowRightEndOnRectangleIcon className="w-5 h-5" />
-                    {STRINGS.LOG_OUT}
-                  </button>
-                </div>
+                <>
+                  <li className="md:ml-4 flex items-center gap-4">
+                    <div className="hidden md:flex flex-col text-right">
+                      <span className="text-sm text-white font-medium">{user.email}</span>
+                      <span className="text-xs text-pink-400">{user.bidCredits} Bids</span>
+                    </div>
+                      <button
+                        onClick={logout}
+                        className={variants.logoutButton()}
+                      >
+                        {STRINGS.LOG_OUT}
+                      </button>
+                  </li>
+                </>
               ) : (
                 <Link 
                   to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
@@ -96,7 +98,6 @@ export function Header() {
                   {STRINGS.SIGN_IN}
                 </Link>
               )}
-            </li>
           </ul>
         </div>
       </div>

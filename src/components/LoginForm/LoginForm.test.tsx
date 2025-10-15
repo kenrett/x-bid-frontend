@@ -1,9 +1,10 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, useNavigate, useSearchParams } from "react-router-dom";
 import { LoginForm } from "./LoginForm";
 import { useAuth } from "../../hooks/useAuth";
 import client from "../../api/client";
+import userEvent from "@testing-library/user-event";
 
 // --- Mocks ---
 vi.mock("react-router-dom", async () => {
@@ -31,6 +32,7 @@ const mockUser = { id: 1, name: "Test User" };
 const mockToken = "fake-jwt-token";
 const mockLogin = vi.fn();
 
+
 const renderComponent = (searchParams = "") => {
   const route = searchParams ? `/login?${searchParams}` : "/login";
   return render(
@@ -46,7 +48,9 @@ describe("LoginForm Component", () => {
     mockedUseAuth.mockReturnValue({ login: mockLogin } as any);
     // Suppress console.error for tests that intentionally cause errors
     vi.spyOn(console, "error").mockImplementation(() => {});
-    mockedUseSearchParams.mockReturnValue([new URLSearchParams()]);
+    // useSearchParams returns a tuple [params, setParams], so we mock both.
+    const setSearchParams = vi.fn();
+    mockedUseSearchParams.mockReturnValue([new URLSearchParams(), setSearchParams]);
     mockedNavigate.mockReturnValue(vi.fn()); // mock the returned navigate function
   });
 
@@ -63,9 +67,12 @@ describe("LoginForm Component", () => {
     renderComponent();
     const emailInput = screen.getByLabelText(/your email/i);
     const passwordInput = screen.getByLabelText(/your password/i);
+    const user = userEvent.setup();
 
-    await fireEvent.change(emailInput, { target: { value: "test@example.com" } });
-    await fireEvent.change(passwordInput, { target: { value: "password123" } });
+
+    await user.type(emailInput, "test@example.com");
+    await user.type(passwordInput, "password123");
+
 
     expect(emailInput).toHaveValue("test@example.com");
     expect(passwordInput).toHaveValue("password123");
@@ -75,22 +82,23 @@ describe("LoginForm Component", () => {
     beforeEach(() => {
       mockedClient.post.mockResolvedValue({
         data: { token: mockToken, user: mockUser },
-      });
+     });
     });
 
     it("should call login handler and navigate to /auctions by default", async () => {
       const navigateFn = vi.fn();
       mockedNavigate.mockReturnValue(navigateFn);
+      const user = userEvent.setup();
 
       renderComponent();
 
-      fireEvent.change(screen.getByLabelText(/your email/i), {
-        target: { value: "test@example.com" },
-      });
-      fireEvent.change(screen.getByLabelText(/your password/i), {
-        target: { value: "password123" },
-      });
-      fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
+      const emailInput = screen.getByLabelText(/your email/i);
+      const passwordInput = screen.getByLabelText(/your password/i);
+      const submitButton = screen.getByRole("button", { name: /sign in/i })
+
+      await user.type(emailInput, "test@example.com")
+      await user.type(passwordInput, "password123")
+      await user.click(submitButton)
 
       await waitFor(() => {
         expect(mockedClient.post).toHaveBeenCalledWith("/login", {
@@ -103,21 +111,23 @@ describe("LoginForm Component", () => {
     });
 
     it("should navigate to the specified redirect URL if present", async () => {
+      const user = userEvent.setup();
       const navigateFn = vi.fn();
       mockedNavigate.mockReturnValue(navigateFn);
       mockedUseSearchParams.mockReturnValue([
         new URLSearchParams("redirect=/my-special-page"),
+        vi.fn(),
       ]);
 
-      renderComponent("redirect=/my-special-page");
 
-      fireEvent.change(screen.getByLabelText(/your email/i), {
-        target: { value: "test@example.com" },
-      });
-      fireEvent.change(screen.getByLabelText(/your password/i), {
-        target: { value: "password123" },
-      });
-      fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
+
+      renderComponent();
+
+      const email = screen.getByLabelText(/your email/i);
+      await user.type(email, "test@example.com");
+      const pw = screen.getByLabelText(/your password/i);
+      await user.type(pw, "password123");
+      await user.click(screen.getByRole("button", { name: /sign in/i }));
 
       await waitFor(() => {
         expect(navigateFn).toHaveBeenCalledWith("/my-special-page");
@@ -127,22 +137,22 @@ describe("LoginForm Component", () => {
 
   describe("on failed login", () => {
     it("should display an error message and not call login or navigate", async () => {
+      const testError = new Error("Invalid credentials");
       // Mock the implementation to return a rejected promise.
       // This is often more stable than `mockRejectedValue`.
-      const testError = new Error("Invalid credentials");
-      mockedClient.post.mockImplementation(() => Promise.reject(testError));
+      mockedClient.post.mockRejectedValue(testError);
       const navigateFn = vi.fn();
       mockedNavigate.mockReturnValue(navigateFn);
+      const user = userEvent.setup();
 
       renderComponent();
 
-      fireEvent.change(screen.getByLabelText(/your email/i), {
-        target: { value: "test@example.com" },
-      });
-      fireEvent.change(screen.getByLabelText(/your password/i), {
-        target: { value: "wrong-password" },
-      });
-      fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
+      await user.type(screen.getByLabelText(/your email/i), "test@example.com");
+      await user.type(
+        screen.getByLabelText(/your password/i),
+        "wrong-password"
+      );
+      await user.click(screen.getByRole("button", { name: /sign in/i }));
 
       const errorMessage = await screen.findByText(
         "Invalid email or password. Please try again."
@@ -157,16 +167,12 @@ describe("LoginForm Component", () => {
 
   it("should show a loading state on the button while submitting", async () => {
     mockedClient.post.mockReturnValue(new Promise(() => {}));
-
+    const user = userEvent.setup();
     renderComponent();
 
-    fireEvent.change(screen.getByLabelText(/your email/i), {
-      target: { value: "test@example.com" },
-    });
-    fireEvent.change(screen.getByLabelText(/your password/i), {
-      target: { value: "password123" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
+    await user.type(screen.getByLabelText(/your email/i), "test@example.com");
+    await user.type(screen.getByLabelText(/your password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
 
     const submitButton = await screen.findByRole("button", {
       name: /signing in.../i,

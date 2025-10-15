@@ -7,6 +7,7 @@ export const BuyBids = () => {
   const { user } = useAuth();
   const [bidPacks, setBidPacks] = useState<BidPack[]>([]);
   const [loading, setLoading] = useState(true);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -52,10 +53,32 @@ export const BuyBids = () => {
     return <div className="font-sans bg-[#0d0d1a] text-red-400 text-lg text-center p-8 min-h-screen">{error}</div>;
   }
 
-  const handleBuy = (packName: string) => {
-    // Placeholder for purchase logic
-    console.log(`Attempting to buy ${packName}`);
-    alert(`Purchase functionality for "${packName}" is not yet implemented.`);
+  const handleBuy = async (id: number) => {
+    if (!user) {
+      setError("You must be logged in to purchase a pack.");
+      return;
+    }
+
+    setLoading(true);
+    setSuccess(false);
+    setError(null);
+
+    try {
+      await client.post(`bid_packs/${id}/purchase`, {
+        user_id: user.id,
+      });
+
+      // updateUserBalance(res.data.new_balance);
+      setSuccess(true);
+      // TODO: Implement toast notification for success
+    } catch (err: any) {
+      const message =
+        err.response?.data?.message || "Something went wrong during purchase.";
+      setError(message);
+      // toast.error(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -97,7 +120,7 @@ export const BuyBids = () => {
               <div className="text-4xl font-bold text-white mb-2">${Number(pack.price).toFixed(2)}</div>
               <p className="text-pink-400 mb-6 font-medium">({pack.pricePerBid}/Bid)</p>
               <button
-                onClick={() => handleBuy(pack.name)}
+                onClick={() => handleBuy(pack.id)}
                 className={`mt-auto w-full font-bold py-3 px-6 rounded-full transition-all duration-300 shadow-md hover:shadow-lg ${
                   pack.highlight
                     ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white transform hover:scale-105"

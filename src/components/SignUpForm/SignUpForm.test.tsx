@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
-import { vi } from "vitest";
+import userEvent from "@testing-library/user-event";
 import { SignUpForm } from "./SignUpForm";
 import userEvent from "@testing-library/user-event";
 import { useAuth } from "../../hooks/useAuth";
@@ -11,8 +11,8 @@ import client from "../../api/client";
 const mockLogin = vi.fn();
 const mockNavigate = vi.fn();
 
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
+vi.mock("react-router-dom", async () => { 
+  const actual = await vi.importActual("react-router-dom") 
   return {
     ...actual,
     useNavigate: () => mockNavigate,
@@ -81,9 +81,9 @@ describe("SignUpForm Component", () => {
 
     renderComponent();
 
-    await user.type(screen.getByLabelText(/your name/i), "Test User");
-    await user.type(screen.getByLabelText(/your email/i), "test@example.com");
-    await user.type(screen.getByLabelText(/^your password/i), "password123");
+    await user.type(screen.getByLabelText(/your name/i),"Test User")
+    await user.type(screen.getByLabelText(/your email/i),"test@example.com")
+    await user.type(screen.getByLabelText(/^your password/i),"password123")
     await user.type(screen.getByLabelText(/confirm password/i), "password123");
 
     await user.click(screen.getByRole("button", { name: /create account/i }));

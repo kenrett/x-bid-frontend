@@ -19,6 +19,7 @@ export function Auction({
 }: AuctionProps) {
   return (
     <div
+      data-testid={`auction-card-${id}`}
       onClick={() => onClick(id)}
       className="group cursor-pointer bg-[#1a0d2e]/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#a020f0]/20"
       style={{
