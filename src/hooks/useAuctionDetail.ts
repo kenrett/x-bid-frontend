@@ -69,10 +69,15 @@ function auctionReducer(state: AuctionState, action: AuctionAction): AuctionStat
       break;
     case "BID_SUCCESS": {
       const { updatedAuction, newBid } = action.payload;
+      // Prevent adding a duplicate bid if the reducer runs twice (e.g., in Strict Mode)
+      // or if a channel update has already added this bid.
+      const bidExists = state.bids.some(bid => bid.id === newBid.id);
+      const newBids = bidExists ? state.bids : [newBid, ...state.bids];
+
       nextState = {
         ...state,
         auction: state.auction ? { ...state.auction, ...updatedAuction } : null,
-        bids: [newBid, ...state.bids],
+        bids: newBids,
         highestBidderUsername: newBid.username,
         isBidding: false, // Reset the bidding flag
         lastBidderId: newBid.user_id, // Set the last bidder ID to prevent race conditions
