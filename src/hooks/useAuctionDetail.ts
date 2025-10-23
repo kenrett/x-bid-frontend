@@ -21,7 +21,7 @@ interface AuctionState {
   error: string | null;
   isBidding: boolean;
   bidError: string | null;
-  highestBidderUsername: string | null;
+  highestBidderUsername: string | null | undefined;
   lastBidderId: number | null;
 }
 
