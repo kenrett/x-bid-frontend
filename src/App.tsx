@@ -8,6 +8,8 @@ import { About } from "./components/About/About";
 import { HowItWorks } from "./components/HowItWorks";
 import { BuyBids } from "./components/BuyBids/BuyBids";
 import { PurchaseStatus } from "./components/BuyBids/PurchaseStatus";
+import { PrivacyPolicy } from "./components/PrivacyPolicy";
+import { TermsAndConditions } from "./components/TermsAndConditions";
 
 const router = createBrowserRouter([
   {
@@ -22,6 +24,8 @@ const router = createBrowserRouter([
       { path: "/how-it-works", element: <HowItWorks /> },
       { path: "/buy-bids", element: <BuyBids /> },
       { path: "/purchase-status", element: <PurchaseStatus /> },
+      { path: "/privacy-policy", element: <PrivacyPolicy /> },
+      { path: "/terms_and_conditions", element: <TermsAndConditions /> },
     ],
   },
 ]);

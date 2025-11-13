@@ -1,5 +1,5 @@
-import logo from "../../assets/x-bid-alt-logo.png";
-// import logo from "../../assets/xbid_logo_high_res.png";
+// import logo from "../../assets/x-bid-alt-logo.png";
+import logo from "../../assets/xbid_logo_high_res.png";
 import { useAuth } from "../../hooks/useAuth";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { NavItem } from "../NavItem";
