@@ -3,12 +3,24 @@ import { useAuth } from "../../hooks/useAuth";
 import { Link } from "react-router-dom";
 import type { BidPack } from "../../types/bidPack";
 import client from "../../api/client";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  EmbeddedCheckoutProvider,
+  EmbeddedCheckout
+} from "@stripe/react-stripe-js";
+
+// Initialize Stripe outside of the component render to avoid
+// recreating the `Stripe` object on every render.
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
+
+
 export const BuyBids = () => {
   const { user } = useAuth();
   const [bidPacks, setBidPacks] = useState<BidPack[]>([]);
   const [loading, setLoading] = useState(true);
-  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBidPacks = async () => {
@@ -54,32 +66,41 @@ export const BuyBids = () => {
   }
 
   const handleBuy = async (id: number) => {
+    if (loading) return; // Prevent multiple clicks while a request is in flight
+
     if (!user) {
       setError("You must be logged in to purchase a pack.");
       return;
     }
 
     setLoading(true);
-    setSuccess(false);
     setError(null);
 
     try {
-      await client.post(`bid_packs/${id}/purchase`, {
-        user_id: user.id,
+      const response = await client.post<{ clientSecret: string }>(`checkouts`, {
+        bid_pack_id: id,
       });
 
-      // updateUserBalance(res.data.new_balance);
-      setSuccess(true);
-      // TODO: Implement toast notification for success
+      setClientSecret(response.data.clientSecret);
     } catch (err: any) {
-      const message =
-        err.response?.data?.message || "Something went wrong during purchase.";
+      const message = err.response?.data?.error || "Something went wrong during purchase.";
       setError(message);
-      // toast.error(message);
     } finally {
       setLoading(false);
     }
   };
+
+  if (clientSecret) {
+    return (
+      <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4">
+        <div id="checkout">
+          <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
+            <EmbeddedCheckout />
+          </EmbeddedCheckoutProvider>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4">
@@ -121,13 +142,14 @@ export const BuyBids = () => {
               <p className="text-pink-400 mb-6 font-medium">({pack.pricePerBid}/Bid)</p>
               <button
                 onClick={() => handleBuy(pack.id)}
-                className={`mt-auto w-full font-bold py-3 px-6 rounded-full transition-all duration-300 shadow-md hover:shadow-lg ${
+                disabled={loading}
+                className={`mt-auto w-full font-bold py-3 px-6 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${
                   pack.highlight
                     ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white transform hover:scale-105"
                     : "bg-white/10 text-white hover:bg-white/20 transform hover:-translate-y-0.5"
                 }`}
               >
-                Acquire Pack
+                {loading ? "Processing..." : "Acquire Pack"}
               </button>
             </div>
           ))}

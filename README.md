@@ -44,12 +44,10 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
 
 3.  **Set up environment variables:**
 
-    Create a `.env` file in the root of the project and add the URLs for your backend API and Action Cable server.
+    Copy the example environment file and fill in the required values. You will need a Stripe publishable key for development.
 
     ```env
-    # .env
-    VITE_API_URL=http://localhost:3000
-    VITE_CABLE_URL=ws://localhost:3000/cable
+    cp .env.example .env.development
     ```
 
 4.  **Run the development server:**

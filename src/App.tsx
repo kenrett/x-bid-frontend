@@ -7,6 +7,7 @@ import { SignUpForm } from "./components/SignUpForm/SignUpForm";
 import { About } from "./components/About/About";
 import { HowItWorks } from "./components/HowItWorks";
 import { BuyBids } from "./components/BuyBids/BuyBids";
+import { PurchaseStatus } from "./components/BuyBids/PurchaseStatus";
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,7 @@ const router = createBrowserRouter([
       { path: "/about", element: <About /> },
       { path: "/how-it-works", element: <HowItWorks /> },
       { path: "/buy-bids", element: <BuyBids /> },
+      { path: "/purchase-status", element: <PurchaseStatus /> },
     ],
   },
 ]);

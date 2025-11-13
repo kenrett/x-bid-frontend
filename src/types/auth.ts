@@ -7,4 +7,5 @@ export type AuthContextType = {
   token: string | null;
   login: (token: string, user: User) => void;
   logout: () => void;
+  updateUserBalance: (newBalance: number) => void;
 };

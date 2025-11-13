@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { User } from "../types/user";
 import { AuthContext } from "../contexts/authContext";
 
@@ -35,8 +35,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem("user");
   };
 
+  const updateUserBalance = useCallback((newBalance: number) => {
+    if (user) {
+      const updatedUser = { ...user, bid_credits: newBalance };
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+    }
+  }, [user]);
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, token, login, logout, updateUserBalance }}
+    >
       {children}
     </AuthContext.Provider>
   );
