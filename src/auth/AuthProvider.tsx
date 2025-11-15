@@ -36,12 +36,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateUserBalance = useCallback((newBalance: number) => {
-    if (user) {
-      const updatedUser = { ...user, bid_credits: newBalance };
-      setUser(updatedUser);
+    setUser(currentUser => {
+      if (!currentUser) return null;
+      const updatedUser = { ...currentUser, bidCredits: newBalance };
       localStorage.setItem("user", JSON.stringify(updatedUser));
-    }
-  }, [user]);
+      return updatedUser;
+    });
+  }, []);
 
   return (
     <AuthContext.Provider

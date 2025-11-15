@@ -26,7 +26,7 @@ export const PurchaseStatus = () => {
           status: string;
           updated_bid_credits?: number;
           error?: string;
-        }>(`/purchase-status`, {
+        }>(`/checkout/success`, {
           params: { session_id: sessionId },
         });
         if (response.data.status === "success" && response.data.updated_bid_credits !== undefined) {
