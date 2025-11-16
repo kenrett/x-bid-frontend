@@ -1,7 +1,9 @@
+import { Page } from "./Page";
+
 export const TermsAndConditions = () => {
   return (
-    <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4">
-      <div className="container mx-auto max-w-4xl">
+    <Page>
+      <div className="container mx-auto max-w-4xl ">
         <div className="text-center mb-12">
           <h1 className="font-serif text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
             Terms & Conditions
@@ -118,6 +120,6 @@ export const TermsAndConditions = () => {
           </section>
         </div>
       </div>
-    </div>
+    </Page>
   );
 };
