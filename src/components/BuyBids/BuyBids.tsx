@@ -9,6 +9,7 @@ import {
   EmbeddedCheckout
 } from "@stripe/react-stripe-js";
 import { Page } from "../Page";
+import { ErrorScreen } from "../ErrorScreen";
 
 // Initialize Stripe outside of the component render to avoid
 // recreating the `Stripe` object on every render.
