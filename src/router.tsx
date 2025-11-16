@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
       { path: "/buy-bids", element: <BuyBids /> },
       { path: "/purchase-status", element: <PurchaseStatus /> },
       { path: "/privacy-policy", element: <PrivacyPolicy /> },
-      { path: "/terms_and_conditions", element: <TermsAndConditions /> },
+      { path: "/terms-and-conditions", element: <TermsAndConditions /> },
     ],
   },
 ]);
