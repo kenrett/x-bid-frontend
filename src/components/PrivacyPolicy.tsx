@@ -1,7 +1,9 @@
+import { Page } from "./Page";
+
 export const PrivacyPolicy = () => {
   return (
-    <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4">
-      <div className="container mx-auto max-w-4xl">
+    <Page>
+      <div className="container mx-auto max-w-4xl ">
         <div className="text-center mb-12">
           <h1 className="font-serif text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
             Privacy Policy
@@ -16,7 +18,7 @@ export const PrivacyPolicy = () => {
               This website is operated by X-Bid ("we", "us", or "our"). This privacy policy discloses our practices regarding information collection and usage for the website located at this domain. This privacy policy does not apply to any other website or service provided by us, our affiliates or clients, unless it appears on such website or service.
             </p>
             <p className="mt-2">
-              By using and visiting our Website and by submitting your personally identifying information to us, you agree to us using your personally identifying information as set out in this privacy policy. If you do not agree to this privacy policy, you may not access or otherwise use the Website or service. Use of the Website is also governed by our <a href="/terms_and_conditions" className="text-pink-400 hover:underline">Terms and Conditions</a>.
+              By using and visiting our Website and by submitting your personally identifying information to us, you agree to us using your personally identifying information as set out in this privacy policy. If you do not agree to this privacy policy, you may not access or otherwise use the Website or service. Use of the Website is also governed by our <a href="/terms-and-conditions" className="text-pink-400 hover:underline">Terms and Conditions</a>.
             </p>
           </section>
 
@@ -124,6 +126,6 @@ export const PrivacyPolicy = () => {
           </section>
         </div>
       </div>
-    </div>
+    </Page>
   );
 };

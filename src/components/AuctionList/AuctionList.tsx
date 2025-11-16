@@ -3,6 +3,7 @@ import { getAuctions } from "../../api/auctions";
 import type { AuctionData } from "../../types/auction";
 import { Auction } from "../Auction/Auction";
 import { useNavigate } from "react-router-dom";
+import { Page } from "../Page";
 const AuctionList = () => {
   const [auctions, setAuctions] = useState<AuctionData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +40,7 @@ const AuctionList = () => {
   };
   
   return (
-    <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4">
+    <Page>
       {auctions.length === 0 ? (
         <p className="text-center text-gray-400">No auctions found.</p>
       ) : (
@@ -59,7 +60,7 @@ const AuctionList = () => {
           </div>
         </div>
       )}
-    </div>
+    </Page>
   );
 };
 

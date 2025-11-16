@@ -8,6 +8,7 @@ import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout
 } from "@stripe/react-stripe-js";
+import { Page } from "../Page";
 
 // Initialize Stripe outside of the component render to avoid
 // recreating the `Stripe` object on every render.
@@ -44,7 +45,7 @@ export const BuyBids = () => {
 
   if (!user) {
     return (
-      <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4 text-center">
+      <Page centered>
         <h2 className="font-serif text-4xl font-bold mb-4 text-white">Your Arsenal Awaits</h2>
         <p className="mb-6 text-lg text-gray-400">Log in to arm yourself for the auction floor.</p>
         <Link
@@ -53,17 +54,19 @@ export const BuyBids = () => {
         >
           Log In to Continue
         </Link>
-      </div>
+      </Page>
     );
   }
 
   if (loading) {
-    return <div className="font-sans bg-[#0d0d1a] text-gray-400 text-lg text-center p-8 min-h-screen">Loading bid packs...</div>;
+    return (
+      <Page centered>
+        <p className="text-gray-400 text-lg">Loading bid packs...</p>
+      </Page>
+    );
   }
 
-  if (error) {
-    return <div className="font-sans bg-[#0d0d1a] text-red-400 text-lg text-center p-8 min-h-screen">{error}</div>;
-  }
+  if (error) return <ErrorScreen message={error} />;
 
   const handleBuy = async (id: number) => {
     if (loading) return; // Prevent multiple clicks while a request is in flight
@@ -92,20 +95,20 @@ export const BuyBids = () => {
 
   if (clientSecret) {
     return (
-      <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4">
+      <Page>
         <div id="checkout">
           <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
             <EmbeddedCheckout />
           </EmbeddedCheckoutProvider>
         </div>
-      </div>
+      </Page>
     );
   }
 
   return (
-    <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4">
+    <Page>
       <div className="container mx-auto">
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 ">
           <h1 className="font-serif text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
             Arm Yourself
           </h1>
@@ -155,6 +158,6 @@ export const BuyBids = () => {
           ))}
         </div>
       </div>
-    </div>
+    </Page>
   );
 };
