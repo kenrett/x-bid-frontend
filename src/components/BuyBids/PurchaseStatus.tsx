@@ -62,10 +62,10 @@ export const PurchaseStatus = () => {
       </h2>
       <p className="mb-6 text-lg text-gray-400">{message}</p>
       <Link
-        to="/buy-bids"
+        to="/auctions"
         className="inline-block text-lg bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20"
       >
-        Back to Bid Packs
+        Back to Auctions
       </Link>
     </div>
   );
