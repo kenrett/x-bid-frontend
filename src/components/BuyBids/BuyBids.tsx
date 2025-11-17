@@ -10,17 +10,17 @@ import {
 } from "@stripe/react-stripe-js";
 import { Page } from "../Page";
 import { ErrorScreen } from "../ErrorScreen";
+import axios from "axios";
 
 // Initialize Stripe outside of the component render to avoid
 // recreating the `Stripe` object on every render.
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-
-
 export const BuyBids = () => {
   const { user } = useAuth();
   const [bidPacks, setBidPacks] = useState<BidPack[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoadingPacks, setIsLoadingPacks] = useState(true);
+  const [isPurchasingPackId, setIsPurchasingPackId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
 
@@ -33,14 +33,14 @@ export const BuyBids = () => {
         setError("Failed to fetch bid packs.");
         console.error(err);
       } finally {
-        setLoading(false);
+        setIsLoadingPacks(false);
       }
     };
 
     if (user) {
-      fetchBidPacks();
+      void fetchBidPacks();
     } else {
-      setLoading(false);
+      setIsLoadingPacks(false);
     }
   }, [user]);
 
@@ -59,7 +59,7 @@ export const BuyBids = () => {
     );
   }
 
-  if (loading) {
+  if (isLoadingPacks) {
     return (
       <Page centered>
         <p className="text-gray-400 text-lg">Loading bid packs...</p>
@@ -70,27 +70,32 @@ export const BuyBids = () => {
   if (error) return <ErrorScreen message={error} />;
 
   const handleBuy = async (id: number) => {
-    if (loading) return; // Prevent multiple clicks while a request is in flight
+    // Prevent multiple clicks while a request is in flight
+    if (isPurchasingPackId !== null) return; 
 
     if (!user) {
       setError("You must be logged in to purchase a pack.");
       return;
     }
 
-    setLoading(true);
+    setIsPurchasingPackId(id);
     setError(null);
 
     try {
-      const response = await client.post<{ clientSecret: string }>(`checkouts`, {
+      const response = await client.post<{ clientSecret: string }>(`/checkouts`, {
         bid_pack_id: id,
       });
 
       setClientSecret(response.data.clientSecret);
-    } catch (err: any) {
-      const message = err.response?.data?.error || "Something went wrong during purchase.";
-      setError(message);
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const message = err.response?.data?.error || "Something went wrong during purchase.";
+        setError(message);
+      } else {
+        setError("An unexpected error occurred.");
+      }
     } finally {
-      setLoading(false);
+      setIsPurchasingPackId(null);
     }
   };
 
@@ -118,7 +123,10 @@ export const BuyBids = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10"
+          aria-busy={isPurchasingPackId !== null}
+        >
           {bidPacks.map((pack, index) => (
             <div
               key={pack.id}
@@ -146,14 +154,15 @@ export const BuyBids = () => {
               <p className="text-pink-400 mb-6 font-medium">({pack.pricePerBid}/Bid)</p>
               <button
                 onClick={() => handleBuy(pack.id)}
-                disabled={loading}
+                disabled={isPurchasingPackId !== null}
+                aria-busy={isPurchasingPackId === pack.id}
                 className={`mt-auto w-full font-bold py-3 px-6 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${
                   pack.highlight
                     ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white transform hover:scale-105"
                     : "bg-white/10 text-white hover:bg-white/20 transform hover:-translate-y-0.5"
                 }`}
               >
-                {loading ? "Processing..." : "Acquire Pack"}
+                {isPurchasingPackId === pack.id ? "Processing..." : "Acquire Pack"}
               </button>
             </div>
           ))}
