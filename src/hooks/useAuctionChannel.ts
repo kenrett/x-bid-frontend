@@ -2,7 +2,7 @@ import { cable } from "@/services/cable";
 import { Bid } from "@/types/bid";
 import { useRef, useEffect, useState } from "react";
 
-type AuctionChannelData = {
+export type AuctionChannelData = {
   current_price?: number;
   highest_bidder_id?: number;
   highest_bidder_name?: string;

@@ -6,11 +6,23 @@ import { useAuctionDetail } from "@/hooks/useAuctionDetail";
 import { LoadingScreen } from "../LoadingScreen";
 import { ErrorScreen } from "../ErrorScreen";
 
-// -------------------- Main Component --------------------
-
+// Wrapper: validate route params, then render the "real" component
 export function AuctionDetail() {
   const { id } = useParams<{ id: string }>();
-  const auctionId = id ? parseInt(id, 10) : 0;
+
+  if (!id) {
+    return <ErrorScreen message="Auction ID is missing from the URL." />;
+  }
+
+  const auctionId = Number.parseInt(id, 10);
+  if (Number.isNaN(auctionId) || auctionId <= 0) {
+    return <ErrorScreen message="Invalid auction ID." />;
+  }
+
+  return <AuctionDetailInner auctionId={auctionId} />;
+}
+
+function AuctionDetailInner({ auctionId }: { auctionId: number }) {
   const {
     auction,
     loading,
@@ -21,30 +33,28 @@ export function AuctionDetail() {
     highestBidderUsername,
     placeUserBid,
     bids,
+    refreshAuction
   } = useAuctionDetail(auctionId);
 
-  // Callback for when the timer ends
   const onTimerEnd = useCallback(() => {
-    // The hook now handles status changes via WebSocket, but a manual
-    // update on timer end can be a good fallback.
-    // For now, we rely on the server broadcast.
-  }, []);
+    // When the countdown hits zero, pull the latest state from the server.
+    // This will tell us definitively if there is a winner and who it is.
+    void refreshAuction();
+  }, [refreshAuction]);
 
   if (error) return <ErrorScreen message={error} />;
   if (loading || !auction) return <LoadingScreen item="auction" />;
 
   return (
-    <>
-      <AuctionView
-        auction={auction}
-        user={user}
-        isBidding={isBidding}
-        bidError={bidError}
-        highestBidderUsername={highestBidderUsername}
-        onPlaceBid={placeUserBid}
-        onTimerEnd={onTimerEnd}
-        bids={bids}
-      />
-    </>
+    <AuctionView
+      auction={auction}
+      user={user}
+      isBidding={isBidding}
+      bidError={bidError}
+      highestBidderUsername={highestBidderUsername ?? "No bids yet"}
+      onPlaceBid={placeUserBid}
+      onTimerEnd={onTimerEnd}
+      bids={bids}
+    />
   );
 }
