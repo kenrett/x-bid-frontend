@@ -1,13 +1,11 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { SignUpForm } from "./SignUpForm";
-import userEvent from "@testing-library/user-event";
 import { useAuth } from "../../hooks/useAuth";
 import client from "../../api/client";
 
-// --- Mocks ---
 const mockLogin = vi.fn();
 const mockNavigate = vi.fn();
 
@@ -53,7 +51,6 @@ describe("SignUpForm Component", () => {
     const user = userEvent.setup();
     renderComponent();
 
-    // Fill required fields to allow form submission
     await user.type(screen.getByLabelText(/your name/i), "Test User");
     await user.type(screen.getByLabelText(/your email/i), "test@example.com");
     await user.type(screen.getByLabelText(/^your password/i), "password123");
@@ -99,12 +96,55 @@ describe("SignUpForm Component", () => {
     });
   });
 
+  it("shows an error and re-enables the button on failed submit", async () => {
+    const user = userEvent.setup();
+    const testError = new Error("boom");
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockedClient.post.mockRejectedValue(testError);
+
+    renderComponent();
+
+    await user.type(screen.getByLabelText(/your name/i),"Test User");
+    await user.type(screen.getByLabelText(/your email/i),"test@example.com");
+    await user.type(screen.getByLabelText(/^your password/i),"password123");
+    await user.type(screen.getByLabelText(/confirm password/i), "password123");
+
+    await user.click(screen.getByRole("button", { name: /create account/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Failed to create account. Please try again."
+    );
+    expect(mockLogin).not.toHaveBeenCalled();
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: /create account/i })).toBeEnabled();
+
+    consoleSpy.mockRestore();
+  });
+
+  it("prevents double submit while a request is in flight", async () => {
+    const user = userEvent.setup();
+    mockedClient.post.mockReturnValue(new Promise(() => {})); // never resolves
+
+    renderComponent();
+
+    await user.type(screen.getByLabelText(/your name/i),"Test User");
+    await user.type(screen.getByLabelText(/your email/i),"test@example.com");
+    await user.type(screen.getByLabelText(/^your password/i),"password123");
+    await user.type(screen.getByLabelText(/confirm password/i), "password123");
+
+    const submitButton = screen.getByRole("button", { name: /create account/i });
+    await user.click(submitButton);
+    await user.click(submitButton);
+
+    expect(mockedClient.post).toHaveBeenCalledTimes(1);
+    expect(submitButton).toBeDisabled();
+  });
+
   it("shows loading state while submitting", async () => {
     const user = userEvent.setup();
     mockedClient.post.mockReturnValue(new Promise(() => {})); // never resolves
     renderComponent();
 
-    // Fill required fields to allow form submission
     await user.type(screen.getByLabelText(/your name/i), "Test User");
     await user.type(screen.getByLabelText(/your email/i), "test@example.com");
     await user.type(screen.getByLabelText(/^your password/i), "password123");
