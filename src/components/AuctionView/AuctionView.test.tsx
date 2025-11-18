@@ -1,11 +1,10 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitForElementToBeRemoved } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { AuctionView } from "./AuctionView";
 import type { AuctionData } from "../../types/auction";
 import type { Bid } from "../../types/bid";
-
-// --- Mocks ---
 
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
@@ -21,13 +20,24 @@ vi.mock("../Countdown/Countdown", () => ({
 }));
 
 // Mock the lazy-loaded BidHistory component
-vi.mock("../BidHistory/BidHistory", () => ({
-  BidHistory: ({ bids }: { bids: Bid[] }) => (
-    <div data-testid="bid-history">Bids: {bids.length}</div>
-  ),
-}));
+let shouldSuspendBidHistory = true;
 
-// --- Test Data ---
+vi.mock("../BidHistory/BidHistory", () => {
+  const SuspenderBidHistory = ({ bids }: { bids: Bid[] }) => {
+    if (shouldSuspendBidHistory) {
+      // Throwing a promise triggers Suspense fallback once.
+      throw new Promise<void>((resolve) => {
+        setTimeout(() => {
+          shouldSuspendBidHistory = false;
+          resolve();
+        }, 0);
+      });
+    }
+    return <div data-testid="bid-history">Bids: {bids.length}</div>;
+  };
+
+  return { BidHistory: SuspenderBidHistory };
+});
 
 const mockAuction: AuctionData = {
   id: 1,
@@ -64,6 +74,11 @@ const renderComponent = (props = {}) => {
 describe("AuctionView Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    shouldSuspendBidHistory = true;
+  });
+
+  afterEach(() => {
+    shouldSuspendBidHistory = true;
   });
 
   it("renders auction details correctly", async () => {
@@ -73,8 +88,6 @@ describe("AuctionView Component", () => {
     expect(screen.getByText("$250.00")).toBeInTheDocument();
     expect(screen.getByAltText("Vintage Masterpiece")).toHaveAttribute("src", "/test-image.jpg");
 
-    // Wait for the lazy-loaded component to resolve to prevent `act` warnings.
-    // This ensures all async updates are flushed before the test ends.
     await screen.findByTestId("bid-history");
   });
 
@@ -84,6 +97,11 @@ describe("AuctionView Component", () => {
     expect(screen.getByText("BidderTwo")).toBeInTheDocument();
   });
 
+  it("renders countdown status text from the mocked Countdown", () => {
+    renderComponent();
+    expect(screen.getByText("Status: active")).toBeInTheDocument();
+  });
+
   it('renders "None" when there is no highest bidder', () => {
     renderComponent({ highestBidderUsername: null });
 
@@ -91,10 +109,11 @@ describe("AuctionView Component", () => {
     expect(bidderInfo).toHaveTextContent("Highest Bidder: None");
   });
 
-  it("calls navigate with '/auctions' when the back button is clicked", () => {
+  it("calls navigate with '/auctions' when the back button is clicked", async () => {
     renderComponent();
+    const user = userEvent.setup();
     const backButton = screen.getByRole("button", { name: /back to auctions/i });
-    fireEvent.click(backButton);
+    await user.click(backButton);
     expect(mockNavigate).toHaveBeenCalledWith("/auctions");
   });
 
@@ -102,18 +121,19 @@ describe("AuctionView Component", () => {
     it("shows the bidding section for an active auction and a logged-in, non-admin user", async () => {
       renderComponent();
       expect(screen.getByRole("button", { name: /place your bid/i })).toBeInTheDocument();
-      // Wait for lazy component to load
       expect(await screen.findByTestId("bid-history")).toBeInTheDocument();
     });
 
     it("hides the bidding section if auction is not active", () => {
       renderComponent({ auction: { ...mockAuction, status: "ended" } });
       expect(screen.queryByRole("button", { name: /place your bid/i })).not.toBeInTheDocument();
+      expect(screen.queryByTestId("bid-history")).not.toBeInTheDocument();
     });
 
     it("hides the bidding section if no user is logged in", () => {
       renderComponent({ user: null });
       expect(screen.queryByRole("button", { name: /place your bid/i })).not.toBeInTheDocument();
+      expect(screen.queryByTestId("bid-history")).not.toBeInTheDocument();
     });
 
     it("hides the bidding section if the user is an admin", () => {
@@ -127,11 +147,12 @@ describe("AuctionView Component", () => {
       expect(screen.getByRole("alert")).toHaveTextContent(error);
     });
 
-    it("calls onPlaceBid when the bid button is clicked", () => {
+    it("calls onPlaceBid when the bid button is clicked", async () => {
       const onPlaceBidMock = vi.fn();
       renderComponent({ onPlaceBid: onPlaceBidMock });
+      const user = userEvent.setup();
       const bidButton = screen.getByRole("button", { name: /place your bid/i });
-      fireEvent.click(bidButton);
+      await user.click(bidButton);
       expect(onPlaceBidMock).toHaveBeenCalledTimes(1);
     });
   });
@@ -164,18 +185,13 @@ describe("AuctionView Component", () => {
   });
 
   describe("Lazy Loading BidHistory", () => {
-    // This test is inherently flaky because Vitest's module mocking resolves
-    // the lazy component almost instantly, making it a race condition to catch
-    // the fallback UI. The more important behavior (that the component *does* load)
-    // is covered in the next test.
-    // it("shows a loading fallback for BidHistory", async () => {
-    //   renderComponent();
-    //   expect(screen.getByText("Loading bid history...")).toBeInTheDocument();
-    //   await waitFor(() => {
-    //     expect(screen.queryByText("Loading bid history...")).not.toBeInTheDocument();
-    //     expect(screen.getByTestId("bid-history")).toBeInTheDocument();
-    //   });
-    // });
+    it("shows the fallback and then renders BidHistory once loaded", async () => {
+      renderComponent();
+      expect(screen.getByText("Loading bid history...")).toBeInTheDocument();
+
+      await waitForElementToBeRemoved(() => screen.queryByText("Loading bid history..."));
+      expect(await screen.findByTestId("bid-history")).toBeInTheDocument();
+    });
 
     it("renders BidHistory with correct bids prop after loading", async () => {
       const bids = [
