@@ -1,29 +1,42 @@
-import { render, screen, within } from "@testing-library/react";
-import { describe, it, expect, beforeEach } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import type { SpyInstance } from "vitest";
 import { BidHistory } from "./BidHistory";
 import type { Bid } from "../../types/bid";
 
 const mockBids: Bid[] = [
   {
     id: 1,
-    amount: 150.5,
+    amount: 150.50,
     created_at: new Date("2023-10-27T10:00:00Z").toISOString(),
     user_id: 1,
-    username: "UserA",
+    username: "User A",
   },
   {
     id: 2,
-    amount: 151.0,
+    amount: 151.00,
     created_at: new Date("2023-10-27T10:01:00Z").toISOString(),
     user_id: 2,
-    username: "UserB",
+    username: "User B",
   },
 ];
 
 describe("BidHistory Component", () => {
+  let dateSpy: SpyInstance;
+
+  beforeEach(() => {
+    dateSpy = vi
+      .spyOn(Date.prototype, "toLocaleString")
+      .mockReturnValue("Jan 01, 10:00:00 UTC");
+  });
+
+  afterEach(() => {
+    dateSpy.mockRestore();
+  });
+
   describe("when there are no bids", () => {
     it('should render a "No bids yet." message', () => {
-      render(<BidHistory bids={[]} />);
+      render(<BidHistory bids={[]} />)
       expect(screen.getByText("No bids yet.")).toBeInTheDocument();
     });
 
@@ -55,18 +68,49 @@ describe("BidHistory Component", () => {
       expect(listItems).toHaveLength(mockBids.length);
     });
 
-    it("should display the details for each bid correctly", () => {
+    it("should display the details for each bid, including formatted date", () => {
       const listItems = screen.getAllByRole("listitem");
 
-      // Check content of the first bid
-      const firstBid = within(listItems[0]);
-      expect(firstBid.getByText("UserA")).toBeInTheDocument();
-      expect(firstBid.getByText("$150.50")).toBeInTheDocument();
+      const firstItem = listItems[0]; // User B
+      expect(firstItem).toHaveTextContent("User B");
+      expect(firstItem).toHaveTextContent("$151.00");
+      expect(firstItem).toHaveTextContent("Jan 01, 10:00:00 UTC");
 
-      // Check content of the second bid
-      const secondBid = within(listItems[1]);
-      expect(secondBid.getByText("UserB")).toBeInTheDocument();
-      expect(secondBid.getByText("$151.00")).toBeInTheDocument();
+      const secondItem = listItems[1]; // User A
+      expect(secondItem).toHaveTextContent("User A");
+      expect(secondItem).toHaveTextContent("$150.50");
+      expect(secondItem).toHaveTextContent("Jan 01, 10:00:00 UTC");
+    });
+  });
+
+  describe("with unsorted bids", () => {
+    it("should render bids in descending chronological order", () => {
+      render(<BidHistory bids={mockBids} />);
+
+      const listItems = screen.getAllByRole("listitem");
+
+      const firstItem = listItems[0];
+      expect(firstItem).toHaveTextContent("User B"); // User B's bid is later
+      expect(firstItem).toHaveTextContent("$151.00");
+
+      const secondItem = listItems[1];
+      expect(secondItem).toHaveTextContent("User A");
+    });
+  });
+
+  describe("when multiple bids share the same timestamp", () => {
+    it("uses the id tiebreaker to keep higher ids first", () => {
+      const sameTimestamp = new Date("2023-10-27T10:00:00Z").toISOString();
+      const bidsWithTie: Bid[] = [
+        { id: 5, amount: 10, created_at: sameTimestamp, user_id: 1, username: "LaterId" },
+        { id: 4, amount: 9, created_at: sameTimestamp, user_id: 2, username: "EarlierId" },
+      ];
+
+      render(<BidHistory bids={bidsWithTie} />);
+
+      const listItems = screen.getAllByRole("listitem");
+      expect(listItems[0]).toHaveTextContent("LaterId");
+      expect(listItems[1]).toHaveTextContent("EarlierId");
     });
   });
 });
