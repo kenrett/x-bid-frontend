@@ -53,18 +53,18 @@ const mockUserLoggedIn = {
   bidCredits: 100,
   email: "test@example.com",
   is_admin: false,
-  token: "fake-token",
 };
 
 // Helper to create a full mock UseAuthReturn object
 const createMockAuthReturn = (user: typeof mockUserLoggedIn | null): UseAuthReturn => ({
   user,
-  login: vi.fn(),
+  login: vi.fn() as UseAuthReturn["login"],
   logout: vi.fn(),
-  isLoggedIn: user !== null,
-  token: user?.token || null,
+  token: user ? "fake-token" : null,
+  refreshToken: user ? "refresh-token" : null,
+  sessionTokenId: user ? "session-token-id" : null,
+  sessionRemainingSeconds: user ? 900 : null,
   updateUserBalance: vi.fn(),
-  currentUser: user,
 });
 
 const renderComponent = () => render(<BuyBids />, { wrapper: MemoryRouter });

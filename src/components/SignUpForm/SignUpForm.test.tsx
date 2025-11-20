@@ -71,9 +71,16 @@ describe("SignUpForm Component", () => {
     const user = userEvent.setup();
     const mockUser = { id: 1, name: "Test User" };
     const mockToken = "fake-token";
+    const mockRefreshToken = "refresh-token";
+    const mockSessionTokenId = "session-token";
 
     mockedClient.post.mockResolvedValue({
-      data: { token: mockToken, user: mockUser },
+      data: {
+        token: mockToken,
+        refresh_token: mockRefreshToken,
+        session_token_id: mockSessionTokenId,
+        user: mockUser,
+      },
     });
 
     renderComponent();
@@ -91,7 +98,12 @@ describe("SignUpForm Component", () => {
         email_address: "test@example.com",
         password: "password123",
       });
-      expect(mockLogin).toHaveBeenCalledWith(mockToken, mockUser);
+      expect(mockLogin).toHaveBeenCalledWith({
+        token: mockToken,
+        refreshToken: mockRefreshToken,
+        sessionTokenId: mockSessionTokenId,
+        user: mockUser,
+      });
       expect(mockNavigate).toHaveBeenCalledWith("/auctions");
     });
   });

@@ -1,11 +1,19 @@
-import type { User } from './user';
+import type { User } from "./user";
+
+export type LoginPayload = {
+  token: string;
+  refreshToken: string;
+  sessionTokenId: string;
+  user: User;
+};
 
 export type AuthContextType = {
   user: User | null;
-  currentUser: User | null;
-  isLoggedIn: boolean;
   token: string | null;
-  login: (token: string, user: User) => void;
+  refreshToken: string | null;
+  sessionTokenId: string | null;
+  sessionRemainingSeconds: number | null;
+  login: (payload: LoginPayload) => void;
   logout: () => void;
   updateUserBalance: (newBalance: number) => void;
 };
