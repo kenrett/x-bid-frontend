@@ -1,5 +1,6 @@
 // import logo from "../../assets/x-bid-alt-logo.png";
-import logo from "../../assets/xbid_logo_high_res.png";
+// import logo from "../../assets/xbid_logo_high_res.png";
+import logo from "../../assets/biddersweet_logo.png";
 import { useAuth } from "../../hooks/useAuth";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { NavItem } from "../NavItem";
@@ -20,7 +21,7 @@ const variants = {
     "absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.15)_0%,rgba(255,255,255,0)_50%)] -z-0"
   ),
   logoImage: cva(
-    "relative h-50 drop-shadow-[0_0_25px_rgba(255,105,180,0.8)] transition-transform duration-300 hover:scale-105"
+    "relative h-65 drop-shadow-[0_0_25px_rgba(255,105,180,0.8)] transition-transform duration-300 hover:scale-105"
   ),
   mobileMenuButton: cva(
     "inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-400 rounded-lg md:hidden hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500"
