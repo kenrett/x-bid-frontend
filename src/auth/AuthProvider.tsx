@@ -160,10 +160,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [token, sessionTokenId, handleSessionInvalidated, persistValue]);
 
   useEffect(() => {
-    if (!sessionTokenId) return;
+    if (!token || !sessionTokenId) return;
 
     const subscription = cable.subscriptions.create(
-      { channel: "SessionChannel", session_token_id: sessionTokenId },
+      { channel: "SessionChannel", token, session_token_id: sessionTokenId },
       {
         received: (payload: unknown) => {
           const eventName = getSessionEventName(payload);
@@ -177,7 +177,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-  }, [sessionTokenId, handleSessionInvalidated]);
+  }, [token, sessionTokenId, handleSessionInvalidated]);
 
   return (
     <AuthContext.Provider
