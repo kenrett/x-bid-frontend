@@ -100,4 +100,17 @@ describe("Countdown Component", () => {
     render(<Countdown endTime={endTime} status="active" onEnd={onEndMock} />);
     expect(screen.getByText("00:00")).toBeInTheDocument();
   });
+
+  it("should only call onEnd once even if re-rendered with the same expired endTime", () => {
+    const endTime = new Date(Date.now() - 1000).toISOString();
+    const { rerender } = render(
+      <Countdown endTime={endTime} status="active" onEnd={onEndMock} />
+    );
+
+    expect(onEndMock).toHaveBeenCalledTimes(1);
+
+    rerender(<Countdown endTime={endTime} status="active" onEnd={onEndMock} />);
+
+    expect(onEndMock).toHaveBeenCalledTimes(1);
+  });
 });

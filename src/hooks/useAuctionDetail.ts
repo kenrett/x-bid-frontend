@@ -43,7 +43,7 @@ type AuctionAction =
  */
 function auctionReducer(state: AuctionState, action: AuctionAction): AuctionState {
   if ('payload' in action) {
-    console.log('[auctionReducer] Action payload:', action.payload);
+    // console.log('[auctionReducer] Action payload:', action.payload);
   }
 
   let nextState: AuctionState;
@@ -95,7 +95,7 @@ function auctionReducer(state: AuctionState, action: AuctionAction): AuctionStat
       }
       // If the channel update is for the user who just bid, ignore it to prevent state overwrites.
       if (data.bid && data.bid.user_id === state.lastBidderId) {
-        console.log('[auctionReducer] Ignoring own bid update from channel.');
+        // console.log('[auctionReducer] Ignoring own bid update from channel.');
         nextState = { ...state, lastBidderId: null };
         break;
       }
@@ -124,7 +124,7 @@ function auctionReducer(state: AuctionState, action: AuctionAction): AuctionStat
       nextState = state;
   }
 
-  console.log('[auctionReducer] State after:', { ...nextState });
+  // console.log('[auctionReducer] State after:', { ...nextState });
   console.groupEnd();
   return nextState;
 }
