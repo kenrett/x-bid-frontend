@@ -11,6 +11,8 @@ import { PurchaseStatus } from "./components/BuyBids/PurchaseStatus";
 import { PrivacyPolicy } from "./components/PrivacyPolicy";
 import { TermsAndConditions } from "./components/TermsAndConditions";
 import { RouteErrorBoundary } from "./components/ErrorBoundary/RouteErrorBoundary";
+import { AdminRoute } from "./components/AdminRoute";
+import { AdminDashboard } from "./components/Admin/AdminDashboard";
 
 export const router = createBrowserRouter([
   {
@@ -28,6 +30,13 @@ export const router = createBrowserRouter([
       { path: "/purchase-status", element: <PurchaseStatus /> },
       { path: "/privacy-policy", element: <PrivacyPolicy /> },
       { path: "/terms-and-conditions", element: <TermsAndConditions /> },
+      {
+        path: "/admin",
+        element: <AdminRoute />,
+        children: [
+          { index: true, element: <AdminDashboard /> },
+        ],
+      },
     ],
   },
 ]);

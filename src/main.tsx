@@ -4,6 +4,7 @@ import './index.css'
 import App from './App'
 import { AuthProvider } from './auth/AuthProvider'
 import { FlowbiteInitializer } from './components/FlowbiteInitializer'
+import { ToastContainer } from './components/Toast/ToastContainer'
 
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Root element not found');
@@ -13,6 +14,7 @@ createRoot(rootElement).render(
     <AuthProvider>
       <FlowbiteInitializer />
       <App />
+      <ToastContainer />
     </AuthProvider>
   </StrictMode>,
 );

@@ -27,11 +27,45 @@ const getSessionEventName = (payload: unknown): string | undefined => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const normalizeUser = useCallback((rawUser: User): User => {
+    const candidate =
+      (rawUser as User).is_admin ??
+      (rawUser as Record<string, unknown>).isAdmin ??
+      (rawUser as Record<string, unknown>).admin;
+
+    const hasAdminRole = (() => {
+      const role = (rawUser as Record<string, unknown>).role;
+      const roles = (rawUser as Record<string, unknown>).roles;
+      if (typeof role === "string") return role.toLowerCase() === "admin";
+      if (Array.isArray(roles)) {
+        return roles.some(
+          (r) => typeof r === "string" && r.toLowerCase() === "admin"
+        );
+      }
+      return false;
+    })();
+
+    const coerceAdmin = (value: unknown): boolean => {
+      if (typeof value === "boolean") return value;
+      if (typeof value === "number") return value !== 0;
+      if (typeof value === "string") {
+        return ["true", "1", "t", "yes"].includes(value.toLowerCase());
+      }
+      return false;
+    };
+
+    return {
+      ...rawUser,
+      is_admin: coerceAdmin(candidate) || hasAdminRole,
+    };
+  }, []);
+
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [sessionTokenId, setSessionTokenId] = useState<string | null>(null);
   const [sessionRemainingSeconds, setSessionRemainingSeconds] = useState<number | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -41,7 +75,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser) as User;
+        setUser(normalizeUser(parsedUser));
       } catch (error) {
         console.error("Failed to parse user from localStorage", error);
         localStorage.removeItem("user");
@@ -51,7 +86,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (storedToken) setToken(storedToken);
     if (storedRefreshToken) setRefreshToken(storedRefreshToken);
     if (storedSessionTokenId) setSessionTokenId(storedSessionTokenId);
-  }, []);
+    setIsReady(true);
+  }, [normalizeUser]);
 
   const persistValue = useCallback((key: string, value: string | null) => {
     if (value) {
@@ -62,17 +98,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = useCallback(({ token: jwt, refreshToken: refresh, sessionTokenId: sessionId, user }: LoginPayload) => {
-    setUser(user);
+    const normalizedUser = normalizeUser(user);
+    setUser(normalizedUser);
     setToken(jwt);
     setRefreshToken(refresh);
     setSessionTokenId(sessionId);
     setSessionRemainingSeconds(null);
 
-    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("user", JSON.stringify(normalizedUser));
     persistValue("token", jwt);
     persistValue("refreshToken", refresh);
     persistValue("sessionTokenId", sessionId);
-  }, [persistValue]);
+  }, [persistValue, normalizeUser]);
 
   const logout = useCallback(() => {
     setUser(null);
@@ -96,11 +133,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(currentUser => {
       if (!currentUser) return null;
       const updatedUser = { ...currentUser, bidCredits: newBalance };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      return updatedUser;
+      localStorage.setItem("user", JSON.stringify(normalizeUser(updatedUser)));
+      return normalizeUser(updatedUser);
     });
-  }, []);
-
+  }, [normalizeUser]);
   useEffect(() => {
     if (!token || !sessionTokenId) {
       setSessionRemainingSeconds(null);
@@ -187,6 +223,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshToken,
         sessionTokenId,
         sessionRemainingSeconds,
+        isReady,
         login,
         logout,
         updateUserBalance,

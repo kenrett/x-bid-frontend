@@ -13,6 +13,7 @@ export type AuthContextType = {
   refreshToken: string | null;
   sessionTokenId: string | null;
   sessionRemainingSeconds: number | null;
+  isReady: boolean;
   login: (payload: LoginPayload) => void;
   logout: () => void;
   updateUserBalance: (newBalance: number) => void;
