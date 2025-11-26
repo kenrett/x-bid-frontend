@@ -102,8 +102,9 @@ function auctionReducer(state: AuctionState, action: AuctionAction): AuctionStat
       
       const updatedAuction = {
         ...state.auction,
-        current_price: data.current_price ?? state.auction.current_price,
-        highest_bidder_id: data.highest_bidder_id ?? state.auction.highest_bidder_id,
+        // Fall back to incoming bid amount if current_price is not broadcast separately.
+        current_price: data.current_price ?? data.bid?.amount ?? state.auction.current_price,
+        highest_bidder_id: data.highest_bidder_id ?? data.bid?.user_id ?? state.auction.highest_bidder_id,
         end_time: data.end_time ?? state.auction.end_time,
       };
       let updatedBids = [...state.bids];
@@ -115,7 +116,7 @@ function auctionReducer(state: AuctionState, action: AuctionAction): AuctionStat
         ...state,
         auction: updatedAuction,
         bids: updatedBids,
-        highestBidderUsername: data.highest_bidder_name ?? state.highestBidderUsername,
+        highestBidderUsername: data.highest_bidder_name ?? data.bid?.username ?? state.highestBidderUsername,
         lastBidderId: null,
       };
       break;
@@ -218,23 +219,35 @@ export function useAuctionDetail(auctionId: number) {
     }
 
     dispatch({ type: "BID_START" });
-    auctionSubscription.perform("stop_stream");
 
     try {
       const { auction: updatedAuctionData, bid: newBid } = await placeBid(
         state.auction.id,
       );
 
-      const updatedAuctionWithId = {
-        ...updatedAuctionData,
-        highest_bidder_id: newBid.user_id,
+      const normalizedBid: Bid = {
+        ...newBid,
+        id: Number(newBid.id),
+        user_id: Number(newBid.user_id),
+        amount: Number(newBid.amount),
+        username: user!.name,
       };
 
-      newBid.username = user!.name;
+      const baseAuction = (updatedAuctionData ?? state.auction)!;
+      const updatedAuctionWithId = {
+        ...baseAuction,
+        highest_bidder_id: normalizedBid.user_id,
+        current_price: Number(
+          updatedAuctionData?.current_price ??
+          normalizedBid.amount ??
+          baseAuction.current_price ??
+          0
+        ),
+      };
 
       dispatch({
         type: "BID_SUCCESS",
-        payload: { updatedAuction: updatedAuctionWithId, newBid },
+        payload: { updatedAuction: updatedAuctionWithId, newBid: normalizedBid },
       });
     } catch (err) {
       if (isAxiosError(err) && err.response?.data?.error) {
@@ -247,9 +260,7 @@ export function useAuctionDetail(auctionId: number) {
         });
       }
     } finally {
-      if (auctionSubscription) {
-        auctionSubscription.perform("start_stream");
-      }
+      // Keep the channel open; we rely on lastBidderId to ignore our own echoes.
     }
   };
 
