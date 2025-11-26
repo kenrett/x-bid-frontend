@@ -15,6 +15,9 @@ import { AdminRoute } from "./components/AdminRoute";
 import { AdminDashboard } from "./components/Admin/AdminDashboard";
 import { AdminLayout } from "./components/Admin/AdminLayout";
 import { AdminPlaceholder } from "./components/Admin/AdminPlaceholder";
+import { AdminAuctionsList } from "./components/Admin/Auctions/AdminAuctionsList";
+import { AdminAuctionCreate } from "./components/Admin/Auctions/AdminAuctionCreate";
+import { AdminAuctionEdit } from "./components/Admin/Auctions/AdminAuctionEdit";
 
 export const router = createBrowserRouter([
   {
@@ -42,12 +45,15 @@ export const router = createBrowserRouter([
               { index: true, element: <AdminDashboard /> },
               {
                 path: "auctions",
-                element: (
-                  <AdminPlaceholder
-                    title="Auctions"
-                    description="Manage and monitor all auctions."
-                  />
-                ),
+                element: <AdminAuctionsList />,
+              },
+              {
+                path: "auctions/new",
+                element: <AdminAuctionCreate />,
+              },
+              {
+                path: "auctions/:id/edit",
+                element: <AdminAuctionEdit />,
               },
               {
                 path: "bid-packs",
