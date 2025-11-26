@@ -166,6 +166,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             handleSessionInvalidated("expired");
             return;
           }
+        } else {
+          // If the backend doesn't send remaining_seconds, keep the session alive
+          // and clear the countdown rather than invalidating/loggin the user out
+          setSessionRemainingSeconds(null);
         }
 
         if (nextToken && nextRefreshToken && nextSessionTokenId) {
