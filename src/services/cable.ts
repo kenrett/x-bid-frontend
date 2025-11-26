@@ -1,6 +1,18 @@
 import { createConsumer } from "@rails/actioncable";
 
-// Use environment variables for the WebSocket URL
-const cableUrl = import.meta.env.VITE_CABLE_URL || "ws://localhost:3000/cable";
-// add VITE_CABLE_URL=wss://your-production-app.com/cable
-export const cable = createConsumer(cableUrl);
+// Attach JWT + session token to the ActionCable URL so the backend Connection
+// (which requires authentication) can authorize the websocket handshake.
+const buildCableUrl = () => {
+  const base = import.meta.env.VITE_CABLE_URL || "ws://localhost:3000/cable";
+  const url = new URL(base);
+
+  const token = localStorage.getItem("token");
+  const sessionTokenId = localStorage.getItem("sessionTokenId");
+
+  if (token) url.searchParams.set("token", token);
+  if (sessionTokenId) url.searchParams.set("session_token_id", sessionTokenId);
+
+  return url.toString();
+};
+
+export const cable = createConsumer(buildCableUrl());
