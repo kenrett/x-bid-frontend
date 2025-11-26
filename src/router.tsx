@@ -13,6 +13,8 @@ import { TermsAndConditions } from "./components/TermsAndConditions";
 import { RouteErrorBoundary } from "./components/ErrorBoundary/RouteErrorBoundary";
 import { AdminRoute } from "./components/AdminRoute";
 import { AdminDashboard } from "./components/Admin/AdminDashboard";
+import { AdminLayout } from "./components/Admin/AdminLayout";
+import { AdminPlaceholder } from "./components/Admin/AdminPlaceholder";
 
 export const router = createBrowserRouter([
   {
@@ -34,7 +36,48 @@ export const router = createBrowserRouter([
         path: "/admin",
         element: <AdminRoute />,
         children: [
-          { index: true, element: <AdminDashboard /> },
+          {
+            element: <AdminLayout />,
+            children: [
+              { index: true, element: <AdminDashboard /> },
+              {
+                path: "auctions",
+                element: (
+                  <AdminPlaceholder
+                    title="Auctions"
+                    description="Manage and monitor all auctions."
+                  />
+                ),
+              },
+              {
+                path: "bid-packs",
+                element: (
+                  <AdminPlaceholder
+                    title="Bid Packs"
+                    description="Create and edit bid packs."
+                  />
+                ),
+              },
+              {
+                path: "users",
+                element: (
+                  <AdminPlaceholder
+                    title="Users & Payments"
+                    description="Review user accounts and payment activity."
+                  />
+                ),
+              },
+              {
+                path: "settings",
+                element: (
+                  <AdminPlaceholder
+                    title="Settings"
+                    description="Configure admin and platform settings."
+                  />
+                ),
+              },
+            ],
+          },
         ],
       },
     ],
