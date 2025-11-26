@@ -28,14 +28,15 @@ const getSessionEventName = (payload: unknown): string | undefined => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const normalizeUser = useCallback((rawUser: User): User => {
+    const record = rawUser as unknown as Record<string, unknown>;
     const candidate =
-      (rawUser as User).is_admin ??
-      (rawUser as Record<string, unknown>).isAdmin ??
-      (rawUser as Record<string, unknown>).admin;
+      rawUser.is_admin ??
+      record.isAdmin ??
+      record.admin;
 
     const hasAdminRole = (() => {
-      const role = (rawUser as Record<string, unknown>).role;
-      const roles = (rawUser as Record<string, unknown>).roles;
+      const role = record.role;
+      const roles = record.roles;
       if (typeof role === "string") return role.toLowerCase() === "admin";
       if (Array.isArray(roles)) {
         return roles.some(

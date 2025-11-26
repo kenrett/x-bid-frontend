@@ -1,6 +1,5 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import type { SpyInstance } from "vitest";
 import { BidHistory } from "./BidHistory";
 import type { Bid } from "../../types/bid";
 
@@ -22,7 +21,7 @@ const mockBids: Bid[] = [
 ];
 
 describe("BidHistory Component", () => {
-  let dateSpy: SpyInstance;
+  let dateSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     dateSpy = vi

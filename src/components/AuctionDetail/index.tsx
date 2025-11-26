@@ -36,7 +36,7 @@ export function AuctionDetail() {
 
   if (error) return <ErrorScreen message={error} />;
   // Show loading screen if we are fetching or if there's no error but the auction hasn't loaded yet.
-  if (loading || !auction) return <LoadingScreen />;
+  if (loading || !auction) return <LoadingScreen item="auction" />;
 
   return (
     <AuctionView
@@ -44,7 +44,7 @@ export function AuctionDetail() {
       user={user}
       isBidding={isBidding}
       bidError={bidError}
-      highestBidderUsername={highestBidderUsername}
+      highestBidderUsername={highestBidderUsername ?? "No bids yet"}
       onPlaceBid={placeUserBid}
       onTimerEnd={onTimerEnd}
       bids={bids}

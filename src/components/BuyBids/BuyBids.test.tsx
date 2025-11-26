@@ -65,6 +65,7 @@ const createMockAuthReturn = (user: typeof mockUserLoggedIn | null): UseAuthRetu
   sessionTokenId: user ? "session-token-id" : null,
   sessionRemainingSeconds: user ? 900 : null,
   updateUserBalance: vi.fn(),
+  isReady: true,
 });
 
 const renderComponent = () => render(<BuyBids />, { wrapper: MemoryRouter });

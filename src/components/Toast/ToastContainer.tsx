@@ -18,7 +18,9 @@ export const ToastContainer = () => {
       }, 3500);
     });
 
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   if (toasts.length === 0) return null;
