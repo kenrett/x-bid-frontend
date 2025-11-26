@@ -57,10 +57,11 @@ export function Header() {
     { name: "How It Works", href: "/how-it-works" },
     { name: "About", href: "/about" },
   ];
-
   const { user, logout } = useAuth();
-  const location = useLocation();
   const isAdmin = Boolean(user?.is_admin);
+  const adminNavItems = isAdmin ? [{ name: "Admin", href: "/admin/auctions" }]: [];
+
+  const location = useLocation();
 
   return (
     <>
@@ -93,6 +94,11 @@ export function Header() {
           >
             <ul className={variants.navList()}>
               {navItems.map((item) => (
+                <NavItem key={item.name} to={item.href}>
+                  {item.name}
+                </NavItem>
+              ))}
+              {adminNavItems.map((item) => (
                 <NavItem key={item.name} to={item.href}>
                   {item.name}
                 </NavItem>
