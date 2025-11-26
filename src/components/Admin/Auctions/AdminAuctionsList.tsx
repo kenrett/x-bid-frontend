@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAuctions } from "../../../api/auctions";
-import { deleteAuction } from "../../../api/admin/auctions";
+import { deleteAuction, updateAuction } from "../../../api/admin/auctions";
 import { showToast } from "../../../services/toast";
 import type { AuctionData } from "../../../types/auction";
 
@@ -69,6 +69,23 @@ export const AdminAuctionsList = () => {
       showToast("Failed to delete auction", "error");
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleStatusChange = async (auction: AuctionData, nextStatus: AuctionData["status"]) => {
+    const label = auction.title ?? `Auction ${auction.id}`;
+    const confirmed = window.confirm(
+      `Change status of "${label}" from ${auction.status} to ${nextStatus}? This affects bidders immediately.`
+    );
+    if (!confirmed) return;
+
+    try {
+      await updateAuction(auction.id, { status: nextStatus });
+      showToast(`Status set to ${nextStatus}`, "success");
+      await fetchAuctions();
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to update status", "error");
     }
   };
 
@@ -271,6 +288,30 @@ export const AdminAuctionsList = () => {
                       >
                         Edit
                       </Link>
+                      {["inactive", "scheduled"].includes(auction.status) && (
+                        <button
+                          onClick={() => void handleStatusChange(auction, "active")}
+                          className="text-sm text-emerald-300 hover:text-emerald-200 underline underline-offset-2"
+                        >
+                          Publish
+                        </button>
+                      )}
+                      {auction.status === "active" && (
+                        <button
+                          onClick={() => void handleStatusChange(auction, "inactive")}
+                          className="text-sm text-amber-200 hover:text-amber-100 underline underline-offset-2"
+                        >
+                          Pause
+                        </button>
+                      )}
+                      {auction.status !== "complete" && (
+                        <button
+                          onClick={() => void handleStatusChange(auction, "complete")}
+                          className="text-sm text-red-300 hover:text-red-200 underline underline-offset-2"
+                        >
+                          Close
+                        </button>
+                      )}
                       <button
                         onClick={() => void handleDelete(auction.id)}
                         disabled={deletingId === auction.id}

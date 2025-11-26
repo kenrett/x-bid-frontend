@@ -15,6 +15,7 @@ export const AdminAuctionEdit = () => {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeEditConfirmed, setActiveEditConfirmed] = useState(false);
 
   useEffect(() => {
     if (!auctionId) {
@@ -28,6 +29,16 @@ export const AdminAuctionEdit = () => {
         setLoading(true);
         setError(null);
         const data = await getAuction(auctionId);
+        if (data.status === "active") {
+          const confirmed = window.confirm(
+            "This auction is active. Editing may affect live bidders. Continue?"
+          );
+          if (!confirmed) {
+            navigate("/admin/auctions");
+            return;
+          }
+          setActiveEditConfirmed(true);
+        }
         setAuction(data);
       } catch (err) {
         console.error(err);
@@ -42,6 +53,13 @@ export const AdminAuctionEdit = () => {
 
   const handleSubmit = async (payload: Partial<AuctionData> & { title: string }) => {
     if (!auctionId) return;
+    if (auction?.status === "active" && !activeEditConfirmed) {
+      const confirmed = window.confirm(
+        "This auction is active. Are you sure you want to save changes?"
+      );
+      if (!confirmed) return;
+      setActiveEditConfirmed(true);
+    }
     try {
       setIsSubmitting(true);
       await updateAuction(auctionId, payload);
