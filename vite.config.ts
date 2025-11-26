@@ -1,12 +1,12 @@
 /// <reference types="vitest" />
 
-import { defineConfig } from 'vitest/config'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-import { resolve } from 'path'
+import { defineConfig, type UserConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+import { resolve } from 'path';
+import type { UserConfig as VitestUserConfig } from 'vitest/config';
 
-// https://vite.dev/config/
-export default defineConfig({
+const config: UserConfig & { test: VitestUserConfig['test'] } = {
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -18,4 +18,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: resolve(__dirname, './src/test/setup.ts'),
   },
-})
+};
+
+// https://vite.dev/config/
+export default defineConfig(config);
