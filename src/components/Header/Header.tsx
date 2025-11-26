@@ -14,7 +14,20 @@ const STRINGS = {
 };
 
 const variants = {
-  nav: cva("bg-[#0d0d1a] border-b border-white/10 sticky top-0 z-50"),
+  nav: cva("border-b border-white/10 sticky top-0 z-50", {
+    variants: {
+      admin: {
+        true: "bg-pink-600",
+        false: "bg-[#0d0d1a]",
+      },
+    },
+    defaultVariants: {
+      admin: false,
+    },
+  }),
+  adminBanner: cva(
+    "bg-pink-700 text-white text-center text-sm py-2 px-4 shadow-md shadow-pink-900/30"
+  ),
   container: cva("max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"),
   logoLink: cva("relative flex items-center justify-center w-60 h-34"),
   logoSpotlight: cva(
@@ -47,61 +60,70 @@ export function Header() {
 
   const { user, logout } = useAuth();
   const location = useLocation();
+  const isAdmin = Boolean(user?.is_admin);
+
   return (
-    <nav className={variants.nav()}>
-      <div className={variants.container()}>
-        <Link to="/" className={variants.logoLink()}>
-          <div className={variants.logoSpotlight()} style={{ transform: 'scale(3)' }}></div>
-          <img 
-            src={logo} alt="X-Bid Logo" 
-            className={variants.logoImage()} />
-        </Link>
-        <button 
-          data-collapse-toggle="navbar-default"
-          type="button"
-          className={variants.mobileMenuButton()}
-          aria-controls="navbar-default"
-          aria-expanded="false"
-        >
-          <span className={`sr-only`}>Open main menu</span>
-          <Bars3Icon className="w-6 h-6" />
-        </button>
-        <div
-          className="hidden w-full md:block md:w-auto animate-fadeInUp"
-          id="navbar-default"
-        >
-          <ul className={variants.navList()}>
-            {navItems.map((item) => (
-              <NavItem key={item.name} to={item.href}>
-                {item.name}
-              </NavItem>
-            ))}
-              {user ? (
-                <>
-                  <li className="md:ml-4 flex items-center gap-4">
-                    <div className="hidden md:flex flex-col text-right">
-                      <span className="text-sm text-white font-medium">{user.email}</span>
-                      <span className="text-xs text-pink-400">{user.bidCredits} Bids</span>
-                    </div>
-                      <button
-                        onClick={logout}
-                        className={variants.logoutButton()}
-                      >
-                        {STRINGS.LOG_OUT}
-                      </button>
-                  </li>
-                </>
-              ) : (
-                <Link 
-                  to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
-                  className={variants.signInLink()}
-                >
-                  {STRINGS.SIGN_IN}
-                </Link>
-              )}
-          </ul>
+    <>
+      {isAdmin && (
+        <div className={variants.adminBanner()}>
+          Admin mode active — actions affect live data.
         </div>
-      </div>
-    </nav>
+      )}
+      <nav className={variants.nav({ admin: isAdmin })}>
+        <div className={variants.container()}>
+          <Link to="/" className={variants.logoLink()}>
+            <div className={variants.logoSpotlight()} style={{ transform: 'scale(3)' }}></div>
+            <img 
+              src={logo} alt="X-Bid Logo" 
+              className={variants.logoImage()} />
+          </Link>
+          <button 
+            data-collapse-toggle="navbar-default"
+            type="button"
+            className={variants.mobileMenuButton()}
+            aria-controls="navbar-default"
+            aria-expanded="false"
+          >
+            <span className={`sr-only`}>Open main menu</span>
+            <Bars3Icon className="w-6 h-6" />
+          </button>
+          <div
+            className="hidden w-full md:block md:w-auto animate-fadeInUp"
+            id="navbar-default"
+          >
+            <ul className={variants.navList()}>
+              {navItems.map((item) => (
+                <NavItem key={item.name} to={item.href}>
+                  {item.name}
+                </NavItem>
+              ))}
+                {user ? (
+                  <>
+                    <li className="md:ml-4 flex items-center gap-4">
+                      <div className="hidden md:flex flex-col text-right">
+                        <span className="text-sm text-white font-medium">{user.email}</span>
+                        <span className="text-xs text-pink-400">{user.bidCredits} Bids</span>
+                      </div>
+                        <button
+                          onClick={logout}
+                          className={variants.logoutButton()}
+                        >
+                          {STRINGS.LOG_OUT}
+                        </button>
+                    </li>
+                  </>
+                ) : (
+                  <Link 
+                    to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
+                    className={variants.signInLink()}
+                  >
+                    {STRINGS.SIGN_IN}
+                  </Link>
+                )}
+            </ul>
+          </div>
+        </div>
+      </nav>
+    </>
   );
 }
