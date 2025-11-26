@@ -36,13 +36,24 @@ export function useAuctionChannel(
   onDataRef.current = onData;
 
   useEffect(() => {
-    // Do not subscribe if the auctionId is not valid (e.g., 0 on initial render)
+    // Do not subscribe if the auctionId is not valid
     if (!auctionId || auctionId <= 0) return;
+
+    // console.log(`[AuctionChannel] creating subscription for auction ${auctionId}`);
 
     // Create and set the subscription object
     const sub = cable.subscriptions.create(
       { channel: "AuctionChannel", auction_id: auctionId },
       {
+        connected: () => {
+          // console.log("[AuctionChannel] connected");
+        },
+        disconnected: () => {
+          // console.log("[AuctionChannel] disconnected");
+        },
+        rejected: () => {
+          // console.warn("[AuctionChannel] subscription rejected");
+        },
         received: (raw: RawAuctionChannelData) => {
           const data: AuctionChannelData = {
             current_price: raw.current_price ? Number(raw.current_price) : undefined,
@@ -54,7 +65,7 @@ export function useAuctionChannel(
             end_time: raw.end_time, // make sure we propagate end_time
             bid: raw.bid ? { ...raw.bid, id: Number(raw.bid.id), user_id: Number(raw.bid.user_id), amount: Number(raw.bid.amount) } : undefined,
           };
-          console.log("Received broadcast data:", data);
+          // console.log("[AuctionChannel] Received broadcast data:", data);
           onDataRef.current(data);
         },
       }
@@ -62,6 +73,7 @@ export function useAuctionChannel(
     setSubscription(sub);
 
     return () => {
+      // console.log(`[AuctionChannel] cleanup for auction ${auctionId}`);
       sub.unsubscribe();
       setSubscription(null);
     };
