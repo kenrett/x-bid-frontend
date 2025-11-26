@@ -2,9 +2,15 @@ import client from "./client";
 import type { Bid } from "../types/bid";
 import type { AuctionData } from "../types/auction";
 
-export const placeBid = async (auctionId: number): Promise<{ auction: AuctionData, bid: Bid }> => {
+interface PlaceBidResponse {
+  success: boolean;
+  bid: Bid;
+  bidCredits?: number;
+  auction?: AuctionData;
+}
+
+export const placeBid = async (auctionId: number): Promise<PlaceBidResponse> => {
   const response = await client.post(`/auctions/${auctionId}/bids`);
-  console.log("placeBid response:", response.data)
   return response.data;
 };
 
