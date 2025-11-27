@@ -18,6 +18,7 @@ import { AdminPlaceholder } from "./components/Admin/AdminPlaceholder";
 import { AdminAuctionsList } from "./components/Admin/Auctions/AdminAuctionsList";
 import { AdminAuctionCreate } from "./components/Admin/Auctions/AdminAuctionCreate";
 import { AdminAuctionEdit } from "./components/Admin/Auctions/AdminAuctionEdit";
+import { AdminAuctionDetail } from "./components/Admin/Auctions/AdminAuctionDetail";
 import { AdminBidPacksList } from "./components/Admin/BidPacks/AdminBidPacksList";
 import { AdminBidPackCreate } from "./components/Admin/BidPacks/AdminBidPackCreate";
 import { AdminBidPackEdit } from "./components/Admin/BidPacks/AdminBidPackEdit";
@@ -49,6 +50,10 @@ export const router = createBrowserRouter([
               {
                 path: "auctions",
                 element: <AdminAuctionsList />,
+              },
+              {
+                path: "auctions/:id",
+                element: <AdminAuctionDetail />,
               },
               {
                 path: "auctions/new",

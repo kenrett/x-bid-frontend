@@ -283,6 +283,12 @@ export const AdminAuctionsList = () => {
                     </td>
                     <td className="px-4 py-3 text-right space-x-2">
                       <Link
+                        to={`/admin/auctions/${auction.id}`}
+                        className="text-sm text-gray-200 hover:text-white underline underline-offset-2"
+                      >
+                        View
+                      </Link>
+                      <Link
                         to={`/admin/auctions/${auction.id}/edit`}
                         className="text-sm text-blue-300 hover:text-blue-200 underline underline-offset-2"
                       >
