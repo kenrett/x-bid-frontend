@@ -73,7 +73,11 @@ export function Header() {
   ];
   const { user, logout } = useAuth();
   const isAdmin = Boolean(user?.is_admin);
-  const adminNavItems = isAdmin ? [{ name: "Admin", href: "/admin/auctions" }]: [];
+  const adminNavItems = isAdmin
+    ? [
+        { name: "Admin", href: "/admin/auctions" },
+      ]
+    : [];
 
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -128,7 +132,14 @@ export function Header() {
                 <>
                   <li className="md:ml-4 flex items-center gap-4">
                     <div className="hidden md:flex flex-col text-right">
-                      <span className="text-sm text-white font-medium">{user.email}</span>
+                      <span className="text-sm text-white font-medium flex items-center gap-2">
+                        {user.email}
+                        {isAdmin && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-xs text-white border border-white/20">
+                            Admin
+                          </span>
+                        )}
+                      </span>
                       <span className="text-xs text-pink-400">{user.bidCredits} Bids</span>
                     </div>
                       <button
