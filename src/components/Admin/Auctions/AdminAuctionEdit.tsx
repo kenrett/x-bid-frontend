@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getAuction } from "../../../api/auctions";
 import { updateAuction } from "../../../api/admin/auctions";
 import { showToast } from "../../../services/toast";
+import { logAdminAction } from "../../../services/adminAudit";
 import type { AuctionData } from "../../../types/auction";
 import { AdminAuctionForm } from "./AdminAuctionForm";
 
@@ -63,6 +64,7 @@ export const AdminAuctionEdit = () => {
     try {
       setIsSubmitting(true);
       await updateAuction(auctionId, payload);
+      logAdminAction("auction.update", { id: auctionId, title: payload.title });
       showToast("Auction updated", "success");
       navigate("/admin/auctions");
     } catch (err) {

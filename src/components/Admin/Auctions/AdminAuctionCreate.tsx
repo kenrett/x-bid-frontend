@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createAuction } from "../../../api/admin/auctions";
 import { showToast } from "../../../services/toast";
+import { logAdminAction } from "../../../services/adminAudit";
 import type { AuctionData } from "../../../types/auction";
 import { AdminAuctionForm } from "./AdminAuctionForm";
 
@@ -13,6 +14,7 @@ export const AdminAuctionCreate = () => {
     try {
       setIsSubmitting(true);
       await createAuction(payload);
+      logAdminAction("auction.create", { title: payload.title });
       showToast("Auction created", "success");
       navigate("/admin/auctions");
     } catch (err) {

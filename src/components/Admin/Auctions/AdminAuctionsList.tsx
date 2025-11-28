@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getAuctions } from "../../../api/auctions";
 import { deleteAuction, updateAuction } from "../../../api/admin/auctions";
 import { showToast } from "../../../services/toast";
+import { logAdminAction } from "../../../services/adminAudit";
 import type { AuctionData } from "../../../types/auction";
 
 export const AdminAuctionsList = () => {
@@ -62,6 +63,7 @@ export const AdminAuctionsList = () => {
     try {
       setDeletingId(id);
       await deleteAuction(id);
+      logAdminAction("auction.delete", { id });
       showToast("Auction deleted", "success");
       await fetchAuctions();
     } catch (err) {
@@ -81,6 +83,7 @@ export const AdminAuctionsList = () => {
 
     try {
       await updateAuction(auction.id, { status: nextStatus });
+      logAdminAction("auction.status_change", { id: auction.id, from: auction.status, to: nextStatus });
       showToast(`Status set to ${nextStatus}`, "success");
       await fetchAuctions();
     } catch (err) {
@@ -224,12 +227,30 @@ export const AdminAuctionsList = () => {
       </div>
 
       {loading && <p className="text-sm text-gray-400">Loading auctions...</p>}
-      {error && <p className="text-sm text-red-300">{error}</p>}
+      {!loading && error && (
+        <div className="rounded-2xl border border-red-500/30 bg-red-900/30 p-4 text-red-100 flex items-center justify-between">
+          <div className="text-sm">{error}</div>
+          <button
+            onClick={() => void fetchAuctions()}
+            className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {!loading && !error && (
         <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
           {!hasAuctions ? (
-            <div className="p-6 text-gray-300">No auctions found.</div>
+            <div className="p-6 text-gray-300 flex items-center justify-between">
+              <span>No auctions found.</span>
+              <button
+                onClick={() => void fetchAuctions()}
+                className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors"
+              >
+                Retry
+              </button>
+            </div>
           ) : (
             <table className="min-w-full text-sm text-gray-200">
               <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-gray-400">

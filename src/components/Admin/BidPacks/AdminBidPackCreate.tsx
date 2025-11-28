@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createBidPack } from "../../../api/admin/bidPacks";
 import { showToast } from "../../../services/toast";
+import { logAdminAction } from "../../../services/adminAudit";
 import type { BidPack } from "../../../types/bidPack";
 import { AdminBidPackForm } from "./AdminBidPackForm";
 
@@ -13,6 +14,7 @@ export const AdminBidPackCreate = () => {
     try {
       setIsSubmitting(true);
       await createBidPack(payload);
+      logAdminAction("bid_pack.create", { name: payload.name });
       showToast("Bid pack created", "success");
       navigate("/admin/bid-packs");
     } catch (err) {

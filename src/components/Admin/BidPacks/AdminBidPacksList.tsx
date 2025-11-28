@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { listBidPacks, deleteBidPack } from "../../../api/admin/bidPacks";
 import type { BidPack } from "../../../types/bidPack";
 import { showToast } from "../../../services/toast";
+import { logAdminAction } from "../../../services/adminAudit";
 
 export const AdminBidPacksList = () => {
   const [packs, setPacks] = useState<BidPack[]>([]);
@@ -39,6 +40,7 @@ export const AdminBidPacksList = () => {
     try {
       setDeletingId(id);
       await deleteBidPack(id);
+      logAdminAction("bid_pack.delete", { id });
       showToast("Bid pack deleted", "success");
       await fetchPacks();
     } catch (err) {
@@ -125,12 +127,30 @@ export const AdminBidPacksList = () => {
       </div>
 
       {loading && <p className="text-sm text-gray-400">Loading bid packs...</p>}
-      {error && <p className="text-sm text-red-300">{error}</p>}
+      {!loading && error && (
+        <div className="rounded-2xl border border-red-500/30 bg-red-900/30 p-4 text-red-100 flex items-center justify-between">
+          <div className="text-sm">{error}</div>
+          <button
+            onClick={() => void fetchPacks()}
+            className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {!loading && !error && (
         <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
           {!hasPacks ? (
-            <div className="p-6 text-gray-300">No bid packs found.</div>
+            <div className="p-6 text-gray-300 flex items-center justify-between">
+              <span>No bid packs found.</span>
+              <button
+                onClick={() => void fetchPacks()}
+                className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors"
+              >
+                Retry
+              </button>
+            </div>
           ) : (
             <table className="min-w-full text-sm text-gray-200">
               <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-gray-400">

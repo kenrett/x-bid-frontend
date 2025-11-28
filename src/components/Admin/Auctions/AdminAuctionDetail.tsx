@@ -5,6 +5,7 @@ import { BidHistory } from "@/components/BidHistory/BidHistory";
 import { ErrorScreen } from "@/components/ErrorScreen";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { showToast } from "@/services/toast";
+import { logAdminAction } from "@/services/adminAudit";
 
 export const AdminAuctionDetail = () => {
   const { id } = useParams();
@@ -31,6 +32,7 @@ export const AdminAuctionDetail = () => {
     try {
       setIsRefreshing(true);
       await refreshAuction();
+      logAdminAction("auction.refresh", { id: auctionId });
       showToast("Auction refreshed", "success");
     } catch (err) {
       console.error(err);

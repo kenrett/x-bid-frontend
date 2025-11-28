@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getBidPack, updateBidPack } from "../../../api/admin/bidPacks";
 import { showToast } from "../../../services/toast";
+import { logAdminAction } from "../../../services/adminAudit";
 import type { BidPack } from "../../../types/bidPack";
 import { AdminBidPackForm } from "./AdminBidPackForm";
 
@@ -44,6 +45,7 @@ export const AdminBidPackEdit = () => {
     try {
       setIsSubmitting(true);
       await updateBidPack(bidPackId, payload);
+      logAdminAction("bid_pack.update", { id: bidPackId, name: payload.name });
       showToast("Bid pack updated", "success");
       navigate("/admin/bid-packs");
     } catch (err) {
