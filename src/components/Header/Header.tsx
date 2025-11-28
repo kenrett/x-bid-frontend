@@ -6,6 +6,7 @@ import { Bars3Icon } from "@heroicons/react/24/outline";
 import { NavItem } from "../NavItem";
 import { Link, useLocation } from "react-router-dom";
 import { cva } from "class-variance-authority";
+import { useEffect, useState } from "react";
 
 const STRINGS = {
   GREETING: "Hello",
@@ -17,7 +18,7 @@ const variants = {
   nav: cva("border-b border-white/10 sticky top-0 z-50", {
     variants: {
       admin: {
-        true: "bg-pink-600",
+        true: "bg-pink-600 top-0",
         false: "bg-[#0d0d1a]",
       },
     },
@@ -26,9 +27,22 @@ const variants = {
     },
   }),
   adminBanner: cva(
-    "bg-pink-700 text-white text-center text-sm py-2 px-4 shadow-md shadow-pink-900/30"
+    "bg-pink-700 text-white text-center text-sm py-2 px-4 shadow-md shadow-pink-900/30 sticky top-0 z-[60]"
   ),
-  container: cva("max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4"),
+  container: cva(
+    "max-w-screen-xl flex flex-wrap items-center justify-between mx-auto transition-all duration-300",
+    {
+      variants: {
+        compact: {
+          true: "py-1.5 px-4",
+          false: "p-5",
+        },
+      },
+      defaultVariants: {
+        compact: false,
+      },
+    }
+  ),
   logoLink: cva("relative flex items-center justify-center w-60 h-34"),
   logoSpotlight: cva(
     "absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.15)_0%,rgba(255,255,255,0)_50%)] -z-0"
@@ -62,74 +76,80 @@ export function Header() {
   const adminNavItems = isAdmin ? [{ name: "Admin", href: "/admin/auctions" }]: [];
 
   const location = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <>
+    <nav className={variants.nav({ admin: isAdmin })}>
       {isAdmin && (
         <div className={variants.adminBanner()}>
           Admin mode active — actions affect live data.
         </div>
       )}
-      <nav className={variants.nav({ admin: isAdmin })}>
-        <div className={variants.container()}>
-          <Link to="/" className={variants.logoLink()}>
-            <div className={variants.logoSpotlight()} style={{ transform: 'scale(3)' }}></div>
-            <img 
-              src={logo} alt="X-Bid Logo" 
-              className={variants.logoImage()} />
-          </Link>
-          <button 
-            data-collapse-toggle="navbar-default"
-            type="button"
-            className={variants.mobileMenuButton()}
-            aria-controls="navbar-default"
-            aria-expanded="false"
-          >
-            <span className={`sr-only`}>Open main menu</span>
-            <Bars3Icon className="w-6 h-6" />
-          </button>
-          <div
-            className="hidden w-full md:block md:w-auto animate-fadeInUp"
-            id="navbar-default"
-          >
-            <ul className={variants.navList()}>
-              {navItems.map((item) => (
-                <NavItem key={item.name} to={item.href}>
-                  {item.name}
-                </NavItem>
-              ))}
-              {adminNavItems.map((item) => (
-                <NavItem key={item.name} to={item.href}>
-                  {item.name}
-                </NavItem>
-              ))}
-                {user ? (
-                  <>
-                    <li className="md:ml-4 flex items-center gap-4">
-                      <div className="hidden md:flex flex-col text-right">
-                        <span className="text-sm text-white font-medium">{user.email}</span>
-                        <span className="text-xs text-pink-400">{user.bidCredits} Bids</span>
-                      </div>
-                        <button
-                          onClick={logout}
-                          className={variants.logoutButton()}
-                        >
-                          {STRINGS.LOG_OUT}
-                        </button>
-                    </li>
-                  </>
-                ) : (
-                  <Link 
-                    to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
-                    className={variants.signInLink()}
-                  >
-                    {STRINGS.SIGN_IN}
-                  </Link>
-                )}
-            </ul>
-          </div>
+      <div className={variants.container({ compact: isScrolled })}>
+        <Link to="/" className={variants.logoLink()}>
+          <div className={variants.logoSpotlight()} style={{ transform: 'scale(3)' }}></div>
+          <img 
+            src={logo} alt="X-Bid Logo" 
+            className={`${variants.logoImage()} ${isScrolled ? "scale-90" : ""}`} />
+        </Link>
+        <button 
+          data-collapse-toggle="navbar-default"
+          type="button"
+          className={variants.mobileMenuButton()}
+          aria-controls="navbar-default"
+          aria-expanded="false"
+        >
+          <span className={`sr-only`}>Open main menu</span>
+          <Bars3Icon className="w-6 h-6" />
+        </button>
+        <div
+          className="hidden w-full md:block md:w-auto animate-fadeInUp"
+          id="navbar-default"
+        >
+          <ul className={variants.navList()}>
+            {navItems.map((item) => (
+              <NavItem key={item.name} to={item.href}>
+                {item.name}
+              </NavItem>
+            ))}
+            {adminNavItems.map((item) => (
+              <NavItem key={item.name} to={item.href}>
+                {item.name}
+              </NavItem>
+            ))}
+              {user ? (
+                <>
+                  <li className="md:ml-4 flex items-center gap-4">
+                    <div className="hidden md:flex flex-col text-right">
+                      <span className="text-sm text-white font-medium">{user.email}</span>
+                      <span className="text-xs text-pink-400">{user.bidCredits} Bids</span>
+                    </div>
+                      <button
+                        onClick={logout}
+                        className={variants.logoutButton()}
+                      >
+                        {STRINGS.LOG_OUT}
+                      </button>
+                  </li>
+                </>
+              ) : (
+                <Link 
+                  to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
+                  className={variants.signInLink()}
+                >
+                  {STRINGS.SIGN_IN}
+                </Link>
+              )}
+          </ul>
         </div>
-      </nav>
-    </>
+      </div>
+    </nav>
   );
 }
