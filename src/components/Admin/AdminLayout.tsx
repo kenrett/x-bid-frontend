@@ -1,12 +1,14 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { Page } from "../Page";
+import { ADMIN_PATHS } from "./adminPaths";
 
 const NAV_ITEMS = [
-  { label: "Auctions", to: "/admin/auctions" },
-  { label: "Bid Packs", to: "/admin/bid-packs" },
-  { label: "Users / Payments", to: "/admin/users" },
-  { label: "Settings", to: "/admin/settings" },
+  { label: "Auctions", to: `/admin/${ADMIN_PATHS.auctions}` },
+  { label: "Bid Packs", to: `/admin/${ADMIN_PATHS.bidPacks}` },
+  { label: "Users", to: `/admin/${ADMIN_PATHS.users}` },
+  { label: "Payments", to: `/admin/${ADMIN_PATHS.payments}` },
+  { label: "Settings", to: `/admin/${ADMIN_PATHS.settings}` },
 ];
 
 export const AdminLayout = () => {

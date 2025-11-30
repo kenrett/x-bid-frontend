@@ -15,6 +15,7 @@ import { AdminRoute } from "./components/AdminRoute";
 import { AdminDashboard } from "./components/Admin/AdminDashboard";
 import { AdminLayout } from "./components/Admin/AdminLayout";
 import { AdminPlaceholder } from "./components/Admin/AdminPlaceholder";
+import { ADMIN_PATHS } from "./components/Admin/adminPaths";
 import { AdminAuctionsList } from "./components/Admin/Auctions/AdminAuctionsList";
 import { AdminAuctionCreate } from "./components/Admin/Auctions/AdminAuctionCreate";
 import { AdminAuctionEdit } from "./components/Admin/Auctions/AdminAuctionEdit";
@@ -22,7 +23,9 @@ import { AdminAuctionDetail } from "./components/Admin/Auctions/AdminAuctionDeta
 import { AdminBidPacksList } from "./components/Admin/BidPacks/AdminBidPacksList";
 import { AdminBidPackCreate } from "./components/Admin/BidPacks/AdminBidPackCreate";
 import { AdminBidPackEdit } from "./components/Admin/BidPacks/AdminBidPackEdit";
-import { AdminUsersPayments } from "./components/Admin/Users/AdminUsersPayments";
+import { AdminUsersPage } from "./components/Admin/Users/AdminUsersPage";
+import { AdminSettings } from "./components/Admin/Settings/AdminSettings";
+import { AdminPaymentsPage } from "./components/Admin/Users/AdminPaymentsPage";
 
 export const router = createBrowserRouter([
   {
@@ -49,45 +52,44 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <AdminDashboard /> },
               {
-                path: "auctions",
+                path: ADMIN_PATHS.auctions,
                 element: <AdminAuctionsList />,
               },
               {
-                path: "auctions/:id",
+                path: `${ADMIN_PATHS.auctions}/:id`,
                 element: <AdminAuctionDetail />,
               },
               {
-                path: "auctions/new",
+                path: `${ADMIN_PATHS.auctions}/new`,
                 element: <AdminAuctionCreate />,
               },
               {
-                path: "auctions/:id/edit",
+                path: `${ADMIN_PATHS.auctions}/:id/edit`,
                 element: <AdminAuctionEdit />,
               },
               {
-                path: "bid-packs",
+                path: ADMIN_PATHS.bidPacks,
                 element: <AdminBidPacksList />,
               },
               {
-                path: "bid-packs/new",
+                path: `${ADMIN_PATHS.bidPacks}/new`,
                 element: <AdminBidPackCreate />,
               },
               {
-                path: "bid-packs/:id/edit",
+                path: `${ADMIN_PATHS.bidPacks}/:id/edit`,
                 element: <AdminBidPackEdit />,
               },
               {
-                path: "users",
-                element: <AdminUsersPayments />,
+                path: ADMIN_PATHS.users,
+                element: <AdminUsersPage />,
               },
               {
-                path: "settings",
-                element: (
-                  <AdminPlaceholder
-                    title="Settings"
-                    description="Configure admin and platform settings."
-                  />
-                ),
+                path: ADMIN_PATHS.payments,
+                element: <AdminPaymentsPage />,
+              },
+              {
+                path: ADMIN_PATHS.settings,
+                element: <AdminSettings />,
               },
             ],
           },
