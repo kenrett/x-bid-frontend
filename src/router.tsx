@@ -22,6 +22,7 @@ import { AdminAuctionDetail } from "./components/Admin/Auctions/AdminAuctionDeta
 import { AdminBidPacksList } from "./components/Admin/BidPacks/AdminBidPacksList";
 import { AdminBidPackCreate } from "./components/Admin/BidPacks/AdminBidPackCreate";
 import { AdminBidPackEdit } from "./components/Admin/BidPacks/AdminBidPackEdit";
+import { AdminUsersPayments } from "./components/Admin/Users/AdminUsersPayments";
 
 export const router = createBrowserRouter([
   {
@@ -77,12 +78,7 @@ export const router = createBrowserRouter([
               },
               {
                 path: "users",
-                element: (
-                  <AdminPlaceholder
-                    title="Users & Payments"
-                    description="Review user accounts and payment activity."
-                  />
-                ),
+                element: <AdminUsersPayments />,
               },
               {
                 path: "settings",
