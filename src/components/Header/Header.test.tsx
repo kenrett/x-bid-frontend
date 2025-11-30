@@ -4,12 +4,12 @@ import { MemoryRouter } from "react-router-dom";
 import { Header } from "./Header";
 import { useAuth } from "../../hooks/useAuth";
 
-// --- Mocks ---
 vi.mock("../../hooks/useAuth");
 const mockedUseAuth = vi.mocked(useAuth);
 
-// --- Test Data ---
-const mockUser = { id: 1, email: "test@example.com" };
+const mockUser = { id: 1, email: "test@example.com", bidCredits: 100 };
+const mockAdmin = { ...mockUser, is_admin: true };
+const mockSuper = { ...mockUser, is_superuser: true };
 const mockLogout = vi.fn();
 
 const renderComponent = (initialPath = "/") => {
@@ -96,5 +96,34 @@ describe("Header Component", () => {
     renderComponent();
     const mobileMenuButton = screen.getByRole("button", { name: /open main menu/i });
     expect(mobileMenuButton).toBeInTheDocument();
+  });
+
+  describe("admin vs superadmin badges and banner", () => {
+    it("shows admin banner and badge for admin", () => {
+      mockedUseAuth.mockReturnValue({ user: mockAdmin, logout: mockLogout } as any);
+      renderComponent();
+
+      expect(screen.getByText(/admin mode active/i)).toBeInTheDocument();
+      const adminBadges = screen.getAllByText("Admin");
+      expect(adminBadges.length).toBeGreaterThanOrEqual(1);
+      expect(screen.queryByText("Superadmin")).not.toBeInTheDocument();
+    });
+
+    it("shows superadmin banner and badge for superuser", () => {
+      mockedUseAuth.mockReturnValue({ user: mockSuper, logout: mockLogout } as any);
+      renderComponent();
+
+      expect(screen.getByText(/superadmin privileges active/i)).toBeInTheDocument();
+      expect(screen.getByText("Superadmin")).toBeInTheDocument();
+      expect(screen.queryAllByText("Admin").length).toBeGreaterThan(0); // nav link
+    });
+
+    it("shows no admin banner for regular user", () => {
+      mockedUseAuth.mockReturnValue({ user: mockUser, logout: mockLogout } as any);
+      renderComponent();
+
+      expect(screen.queryByText(/admin mode active/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/superadmin privileges/i)).not.toBeInTheDocument();
+    });
   });
 });
