@@ -29,10 +29,16 @@ const getSessionEventName = (payload: unknown): string | undefined => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const normalizeUser = useCallback((rawUser: User): User => {
     const record = rawUser as unknown as Record<string, unknown>;
-    const candidate =
+    const adminCandidate =
       rawUser.is_admin ??
       record.isAdmin ??
       record.admin;
+    const superCandidate =
+      record.is_superuser ??
+      record.isSuperuser ??
+      record.superuser ??
+      record.super_admin ??
+      record.superAdmin;
 
     const hasAdminRole = (() => {
       const role = record.role;
@@ -41,6 +47,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (Array.isArray(roles)) {
         return roles.some(
           (r) => typeof r === "string" && r.toLowerCase() === "admin"
+        );
+      }
+      return false;
+    })();
+
+    const hasSuperRole = (() => {
+      const role = record.role;
+      const roles = record.roles;
+      if (typeof role === "string") return role.toLowerCase() === "superadmin";
+      if (Array.isArray(roles)) {
+        return roles.some(
+          (r) => typeof r === "string" && r.toLowerCase() === "superadmin"
         );
       }
       return false;
@@ -55,9 +73,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     };
 
+    const isSuperuser = coerceAdmin(superCandidate) || hasSuperRole;
+
     return {
       ...rawUser,
-      is_admin: coerceAdmin(candidate) || hasAdminRole,
+      is_superuser: isSuperuser,
+      is_admin: coerceAdmin(adminCandidate) || hasAdminRole || isSuperuser,
     };
   }, []);
 

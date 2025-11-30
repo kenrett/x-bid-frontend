@@ -7,7 +7,7 @@ export const AdminRoute = () => {
   const { user: authUser, isReady } = useAuth();
   const location = useLocation();
   const hasNotifiedRef = useRef(false);
-  const isAdmin = Boolean(authUser?.is_admin);
+  const isAdmin = Boolean(authUser?.is_admin || authUser?.is_superuser);
 
   useEffect(() => {
     if (!isReady) return;

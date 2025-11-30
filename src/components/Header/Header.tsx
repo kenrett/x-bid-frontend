@@ -12,6 +12,8 @@ const STRINGS = {
   GREETING: "Hello",
   LOG_OUT: "Log Out",
   SIGN_IN: "Sign In",
+  ADMIN_BANNER: "Admin mode active — actions affect live data.",
+  SUPERADMIN_BANNER: "SUPERADMIN PRIVILEDGES ACTIVE — CHANGES IMPACT THE ENTIRE PLATFORM.",
 };
 
 const variants = {
@@ -27,7 +29,18 @@ const variants = {
     },
   }),
   adminBanner: cva(
-    "bg-pink-700 text-white text-center text-sm py-2 px-4 shadow-md shadow-pink-900/30 sticky top-0 z-[60]"
+    "text-center text-sm py-2 px-4 sticky top-0 z-[60]",
+    {
+      variants: {
+        super: {
+          true: "bg-red-700 text-white shadow-[0_8px_30px_rgba(255,0,0,0.45)] border-b border-red-300",
+          false: "bg-pink-700 text-white shadow-md shadow-pink-900/30 border-b border-pink-200/60",
+        },
+      },
+      defaultVariants: {
+        super: false,
+      },
+    }
   ),
   container: cva(
     "max-w-screen-xl flex flex-wrap items-center justify-between mx-auto transition-all duration-300",
@@ -72,7 +85,8 @@ export function Header() {
     { name: "About", href: "/about" },
   ];
   const { user, logout } = useAuth();
-  const isAdmin = Boolean(user?.is_admin);
+  const isSuperAdmin = Boolean(user?.is_superuser);
+  const isAdmin = Boolean(user?.is_admin || isSuperAdmin);
   const adminNavItems = isAdmin
     ? [
         { name: "Admin", href: "/admin/auctions" },
@@ -92,8 +106,8 @@ export function Header() {
   return (
     <nav className={variants.nav({ admin: isAdmin })}>
       {isAdmin && (
-        <div className={variants.adminBanner()}>
-          Admin mode active — actions affect live data.
+        <div className={variants.adminBanner({ super: isSuperAdmin })}>
+          {isSuperAdmin ? STRINGS.SUPERADMIN_BANNER : STRINGS.ADMIN_BANNER}
         </div>
       )}
       <div className={variants.container({ compact: isScrolled })}>
@@ -135,8 +149,14 @@ export function Header() {
                       <span className="text-sm text-white font-medium flex items-center gap-2">
                         {user.email}
                         {isAdmin && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-0.5 text-xs text-white border border-white/20">
-                            Admin
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs border ${
+                              isSuperAdmin
+                                ? "bg-red-600 text-white border-red-300 shadow-[0_0_12px_rgba(255,0,0,0.6)]"
+                                : "bg-white/10 text-white border-white/20"
+                            }`}
+                          >
+                            {isSuperAdmin ? "Superadmin" : "Admin"}
                           </span>
                         )}
                       </span>

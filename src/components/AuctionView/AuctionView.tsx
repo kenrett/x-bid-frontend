@@ -12,7 +12,7 @@ import type { Bid } from "../../types/bid";
 
 interface AuctionViewProps {
   auction: AuctionData;
-  user: { id: number; name: string; is_admin?: boolean } | null;
+  user: { id: number; name: string; is_admin?: boolean; is_superuser?: boolean } | null;
   isBidding: boolean;
   bidError: string | null;
   highestBidderUsername: string | null;
@@ -107,7 +107,7 @@ const AuctionViewComponent = ({
             </div>
 
             {/* Bidding Section */}
-            {auction.status === "active" && user && !user.is_admin && (
+            {auction.status === "active" && user && !(user.is_admin || user.is_superuser) && (
               <>
                 {bidError && (
                   <div
