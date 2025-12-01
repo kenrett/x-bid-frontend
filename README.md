@@ -6,6 +6,8 @@ This is the frontend for XBid, a penny auction web application built with React.
 
 -   **Real-time Bidding:** Live auction updates using Action Cable WebSockets.
 -   **User Authentication:** Secure login and registration for users.
+-   **Admin Console:** Manage auctions, bid packs, users, payments, and site settings.
+-   **Bid Purchases:** Stripe-powered embedded checkout for buying bid packs.
 -   **Auction Listings:** View all active, scheduled, and completed auctions.
 -   **Detailed Auction View:** In-depth look at individual auctions with bid history.
 -   **Responsive Design:** Styled with Tailwind CSS for a seamless experience on all devices.
@@ -50,6 +52,10 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
     cp .env.example .env.development
     ```
 
+    - `VITE_API_URL`: Base URL for the XBid backend API (defaults to `http://localhost:3000/api/v1`).
+    - `VITE_STRIPE_PUBLISHABLE_KEY`: Stripe publishable key used for embedded checkout.
+    - `VITE_CABLE_URL` (optional): Action Cable WebSocket endpoint; defaults to `ws://localhost:3000/cable`.
+
 4.  **Run the development server:**
     ```sh
     npm run dev
@@ -61,7 +67,9 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
 -   `npm run dev`: Starts the development server with Hot Module Replacement.
 -   `npm run build`: Bundles the app for production.
 -   `npm run lint`: Lints the codebase using ESLint.
--   `npm run preview`: Serves the production build locally for preview.
+-   `npm run test`: Runs the Vitest suite in watch mode (see `src/test/setup.ts` for the shared test setup).
+-   `npm run test:ci`: Executes the Vitest suite once for CI environments.
+-   `npm run preview`: Serves the production build locally for preview after `npm run build`.
 
 ## 🧱 Architecture
 
