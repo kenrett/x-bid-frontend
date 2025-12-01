@@ -11,6 +11,9 @@ type SessionRemainingResponse = {
   token?: string;
   refresh_token?: string;
   session_token_id?: string;
+  user?: User;
+  is_admin?: boolean;
+  is_superuser?: boolean;
 };
 
 const SESSION_POLL_INTERVAL_MS = 60_000;
@@ -119,8 +122,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = useCallback(({ token: jwt, refreshToken: refresh, sessionTokenId: sessionId, user }: LoginPayload) => {
-    const normalizedUser = normalizeUser(user);
+  const login = useCallback(({ token: jwt, refreshToken: refresh, sessionTokenId: sessionId, user, is_admin, is_superuser }: LoginPayload) => {
+    const normalizedUser = normalizeUser({
+      ...user,
+      is_admin: user?.is_admin ?? is_admin,
+      is_superuser: user?.is_superuser ?? is_superuser,
+    } as User);
     setUser(normalizedUser);
     setToken(jwt);
     setRefreshToken(refresh);
@@ -180,6 +187,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           token: nextToken,
           refresh_token: nextRefreshToken,
           session_token_id: nextSessionTokenId,
+          user: refreshedUser,
+          is_admin: refreshedAdminFlag,
+          is_superuser: refreshedSuperFlag,
         } = response.data;
 
         if (typeof remaining_seconds === "number") {
@@ -202,6 +212,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setSessionTokenId(nextSessionTokenId);
           persistValue("sessionTokenId", nextSessionTokenId);
         }
+
+        if (refreshedUser || typeof refreshedAdminFlag === "boolean" || typeof refreshedSuperFlag === "boolean") {
+          setUser((currentUser) => {
+            const baseUser = refreshedUser ?? currentUser;
+            if (!baseUser) return currentUser;
+
+            const mergedUser = normalizeUser({
+              ...baseUser,
+              ...(refreshedUser ?? {}),
+              is_admin: (refreshedUser ?? baseUser).is_admin ?? refreshedAdminFlag ?? currentUser?.is_admin,
+              is_superuser: (refreshedUser ?? baseUser).is_superuser ?? refreshedSuperFlag ?? currentUser?.is_superuser,
+            } as User);
+
+            localStorage.setItem("user", JSON.stringify(mergedUser));
+            return mergedUser;
+          });
+        }
       } catch (error) {
         console.error("Failed to fetch session remaining time", error);
         if (isAxiosError(error) && error.response?.status === 401) {
@@ -219,7 +246,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         window.clearInterval(intervalId);
       }
     };
-  }, [token, sessionTokenId, handleSessionInvalidated, persistValue]);
+  }, [token, sessionTokenId, handleSessionInvalidated, persistValue, normalizeUser]);
 
   useEffect(() => {
     if (!token || !sessionTokenId) return;

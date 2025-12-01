@@ -19,12 +19,14 @@ export const LoginForm = () => {
 
     try {
       const response = await client.post('/login', { email_address, password });
-      const { token, refresh_token, session_token_id, user } = response.data;
+      const { token, refresh_token, session_token_id, user, is_admin, is_superuser } = response.data;
       login({
         token,
         refreshToken: refresh_token,
         sessionTokenId: session_token_id,
         user,
+        is_admin,
+        is_superuser,
       });
       const redirectTo = searchParams.get('redirect') || '/auctions';
       navigate(redirectTo); // Redirect on successful login
