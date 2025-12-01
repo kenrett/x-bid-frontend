@@ -1,15 +1,16 @@
+import client from "@/api/client";
+
 type Payload = Record<string, unknown> | undefined;
 
 export const logAdminAction = (action: string, payload?: Payload) => {
-  // Client-side audit placeholder; replace with backend logging when available.
-  try {
-    const entry = {
-      action,
-      payload,
-      at: new Date().toISOString(),
-    };
-    console.info("[admin:audit]", entry);
-  } catch (error) {
-    console.error("[admin:audit] failed to log action", error);
-  }
+  // Fire-and-forget server-side audit; errors are logged but not thrown.
+  const sendAudit = async () => {
+    try {
+      await client.post("/api/v1/admin/audit", { action, payload });
+    } catch (error) {
+      console.error("[admin:audit] failed to log action", error);
+    }
+  };
+
+  void sendAudit();
 };

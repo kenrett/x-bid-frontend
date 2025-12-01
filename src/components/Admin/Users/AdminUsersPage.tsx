@@ -13,20 +13,32 @@ export const AdminUsersPage = () => {
   const [userSearch, setUserSearch] = useState("");
 
   const filteredUsers = useMemo(() => {
-    return users.filter((candidate) =>
-      candidate.email.toLowerCase().includes(userSearch.toLowerCase()) ||
-      candidate.name.toLowerCase().includes(userSearch.toLowerCase())
+    const list = Array.isArray(users) ? users : [];
+    const term = userSearch.toLowerCase();
+
+    return list.filter((candidate) =>
+      candidate.email.toLowerCase().includes(term) ||
+      candidate.name.toLowerCase().includes(term)
     );
   }, [users, userSearch]);
 
   useEffect(() => {
+    let mounted = true;
+
     const fetchUsers = async () => {
       try {
-        setUsers(await adminUsersApi.getUsers());
-      } catch (error) { showToast("Could not load users", "error"); }
+        const data = await adminUsersApi.getUsers();
+        if (mounted) setUsers(Array.isArray(data) ? data : []);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        showToast(`Could not load users: ${message}`, "error");
+      }
     };
-    fetchUsers();
+
+    void fetchUsers();
+    return () => { mounted = false; };
   }, []);
+
 
   const requireSuper = (action: () => void) => {
     if (!isSuperAdmin) {
@@ -47,7 +59,8 @@ export const AdminUsersPage = () => {
       logAdminAction(log, { id: updatedUser.id });
       showToast(successMessage, "success");
     } catch (error) {
-      showToast(`Action failed: ${error.message}`, "error");
+      const message = error instanceof Error ? error.message : String(error);
+      showToast(`Action failed: ${message}`, "error");
     }
   };
 
