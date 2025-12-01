@@ -1,19 +1,15 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { showToast } from "@/services/toast";
 import { logAdminAction } from "@/services/adminAudit";
 import type { AdminUser } from "./types";
 import { AdminUsers } from "./AdminUsers";
-
-const mockUsers: AdminUser[] = [
-  { id: 1, email: "admin@example.com", name: "Admin User", role: "admin", status: "active" },
-  { id: 2, email: "superadmin@example.com", name: "Super Admin", role: "superadmin", status: "active" },
-];
+import { adminUsersApi } from "@/services/adminUsersApi";
 
 export const AdminUsersPage = () => {
   const { user } = useAuth();
   const isSuperAdmin = Boolean(user?.is_superuser);
-  const [users, setUsers] = useState<AdminUser[]>(mockUsers);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [userSearch, setUserSearch] = useState("");
 
   const filteredUsers = useMemo(() => {
@@ -23,6 +19,15 @@ export const AdminUsersPage = () => {
     );
   }, [users, userSearch]);
 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setUsers(await adminUsersApi.getUsers());
+      } catch (error) { showToast("Could not load users", "error"); }
+    };
+    fetchUsers();
+  }, []);
+
   const requireSuper = (action: () => void) => {
     if (!isSuperAdmin) {
       showToast("Superadmin only action", "error");
@@ -31,21 +36,29 @@ export const AdminUsersPage = () => {
     action();
   };
 
-  const updateUser = (id: number, updates: Partial<AdminUser>, action: string) => {
-    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...updates } : u)));
-    logAdminAction(action, { id, ...updates });
+  const updateUserInState = (updatedUser: AdminUser) => {
+    setUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
+  };
+
+  const handleApiAction = async (action: () => Promise<AdminUser>, log: string, successMessage: string) => {
+    try {
+      const updatedUser = await action();
+      updateUserInState(updatedUser);
+      logAdminAction(log, { id: updatedUser.id });
+      showToast(successMessage, "success");
+    } catch (error) {
+      showToast(`Action failed: ${error.message}`, "error");
+    }
   };
 
   const handlePromote = (id: number) =>
     requireSuper(() => {
-      updateUser(id, { role: "admin", status: "active" }, "admin.promote");
-      showToast("Admin granted", "success");
+      handleApiAction(() => adminUsersApi.grantAdmin(id), "admin.promote", "Admin granted");
     });
 
   const handleDemote = (id: number) =>
     requireSuper(() => {
-      updateUser(id, { role: "admin", status: "disabled" }, "admin.demote");
-      showToast("Admin access removed", "success");
+      handleApiAction(() => adminUsersApi.revokeAdmin(id), "admin.demote", "Admin access removed");
     });
 
   const handleBan = (id: number) =>
@@ -53,14 +66,12 @@ export const AdminUsersPage = () => {
       const target = users.find((u) => u.id === id);
       const confirmed = window.confirm(`Ban ${target?.email ?? "this user"}? This disables access.`);
       if (!confirmed) return;
-      updateUser(id, { status: "disabled" }, "user.ban");
-      showToast("User banned", "success");
+      handleApiAction(() => adminUsersApi.banUser(id), "user.ban", "User banned");
     });
 
   const handleRemoveSuper = (id: number) =>
     requireSuper(() => {
-      updateUser(id, { role: "admin", status: "disabled" }, "superadmin.remove");
-      showToast("Superadmin access removed", "success");
+      handleApiAction(() => adminUsersApi.revokeSuperadmin(id), "superadmin.remove", "Superadmin access removed");
     });
 
   return (
@@ -69,7 +80,7 @@ export const AdminUsersPage = () => {
         <div>
           <p className="text-xs uppercase tracking-wide text-gray-500">Users</p>
           <h2 className="text-3xl font-serif font-bold text-white">Admin accounts</h2>
-          <p className="text-sm text-gray-400 mt-1">Placeholder data shown; wire to backend for real management.</p>
+          <p className="text-sm text-gray-400 mt-1">Manage user roles and access.</p>
         </div>
       </div>
 
