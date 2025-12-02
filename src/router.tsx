@@ -26,6 +26,8 @@ import { AdminBidPackEdit } from "./components/Admin/BidPacks/AdminBidPackEdit";
 import { AdminUsersPage } from "./components/Admin/Users/AdminUsersPage";
 import { AdminSettings } from "./components/Admin/Settings/AdminSettings";
 import { AdminPaymentsPage } from "./components/Admin/Users/AdminPaymentsPage";
+import { ForgotPassword } from "./components/Auth/ForgotPassword";
+import { ResetPassword } from "./components/Auth/ResetPassword";
 
 export const router = createBrowserRouter([
   {
@@ -37,6 +39,8 @@ export const router = createBrowserRouter([
       { path: "/auctions/:id", element: <AuctionDetail /> },
       { path: "/login", element: <LoginForm /> },
       { path: "/signup", element: <SignUpForm /> },
+      { path: "/forgot-password", element: <ForgotPassword /> },
+      { path: "/reset-password", element: <ResetPassword /> },
       { path: "/about", element: <About /> },
       { path: "/how-it-works", element: <HowItWorks /> },
       { path: "/buy-bids", element: <BuyBids /> },

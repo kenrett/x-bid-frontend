@@ -132,6 +132,12 @@ export const LoginForm = () => {
               </button>
 
               <div className="text-center text-sm font-medium text-gray-300">
+                <Link to="/forgot-password" className="text-pink-300 underline-offset-4 transition hover:text-white hover:underline">
+                  Forgot your password?
+                </Link>
+              </div>
+
+              <div className="text-center text-sm font-medium text-gray-300">
                 Not registered?{" "}
                 <Link to="/signup" className="text-pink-300 underline-offset-4 transition hover:text-white hover:underline">
                   Create account
