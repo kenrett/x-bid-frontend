@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { listBidPacks, deleteBidPack } from "../../../api/admin/bidPacks";
+import axios from "axios";
+import { listBidPacks, deleteBidPack, updateBidPack } from "../../../api/admin/bidPacks";
 import type { BidPack } from "../../../types/bidPack";
 import { showToast } from "../../../services/toast";
 import { logAdminAction } from "../../../services/adminAudit";
@@ -9,7 +10,8 @@ export const AdminBidPacksList = () => {
   const [packs, setPacks] = useState<BidPack[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [retiringId, setRetiringId] = useState<number | null>(null);
+  const [reactivatingId, setReactivatingId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [highlightFilter, setHighlightFilter] = useState<"all" | "featured" | "standard">("all");
 
@@ -31,23 +33,47 @@ export const AdminBidPacksList = () => {
     void fetchPacks();
   }, [fetchPacks]);
 
-  const handleDelete = async (id: number) => {
+  const handleRetire = async (id: number) => {
     const target = packs.find((pack) => pack.id === id);
     const label = target?.name ?? `Bid pack ${id}`;
-    const confirmed = window.confirm(`Delete "${label}"? This cannot be undone.`);
+    const confirmed = window.confirm(
+      `Retire "${label}"? Retired bid packs cannot be purchased until reactivated.`
+    );
     if (!confirmed) return;
 
     try {
-      setDeletingId(id);
+      setRetiringId(id);
       await deleteBidPack(id);
-      logAdminAction("bid_pack.delete", { id });
-      showToast("Bid pack deleted", "success");
+      logAdminAction("bid_pack.retire", { id });
+      showToast("Bid pack retired", "success");
       await fetchPacks();
     } catch (err) {
       console.error(err);
-      showToast("Failed to delete bid pack", "error");
+      const message = axios.isAxiosError(err) ? err.response?.data?.error : null;
+      showToast(message || "Failed to retire bid pack", "error");
     } finally {
-      setDeletingId(null);
+      setRetiringId(null);
+    }
+  };
+
+  const handleReactivate = async (pack: BidPack) => {
+    const confirmed = window.confirm(
+      `Reactivate "${pack.name}"? It will become purchasable immediately.`
+    );
+    if (!confirmed) return;
+
+    try {
+      setReactivatingId(pack.id);
+      await updateBidPack(pack.id, { active: true });
+      logAdminAction("bid_pack.reactivate", { id: pack.id });
+      showToast("Bid pack reactivated", "success");
+      await fetchPacks();
+    } catch (err) {
+      console.error(err);
+      const message = axios.isAxiosError(err) ? err.response?.data?.error : null;
+      showToast(message || "Failed to reactivate bid pack", "error");
+    } finally {
+      setReactivatingId(null);
     }
   };
 
@@ -160,6 +186,7 @@ export const AdminBidPacksList = () => {
                   <th className="px-4 py-3">Price</th>
                   <th className="px-4 py-3">$/Bid</th>
                   <th className="px-4 py-3">Highlight</th>
+                  <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
@@ -181,6 +208,17 @@ export const AdminBidPacksList = () => {
                         {pack.highlight ? "Featured" : "Standard"}
                       </span>
                     </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                          pack.status === "active"
+                            ? "bg-green-900 text-green-100"
+                            : "bg-gray-800 text-gray-200 border border-white/10"
+                        }`}
+                      >
+                        {pack.status === "active" ? "Active" : "Retired"}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-right space-x-2">
                       <Link
                         to={`/admin/bid-packs/${pack.id}/edit`}
@@ -188,13 +226,23 @@ export const AdminBidPacksList = () => {
                       >
                         Edit
                       </Link>
-                      <button
-                        onClick={() => void handleDelete(pack.id)}
-                        disabled={deletingId === pack.id}
-                        className="text-sm text-red-300 hover:text-red-200 disabled:opacity-50 underline underline-offset-2"
-                      >
-                        {deletingId === pack.id ? "Deleting..." : "Delete"}
-                      </button>
+                      {pack.status === "retired" ? (
+                        <button
+                          onClick={() => void handleReactivate(pack)}
+                          disabled={reactivatingId === pack.id}
+                          className="text-sm text-green-300 hover:text-green-200 disabled:opacity-50 underline underline-offset-2"
+                        >
+                          {reactivatingId === pack.id ? "Reactivating..." : "Reactivate"}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => void handleRetire(pack.id)}
+                          disabled={retiringId === pack.id}
+                          className="text-sm text-red-300 hover:text-red-200 disabled:opacity-50 underline underline-offset-2"
+                        >
+                          {retiringId === pack.id ? "Retiring..." : "Retire"}
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

@@ -58,8 +58,8 @@ describe("LoginForm Component", () => {
 
   it("should render the form fields and submit button", () => {
     renderComponent();
-    expect(screen.getByLabelText(/your email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/your password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /sign in/i })
     ).toBeInTheDocument();
@@ -67,8 +67,8 @@ describe("LoginForm Component", () => {
 
   it("should allow user to type into email and password fields", async () => {
     renderComponent();
-    const emailInput = screen.getByLabelText(/your email/i);
-    const passwordInput = screen.getByLabelText(/your password/i);
+    const emailInput = screen.getByLabelText(/email address/i);
+    const passwordInput = screen.getByLabelText(/password/i);
     const user = userEvent.setup();
 
 
@@ -99,8 +99,8 @@ describe("LoginForm Component", () => {
 
       renderComponent();
 
-      const emailInput = screen.getByLabelText(/your email/i);
-      const passwordInput = screen.getByLabelText(/your password/i);
+      const emailInput = screen.getByLabelText(/email address/i);
+      const passwordInput = screen.getByLabelText(/password/i);
       const submitButton = screen.getByRole("button", { name: /sign in/i })
 
       await user.type(emailInput, "test@example.com")
@@ -135,9 +135,9 @@ describe("LoginForm Component", () => {
 
       renderComponent();
 
-      const email = screen.getByLabelText(/your email/i);
+      const email = screen.getByLabelText(/email address/i);
       await user.type(email, "test@example.com");
-      const pw = screen.getByLabelText(/your password/i);
+      const pw = screen.getByLabelText(/password/i);
       await user.type(pw, "password123");
       await user.click(screen.getByRole("button", { name: /sign in/i }));
 
@@ -159,11 +159,8 @@ describe("LoginForm Component", () => {
 
       renderComponent();
 
-      await user.type(screen.getByLabelText(/your email/i), "test@example.com");
-      await user.type(
-        screen.getByLabelText(/your password/i),
-        "wrong-password"
-      );
+      await user.type(screen.getByLabelText(/email address/i), "test@example.com");
+      await user.type(screen.getByLabelText(/password/i), "wrong-password");
       await user.click(screen.getByRole("button", { name: /sign in/i }));
 
       const errorMessage = await screen.findByText(
@@ -182,8 +179,8 @@ describe("LoginForm Component", () => {
     const user = userEvent.setup();
     renderComponent();
 
-    await user.type(screen.getByLabelText(/your email/i), "test@example.com");
-    await user.type(screen.getByLabelText(/your password/i), "password123");
+    await user.type(screen.getByLabelText(/email address/i), "test@example.com");
+    await user.type(screen.getByLabelText(/password/i), "password123");
     await user.click(screen.getByRole("button", { name: /sign in/i }));
 
     const submitButton = await screen.findByRole("button", {

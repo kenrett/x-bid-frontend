@@ -28,7 +28,28 @@ export const BuyBids = () => {
     const fetchBidPacks = async () => {
       try {
         const response = await client.get<BidPack[]>("/bid_packs");
-        setBidPacks(response.data);
+        const normalized = response.data.map((pack) => {
+          const bids = Number(pack.bids);
+          const status = pack.status === "retired" ? "retired" : "active";
+          const active = typeof pack.active === "boolean" ? pack.active : status === "active";
+          const price = Number(pack.price);
+          const pricePerBid =
+            pack.pricePerBid !== undefined && pack.pricePerBid !== null
+              ? String(pack.pricePerBid)
+              : bids > 0 && !Number.isNaN(price)
+                ? (price / bids).toFixed(2)
+                : "0.00";
+          return {
+            ...pack,
+            status,
+            active,
+            price: Number.isNaN(price) ? 0 : price,
+            bids: Number.isNaN(bids) ? 0 : bids,
+            pricePerBid,
+            highlight: Boolean(pack.highlight),
+          };
+        });
+        setBidPacks(normalized);
       } catch (err) {
         setError("Failed to fetch bid packs.");
         console.error(err);
@@ -70,6 +91,12 @@ export const BuyBids = () => {
   if (error) return <ErrorScreen message={error} />;
 
   const handleBuy = async (id: number) => {
+    const selectedPack = bidPacks.find((pack) => pack.id === id);
+    if (selectedPack && (selectedPack.status === "retired" || !selectedPack.active)) {
+      setError("This bid pack is retired and cannot be purchased.");
+      return;
+    }
+
     // Prevent multiple clicks while a request is in flight
     if (isPurchasingPackId !== null) return; 
 
@@ -127,7 +154,9 @@ export const BuyBids = () => {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10"
           aria-busy={isPurchasingPackId !== null}
         >
-          {bidPacks.map((pack, index) => (
+          {bidPacks
+            .filter((pack) => pack.status === "active" && pack.active)
+            .map((pack, index) => (
             <div
               key={pack.id}
               className={`group flex flex-col text-center bg-[#1a0d2e]/50 backdrop-blur-sm border rounded-2xl p-6 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl ${

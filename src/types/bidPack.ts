@@ -6,4 +6,6 @@ export interface BidPack {
   price: number;
   pricePerBid: string;
   highlight: boolean;
+  status: "active" | "retired";
+  active: boolean;
 }

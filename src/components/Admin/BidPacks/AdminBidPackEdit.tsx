@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import { getBidPack, updateBidPack } from "../../../api/admin/bidPacks";
 import { showToast } from "../../../services/toast";
 import { logAdminAction } from "../../../services/adminAudit";
@@ -14,6 +15,7 @@ export const AdminBidPackEdit = () => {
   const [bidPack, setBidPack] = useState<BidPack | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTogglingStatus, setIsTogglingStatus] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -56,6 +58,37 @@ export const AdminBidPackEdit = () => {
     }
   };
 
+  const handleStatusChange = async (nextActive: boolean) => {
+    if (!bidPackId || !bidPack) return;
+
+    const action = nextActive ? "reactivate" : "retire";
+    const confirmed = window.confirm(
+      `${action === "retire" ? "Retire" : "Reactivate"} "${bidPack.name}"? ${
+        action === "retire"
+          ? "Retired bid packs cannot be purchased until reactivated."
+          : "It will become purchasable immediately."
+      }`
+    );
+    if (!confirmed) return;
+
+    try {
+      setIsTogglingStatus(true);
+      const updated = await updateBidPack(bidPackId, { active: nextActive });
+      setBidPack(updated);
+      logAdminAction(`bid_pack.${action}`, { id: bidPackId });
+      showToast(
+        action === "retire" ? "Bid pack retired" : "Bid pack reactivated",
+        "success"
+      );
+    } catch (err) {
+      console.error(err);
+      const message = axios.isAxiosError(err) ? err.response?.data?.error : null;
+      showToast(message || `Failed to ${action} bid pack`, "error");
+    } finally {
+      setIsTogglingStatus(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -67,7 +100,43 @@ export const AdminBidPackEdit = () => {
       {error && <p className="text-sm text-red-300">{error}</p>}
 
       {!loading && !error && bidPack && (
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-300">Status:</span>
+              <span
+                className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                  bidPack.status === "active"
+                    ? "bg-green-900 text-green-100"
+                    : "bg-gray-800 text-gray-200 border border-white/10"
+                }`}
+              >
+                {bidPack.status === "active" ? "Active" : "Retired"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              {bidPack.status === "active" ? (
+                <button
+                  type="button"
+                  onClick={() => void handleStatusChange(false)}
+                  disabled={isTogglingStatus}
+                  className="text-sm text-red-300 hover:text-red-200 disabled:opacity-50 underline underline-offset-2"
+                >
+                  {isTogglingStatus ? "Retiring..." : "Retire pack"}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => void handleStatusChange(true)}
+                  disabled={isTogglingStatus}
+                  className="text-sm text-green-300 hover:text-green-200 disabled:opacity-50 underline underline-offset-2"
+                >
+                  {isTogglingStatus ? "Reactivating..." : "Reactivate pack"}
+                </button>
+              )}
+            </div>
+          </div>
+
           <AdminBidPackForm
             initialValues={bidPack}
             submitLabel="Save changes"

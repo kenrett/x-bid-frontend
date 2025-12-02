@@ -35,6 +35,8 @@ const mockBidPacks: BidPack[] = [
     description: "A little something to get you started.",
     pricePerBid: "0.10",
     highlight: false,
+    status: "active",
+    active: true,
   },
   {
     id: 2,
@@ -44,6 +46,19 @@ const mockBidPacks: BidPack[] = [
     description: "For the serious bidder.",
     pricePerBid: "0.09",
     highlight: true,
+    status: "active",
+    active: true,
+  },
+  {
+    id: 3,
+    name: "Archived Pack",
+    bids: 100,
+    price: 9.5,
+    description: "Retired pack should be hidden.",
+    pricePerBid: "0.09",
+    highlight: false,
+    status: "retired",
+    active: false,
   },
 ];
 

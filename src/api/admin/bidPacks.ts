@@ -6,6 +6,16 @@ type BidPackPayload = Partial<BidPack> & { name: string };
 const normalizeBidPack = (pack: BidPack): BidPack => {
   const price = parseFloat(String(pack.price));
   const bids = Number(pack.bids);
+  const status: BidPack["status"] =
+    pack.status === "retired" || pack.status === "active"
+      ? pack.status
+      : typeof pack.active === "boolean"
+        ? pack.active
+          ? "active"
+          : "retired"
+        : "active";
+
+  const active = typeof pack.active === "boolean" ? pack.active : status === "active";
 
   const pricePerBid =
     pack.pricePerBid !== undefined && pack.pricePerBid !== null
@@ -19,6 +29,8 @@ const normalizeBidPack = (pack: BidPack): BidPack => {
     price: Number.isNaN(price) ? 0 : price,
     pricePerBid,
     highlight: Boolean(pack.highlight),
+    status,
+    active,
   };
 };
 

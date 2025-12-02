@@ -38,9 +38,9 @@ describe("SignUpForm Component", () => {
 
   it("renders all form fields", () => {
     renderComponent();
-    expect(screen.getByLabelText(/your name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/your email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/^your password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^password/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /create account/i })
@@ -51,9 +51,9 @@ describe("SignUpForm Component", () => {
     const user = userEvent.setup();
     renderComponent();
 
-    await user.type(screen.getByLabelText(/your name/i), "Test User");
-    await user.type(screen.getByLabelText(/your email/i), "test@example.com");
-    await user.type(screen.getByLabelText(/^your password/i), "password123");
+    await user.type(screen.getByLabelText(/name/i), "Test User");
+    await user.type(screen.getByLabelText(/email address/i), "test@example.com");
+    await user.type(screen.getByLabelText(/^password/i), "password123");
     await user.type(screen.getByLabelText(/confirm password/i), "password456");
 
     await user.click(screen.getByRole("button", { name: /create account/i }));
@@ -85,9 +85,9 @@ describe("SignUpForm Component", () => {
 
     renderComponent();
 
-    await user.type(screen.getByLabelText(/your name/i),"Test User")
-    await user.type(screen.getByLabelText(/your email/i),"test@example.com")
-    await user.type(screen.getByLabelText(/^your password/i),"password123")
+    await user.type(screen.getByLabelText(/name/i),"Test User")
+    await user.type(screen.getByLabelText(/email address/i),"test@example.com")
+    await user.type(screen.getByLabelText(/^password/i),"password123")
     await user.type(screen.getByLabelText(/confirm password/i), "password123");
 
     await user.click(screen.getByRole("button", { name: /create account/i }));
@@ -116,9 +116,9 @@ describe("SignUpForm Component", () => {
 
     renderComponent();
 
-    await user.type(screen.getByLabelText(/your name/i),"Test User");
-    await user.type(screen.getByLabelText(/your email/i),"test@example.com");
-    await user.type(screen.getByLabelText(/^your password/i),"password123");
+    await user.type(screen.getByLabelText(/name/i),"Test User");
+    await user.type(screen.getByLabelText(/email address/i),"test@example.com");
+    await user.type(screen.getByLabelText(/^password/i),"password123");
     await user.type(screen.getByLabelText(/confirm password/i), "password123");
 
     await user.click(screen.getByRole("button", { name: /create account/i }));
@@ -139,9 +139,9 @@ describe("SignUpForm Component", () => {
 
     renderComponent();
 
-    await user.type(screen.getByLabelText(/your name/i),"Test User");
-    await user.type(screen.getByLabelText(/your email/i),"test@example.com");
-    await user.type(screen.getByLabelText(/^your password/i),"password123");
+    await user.type(screen.getByLabelText(/name/i),"Test User");
+    await user.type(screen.getByLabelText(/email address/i),"test@example.com");
+    await user.type(screen.getByLabelText(/^password/i),"password123");
     await user.type(screen.getByLabelText(/confirm password/i), "password123");
 
     const submitButton = screen.getByRole("button", { name: /create account/i });
@@ -157,9 +157,9 @@ describe("SignUpForm Component", () => {
     mockedClient.post.mockReturnValue(new Promise(() => {})); // never resolves
     renderComponent();
 
-    await user.type(screen.getByLabelText(/your name/i), "Test User");
-    await user.type(screen.getByLabelText(/your email/i), "test@example.com");
-    await user.type(screen.getByLabelText(/^your password/i), "password123");
+    await user.type(screen.getByLabelText(/name/i), "Test User");
+    await user.type(screen.getByLabelText(/email address/i), "test@example.com");
+    await user.type(screen.getByLabelText(/^password/i), "password123");
     await user.type(screen.getByLabelText(/confirm password/i), "password123");
 
     await user.click(screen.getByRole("button", { name: /create account/i }));
