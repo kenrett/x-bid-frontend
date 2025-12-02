@@ -38,7 +38,7 @@ export const ResetPassword = () => {
 
     try {
       setIsSubmitting(true);
-      await client.post("/api/v1/password/reset", {
+      await client.post("/password/reset", {
         password: {
           token: token.trim(),
           password,

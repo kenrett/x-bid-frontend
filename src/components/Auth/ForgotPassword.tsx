@@ -18,7 +18,7 @@ export const ForgotPassword = () => {
 
     try {
       setIsSubmitting(true);
-      const response = await client.post("/api/v1/password/forgot", {
+      const response = await client.post("/password/forgot", {
         password: { email_address: email.trim() },
       });
       if (response.data?.debug_token) {

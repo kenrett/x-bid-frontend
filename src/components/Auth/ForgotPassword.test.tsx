@@ -30,7 +30,7 @@ describe("ForgotPassword", () => {
     await user.click(screen.getByRole("button", { name: /send reset link/i }));
 
     await waitFor(() => {
-      expect(mockedClient.post).toHaveBeenCalledWith("/api/v1/password/forgot", {
+      expect(mockedClient.post).toHaveBeenCalledWith("/password/forgot", {
         password: { email_address: "test@example.com" },
       });
     });
