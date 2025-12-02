@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import { getAuctions } from "../../../api/auctions";
 import { deleteAuction, updateAuction } from "../../../api/admin/auctions";
 import { showToast } from "../../../services/toast";
@@ -10,7 +11,8 @@ export const AdminAuctionsList = () => {
   const [auctions, setAuctions] = useState<AuctionData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [retiringId, setRetiringId] = useState<number | null>(null);
+  const [reactivatingId, setReactivatingId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<AuctionData["status"] | "all">("all");
   const [startAfter, setStartAfter] = useState("");
@@ -54,23 +56,47 @@ export const AdminAuctionsList = () => {
     void fetchAuctions();
   }, [fetchAuctions]);
 
-  const handleDelete = async (id: number) => {
-    const target = auctions.find((auction) => auction.id === id);
-    const label = target?.title ?? `Auction ${id}`;
-    const confirmed = window.confirm(`Delete "${label}"? This cannot be undone.`);
+  const handleRetire = async (auction: AuctionData) => {
+    const label = auction.title ?? `Auction ${auction.id}`;
+    const confirmed = window.confirm(
+      `Retire "${label}"? This will set it inactive and block bidding.`
+    );
     if (!confirmed) return;
 
     try {
-      setDeletingId(id);
-      await deleteAuction(id);
-      logAdminAction("auction.delete", { id });
-      showToast("Auction deleted", "success");
+      setRetiringId(auction.id);
+      await deleteAuction(auction.id);
+      logAdminAction("auction.retire", { id: auction.id });
+      showToast("Auction retired", "success");
       await fetchAuctions();
     } catch (err) {
       console.error(err);
-      showToast("Failed to delete auction", "error");
+      const message = axios.isAxiosError(err) ? err.response?.data?.error : null;
+      showToast(message || "Failed to retire auction", "error");
     } finally {
-      setDeletingId(null);
+      setRetiringId(null);
+    }
+  };
+
+  const handleReactivate = async (auction: AuctionData) => {
+    const label = auction.title ?? `Auction ${auction.id}`;
+    const confirmed = window.confirm(
+      `Reactivate "${label}"? It will return to active state immediately.`
+    );
+    if (!confirmed) return;
+
+    try {
+      setReactivatingId(auction.id);
+      await updateAuction(auction.id, { status: "active" });
+      logAdminAction("auction.reactivate", { id: auction.id });
+      showToast("Auction reactivated", "success");
+      await fetchAuctions();
+    } catch (err) {
+      console.error(err);
+      const message = axios.isAxiosError(err) ? err.response?.data?.error : null;
+      showToast(message || "Failed to reactivate auction", "error");
+    } finally {
+      setReactivatingId(null);
     }
   };
 
@@ -88,7 +114,8 @@ export const AdminAuctionsList = () => {
       await fetchAuctions();
     } catch (err) {
       console.error(err);
-      showToast("Failed to update status", "error");
+      const message = axios.isAxiosError(err) ? err.response?.data?.error : null;
+      showToast(message || "Failed to update status", "error");
     }
   };
 
@@ -98,10 +125,21 @@ export const AdminAuctionsList = () => {
       scheduled: "bg-blue-900 text-blue-100",
       active: "bg-green-900 text-green-100",
       complete: "bg-purple-900 text-purple-100",
+      cancelled: "bg-red-900 text-red-100",
     };
+    const label =
+      status === "scheduled"
+        ? "Scheduled"
+        : status === "complete"
+          ? "Complete"
+          : status === "inactive"
+            ? "Inactive"
+            : status === "cancelled"
+              ? "Cancelled"
+              : "Active";
     return (
       <span className={`text-xs font-semibold px-2 py-1 rounded-full ${styles[status]}`}>
-        {status}
+        {label}
       </span>
     );
   }, []);
@@ -194,7 +232,7 @@ export const AdminAuctionsList = () => {
             className="rounded-lg bg-black/20 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
           />
           <div className="flex flex-wrap gap-2">
-            {(["all", "inactive", "scheduled", "active", "complete"] as const).map((status) => (
+            {(["all", "inactive", "scheduled", "active", "complete", "cancelled"] as const).map((status) => (
               <button
                 key={status}
                 type="button"
@@ -325,10 +363,11 @@ export const AdminAuctionsList = () => {
                       )}
                       {auction.status === "active" && (
                         <button
-                          onClick={() => void handleStatusChange(auction, "inactive")}
+                          onClick={() => void handleRetire(auction)}
+                          disabled={retiringId === auction.id}
                           className="text-sm text-amber-200 hover:text-amber-100 underline underline-offset-2"
                         >
-                          Pause
+                          {retiringId === auction.id ? "Retiring..." : "Retire"}
                         </button>
                       )}
                       {auction.status !== "complete" && (
@@ -339,13 +378,15 @@ export const AdminAuctionsList = () => {
                           Close
                         </button>
                       )}
-                      <button
-                        onClick={() => void handleDelete(auction.id)}
-                        disabled={deletingId === auction.id}
-                        className="text-sm text-red-300 hover:text-red-200 disabled:opacity-50 underline underline-offset-2"
-                      >
-                        {deletingId === auction.id ? "Deleting..." : "Delete"}
-                      </button>
+                      {auction.status === "inactive" && (
+                        <button
+                          onClick={() => void handleReactivate(auction)}
+                          disabled={reactivatingId === auction.id}
+                          className="text-sm text-emerald-300 hover:text-emerald-200 disabled:opacity-50 underline underline-offset-2"
+                        >
+                          {reactivatingId === auction.id ? "Reactivating..." : "Reactivate"}
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

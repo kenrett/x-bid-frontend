@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { AdminAuctionsList } from "./AdminAuctionsList";
 import { getAuctions } from "../../../api/auctions";
-import { updateAuction } from "../../../api/admin/auctions";
+import { updateAuction, deleteAuction } from "../../../api/admin/auctions";
 import { showToast } from "../../../services/toast";
 
 vi.mock("../../../api/auctions", () => ({
@@ -54,6 +54,7 @@ describe("AdminAuctionsList", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     vi.mocked(getAuctions).mockResolvedValue(mockAuctions);
     vi.mocked(updateAuction).mockResolvedValue(mockAuctions[0]);
+    vi.mocked(deleteAuction).mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -92,6 +93,23 @@ describe("AdminAuctionsList", () => {
       expect(updateAuction).toHaveBeenCalledWith(1, { status: "active" });
     });
 
+    expect(showToast).toHaveBeenCalled();
+  });
+
+  it("retires an active auction via the retire action", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={["/admin/auctions"]}>
+        <AdminAuctionsList />
+      </MemoryRouter>
+    );
+
+    const retireBtn = await screen.findByText("Retire");
+    await user.click(retireBtn);
+
+    await waitFor(() => {
+      expect(deleteAuction).toHaveBeenCalledWith(2);
+    });
     expect(showToast).toHaveBeenCalled();
   });
 });
