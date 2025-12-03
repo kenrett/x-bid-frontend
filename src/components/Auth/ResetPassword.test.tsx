@@ -22,7 +22,17 @@ const renderWithToken = (token = "abc123") =>
 describe("ResetPassword", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedUseAuth.mockReturnValue({ logout: vi.fn() } as any);
+    mockedUseAuth.mockReturnValue({
+      token: null,
+      refreshToken: null,
+      sessionTokenId: null,
+      sessionRemainingSeconds: 0,
+      user: null,
+      login: vi.fn(),
+      logout: vi.fn(),
+      isReady: true,
+      updateUserBalance: vi.fn(),
+    });
     mockedClient.post.mockResolvedValue({ data: { message: "Password updated" } });
   });
 
