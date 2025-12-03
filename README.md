@@ -8,6 +8,8 @@ This is the frontend for XBid, a penny auction web application built with React.
 -   **User Authentication:** Secure login and registration for users.
 -   **Admin Console:** Manage auctions, bid packs, users, payments, and site settings.
 -   **Bid Purchases:** Stripe-powered embedded checkout for buying bid packs.
+-   **Password Recovery:** Forgot/reset password flows wired to backend tokens.
+-   **Maintenance Mode:** Superadmin toggle to take the site offline with a branded splash page and automatic redirect back when re-enabled.
 -   **Auction Listings:** View all active, scheduled, and completed auctions.
 -   **Detailed Auction View:** In-depth look at individual auctions with bid history.
 -   **Responsive Design:** Styled with Tailwind CSS for a seamless experience on all devices.
@@ -52,7 +54,7 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
     cp .env.example .env.development
     ```
 
-    - `VITE_API_URL`: Base URL for the XBid backend API (defaults to `http://localhost:3000/api/v1`).
+    - `VITE_API_URL`: Base URL for the XBid backend API (e.g., `http://localhost:3000/api/v1`).
     - `VITE_STRIPE_PUBLISHABLE_KEY`: Stripe publishable key used for embedded checkout.
     - `VITE_CABLE_URL` (optional): Action Cable WebSocket endpoint; defaults to `ws://localhost:3000/cable`.
 
@@ -73,36 +75,14 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
 
 ## 🧱 Architecture
 
-### Error Handling with `ErrorBoundary`
+### Admin & Access Control
+- Admin screens require `is_admin` or `is_superuser` from the auth payload; superadmin-only actions (admin user management, maintenance) are gated in the UI.
+- Audit logging is fire-and-forget via `/api/v1/admin/audit` (backend also logs common admin actions automatically). Errors surface as toasts only.
 
-This application uses a global `ErrorBoundary` component to catch and gracefully handle JavaScript errors that occur during rendering in any part of the component tree. This prevents the entire application from crashing and provides a user-friendly fallback UI.
+### Password Recovery
+- Forgot password: `/api/v1/password/forgot` with `email_address`, always shows a generic success message.
+- Reset password: `/api/v1/password/reset` with token + new password. Errors (401/403/422) are surfaced inline.
 
-#### Features
-
-*   **Graceful Fallback UI**: Displays a clean, user-friendly error screen instead of a white page.
-*   **Error Logging**: Automatically logs errors to the console and is configured to send them to an external monitoring service (see `src/services/logger.ts`).
-*   **Recovery Options**: Provides "Try Again" and "Reload Page" buttons to allow users to recover from the error state.
-*   **Route-based Reset**: The error boundary automatically resets when the user navigates to a new page, allowing them to continue using other parts of the application.
-
-#### Usage
-
-To ensure it covers the entire application, the `ErrorBoundary` wraps the main `<App />` component within the application's entry point (`src/main.tsx`).
-
-By providing a unique `key` to the `ErrorBoundary` that changes with the location, we ensure that if a user navigates away from a broken route, the error boundary component is re-mounted, clearing the error state.
-
-Here is the integration example from `src/main.tsx`:
-
-```tsx
-import { BrowserRouter, useLocation } from 'react-router-dom';
-
-const AppWrapper = () => {
-  const location = useLocation();
-  return (
-    <ErrorBoundary key={location.pathname}>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </ErrorBoundary>
-  );
-};
-```
+### Maintenance Mode
+- Superadmin can toggle maintenance in Admin Settings; uses `/api/v1/admin/maintenance` behind the scenes.
+- When the backend returns 503, the app redirects to `/maintenance` and polls until maintenance is cleared, then returns to `/auctions`.
