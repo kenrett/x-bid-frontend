@@ -19,4 +19,18 @@ client.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+client.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+    if (status === 503) {
+      const currentPath = window.location.pathname;
+      if (!currentPath.startsWith("/maintenance")) {
+        window.location.assign("/maintenance");
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default client;
