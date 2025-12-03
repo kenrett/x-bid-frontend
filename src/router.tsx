@@ -28,6 +28,7 @@ import { AdminSettings } from "./components/Admin/Settings/AdminSettings";
 import { AdminPaymentsPage } from "./components/Admin/Users/AdminPaymentsPage";
 import { ForgotPassword } from "./components/Auth/ForgotPassword";
 import { ResetPassword } from "./components/Auth/ResetPassword";
+import { MaintenanceMode } from "./components/MaintenanceMode";
 
 export const router = createBrowserRouter([
   {
@@ -47,6 +48,7 @@ export const router = createBrowserRouter([
       { path: "/purchase-status", element: <PurchaseStatus /> },
       { path: "/privacy-policy", element: <PrivacyPolicy /> },
       { path: "/terms-and-conditions", element: <TermsAndConditions /> },
+      { path: "/maintenance", element: <MaintenanceMode /> },
       {
         path: "/admin",
         element: <AdminRoute />,
