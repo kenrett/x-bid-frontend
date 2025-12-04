@@ -6,7 +6,7 @@ import { Bars3Icon } from "@heroicons/react/24/outline";
 import { NavItem } from "../NavItem";
 import { Link, useLocation } from "react-router-dom";
 import { cva } from "class-variance-authority";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const STRINGS = {
   GREETING: "Hello",
@@ -77,21 +77,39 @@ const variants = {
   ),
 };
 
+const NAV_ITEMS = [
+  { name: "Auctions", href: "/auctions" },
+  { name: "Buy Bids", href: "/buy-bids" },
+  { name: "How It Works", href: "/how-it-works" },
+  { name: "About", href: "/about" },
+];
+
 export function Header() {
-  const navItems = [
-    { name: "Auctions", href: "/auctions" },
-    { name: "Buy Bids", href: "/buy-bids" },
-    { name: "How It Works", href: "/how-it-works" },
-    { name: "About", href: "/about" },
-  ];
-  const { user, logout } = useAuth();
+  const { user, logout, token } = useAuth();
   const isSuperAdmin = Boolean(user?.is_superuser);
   const isAdmin = Boolean(user?.is_admin || isSuperAdmin);
-  const adminNavItems = isAdmin
-    ? [
-        { name: "Admin", href: "/admin/auctions" },
-      ]
-    : [];
+  const apiBase = import.meta.env.VITE_API_URL;
+
+  const apiDocsHref = useMemo(() => {
+    try {
+      const base = apiBase ? new URL("/api-docs", apiBase) : new URL("/api-docs", window.location.origin);
+      if (token) base.searchParams.set("token", token);
+      return base.toString();
+    } catch {
+      return token ? `/api-docs?token=${encodeURIComponent(token)}` : "/api-docs";
+    }
+  }, [apiBase, token]);
+
+  const adminNavItems = useMemo(
+    () =>
+      isAdmin
+        ? [
+            { name: "Admin", href: "/admin/auctions" },
+            { name: "API Docs", href: apiDocsHref },
+          ]
+        : [],
+    [isAdmin, apiDocsHref]
+  );
 
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -132,7 +150,7 @@ export function Header() {
           id="navbar-default"
         >
           <ul className={variants.navList()}>
-            {navItems.map((item) => (
+            {NAV_ITEMS.map((item) => (
               <NavItem key={item.name} to={item.href}>
                 {item.name}
               </NavItem>
