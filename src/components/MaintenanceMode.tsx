@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import axios from "axios";
 import { Page } from "./Page";
-import { getMaintenance } from "@/api/admin/maintenance";
+import { getPublicMaintenance } from "@/api/admin/maintenance";
 
 export const MaintenanceMode = () => {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ export const MaintenanceMode = () => {
 
     const checkStatus = async () => {
       try {
-        const state = await getMaintenance();
+        const state = await getPublicMaintenance();
         if (!state.enabled && !cancelled) {
           navigate("/auctions", { replace: true });
         }
