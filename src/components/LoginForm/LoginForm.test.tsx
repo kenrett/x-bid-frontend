@@ -163,9 +163,7 @@ describe("LoginForm Component", () => {
       await user.type(screen.getByLabelText(/password/i), "wrong-password");
       await user.click(screen.getByRole("button", { name: /sign in/i }));
 
-      const errorMessage = await screen.findByText(
-        "Invalid email or password. Please try again."
-      );
+      const errorMessage = await screen.findByText("Invalid credentials");
       expect(errorMessage).toBeInTheDocument();
 
       expect(console.error).toHaveBeenCalledWith(testError);

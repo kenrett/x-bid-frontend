@@ -124,7 +124,7 @@ describe("SignUpForm Component", () => {
     await user.click(screen.getByRole("button", { name: /create account/i }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Failed to create account. Please try again."
+      "boom"
     );
     expect(mockLogin).not.toHaveBeenCalled();
     expect(mockNavigate).not.toHaveBeenCalled();

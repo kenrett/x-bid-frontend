@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import client from "@api/client";
 import { useAuth } from "../../hooks/useAuth";
+import { parseApiError } from "@/utils/apiError";
 
 export const SignUpForm = () => {
   const [name, setName] = useState("");
@@ -41,7 +42,8 @@ export const SignUpForm = () => {
       });
       navigate("/auctions");
     } catch (err) {
-      setError("Failed to create account. Please try again.");
+      const parsed = parseApiError(err);
+      setError(parsed.message || "Failed to create account. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);

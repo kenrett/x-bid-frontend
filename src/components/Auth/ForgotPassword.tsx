@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import client from "@api/client";
+import { parseApiError } from "@/utils/apiError";
 
 export const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -26,10 +27,7 @@ export const ForgotPassword = () => {
       }
       setMessage("If that account exists, we've emailed instructions to reset the password.");
     } catch (err) {
-      const message =
-        axios.isAxiosError(err) && err.response?.data?.error
-          ? err.response.data.error
-          : "We couldn't process your request. Please try again.";
+      const message = parseApiError(err).message || "We couldn't process your request. Please try again.";
       // Still avoid user-enumeration; surface generic failure.
       setError(message);
       setMessage("If that account exists, we've emailed instructions to reset the password.");

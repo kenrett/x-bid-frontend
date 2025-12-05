@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import client from "@api/client";
 import { useAuth } from "../../hooks/useAuth";
+import { parseApiError } from "@/utils/apiError";
 
 export const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -49,21 +50,8 @@ export const ResetPassword = () => {
       setPassword("");
       setConfirmPassword("");
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const status = err.response?.status;
-        const apiError = err.response?.data?.error;
-        if (status === 401) {
-          setError(apiError || "Invalid or expired reset token.");
-        } else if (status === 403) {
-          setError(apiError || "This account is disabled.");
-        } else if (status === 422) {
-          setError(apiError || "Password does not meet requirements.");
-        } else {
-          setError(apiError || "Unable to reset password. Please try again.");
-        }
-      } else {
-        setError("Unable to reset password. Please try again.");
-      }
+      const parsed = parseApiError(err);
+      setError(parsed.message || "Unable to reset password. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

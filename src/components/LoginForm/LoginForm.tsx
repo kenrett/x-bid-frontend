@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import client from "@api/client";
+import { parseApiError } from "@/utils/apiError";
 
 export const LoginForm = () => {
   const [email_address, setEmailAddress] = useState("");
@@ -31,7 +32,8 @@ export const LoginForm = () => {
       const redirectTo = searchParams.get("redirect") || "/auctions";
       navigate(redirectTo); // Redirect on successful login
     } catch (err) {
-      setError("Invalid email or password. Please try again.");
+      const parsed = parseApiError(err);
+      setError(parsed.message || "Invalid email or password. Please try again.");
       console.error(err);
     } finally {
       setLoading(false);
