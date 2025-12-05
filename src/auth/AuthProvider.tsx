@@ -5,6 +5,7 @@ import type { User } from "../types/user";
 import type { LoginPayload } from "../types/auth";
 import client from "../api/client";
 import { cable } from "@/services/cable";
+import { normalizeUser } from "@/api/user";
 
 type SessionRemainingResponse = {
   remaining_seconds?: number;
@@ -30,60 +31,10 @@ const getSessionEventName = (payload: unknown): string | undefined => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const normalizeUser = useCallback((rawUser: User): User => {
-    const record = rawUser as unknown as Record<string, unknown>;
-    const adminCandidate =
-      rawUser.is_admin ??
-      record.isAdmin ??
-      record.admin;
-    const superCandidate =
-      record.is_superuser ??
-      record.isSuperuser ??
-      record.superuser ??
-      record.super_admin ??
-      record.superAdmin;
-
-    const hasAdminRole = (() => {
-      const role = record.role;
-      const roles = record.roles;
-      if (typeof role === "string") return role.toLowerCase() === "admin";
-      if (Array.isArray(roles)) {
-        return roles.some(
-          (r) => typeof r === "string" && r.toLowerCase() === "admin"
-        );
-      }
-      return false;
-    })();
-
-    const hasSuperRole = (() => {
-      const role = record.role;
-      const roles = record.roles;
-      if (typeof role === "string") return role.toLowerCase() === "superadmin";
-      if (Array.isArray(roles)) {
-        return roles.some(
-          (r) => typeof r === "string" && r.toLowerCase() === "superadmin"
-        );
-      }
-      return false;
-    })();
-
-    const coerceAdmin = (value: unknown): boolean => {
-      if (typeof value === "boolean") return value;
-      if (typeof value === "number") return value !== 0;
-      if (typeof value === "string") {
-        return ["true", "1", "t", "yes"].includes(value.toLowerCase());
-      }
-      return false;
-    };
-
-    const isSuperuser = coerceAdmin(superCandidate) || hasSuperRole;
-
-    return {
-      ...rawUser,
-      is_superuser: isSuperuser,
-      is_admin: coerceAdmin(adminCandidate) || hasAdminRole || isSuperuser,
-    };
-  }, []);
+  const normalizeAuthUser = useCallback(
+    (rawUser: User): User => normalizeUser(rawUser),
+    []
+  );
 
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -101,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser) as User;
-        setUser(normalizeUser(parsedUser));
+        setUser(normalizeAuthUser(parsedUser));
       } catch (error) {
         console.error("Failed to parse user from localStorage", error);
         localStorage.removeItem("user");
@@ -112,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (storedRefreshToken) setRefreshToken(storedRefreshToken);
     if (storedSessionTokenId) setSessionTokenId(storedSessionTokenId);
     setIsReady(true);
-  }, [normalizeUser]);
+  }, [normalizeAuthUser]);
 
   const persistValue = useCallback((key: string, value: string | null) => {
     if (value) {
@@ -123,7 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = useCallback(({ token: jwt, refreshToken: refresh, sessionTokenId: sessionId, user, is_admin, is_superuser }: LoginPayload) => {
-    const normalizedUser = normalizeUser({
+    const normalizedUser = normalizeAuthUser({
       ...user,
       is_admin: user?.is_admin ?? is_admin,
       is_superuser: user?.is_superuser ?? is_superuser,
@@ -138,7 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     persistValue("token", jwt);
     persistValue("refreshToken", refresh);
     persistValue("sessionTokenId", sessionId);
-  }, [persistValue, normalizeUser]);
+  }, [persistValue, normalizeAuthUser]);
 
   const logout = useCallback(() => {
     setUser(null);
@@ -162,10 +113,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(currentUser => {
       if (!currentUser) return null;
       const updatedUser = { ...currentUser, bidCredits: newBalance };
-      localStorage.setItem("user", JSON.stringify(normalizeUser(updatedUser)));
-      return normalizeUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(normalizeAuthUser(updatedUser)));
+      return normalizeAuthUser(updatedUser);
     });
-  }, [normalizeUser]);
+  }, [normalizeAuthUser]);
   useEffect(() => {
     if (!token || !sessionTokenId) {
       setSessionRemainingSeconds(null);
