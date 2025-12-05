@@ -12,9 +12,14 @@ const normalizeStatus = (status: string | undefined): AuctionStatus => {
 };
 
 export const getAuctions = async () => {
-  const res = await client.get<AuctionData[]>("/auctions");
+  const res = await client.get<AuctionData[] | { auctions?: AuctionData[] }>("/auctions");
+  const list = Array.isArray(res.data)
+    ? res.data
+    : Array.isArray((res.data as { auctions?: AuctionData[] }).auctions)
+      ? (res.data as { auctions: AuctionData[] }).auctions
+      : [];
 
-  return res.data.map((auction) => ({
+  return list.map((auction) => ({
     ...auction,
     current_price: parseFloat(String(auction.current_price)),
     status: normalizeStatus(auction.status),
