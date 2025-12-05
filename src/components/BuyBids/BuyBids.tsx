@@ -129,7 +129,12 @@ export const BuyBids = () => {
   if (clientSecret) {
     return (
       <Page>
-        <div id="checkout">
+        <div
+          id="checkout"
+          className="min-h-[320px] flex items-center justify-center bg-[#1a0d2e]/40 rounded-2xl border border-white/10 p-6"
+          aria-busy="true"
+        >
+          <p className="text-gray-300">Loading secure checkout...</p>
           <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
             <EmbeddedCheckout />
           </EmbeddedCheckoutProvider>

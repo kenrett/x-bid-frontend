@@ -1,0 +1,32 @@
+import { defineConfig, devices } from "@playwright/test";
+
+export default defineConfig({
+  testDir: "./e2e",
+  timeout: 90_000,
+  expect: { timeout: 5_000 },
+  fullyParallel: true,
+  reporter: "list",
+  use: {
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://localhost:4173",
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
+    video: "retain-on-failure",
+  },
+  webServer: {
+    command: "npm run dev -- --host --port 4173",
+    url: "http://localhost:4173",
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+    env: {
+      ...process.env,
+      VITE_API_URL: process.env.VITE_API_URL ?? "http://localhost:4173",
+      VITE_STRIPE_PUBLISHABLE_KEY: process.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "pk_test_stubbed",
+    },
+  },
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+    },
+  ],
+});

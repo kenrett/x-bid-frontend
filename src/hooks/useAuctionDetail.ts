@@ -99,6 +99,7 @@ function auctionReducer(state: AuctionState, action: AuctionAction): AuctionStat
         // Fall back to incoming bid amount if current_price is not broadcast separately.
         current_price: data.current_price ?? data.bid?.amount ?? state.auction.current_price,
         highest_bidder_id: data.highest_bidder_id ?? data.bid?.user_id ?? state.auction.highest_bidder_id,
+        winning_user_name: data.highest_bidder_name ?? data.bid?.username ?? state.auction.winning_user_name,
         end_time: data.end_time ?? state.auction.end_time,
       };
       let updatedBids = [...state.bids];
@@ -238,6 +239,7 @@ export function useAuctionDetail(auctionId: number) {
           baseAuction.current_price ??
           0
         ),
+        winning_user_name: normalizedBid.username,
       };
 
       dispatch({
