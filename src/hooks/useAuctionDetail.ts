@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useCallback } from "react";
+import { useEffect, useReducer, useCallback, useRef } from "react";
 import { isAxiosError } from "axios";
 
 import { useAuth } from "./useAuth";
@@ -42,10 +42,6 @@ type AuctionAction =
  * @param action - The action to be processed.
  */
 function auctionReducer(state: AuctionState, action: AuctionAction): AuctionState {
-  if ('payload' in action) {
-    // console.log('[auctionReducer] Action payload:', action.payload);
-  }
-
   let nextState: AuctionState;
 
   switch (action.type) {
@@ -144,6 +140,7 @@ const initialState: AuctionState = { auction: null, bids: [], loading: true, err
 export function useAuctionDetail(auctionId: number) {
   const { user } = useAuth();
   const [state, dispatch] = useReducer(auctionReducer, initialState);
+  const lastRefreshEndTimeRef = useRef<string | null>(null);
 
   const refreshAuction = useCallback(async () => {
     if (!auctionId) return;
@@ -178,6 +175,7 @@ export function useAuctionDetail(auctionId: number) {
   }, [auctionId]);
 
   useEffect(() => {
+    lastRefreshEndTimeRef.current = null;
     void refreshAuction();
   }, [refreshAuction]);
 
@@ -264,10 +262,21 @@ export function useAuctionDetail(auctionId: number) {
     }
   };
 
+  const handleTimerEnd = useCallback(() => {
+    const currentEndTime = state.auction?.end_time ?? null;
+    if (lastRefreshEndTimeRef.current === currentEndTime) return;
+    lastRefreshEndTimeRef.current = currentEndTime;
+    void refreshAuction();
+  }, [refreshAuction, state.auction?.end_time]);
+
+  const highestBidderDisplay = state.highestBidderUsername ?? "No bids yet";
+
   return {
     ...state,
     user,
     placeUserBid,
     refreshAuction,
+    onTimerEnd: handleTimerEnd,
+    highestBidderDisplay,
   };
 }
