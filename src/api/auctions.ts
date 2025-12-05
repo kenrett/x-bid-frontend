@@ -1,15 +1,6 @@
 import client from "./client";
-import type { AuctionDetail, AuctionStatus, AuctionSummary } from "../types/auction";
-
-const normalizeStatus = (status: string | undefined): AuctionStatus => {
-  if (status === "pending") return "scheduled";
-  if (status === "ended") return "complete";
-  if (status === "cancelled") return "cancelled";
-  if (status === "active") return "active";
-  if (status === "scheduled") return "scheduled";
-  if (status === "complete") return "complete";
-  return "inactive";
-};
+import type { AuctionDetail, AuctionSummary } from "../types/auction";
+import { statusFromApi } from "./status";
 
 export const getAuctions = async () => {
   const res = await client.get<AuctionSummary[] | { auctions?: AuctionSummary[] }>("/auctions");
@@ -22,7 +13,7 @@ export const getAuctions = async () => {
   return list.map((auction) => ({
     ...auction,
     current_price: parseFloat(String(auction.current_price)),
-    status: normalizeStatus(auction.status),
+    status: statusFromApi(auction.status),
   }));
 };
 
@@ -35,6 +26,6 @@ export const getAuction = async (id: number) => {
     ...data,
     bids,
     current_price: parseFloat(String(data.current_price)),
-    status: normalizeStatus(data.status),
+    status: statusFromApi(data.status),
   };
 };
