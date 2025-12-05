@@ -1,21 +1,42 @@
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
+
+vi.mock("@hooks/useAuctionChannel", () => {
+  const useAuctionChannel = vi.fn();
+  return { useAuctionChannel };
+});
+vi.mock("@api/auctions", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@api/auctions")>();
+  return {
+    ...actual,
+    getAuction: vi.fn(),
+  };
+});
+vi.mock("@api/bids", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@api/bids")>();
+  return {
+    ...actual,
+    getBidHistory: vi.fn(),
+    placeBid: vi.fn(),
+  };
+});
+vi.mock("@hooks/useAuth", () => ({
+  useAuth: vi.fn(),
+}));
+
 import { useAuctionDetail } from "./useAuctionDetail";
+import { useAuctionChannel } from "@hooks/useAuctionChannel";
 import * as auctionsApi from "@api/auctions";
 import * as bidsApi from "@api/bids";
 import { useAuth } from "@hooks/useAuth";
-
-vi.mock("@api/auctions");
-vi.mock("@api/bids");
-vi.mock("@hooks/useAuctionChannel", () => ({ useAuctionChannel: vi.fn() }));
-vi.mock("@hooks/useAuth");
 
 const mockedGetAuction = vi.mocked(auctionsApi.getAuction);
 const mockedGetBidHistory = vi.mocked(bidsApi.getBidHistory);
 const mockedPlaceBid = vi.mocked(bidsApi.placeBid);
 const mockedUseAuth = vi.mocked(useAuth);
+const mockedUseAuctionChannel = vi.mocked(useAuctionChannel);
 
-const auction = {
+const baseAuction = {
   id: 1,
   title: "Test Auction",
   description: "desc",
@@ -37,9 +58,10 @@ const user = { id: 10, name: "User", is_admin: false, is_superuser: false };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockedGetAuction.mockResolvedValue(auction as any);
+  mockedUseAuctionChannel.mockReturnValue(true as any);
+  mockedGetAuction.mockResolvedValue(baseAuction as any);
   mockedGetBidHistory.mockResolvedValue(bidHistoryResponse as any);
-  mockedPlaceBid.mockResolvedValue({ auction, bid: { id: 99, user_id: 10, amount: 2 } } as any);
+  mockedPlaceBid.mockResolvedValue({ auction: baseAuction, bid: { id: 99, user_id: 10, amount: 2 } } as any);
   mockedUseAuth.mockReturnValue({ user } as any);
 });
 
@@ -60,5 +82,35 @@ describe("useAuctionDetail", () => {
     });
 
     await waitFor(() => expect(refreshSpy).toHaveBeenCalledTimes(2));
+  });
+
+  it("sets highestBidderDisplay from winning_user_name when present", async () => {
+    mockedGetAuction.mockResolvedValueOnce({
+      ...baseAuction,
+      winning_user_name: "Winner",
+      highest_bidder_id: 20,
+    } as any);
+    mockedGetBidHistory.mockResolvedValueOnce({
+      auction: { winning_user_id: 20, winning_user_name: "Winner" },
+      bids: [],
+    } as any);
+
+    const { result } = renderHook(() => useAuctionDetail(1));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.highestBidderDisplay).toBe("Winner");
+  });
+
+  it("places bid and updates bids/auction state", async () => {
+    const { result } = renderHook(() => useAuctionDetail(1));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      await result.current.placeUserBid();
+    });
+
+    expect(result.current.bids[0]?.id).toBe(99);
+    expect(result.current.auction?.highest_bidder_id).toBe(10);
+    expect(result.current.isBidding).toBe(false);
+    expect(result.current.bidError).toBeNull();
   });
 });
