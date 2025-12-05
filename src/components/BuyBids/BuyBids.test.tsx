@@ -5,11 +5,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { BuyBids } from "./BuyBids";
 import { useAuth } from "../../hooks/useAuth";
-import client from "../../api/client";
+import client from "@api/client";
 import type { BidPack } from "../../types/bidPack";
 
 vi.mock("../../hooks/useAuth");
-vi.mock("../../api/client");
+vi.mock("@api/client");
 vi.mock("@stripe/stripe-js", () => ({
   loadStripe: vi.fn(() => Promise.resolve("stripe-instance")),
 }));

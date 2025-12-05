@@ -1,14 +1,14 @@
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { useAuctionDetail } from "./useAuctionDetail";
-import * as auctionsApi from "../api/auctions";
-import * as bidsApi from "../api/bids";
-import { useAuth } from "./useAuth";
+import * as auctionsApi from "@api/auctions";
+import * as bidsApi from "@api/bids";
+import { useAuth } from "@hooks/useAuth";
 
-vi.mock("../api/auctions");
-vi.mock("../api/bids");
-vi.mock("./useAuctionChannel", () => ({ useAuctionChannel: vi.fn() }));
-vi.mock("./useAuth");
+vi.mock("@api/auctions");
+vi.mock("@api/bids");
+vi.mock("@hooks/useAuctionChannel", () => ({ useAuctionChannel: vi.fn() }));
+vi.mock("@hooks/useAuth");
 
 const mockedGetAuction = vi.mocked(auctionsApi.getAuction);
 const mockedGetBidHistory = vi.mocked(bidsApi.getBidHistory);

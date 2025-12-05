@@ -1,11 +1,11 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import AuctionList from "./AuctionList";
-import { getAuctions } from "../../api/auctions";
+import { getAuctions } from "@api/auctions";
 import type { AuctionSummary } from "../../types/auction";
 
 // Mock the API module
-vi.mock("../../api/auctions");
+vi.mock("@api/auctions");
 
 // Mock the child Auction component to isolate the AuctionList component
 vi.mock("../Auction/Auction", () => ({

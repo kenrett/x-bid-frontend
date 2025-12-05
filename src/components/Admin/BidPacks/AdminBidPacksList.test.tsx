@@ -8,12 +8,12 @@ import {
   listBidPacks,
   deleteBidPack,
   updateBidPack,
-} from "../../../api/admin/bidPacks";
+} from "@api/admin/bidPacks";
 import { showToast } from "../../../services/toast";
 import { logAdminAction } from "../../../services/adminAudit";
 import type { BidPack } from "../../../types/bidPack";
 
-vi.mock("../../../api/admin/bidPacks");
+vi.mock("@api/admin/bidPacks");
 vi.mock("../../../services/toast");
 vi.mock("../../../services/adminAudit");
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import client from "../../api/client";
+import client from "@api/client";
 import { useAuth } from "../../hooks/useAuth";
 
 export const ResetPassword = () => {

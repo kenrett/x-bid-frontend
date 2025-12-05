@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { Link } from "react-router-dom";
 import type { BidPack } from "../../types/bidPack";
-import client from "../../api/client";
+import client from "@api/client";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   EmbeddedCheckoutProvider,

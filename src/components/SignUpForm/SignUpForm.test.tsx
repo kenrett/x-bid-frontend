@@ -4,7 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { SignUpForm } from "./SignUpForm";
 import { useAuth } from "../../hooks/useAuth";
-import client from "../../api/client";
+import client from "@api/client";
 
 const mockLogin = vi.fn();
 const mockNavigate = vi.fn();
@@ -18,7 +18,7 @@ vi.mock("react-router-dom", async () => {
 });
 
 vi.mock("../../hooks/useAuth");
-vi.mock("../../api/client");
+vi.mock("@api/client");
 
 const mockedUseAuth = vi.mocked(useAuth);
 const mockedClient = vi.mocked(client, true);

@@ -1,10 +1,10 @@
 import { useEffect, useReducer, useCallback, useRef } from "react";
 import { isAxiosError } from "axios";
 
-import { useAuth } from "./useAuth";
-import { getAuction } from "../api/auctions";
-import { placeBid, getBidHistory } from "../api/bids";
-import { useAuctionChannel, type AuctionChannelData } from "./useAuctionChannel";
+import { useAuth } from "@hooks/useAuth";
+import { getAuction } from "@api/auctions";
+import { placeBid, getBidHistory } from "@api/bids";
+import { useAuctionChannel, type AuctionChannelData } from "@hooks/useAuctionChannel";
 
 import type { AuctionDetail } from "../types/auction";
 import type { Bid } from "../types/bid";
@@ -21,7 +21,6 @@ interface AuctionState {
   error: string | null;
   isBidding: boolean;
   bidError: string | null;
-  highestBidderUsername: string | null | undefined;
   lastBidderId: number | null;
 }
 
@@ -50,7 +49,7 @@ function auctionReducer(state: AuctionState, action: AuctionAction): AuctionStat
       break;
     case "FETCH_SUCCESS": {
       const { auction, bids } = action.payload;
-      nextState = { ...state, loading: false, auction, bids, highestBidderUsername: auction.winning_user_name };
+      nextState = { ...state, loading: false, auction, bids };
       break;
     }
     case "FETCH_FAILURE":
@@ -70,7 +69,6 @@ function auctionReducer(state: AuctionState, action: AuctionAction): AuctionStat
         ...state,
         auction: state.auction ? { ...state.auction, ...updatedAuction } : null,
         bids: newBids,
-        highestBidderUsername: newBid.username,
         isBidding: false, // Reset the bidding flag
         lastBidderId: newBid.user_id, // Set the last bidder ID to prevent race conditions
       };
@@ -112,7 +110,6 @@ function auctionReducer(state: AuctionState, action: AuctionAction): AuctionStat
         ...state,
         auction: updatedAuction,
         bids: updatedBids,
-        highestBidderUsername: data.highest_bidder_name ?? data.bid?.username ?? state.highestBidderUsername,
         lastBidderId: null,
       };
       break;
@@ -129,7 +126,7 @@ function auctionReducer(state: AuctionState, action: AuctionAction): AuctionStat
 /**
  * The initial state for the auction reducer.
  */
-const initialState: AuctionState = { auction: null, bids: [], loading: true, error: null, isBidding: false, bidError: null, highestBidderUsername: null, lastBidderId: null };
+const initialState: AuctionState = { auction: null, bids: [], loading: true, error: null, isBidding: false, bidError: null, lastBidderId: null };
 
 /**
  * A custom hook to manage the state and logic for an auction detail page.
@@ -269,7 +266,11 @@ export function useAuctionDetail(auctionId: number) {
     void refreshAuction();
   }, [refreshAuction, state.auction?.end_time]);
 
-  const highestBidderDisplay = state.highestBidderUsername ?? "No bids yet";
+  const highestBidderDisplay =
+    // Backend guarantees bids are newest-first.
+    state.auction?.winning_user_name ??
+    state.bids[0]?.username ??
+    "No bids yet";
 
   return {
     ...state,

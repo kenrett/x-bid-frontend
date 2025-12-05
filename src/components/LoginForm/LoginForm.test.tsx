@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, useNavigate, useSearchParams } from "react-router-dom";
 import { LoginForm } from "./LoginForm";
 import { useAuth } from "../../hooks/useAuth";
-import client from "../../api/client";
+import client from "@api/client";
 import userEvent from "@testing-library/user-event";
 
 // --- Mocks ---
@@ -19,7 +19,7 @@ vi.mock("react-router-dom", async () => {
 });
 
 vi.mock("../../hooks/useAuth");
-vi.mock("../../api/client");
+vi.mock("@api/client");
 
 // --- Helpers to get typed mocked functions ---
 const mockedUseAuth = vi.mocked(useAuth);

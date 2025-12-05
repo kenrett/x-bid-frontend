@@ -3,10 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ResetPassword } from "./ResetPassword";
-import client from "../../api/client";
+import client from "@api/client";
 import { useAuth } from "../../hooks/useAuth";
 
-vi.mock("../../api/client");
+vi.mock("@api/client");
 vi.mock("../../hooks/useAuth");
 
 const mockedClient = vi.mocked(client, true);

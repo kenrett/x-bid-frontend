@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { getAuctions } from "../../api/auctions";
+import { getAuctions } from "@api/auctions";
 import type { AuctionSummary } from "../../types/auction";
 import { Auction } from "../Auction/Auction";
 import { useNavigate } from "react-router-dom";

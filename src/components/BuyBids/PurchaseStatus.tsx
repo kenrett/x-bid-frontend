@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import client from "../../api/client";
+import client from "@api/client";
 import { useAuth } from "../../hooks/useAuth";
 import { CheckoutSuccessResponse } from "@/types/checkout";
 import { Page } from "../Page";

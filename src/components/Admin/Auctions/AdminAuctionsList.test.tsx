@@ -3,16 +3,16 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { AdminAuctionsList } from "./AdminAuctionsList";
-import { getAuctions } from "../../../api/auctions";
-import { updateAuction, deleteAuction } from "../../../api/admin/auctions";
+import { getAuctions } from "@api/auctions";
+import { updateAuction, deleteAuction } from "@api/admin/auctions";
 import { showToast } from "../../../services/toast";
 import type { AuctionSummary } from "../../../types/auction";
 
-vi.mock("../../../api/auctions", () => ({
+vi.mock("@api/auctions", () => ({
   getAuctions: vi.fn(),
 }));
 
-vi.mock("../../../api/admin/auctions", () => ({
+vi.mock("@api/admin/auctions", () => ({
   deleteAuction: vi.fn(),
   updateAuction: vi.fn(),
 }));

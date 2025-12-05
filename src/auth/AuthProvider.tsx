@@ -3,9 +3,9 @@ import { isAxiosError } from "axios";
 import { AuthContext } from "../contexts/authContext";
 import type { User } from "../types/user";
 import type { LoginPayload } from "../types/auth";
-import client from "../api/client";
+import client from "@api/client";
 import { cable } from "@/services/cable";
-import { normalizeUser } from "@/api/user";
+import { normalizeUser } from "@api/user";
 
 type SessionRemainingResponse = {
   remaining_seconds?: number;
