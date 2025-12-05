@@ -6,6 +6,7 @@ import { AdminAuctionsList } from "./AdminAuctionsList";
 import { getAuctions } from "../../../api/auctions";
 import { updateAuction, deleteAuction } from "../../../api/admin/auctions";
 import { showToast } from "../../../services/toast";
+import type { AuctionSummary } from "../../../types/auction";
 
 vi.mock("../../../api/auctions", () => ({
   getAuctions: vi.fn(),
@@ -24,7 +25,7 @@ vi.mock("../../../services/adminAudit", () => ({
   logAdminAction: vi.fn(),
 }));
 
-const mockAuctions = [
+const mockAuctions: AuctionSummary[] = [
   {
     id: 1,
     title: "Vintage Guitar",
@@ -36,7 +37,7 @@ const mockAuctions = [
     end_time: "2024-01-02T00:00:00Z",
     highest_bidder_id: 0,
     winning_user_name: null,
-    bids: [],
+    bid_count: 0,
   },
   {
     id: 2,
@@ -49,7 +50,7 @@ const mockAuctions = [
     end_time: "2024-02-02T00:00:00Z",
     highest_bidder_id: 10,
     winning_user_name: "TopBidder",
-    bids: [],
+    bid_count: 3,
   },
 ];
 

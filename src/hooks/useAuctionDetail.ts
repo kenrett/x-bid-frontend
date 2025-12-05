@@ -6,7 +6,7 @@ import { getAuction } from "../api/auctions";
 import { placeBid, getBidHistory } from "../api/bids";
 import { useAuctionChannel, type AuctionChannelData } from "./useAuctionChannel";
 
-import type { AuctionData } from "../types/auction";
+import type { AuctionDetail } from "../types/auction";
 import type { Bid } from "../types/bid";
 
 /**
@@ -15,7 +15,7 @@ import type { Bid } from "../types/bid";
  * and states related to placing a bid.
  */
 interface AuctionState {
-  auction: AuctionData | null;
+  auction: AuctionDetail | null;
   bids: Bid[];
   loading: boolean;
   error: string | null;
@@ -27,10 +27,10 @@ interface AuctionState {
 
 type AuctionAction =
   | { type: "FETCH_INIT" }
-  | { type: "FETCH_SUCCESS"; payload: { auction: AuctionData; bids: Bid[] } }
+  | { type: "FETCH_SUCCESS"; payload: { auction: AuctionDetail; bids: Bid[] } }
   | { type: "FETCH_FAILURE"; payload: string }
   | { type: "BID_START" }
-  | { type: "BID_SUCCESS"; payload: { updatedAuction: Partial<AuctionData>; newBid: Bid } }
+  | { type: "BID_SUCCESS"; payload: { updatedAuction: Partial<AuctionDetail>; newBid: Bid } }
   | { type: "BID_FAILURE"; payload: string }
   | { type: "BID_END" }
   | { type: "CHANNEL_UPDATE"; payload: { data: AuctionChannelData } };

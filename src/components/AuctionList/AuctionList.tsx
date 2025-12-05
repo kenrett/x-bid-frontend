@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { getAuctions } from "../../api/auctions";
-import type { AuctionData } from "../../types/auction";
+import type { AuctionSummary } from "../../types/auction";
 import { Auction } from "../Auction/Auction";
 import { useNavigate } from "react-router-dom";
 import { Page } from "../Page";
 const AuctionList = () => {
-  const [auctions, setAuctions] = useState<AuctionData[]>([]);
+  const [auctions, setAuctions] = useState<AuctionSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();

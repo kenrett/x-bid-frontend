@@ -1,7 +1,7 @@
 export type AuctionStatus = "inactive" | "active" | "scheduled" | "complete" | "cancelled";
-import type { Bid } from './bid';
+import type { Bid } from "./bid";
 
-export interface AuctionData {
+export interface AuctionSummary {
   id: number;
   title: string;
   description: string;
@@ -10,7 +10,11 @@ export interface AuctionData {
   status: AuctionStatus;
   start_date: string;
   end_time: string;
-  highest_bidder_id: number;
+  highest_bidder_id: number | null;
   winning_user_name?: string | null;
-  bids: Bid[] | number;
+  bid_count?: number;
+}
+
+export interface AuctionDetail extends AuctionSummary {
+  bids: Bid[];
 }

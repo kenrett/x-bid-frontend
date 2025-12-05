@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { createAuction } from "../../../api/admin/auctions";
 import { showToast } from "../../../services/toast";
 import { logAdminAction } from "../../../services/adminAudit";
-import type { AuctionData } from "../../../types/auction";
+import type { AuctionSummary } from "../../../types/auction";
 import { AdminAuctionForm } from "./AdminAuctionForm";
 
 export const AdminAuctionCreate = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (payload: Partial<AuctionData> & { title: string }) => {
+  const handleSubmit = async (payload: Partial<AuctionSummary> & { title: string }) => {
     try {
       setIsSubmitting(true);
       await createAuction(payload);

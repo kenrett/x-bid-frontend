@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import AuctionList from "./AuctionList";
 import { getAuctions } from "../../api/auctions";
-import type { AuctionData } from "../../types/auction";
+import type { AuctionSummary } from "../../types/auction";
 
 // Mock the API module
 vi.mock("../../api/auctions");
@@ -28,14 +28,14 @@ vi.mock("react-router-dom", async () => {
 
 const mockedGetAuctions = vi.mocked(getAuctions);
 
-const mockAuctions: AuctionData[] = [
+const mockAuctions: AuctionSummary[] = [
   {
     id: 1, title: "Vintage Watch", current_price: 150.0, end_time: new Date().toISOString(), image_url: "",
     description: "",
     status: "inactive",
     start_date: "",
     highest_bidder_id: 0,
-    bids: 0
+    bid_count: 0
   },
   {
     id: 2, title: "Art Painting", current_price: 300.0, end_time: new Date().toISOString(), image_url: "",
@@ -43,7 +43,7 @@ const mockAuctions: AuctionData[] = [
     status: "inactive",
     start_date: "",
     highest_bidder_id: 0,
-    bids: 0
+    bid_count: 0
   },
 ];
 
@@ -128,8 +128,8 @@ describe("AuctionList", () => {
 
   it("should not attempt to update state if the component unmounts during fetch", async () => {
     // This promise will be resolved manually later
-    let resolvePromise: (value: AuctionData[]) => void;
-    const promise = new Promise<AuctionData[]>((resolve) => {
+    let resolvePromise: (value: AuctionSummary[]) => void;
+    const promise = new Promise<AuctionSummary[]>((resolve) => {
       resolvePromise = resolve;
     });
     mockedGetAuctions.mockImplementation(() => promise);

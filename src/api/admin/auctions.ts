@@ -1,5 +1,5 @@
 import client from "../client";
-import type { AuctionData, AuctionStatus } from "../../types/auction";
+import type { AuctionDetail, AuctionStatus, AuctionSummary } from "../../types/auction";
 
 const toApiStatus = (status: AuctionStatus | undefined) => {
   if (status === "scheduled") return "pending";
@@ -17,16 +17,16 @@ const normalizeStatus = (status: string | undefined): AuctionStatus => {
   return "inactive";
 };
 
-const normalizeAuction = (auction: AuctionData): AuctionData => ({
+const normalizeAuction = (auction: AuctionSummary): AuctionSummary => ({
   ...auction,
   status: normalizeStatus(auction.status),
   current_price: parseFloat(String(auction.current_price)),
 });
 
 export const createAuction = async (
-  payload: Partial<AuctionData> & { title: string }
+  payload: Partial<AuctionSummary> & { title: string }
 ) => {
-  const res = await client.post<AuctionData>("/auctions", {
+  const res = await client.post<AuctionSummary>("/auctions", {
     ...payload,
     status: toApiStatus(payload.status),
   });
@@ -35,9 +35,9 @@ export const createAuction = async (
 
 export const updateAuction = async (
   id: number,
-  updates: Partial<AuctionData>
+  updates: Partial<AuctionSummary>
 ) => {
-  const res = await client.put<AuctionData>(`/auctions/${id}`, {
+  const res = await client.put<AuctionSummary>(`/auctions/${id}`, {
     ...updates,
     status: toApiStatus(updates.status),
   });

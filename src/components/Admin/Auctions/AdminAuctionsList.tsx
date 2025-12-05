@@ -5,16 +5,16 @@ import { getAuctions } from "../../../api/auctions";
 import { deleteAuction, updateAuction } from "../../../api/admin/auctions";
 import { showToast } from "../../../services/toast";
 import { logAdminAction } from "../../../services/adminAudit";
-import type { AuctionData } from "../../../types/auction";
+import type { AuctionSummary } from "../../../types/auction";
 
 export const AdminAuctionsList = () => {
-  const [auctions, setAuctions] = useState<AuctionData[]>([]);
+  const [auctions, setAuctions] = useState<AuctionSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retiringId, setRetiringId] = useState<number | null>(null);
   const [reactivatingId, setReactivatingId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<AuctionData["status"] | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<AuctionSummary["status"] | "all">("all");
   const [startAfter, setStartAfter] = useState("");
   const [endBefore, setEndBefore] = useState("");
   const [sortKey, setSortKey] = useState<"start_date" | "end_time" | "current_price">("start_date");
@@ -56,7 +56,7 @@ export const AdminAuctionsList = () => {
     void fetchAuctions();
   }, [fetchAuctions]);
 
-  const handleRetire = async (auction: AuctionData) => {
+  const handleRetire = async (auction: AuctionSummary) => {
     const label = auction.title ?? `Auction ${auction.id}`;
     const confirmed = window.confirm(
       `Retire "${label}"? This will set it inactive and block bidding.`
@@ -78,7 +78,7 @@ export const AdminAuctionsList = () => {
     }
   };
 
-  const handleReactivate = async (auction: AuctionData) => {
+  const handleReactivate = async (auction: AuctionSummary) => {
     const label = auction.title ?? `Auction ${auction.id}`;
     const confirmed = window.confirm(
       `Reactivate "${label}"? It will return to active state immediately.`
@@ -100,7 +100,7 @@ export const AdminAuctionsList = () => {
     }
   };
 
-  const handleStatusChange = async (auction: AuctionData, nextStatus: AuctionData["status"]) => {
+  const handleStatusChange = async (auction: AuctionSummary, nextStatus: AuctionSummary["status"]) => {
     const label = auction.title ?? `Auction ${auction.id}`;
     const confirmed = window.confirm(
       `Change status of "${label}" from ${auction.status} to ${nextStatus}? This affects bidders immediately.`
@@ -119,8 +119,8 @@ export const AdminAuctionsList = () => {
     }
   };
 
-  const statusBadge = useCallback((status: AuctionData["status"]) => {
-    const styles: Record<AuctionData["status"], string> = {
+  const statusBadge = useCallback((status: AuctionSummary["status"]) => {
+    const styles: Record<AuctionSummary["status"], string> = {
       inactive: "bg-gray-700 text-gray-100",
       scheduled: "bg-blue-900 text-blue-100",
       active: "bg-green-900 text-green-100",

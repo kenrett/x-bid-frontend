@@ -7,11 +7,11 @@ const BidHistory = lazy(() =>
   import("../BidHistory/BidHistory").then((module) => ({ default: module.BidHistory }))
 );
 
-import type { AuctionData } from "../../types/auction";
+import type { AuctionDetail } from "../../types/auction";
 import type { Bid } from "../../types/bid";
 
 interface AuctionViewProps {
-  auction: AuctionData;
+  auction: AuctionDetail;
   user: { id: number; name: string; is_admin?: boolean; is_superuser?: boolean } | null;
   isBidding: boolean;
   bidError: string | null;

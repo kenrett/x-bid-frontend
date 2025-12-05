@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { AuctionView } from "./AuctionView";
-import type { AuctionData } from "../../types/auction";
+import type { AuctionDetail } from "../../types/auction";
 import type { Bid } from "../../types/bid";
 
 const mockNavigate = vi.fn();
@@ -39,7 +39,7 @@ vi.mock("../BidHistory/BidHistory", () => {
   return { BidHistory: SuspenderBidHistory };
 });
 
-const mockAuction: AuctionData = {
+const mockAuction: AuctionDetail = {
   id: 1,
   title: "Vintage Masterpiece",
   description: "A truly unique item.",

@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from "react";
-import type { AuctionData, AuctionStatus } from "../../../types/auction";
+import type { AuctionSummary, AuctionStatus } from "../../../types/auction";
 
-type FormPayload = Partial<AuctionData> & { title: string };
+type FormPayload = Partial<AuctionSummary> & { title: string };
 
 interface AdminAuctionFormProps {
-  initialValues?: Partial<AuctionData>;
+  initialValues?: Partial<AuctionSummary>;
   onSubmit: (payload: FormPayload) => Promise<void> | void;
   submitLabel: string;
   isSubmitting?: boolean;
@@ -22,7 +22,7 @@ type FormState = {
 
 const STATUS_OPTIONS: AuctionStatus[] = ["inactive", "scheduled", "active", "complete"];
 
-const toFormState = (values?: Partial<AuctionData>): FormState => ({
+const toFormState = (values?: Partial<AuctionSummary>): FormState => ({
   title: values?.title ?? "",
   description: values?.description ?? "",
   image_url: values?.image_url ?? "",
@@ -40,7 +40,7 @@ const compactPayload = (state: FormState): FormPayload => {
     title: state.title.trim(),
   };
 
-  const optionalStrings: Array<[keyof FormState, keyof AuctionData]> = [
+  const optionalStrings: Array<[keyof FormState, keyof AuctionSummary]> = [
     ["description", "description"],
     ["image_url", "image_url"],
     ["start_date", "start_date"],

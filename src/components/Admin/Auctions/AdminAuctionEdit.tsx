@@ -4,7 +4,7 @@ import { getAuction } from "../../../api/auctions";
 import { updateAuction } from "../../../api/admin/auctions";
 import { showToast } from "../../../services/toast";
 import { logAdminAction } from "../../../services/adminAudit";
-import type { AuctionData } from "../../../types/auction";
+import type { AuctionSummary } from "../../../types/auction";
 import { AdminAuctionForm } from "./AdminAuctionForm";
 
 export const AdminAuctionEdit = () => {
@@ -12,7 +12,7 @@ export const AdminAuctionEdit = () => {
   const auctionId = Number(id);
   const navigate = useNavigate();
 
-  const [auction, setAuction] = useState<AuctionData | null>(null);
+  const [auction, setAuction] = useState<AuctionSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +52,7 @@ export const AdminAuctionEdit = () => {
     void fetchAuction();
   }, [auctionId]);
 
-  const handleSubmit = async (payload: Partial<AuctionData> & { title: string }) => {
+  const handleSubmit = async (payload: Partial<AuctionSummary> & { title: string }) => {
     if (!auctionId) return;
     if (auction?.status === "active" && !activeEditConfirmed) {
       const confirmed = window.confirm(

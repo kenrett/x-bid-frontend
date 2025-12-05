@@ -1,5 +1,5 @@
 import client from "./client";
-import type { AuctionData, AuctionStatus } from "../types/auction";
+import type { AuctionDetail, AuctionStatus, AuctionSummary } from "../types/auction";
 
 const normalizeStatus = (status: string | undefined): AuctionStatus => {
   if (status === "pending") return "scheduled";
@@ -12,11 +12,11 @@ const normalizeStatus = (status: string | undefined): AuctionStatus => {
 };
 
 export const getAuctions = async () => {
-  const res = await client.get<AuctionData[] | { auctions?: AuctionData[] }>("/auctions");
+  const res = await client.get<AuctionSummary[] | { auctions?: AuctionSummary[] }>("/auctions");
   const list = Array.isArray(res.data)
     ? res.data
-    : Array.isArray((res.data as { auctions?: AuctionData[] }).auctions)
-      ? (res.data as { auctions: AuctionData[] }).auctions
+    : Array.isArray((res.data as { auctions?: AuctionSummary[] }).auctions)
+      ? (res.data as { auctions: AuctionSummary[] }).auctions
       : [];
 
   return list.map((auction) => ({
@@ -27,11 +27,14 @@ export const getAuctions = async () => {
 };
 
 export const getAuction = async (id: number) => {
-  const res = await client.get<AuctionData>(`/auctions/${id}`);
+  const res = await client.get<AuctionDetail | (AuctionDetail & { bids?: unknown })>(`/auctions/${id}`);
+  const data = res.data;
+  const bids = Array.isArray((data as any).bids) ? (data as any).bids : [];
 
   return {
-    ...res.data,
-    current_price: parseFloat(String(res.data.current_price)),
-    status: normalizeStatus(res.data.status),
+    ...data,
+    bids,
+    current_price: parseFloat(String(data.current_price)),
+    status: normalizeStatus(data.status),
   };
 };

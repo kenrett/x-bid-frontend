@@ -1,12 +1,12 @@
 import client from "./client";
 import type { Bid } from "../types/bid";
-import type { AuctionData } from "../types/auction";
+import type { AuctionDetail } from "../types/auction";
 
 interface PlaceBidResponse {
   success: boolean;
   bid: Bid;
   bidCredits?: number;
-  auction?: AuctionData;
+  auction?: AuctionDetail;
 }
 
 export const placeBid = async (auctionId: number): Promise<PlaceBidResponse> => {
