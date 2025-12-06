@@ -4,7 +4,9 @@ import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 
 import { Countdown } from "../Countdown/Countdown";
 const BidHistory = lazy(() =>
-  import("../BidHistory/BidHistory").then((module) => ({ default: module.BidHistory }))
+  import("../BidHistory/BidHistory").then((module) => ({
+    default: module.BidHistory,
+  })),
 );
 
 import type { AuctionDetail } from "../../types/auction";
@@ -12,7 +14,12 @@ import type { Bid } from "../../types/bid";
 
 interface AuctionViewProps {
   auction: AuctionDetail;
-  user: { id: number; name: string; is_admin?: boolean; is_superuser?: boolean } | null;
+  user: {
+    id: number;
+    name: string;
+    is_admin?: boolean;
+    is_superuser?: boolean;
+  } | null;
   isBidding: boolean;
   bidError: string | null;
   highestBidderUsername: string | null;
@@ -46,7 +53,7 @@ const AuctionViewComponent = ({
             Back to Auctions
           </button>
         </div>
-
+        $$$$$$$<div>${user?.id}</div>$$$$$$
         {/* Auction Layout */}
         <div className="grid md:grid-cols-2 gap-12 items-start">
           <div className="rounded-2xl overflow-hidden shadow-2xl shadow-[#a020f0]/10">
@@ -69,17 +76,24 @@ const AuctionViewComponent = ({
             <div className="p-6 bg-white/5 rounded-2xl border border-white/10">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center sm:text-left">
                 <div>
-                  <div id="current-price-label" className="text-sm text-gray-400 uppercase tracking-wider">Current Price</div>
+                  <div
+                    id="current-price-label"
+                    className="text-sm text-gray-400 uppercase tracking-wider"
+                  >
+                    Current Price
+                  </div>
                   <div
                     className="text-3xl font-bold text-pink-400"
                     aria-labelledby="current-price-label"
                     aria-live="polite"
                   >
-                    ${Number(auction.current_price).toFixed(2)}
+                    ${(auction.current_price ?? 0).toFixed(2)}
                   </div>
                 </div>
                 <div className="sm:text-right">
-                  <div className="text-sm text-gray-400 uppercase tracking-wider">Time Remaining</div>
+                  <div className="text-sm text-gray-400 uppercase tracking-wider">
+                    Time Remaining
+                  </div>
                   <Countdown
                     // Assuming Countdown handles its own live announcements.
                     // If not, it should also have aria-live="polite".
@@ -93,13 +107,11 @@ const AuctionViewComponent = ({
                 className="mt-4 pt-4 border-t border-white/10 text-gray-300 text-center sm:text-left"
                 data-testid="highest-bidder-info"
               >
-                <span
-                  aria-live="polite"
-                >
-                  Highest Bidder:{" "}
-                </span>
+                <span aria-live="polite">Highest Bidder: </span>
                 {highestBidderUsername ? (
-                  <span className="font-semibold text-purple-400">{highestBidderUsername}</span>
+                  <span className="font-semibold text-purple-400">
+                    {highestBidderUsername}
+                  </span>
                 ) : (
                   "None"
                 )}
@@ -107,37 +119,48 @@ const AuctionViewComponent = ({
             </div>
 
             {/* Bidding Section */}
-            {auction.status === "active" && user && !(user.is_admin || user.is_superuser) && (
-              <>
-                {bidError && (
-                  <div
-                    className="p-4 bg-red-900/50 border border-red-500/50 text-red-300 rounded-lg text-center"
-                    role="alert"
+            {auction.status === "active" &&
+              user &&
+              !(user.is_admin || user.is_superuser) && (
+                <>
+                  {bidError && (
+                    <div
+                      className="p-4 bg-red-900/50 border border-red-500/50 text-red-300 rounded-lg text-center"
+                      role="alert"
+                    >
+                      {bidError}
+                    </div>
+                  )}
+                  <Suspense
+                    fallback={
+                      <div className="text-center text-gray-400">
+                        Loading bid history...
+                      </div>
+                    }
                   >
-                    {bidError}
-                  </div>
-                )}
-                <Suspense fallback={<div className="text-center text-gray-400">Loading bid history...</div>}>
-                  <BidHistory bids={bids} />
-                </Suspense>
-                <button
-                  onClick={onPlaceBid}
-                  disabled={isBidding || Number(user?.id) === Number(auction.highest_bidder_id)}
-                  className="mt-4 w-full text-lg bg-[#ff69b4] text-[#1a0d2e] px-10 py-4 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20 disabled:bg-gray-500 disabled:cursor-not-allowed disabled:shadow-none disabled:scale-100"
-                >
-                  {isBidding
-                    ? "Placing Bid..."
-                    : Number(user?.id) === Number(auction.highest_bidder_id)
-                    ? "You are the highest bidder"
-                    : "Place Your Bid"}
-                </button>
-              </>
-            )}
+                    <BidHistory bids={bids} />
+                  </Suspense>
+                  <button
+                    onClick={onPlaceBid}
+                    disabled={
+                      isBidding ||
+                      Number(user?.id) === Number(auction.highest_bidder_id)
+                    }
+                    className="mt-4 w-full text-lg bg-[#ff69b4] text-[#1a0d2e] px-10 py-4 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20 disabled:bg-gray-500 disabled:cursor-not-allowed disabled:shadow-none disabled:scale-100"
+                  >
+                    {isBidding
+                      ? "Placing Bid..."
+                      : Number(user?.id) === Number(auction.highest_bidder_id)
+                        ? "You are the highest bidder"
+                        : "Place Your Bid"}
+                  </button>
+                </>
+              )}
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export const AuctionView = memo(AuctionViewComponent);

@@ -46,9 +46,15 @@ export const AdminAuctionDetail = () => {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-wide text-gray-500">Admin Monitor</p>
-          <h2 className="text-3xl font-serif font-bold text-white">{auction.title}</h2>
-          <p className="text-sm text-gray-400 mt-1">Live overview with bid stream and controls.</p>
+          <p className="text-xs uppercase tracking-wide text-gray-500">
+            Admin Monitor
+          </p>
+          <h2 className="text-3xl font-serif font-bold text-white">
+            {auction.title}
+          </h2>
+          <p className="text-sm text-gray-400 mt-1">
+            Live overview with bid stream and controls.
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -63,13 +69,22 @@ export const AdminAuctionDetail = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <InfoCard label="Status" value={auction.status} />
-        <InfoCard label="Current price" value={`$${Number(auction.current_price).toFixed(2)}`} />
+        <InfoCard
+          label="Current price"
+          value={`$${Number(auction.current_price).toFixed(2)}`}
+        />
         <InfoCard label="Highest bidder" value={highestBidderUsername ?? "—"} />
         <InfoCard label="End time" value={auction.end_time || "—"} />
         <InfoCard label="Start time" value={auction.start_date || "—"} />
         <InfoCard label="Auction ID" value={auction.id} />
-        <InfoCard label="Highest bidder ID" value={auction.highest_bidder_id ?? "—"} />
-        <InfoCard label="Winning user" value={auction.winning_user_name ?? "—"} />
+        <InfoCard
+          label="Highest bidder ID"
+          value={auction.highest_bidder_id ?? "—"}
+        />
+        <InfoCard
+          label="Winning user"
+          value={auction.winning_user_name ?? "—"}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -101,7 +116,13 @@ export const AdminAuctionDetail = () => {
   );
 };
 
-const InfoCard = ({ label, value }: { label: string; value: React.ReactNode }) => (
+const InfoCard = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) => (
   <div className="bg-white/5 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/20">
     <p className="text-xs uppercase tracking-wide text-gray-400">{label}</p>
     <div className="text-lg font-semibold text-white break-all">{value}</div>

@@ -16,9 +16,10 @@ export const AdminUsersPage = () => {
     const list = Array.isArray(users) ? users : [];
     const term = userSearch.toLowerCase();
 
-    return list.filter((candidate) =>
-      candidate.email.toLowerCase().includes(term) ||
-      candidate.name.toLowerCase().includes(term)
+    return list.filter(
+      (candidate) =>
+        candidate.email.toLowerCase().includes(term) ||
+        candidate.name.toLowerCase().includes(term),
     );
   }, [users, userSearch]);
 
@@ -36,9 +37,10 @@ export const AdminUsersPage = () => {
     };
 
     void fetchUsers();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
-
 
   const requireSuper = (action: () => void) => {
     if (!isSuperAdmin) {
@@ -49,10 +51,16 @@ export const AdminUsersPage = () => {
   };
 
   const updateUserInState = (updatedUser: AdminUser) => {
-    setUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
+    setUsers((prev) =>
+      prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)),
+    );
   };
 
-  const handleApiAction = async (action: () => Promise<AdminUser>, log: string, successMessage: string) => {
+  const handleApiAction = async (
+    action: () => Promise<AdminUser>,
+    log: string,
+    successMessage: string,
+  ) => {
     try {
       const updatedUser = await action();
       updateUserInState(updatedUser);
@@ -66,25 +74,43 @@ export const AdminUsersPage = () => {
 
   const handlePromote = (id: number) =>
     requireSuper(() => {
-      handleApiAction(() => adminUsersApi.grantAdmin(id), "admin.promote", "Admin granted");
+      handleApiAction(
+        () => adminUsersApi.grantAdmin(id),
+        "admin.promote",
+        "Admin granted",
+      );
     });
 
   const handleDemote = (id: number) =>
     requireSuper(() => {
-      handleApiAction(() => adminUsersApi.revokeAdmin(id), "admin.demote", "Admin access removed");
+      handleApiAction(
+        () => adminUsersApi.revokeAdmin(id),
+        "admin.demote",
+        "Admin access removed",
+      );
     });
 
   const handleBan = (id: number) =>
     requireSuper(() => {
       const target = users.find((u) => u.id === id);
-      const confirmed = window.confirm(`Ban ${target?.email ?? "this user"}? This disables access.`);
+      const confirmed = window.confirm(
+        `Ban ${target?.email ?? "this user"}? This disables access.`,
+      );
       if (!confirmed) return;
-      handleApiAction(() => adminUsersApi.banUser(id), "user.ban", "User banned");
+      handleApiAction(
+        () => adminUsersApi.banUser(id),
+        "user.ban",
+        "User banned",
+      );
     });
 
   const handleRemoveSuper = (id: number) =>
     requireSuper(() => {
-      handleApiAction(() => adminUsersApi.revokeSuperadmin(id), "superadmin.remove", "Superadmin access removed");
+      handleApiAction(
+        () => adminUsersApi.revokeSuperadmin(id),
+        "superadmin.remove",
+        "Superadmin access removed",
+      );
     });
 
   return (
@@ -92,8 +118,12 @@ export const AdminUsersPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs uppercase tracking-wide text-gray-500">Users</p>
-          <h2 className="text-3xl font-serif font-bold text-white">Admin accounts</h2>
-          <p className="text-sm text-gray-400 mt-1">Manage user roles and access.</p>
+          <h2 className="text-3xl font-serif font-bold text-white">
+            Admin accounts
+          </h2>
+          <p className="text-sm text-gray-400 mt-1">
+            Manage user roles and access.
+          </p>
         </div>
       </div>
 

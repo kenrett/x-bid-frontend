@@ -19,12 +19,12 @@ describe("Auction Component", () => {
 
     // Check for title
     expect(
-      screen.getByRole("heading", { name: /Vintage Space Poster/i })
+      screen.getByRole("heading", { name: /Vintage Space Poster/i }),
     ).toBeInTheDocument();
 
     // Check for description
     expect(
-      screen.getByText("A rare original poster from the Apollo missions.")
+      screen.getByText("A rare original poster from the Apollo missions."),
     ).toBeInTheDocument();
 
     // Check for formatted price
@@ -55,6 +55,8 @@ describe("Auction Component", () => {
     render(<Auction {...mockAuctionProps} index={3} />);
     const component = screen.getByTestId(`auction-card-${mockAuctionProps.id}`);
 
-    expect(component).toHaveStyle("animation: fadeInUp 0.5s 0.3s ease-out both");
+    expect(component).toHaveStyle(
+      "animation: fadeInUp 0.5s 0.3s ease-out both",
+    );
   });
 });

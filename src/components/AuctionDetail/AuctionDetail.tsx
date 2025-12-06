@@ -32,7 +32,7 @@ function AuctionDetailInner({ auctionId }: { auctionId: number }) {
     highestBidderDisplay,
     placeUserBid,
     bids,
-    onTimerEnd
+    onTimerEnd,
   } = useAuctionDetail(auctionId);
 
   if (error) return <ErrorScreen message={error} />;

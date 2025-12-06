@@ -1,10 +1,10 @@
-import { useEffect } from 'react'
-import { initFlowbite } from 'flowbite'
+import { useEffect } from "react";
+import { initFlowbite } from "flowbite";
 
 export function FlowbiteInitializer() {
   useEffect(() => {
-    initFlowbite()
-  }, [])
+    initFlowbite();
+  }, []);
 
-  return null
+  return null;
 }

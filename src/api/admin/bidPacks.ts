@@ -15,7 +15,8 @@ const normalizeBidPack = (pack: BidPack): BidPack => {
           : "retired"
         : "active";
 
-  const active = typeof pack.active === "boolean" ? pack.active : status === "active";
+  const active =
+    typeof pack.active === "boolean" ? pack.active : status === "active";
 
   const pricePerBid =
     pack.pricePerBid !== undefined && pack.pricePerBid !== null

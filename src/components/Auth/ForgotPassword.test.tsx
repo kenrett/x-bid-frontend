@@ -13,7 +13,7 @@ const renderComponent = () =>
   render(
     <MemoryRouter initialEntries={["/forgot-password"]}>
       <ForgotPassword />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 
 describe("ForgotPassword", () => {
@@ -26,7 +26,10 @@ describe("ForgotPassword", () => {
     const user = userEvent.setup();
     renderComponent();
 
-    await user.type(screen.getByLabelText(/email address/i), "test@example.com");
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "test@example.com",
+    );
     await user.click(screen.getByRole("button", { name: /send reset link/i }));
 
     await waitFor(() => {
@@ -36,18 +39,27 @@ describe("ForgotPassword", () => {
     });
 
     expect(
-      await screen.findByText(/if that account exists, we've emailed instructions/i)
+      await screen.findByText(
+        /if that account exists, we've emailed instructions/i,
+      ),
     ).toBeInTheDocument();
   });
 
   it("renders debug token when provided", async () => {
-    mockedClient.post.mockResolvedValue({ data: { status: "ok", debug_token: "abc123" } });
+    mockedClient.post.mockResolvedValue({
+      data: { status: "ok", debug_token: "abc123" },
+    });
     const user = userEvent.setup();
     renderComponent();
 
-    await user.type(screen.getByLabelText(/email address/i), "test@example.com");
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "test@example.com",
+    );
     await user.click(screen.getByRole("button", { name: /send reset link/i }));
 
-    expect(await screen.findByText(/debug token:/i)).toHaveTextContent("abc123");
+    expect(await screen.findByText(/debug token:/i)).toHaveTextContent(
+      "abc123",
+    );
   });
 });

@@ -31,17 +31,21 @@ const getSessionEventName = (payload: unknown): string | undefined => {
   return undefined;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const normalizeAuthUser = useCallback(
     (rawUser: User): User => normalizeUser(rawUser),
-    []
+    [],
   );
 
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [sessionTokenId, setSessionTokenId] = useState<string | null>(null);
-  const [sessionRemainingSeconds, setSessionRemainingSeconds] = useState<number | null>(null);
+  const [sessionRemainingSeconds, setSessionRemainingSeconds] = useState<
+    number | null
+  >(null);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -74,24 +78,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = useCallback(({ token: jwt, refreshToken: refresh, sessionTokenId: sessionId, user, is_admin, is_superuser }: LoginPayload) => {
-    const normalizedUser = normalizeAuthUser({
-      ...user,
-      is_admin: user?.is_admin ?? is_admin,
-      is_superuser: user?.is_superuser ?? is_superuser,
-    } as User);
-    setUser(normalizedUser);
-    setToken(jwt);
-    setRefreshToken(refresh);
-    setSessionTokenId(sessionId);
-    setSessionRemainingSeconds(null);
+  const login = useCallback(
+    ({
+      token: jwt,
+      refreshToken: refresh,
+      sessionTokenId: sessionId,
+      user,
+      is_admin,
+      is_superuser,
+    }: LoginPayload) => {
+      const normalizedUser = normalizeAuthUser({
+        ...user,
+        is_admin: user?.is_admin ?? is_admin,
+        is_superuser: user?.is_superuser ?? is_superuser,
+      } as User);
+      setUser(normalizedUser);
+      setToken(jwt);
+      setRefreshToken(refresh);
+      setSessionTokenId(sessionId);
+      setSessionRemainingSeconds(null);
 
-    localStorage.setItem("user", JSON.stringify(normalizedUser));
-    persistValue("token", jwt);
-    persistValue("refreshToken", refresh);
-    persistValue("sessionTokenId", sessionId);
-    setSentryUser(normalizedUser);
-  }, [persistValue, normalizeAuthUser]);
+      localStorage.setItem("user", JSON.stringify(normalizedUser));
+      persistValue("token", jwt);
+      persistValue("refreshToken", refresh);
+      persistValue("sessionTokenId", sessionId);
+      setSentryUser(normalizedUser);
+    },
+    [persistValue, normalizeAuthUser],
+  );
 
   const logout = useCallback(() => {
     setUser(null);
@@ -107,19 +121,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSentryUser(null);
   }, [persistValue]);
 
-  const handleSessionInvalidated = useCallback((reason?: string) => {
-    console.warn(`[AuthProvider] Session invalidated${reason ? ` (${reason})` : ""}`);
-    logout();
-  }, [logout]);
+  const handleSessionInvalidated = useCallback(
+    (reason?: string) => {
+      console.warn(
+        `[AuthProvider] Session invalidated${reason ? ` (${reason})` : ""}`,
+      );
+      logout();
+    },
+    [logout],
+  );
 
-  const updateUserBalance = useCallback((newBalance: number) => {
-    setUser(currentUser => {
-      if (!currentUser) return null;
-      const updatedUser = { ...currentUser, bidCredits: newBalance };
-      localStorage.setItem("user", JSON.stringify(normalizeAuthUser(updatedUser)));
-      return normalizeAuthUser(updatedUser);
-    });
-  }, [normalizeAuthUser]);
+  const updateUserBalance = useCallback(
+    (newBalance: number) => {
+      setUser((currentUser) => {
+        if (!currentUser) return null;
+        const updatedUser = { ...currentUser, bidCredits: newBalance };
+        localStorage.setItem(
+          "user",
+          JSON.stringify(normalizeAuthUser(updatedUser)),
+        );
+        return normalizeAuthUser(updatedUser);
+      });
+    },
+    [normalizeAuthUser],
+  );
   useEffect(() => {
     if (!token || !sessionTokenId) {
       setSessionRemainingSeconds(null);
@@ -131,9 +156,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const fetchRemaining = async () => {
       try {
-        const response = await client.get<SessionRemainingResponse>("/session/remaining", {
-          params: { session_token_id: sessionTokenId },
-        });
+        const response = await client.get<SessionRemainingResponse>(
+          "/session/remaining",
+          {
+            params: { session_token_id: sessionTokenId },
+          },
+        );
         if (cancelled) return;
 
         const {
@@ -167,7 +195,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           persistValue("sessionTokenId", nextSessionTokenId);
         }
 
-        if (refreshedUser || typeof refreshedAdminFlag === "boolean" || typeof refreshedSuperFlag === "boolean") {
+        if (
+          refreshedUser ||
+          typeof refreshedAdminFlag === "boolean" ||
+          typeof refreshedSuperFlag === "boolean"
+        ) {
           setUser((currentUser) => {
             const baseUser = refreshedUser ?? currentUser;
             if (!baseUser) return currentUser;
@@ -175,8 +207,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const mergedUser = normalizeUser({
               ...baseUser,
               ...(refreshedUser ?? {}),
-              is_admin: (refreshedUser ?? baseUser).is_admin ?? refreshedAdminFlag ?? currentUser?.is_admin,
-              is_superuser: (refreshedUser ?? baseUser).is_superuser ?? refreshedSuperFlag ?? currentUser?.is_superuser,
+              is_admin:
+                (refreshedUser ?? baseUser).is_admin ??
+                refreshedAdminFlag ??
+                currentUser?.is_admin,
+              is_superuser:
+                (refreshedUser ?? baseUser).is_superuser ??
+                refreshedSuperFlag ??
+                currentUser?.is_superuser,
             } as User);
 
             localStorage.setItem("user", JSON.stringify(mergedUser));
@@ -200,7 +238,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         window.clearInterval(intervalId);
       }
     };
-  }, [token, sessionTokenId, handleSessionInvalidated, persistValue, normalizeUser]);
+  }, [
+    token,
+    sessionTokenId,
+    handleSessionInvalidated,
+    persistValue,
+    normalizeUser,
+  ]);
 
   useEffect(() => {
     if (!token || !sessionTokenId) return;
@@ -214,7 +258,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             handleSessionInvalidated("broadcast");
           }
         },
-      }
+      },
     );
 
     return () => {

@@ -8,9 +8,10 @@ import userEvent from "@testing-library/user-event";
 
 // --- Mocks ---
 vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>(
-    "react-router-dom"
-  );
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
   return {
     ...actual,
     useNavigate: vi.fn(),
@@ -34,13 +35,12 @@ const mockRefreshToken = "fake-refresh-token";
 const mockSessionTokenId = "session-token-id";
 const mockLogin = vi.fn();
 
-
 const renderComponent = (searchParams = "") => {
   const route = searchParams ? `/login?${searchParams}` : "/login";
   return render(
     <MemoryRouter initialEntries={[route]}>
       <LoginForm />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 };
 
@@ -52,7 +52,10 @@ describe("LoginForm Component", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     // useSearchParams returns a tuple [params, setParams], so we mock both.
     const setSearchParams = vi.fn();
-    mockedUseSearchParams.mockReturnValue([new URLSearchParams(), setSearchParams]);
+    mockedUseSearchParams.mockReturnValue([
+      new URLSearchParams(),
+      setSearchParams,
+    ]);
     mockedNavigate.mockReturnValue(vi.fn()); // mock the returned navigate function
   });
 
@@ -61,7 +64,7 @@ describe("LoginForm Component", () => {
     expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /sign in/i })
+      screen.getByRole("button", { name: /sign in/i }),
     ).toBeInTheDocument();
   });
 
@@ -71,10 +74,8 @@ describe("LoginForm Component", () => {
     const passwordInput = screen.getByLabelText(/password/i);
     const user = userEvent.setup();
 
-
     await user.type(emailInput, "test@example.com");
     await user.type(passwordInput, "password123");
-
 
     expect(emailInput).toHaveValue("test@example.com");
     expect(passwordInput).toHaveValue("password123");
@@ -89,7 +90,7 @@ describe("LoginForm Component", () => {
           session_token_id: mockSessionTokenId,
           user: mockUser,
         },
-     });
+      });
     });
 
     it("should call login handler and navigate to /auctions by default", async () => {
@@ -101,11 +102,11 @@ describe("LoginForm Component", () => {
 
       const emailInput = screen.getByLabelText(/email address/i);
       const passwordInput = screen.getByLabelText(/password/i);
-      const submitButton = screen.getByRole("button", { name: /sign in/i })
+      const submitButton = screen.getByRole("button", { name: /sign in/i });
 
-      await user.type(emailInput, "test@example.com")
-      await user.type(passwordInput, "password123")
-      await user.click(submitButton)
+      await user.type(emailInput, "test@example.com");
+      await user.type(passwordInput, "password123");
+      await user.click(submitButton);
 
       await waitFor(() => {
         expect(mockedClient.post).toHaveBeenCalledWith("/login", {
@@ -130,8 +131,6 @@ describe("LoginForm Component", () => {
         new URLSearchParams("redirect=/my-special-page"),
         vi.fn(),
       ]);
-
-
 
       renderComponent();
 
@@ -159,7 +158,10 @@ describe("LoginForm Component", () => {
 
       renderComponent();
 
-      await user.type(screen.getByLabelText(/email address/i), "test@example.com");
+      await user.type(
+        screen.getByLabelText(/email address/i),
+        "test@example.com",
+      );
       await user.type(screen.getByLabelText(/password/i), "wrong-password");
       await user.click(screen.getByRole("button", { name: /sign in/i }));
 
@@ -177,7 +179,10 @@ describe("LoginForm Component", () => {
     const user = userEvent.setup();
     renderComponent();
 
-    await user.type(screen.getByLabelText(/email address/i), "test@example.com");
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "test@example.com",
+    );
     await user.type(screen.getByLabelText(/password/i), "password123");
     await user.click(screen.getByRole("button", { name: /sign in/i }));
 

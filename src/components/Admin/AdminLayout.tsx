@@ -20,9 +20,15 @@ export const AdminLayout = () => {
         <div className="grid grid-cols-[240px_1fr] gap-8">
           <aside className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col gap-6">
             <div>
-              <div className="text-xs uppercase tracking-wide text-gray-400 mb-1">Signed in as</div>
-              <div className="text-lg font-semibold text-white truncate">{user?.name ?? "Admin"}</div>
-              <div className="text-xs text-gray-500 truncate">{user?.email}</div>
+              <div className="text-xs uppercase tracking-wide text-gray-400 mb-1">
+                Signed in as
+              </div>
+              <div className="text-lg font-semibold text-white truncate">
+                {user?.name ?? "Admin"}
+              </div>
+              <div className="text-xs text-gray-500 truncate">
+                {user?.email}
+              </div>
             </div>
             <nav className="flex flex-col gap-2" aria-label="Admin navigation">
               {NAV_ITEMS.map((item) => (
@@ -52,12 +58,18 @@ export const AdminLayout = () => {
           <section className="space-y-4">
             <header className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-wide text-gray-500">Admin Console</p>
-                <h1 className="text-3xl font-serif font-bold text-white">Control Center</h1>
+                <p className="text-xs uppercase tracking-wide text-gray-500">
+                  Admin Console
+                </p>
+                <h1 className="text-3xl font-serif font-bold text-white">
+                  Control Center
+                </h1>
               </div>
               <div className="text-right">
                 <p className="text-sm text-gray-400">Welcome back</p>
-                <p className="text-lg font-semibold text-white">{user?.name ?? "Admin"}</p>
+                <p className="text-lg font-semibold text-white">
+                  {user?.name ?? "Admin"}
+                </p>
               </div>
             </header>
 

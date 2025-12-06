@@ -61,7 +61,10 @@ beforeEach(() => {
   mockedUseAuctionChannel.mockReturnValue(true as any);
   mockedGetAuction.mockResolvedValue(baseAuction as any);
   mockedGetBidHistory.mockResolvedValue(bidHistoryResponse as any);
-  mockedPlaceBid.mockResolvedValue({ auction: baseAuction, bid: { id: 99, user_id: 10, amount: 2 } } as any);
+  mockedPlaceBid.mockResolvedValue({
+    auction: baseAuction,
+    bid: { id: 99, user_id: 10, amount: 2 },
+  } as any);
   mockedUseAuth.mockReturnValue({ user } as any);
 });
 

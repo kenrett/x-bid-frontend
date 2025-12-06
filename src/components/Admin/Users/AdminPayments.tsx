@@ -7,7 +7,11 @@ interface AdminPaymentsProps {
   onSearchChange: (value: string) => void;
 }
 
-export const AdminPayments = ({ payments, search, onSearchChange }: AdminPaymentsProps) => {
+export const AdminPayments = ({
+  payments,
+  search,
+  onSearchChange,
+}: AdminPaymentsProps) => {
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     onSearchChange(event.target.value);
   };
@@ -41,21 +45,31 @@ export const AdminPayments = ({ payments, search, onSearchChange }: AdminPayment
             <tbody className="divide-y divide-white/10">
               {payments.map((payment) => (
                 <tr key={payment.id} className="hover:bg-white/[0.04]">
-                  <td className="px-4 py-3 font-semibold text-white">#{payment.id}</td>
-                  <td className="px-4 py-3 text-gray-200">{payment.userEmail}</td>
-                  <td className="px-4 py-3 text-gray-200">${payment.amount.toFixed(2)}</td>
+                  <td className="px-4 py-3 font-semibold text-white">
+                    #{payment.id}
+                  </td>
+                  <td className="px-4 py-3 text-gray-200">
+                    {payment.userEmail}
+                  </td>
+                  <td className="px-4 py-3 text-gray-200">
+                    ${payment.amount.toFixed(2)}
+                  </td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      payment.status === "succeeded"
-                        ? "bg-green-900 text-green-100 border border-green-300/30"
-                        : payment.status === "pending"
-                          ? "bg-amber-900 text-amber-100 border border-amber-300/30"
-                          : "bg-red-900 text-red-100 border border-red-300/30"
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        payment.status === "succeeded"
+                          ? "bg-green-900 text-green-100 border border-green-300/30"
+                          : payment.status === "pending"
+                            ? "bg-amber-900 text-amber-100 border border-amber-300/30"
+                            : "bg-red-900 text-red-100 border border-red-300/30"
+                      }`}
+                    >
                       {payment.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-200">{payment.createdAt}</td>
+                  <td className="px-4 py-3 text-gray-200">
+                    {payment.createdAt}
+                  </td>
                 </tr>
               ))}
             </tbody>

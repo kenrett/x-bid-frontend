@@ -26,7 +26,8 @@ function formatTime(milliseconds: number): string {
   const paddedMinutes = String(minutes).padStart(2, "0");
   const paddedSeconds = String(seconds).padStart(2, "0");
 
-  if (hours > 0) return `${String(hours).padStart(2, "0")}:${paddedMinutes}:${paddedSeconds}`;
+  if (hours > 0)
+    return `${String(hours).padStart(2, "0")}:${paddedMinutes}:${paddedSeconds}`;
   return `${paddedMinutes}:${paddedSeconds}`;
 }
 

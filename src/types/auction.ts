@@ -1,4 +1,9 @@
-export type AuctionStatus = "inactive" | "active" | "scheduled" | "complete" | "cancelled";
+export type AuctionStatus =
+  | "inactive"
+  | "active"
+  | "scheduled"
+  | "complete"
+  | "cancelled";
 import type { Bid } from "./bid";
 
 export interface AuctionSummary {

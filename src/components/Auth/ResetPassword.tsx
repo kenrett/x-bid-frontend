@@ -72,7 +72,8 @@ export const ResetPassword = () => {
             Set a new password.
           </h1>
           <p className="text-base text-gray-300 sm:text-lg">
-            Choose a new password to regain access. For your security, all previous sessions have been revoked.
+            Choose a new password to regain access. For your security, all
+            previous sessions have been revoked.
           </p>
         </div>
 
@@ -80,13 +81,18 @@ export const ResetPassword = () => {
           <div className="absolute inset-[-1px] rounded-[28px] bg-gradient-to-br from-pink-500/60 via-purple-500/40 to-indigo-500/60 opacity-60 blur-xl" />
           <div className="relative rounded-[24px] border border-white/10 bg-white/5 p-8 shadow-[0_25px_60px_rgba(0,0,0,0.35)] backdrop-blur">
             <div className="mb-6">
-              <p className="text-xs uppercase tracking-[0.18em] text-pink-200/80">Password reset</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-pink-200/80">
+                Password reset
+              </p>
               <h2 className="text-2xl font-bold text-white">Update password</h2>
             </div>
 
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="space-y-2">
-                <label htmlFor="reset-token" className="block text-sm font-semibold text-white">
+                <label
+                  htmlFor="reset-token"
+                  className="block text-sm font-semibold text-white"
+                >
                   Reset token
                 </label>
                 <input
@@ -103,7 +109,10 @@ export const ResetPassword = () => {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label htmlFor="reset-password" className="block text-sm font-semibold text-white">
+                  <label
+                    htmlFor="reset-password"
+                    className="block text-sm font-semibold text-white"
+                  >
                     New password
                   </label>
                   <input
@@ -120,7 +129,10 @@ export const ResetPassword = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="reset-password-confirm" className="block text-sm font-semibold text-white">
+                  <label
+                    htmlFor="reset-password-confirm"
+                    className="block text-sm font-semibold text-white"
+                  >
                     Confirm password
                   </label>
                   <input
@@ -138,7 +150,10 @@ export const ResetPassword = () => {
               </div>
 
               {message && (
-                <p className="rounded-lg bg-green-500/10 px-3 py-2 text-sm text-green-200" role="status">
+                <p
+                  className="rounded-lg bg-green-500/10 px-3 py-2 text-sm text-green-200"
+                  role="status"
+                >
                   {message}{" "}
                   <button
                     type="button"
@@ -150,7 +165,10 @@ export const ResetPassword = () => {
                 </p>
               )}
               {error && (
-                <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-200" role="alert">
+                <p
+                  className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-200"
+                  role="alert"
+                >
                   {error}
                 </p>
               )}
@@ -167,7 +185,10 @@ export const ResetPassword = () => {
               </button>
 
               <div className="text-center text-sm font-medium text-gray-300">
-                <Link to="/login" className="text-pink-300 underline-offset-4 transition hover:text-white hover:underline">
+                <Link
+                  to="/login"
+                  className="text-pink-300 underline-offset-4 transition hover:text-white hover:underline"
+                >
                   Back to sign in
                 </Link>
               </div>

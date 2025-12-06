@@ -26,11 +26,21 @@ export function Auction({
         animation: `fadeInUp 0.5s ${(index * 0.1).toFixed(1)}s ease-out both`,
       }}
     >
-      <img src={image_url} alt={title} className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-105" />
+      <img
+        src={image_url}
+        alt={title}
+        className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-105"
+      />
       <div className="p-5">
-        <h2 className="text-2xl font-serif font-bold mb-2 text-white truncate">{title}</h2>
-        <p className="text-gray-400 mb-4 h-12 overflow-hidden text-ellipsis">{description}</p>
-        <p className="text-lg font-semibold text-pink-400">Current Price: ${current_price.toFixed(2)}</p>
+        <h2 className="text-2xl font-serif font-bold mb-2 text-white truncate">
+          {title}
+        </h2>
+        <p className="text-gray-400 mb-4 h-12 overflow-hidden text-ellipsis">
+          {description}
+        </p>
+        <p className="text-lg font-semibold text-pink-400">
+          Current Price: ${current_price.toFixed(2)}
+        </p>
       </div>
     </div>
   );

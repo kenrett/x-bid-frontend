@@ -149,17 +149,20 @@ export const isDocumentRequest = (route: Route) =>
   route.request().resourceType() === "document";
 
 export const seedAuthState = async (page: Page, user = authedUser) => {
-  await page.addInitScript((auth) => {
-    localStorage.setItem("user", JSON.stringify(auth.user));
-    localStorage.setItem("token", auth.token);
-    localStorage.setItem("refreshToken", auth.refreshToken);
-    localStorage.setItem("sessionTokenId", auth.sessionTokenId);
-  }, {
-    user,
-    token: "token-authed",
-    refreshToken: "refresh-authed",
-    sessionTokenId: "session-authed",
-  });
+  await page.addInitScript(
+    (auth) => {
+      localStorage.setItem("user", JSON.stringify(auth.user));
+      localStorage.setItem("token", auth.token);
+      localStorage.setItem("refreshToken", auth.refreshToken);
+      localStorage.setItem("sessionTokenId", auth.sessionTokenId);
+    },
+    {
+      user,
+      token: "token-authed",
+      refreshToken: "refresh-authed",
+      sessionTokenId: "session-authed",
+    },
+  );
 };
 
 export const mockSessionRemaining = async (page: Page, user = authedUser) => {

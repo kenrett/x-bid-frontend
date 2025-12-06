@@ -20,7 +20,12 @@ type FormState = {
   current_price: string;
 };
 
-const STATUS_OPTIONS: AuctionStatus[] = ["inactive", "scheduled", "active", "complete"];
+const STATUS_OPTIONS: AuctionStatus[] = [
+  "inactive",
+  "scheduled",
+  "active",
+  "complete",
+];
 
 const toFormState = (values?: Partial<AuctionSummary>): FormState => ({
   title: values?.title ?? "",
@@ -76,12 +81,20 @@ export const AdminAuctionForm = ({
   submitLabel,
   isSubmitting,
 }: AdminAuctionFormProps) => {
-  const [formState, setFormState] = useState<FormState>(() => toFormState(initialValues));
+  const [formState, setFormState] = useState<FormState>(() =>
+    toFormState(initialValues),
+  );
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (key: keyof FormState) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormState((prev) => ({ ...prev, [key]: event.target.value }));
-  };
+  const handleChange =
+    (key: keyof FormState) =>
+    (
+      event: React.ChangeEvent<
+        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+      >,
+    ) => {
+      setFormState((prev) => ({ ...prev, [key]: event.target.value }));
+    };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();

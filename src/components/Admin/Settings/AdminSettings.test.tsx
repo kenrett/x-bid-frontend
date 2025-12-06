@@ -21,7 +21,7 @@ const renderComponent = () =>
   render(
     <MemoryRouter>
       <AdminSettings />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 
 describe("AdminSettings (maintenance)", () => {
@@ -42,7 +42,9 @@ describe("AdminSettings (maintenance)", () => {
 
   it("loads maintenance state on mount", async () => {
     renderComponent();
-    expect(await screen.findByRole("heading", { name: /maintenance mode/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: /maintenance mode/i }),
+    ).toBeInTheDocument();
     await waitFor(() => {
       expect(mockedGetMaintenance).toHaveBeenCalled();
     });
@@ -64,7 +66,10 @@ describe("AdminSettings (maintenance)", () => {
     mockedUseAuth.mockReturnValue({
       user: { id: 2, email: "admin@example.com", is_superuser: false },
     } as any);
-    mockedGetMaintenance.mockResolvedValue({ enabled: false, updated_at: null });
+    mockedGetMaintenance.mockResolvedValue({
+      enabled: false,
+      updated_at: null,
+    });
     renderComponent();
 
     const toggle = await screen.findByRole("checkbox");

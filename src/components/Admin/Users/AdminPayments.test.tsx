@@ -5,18 +5,26 @@ import { AdminPayments } from "./AdminPayments";
 import type { Payment } from "./types";
 
 const payments: Payment[] = [
-  { id: 1, userEmail: "a@example.com", amount: 10, status: "succeeded", createdAt: "2024-01-01" },
-  { id: 2, userEmail: "b@example.com", amount: 20, status: "failed", createdAt: "2024-01-02" },
+  {
+    id: 1,
+    userEmail: "a@example.com",
+    amount: 10,
+    status: "succeeded",
+    createdAt: "2024-01-01",
+  },
+  {
+    id: 2,
+    userEmail: "b@example.com",
+    amount: 20,
+    status: "failed",
+    createdAt: "2024-01-02",
+  },
 ];
 
 describe("AdminPayments", () => {
   it("renders payments table", () => {
     render(
-      <AdminPayments
-        payments={payments}
-        search=""
-        onSearchChange={() => {}}
-      />
+      <AdminPayments payments={payments} search="" onSearchChange={() => {}} />,
     );
 
     expect(screen.getByText("#1")).toBeInTheDocument();
@@ -26,13 +34,7 @@ describe("AdminPayments", () => {
   });
 
   it("shows empty state when no payments", () => {
-    render(
-      <AdminPayments
-        payments={[]}
-        search=""
-        onSearchChange={() => {}}
-      />
-    );
+    render(<AdminPayments payments={[]} search="" onSearchChange={() => {}} />);
 
     expect(screen.getByText(/no payments found/i)).toBeInTheDocument();
   });
@@ -44,7 +46,7 @@ describe("AdminPayments", () => {
         payments={payments}
         search=""
         onSearchChange={onSearchChange}
-      />
+      />,
     );
 
     const user = userEvent.setup();

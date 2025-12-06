@@ -71,7 +71,9 @@ const mockUserLoggedIn = {
 };
 
 // Helper to create a full mock UseAuthReturn object
-const createMockAuthReturn = (user: typeof mockUserLoggedIn | null): UseAuthReturn => ({
+const createMockAuthReturn = (
+  user: typeof mockUserLoggedIn | null,
+): UseAuthReturn => ({
   user,
   login: vi.fn() as UseAuthReturn["login"],
   logout: vi.fn(),
@@ -101,12 +103,11 @@ describe("BuyBids Component", () => {
       renderComponent();
 
       expect(
-        screen.getByRole("heading", { name: /your arsenal awaits/i })
+        screen.getByRole("heading", { name: /your arsenal awaits/i }),
       ).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: /log in to continue/i })).toHaveAttribute(
-        "href",
-        "/login"
-      );
+      expect(
+        screen.getByRole("link", { name: /log in to continue/i }),
+      ).toHaveAttribute("href", "/login");
       expect(mockedClient.get).not.toHaveBeenCalled();
       expect(mockedClient.post).not.toHaveBeenCalled();
     });
@@ -127,7 +128,9 @@ describe("BuyBids Component", () => {
       mockedClient.get.mockRejectedValue(new Error("API Error"));
       renderComponent();
 
-      expect(await screen.findByText("Failed to fetch bid packs.")).toBeInTheDocument();
+      expect(
+        await screen.findByText("Failed to fetch bid packs."),
+      ).toBeInTheDocument();
       expect(console.error).toHaveBeenCalled();
     });
 
@@ -138,12 +141,16 @@ describe("BuyBids Component", () => {
       expect(await screen.findByText("Starter Pack")).toBeInTheDocument();
       expect(screen.getByText("Pro Pack")).toBeInTheDocument();
       expect(screen.getByText("BEST VALUE")).toBeInTheDocument();
-      expect(screen.queryByText("Loading bid packs...")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Loading bid packs..."),
+      ).not.toBeInTheDocument();
     });
 
     it("posts checkout and renders embedded checkout on success, replacing the cards", async () => {
       mockedClient.get.mockResolvedValue({ data: mockBidPacks });
-      mockedClient.post.mockResolvedValue({ data: { clientSecret: "cs_test_123" } });
+      mockedClient.post.mockResolvedValue({
+        data: { clientSecret: "cs_test_123" },
+      });
       renderComponent();
       const user = userEvent.setup();
 
@@ -159,7 +166,9 @@ describe("BuyBids Component", () => {
       expect(mockedClient.post).toHaveBeenCalledWith("/checkouts", {
         bid_pack_id: 1,
       });
-      expect(await screen.findByTestId("embedded-checkout-provider")).toBeInTheDocument();
+      expect(
+        await screen.findByTestId("embedded-checkout-provider"),
+      ).toBeInTheDocument();
       expect(screen.getByTestId("embedded-checkout")).toBeInTheDocument();
       expect(screen.queryByText("Arm Yourself")).not.toBeInTheDocument();
     });
@@ -204,7 +213,9 @@ describe("BuyBids Component", () => {
       await user.click(acquireButton);
 
       expect(await screen.findByText("Payment failed")).toBeInTheDocument();
-      expect(screen.queryByTestId("embedded-checkout-provider")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("embedded-checkout-provider"),
+      ).not.toBeInTheDocument();
     });
 
     it("surfaces a fallback message for non-Axios errors", async () => {
@@ -222,8 +233,12 @@ describe("BuyBids Component", () => {
 
       await user.click(acquireButton);
 
-      expect(await screen.findByText("An unexpected error occurred.")).toBeInTheDocument();
-      expect(screen.queryByTestId("embedded-checkout-provider")).not.toBeInTheDocument();
+      expect(
+        await screen.findByText("An unexpected error occurred."),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("embedded-checkout-provider"),
+      ).not.toBeInTheDocument();
     });
 
     it("handles session timeout before purchase by blocking checkout and showing an error", async () => {
@@ -233,16 +248,24 @@ describe("BuyBids Component", () => {
       let authState: UseAuthReturn = createMockAuthReturn(mockUserLoggedIn);
       mockedUseAuth.mockImplementation(() => authState);
 
-      const { rerender } = render(<MemoryRouter><BuyBids /></MemoryRouter>);
+      const { rerender } = render(
+        <MemoryRouter>
+          <BuyBids />
+        </MemoryRouter>,
+      );
 
       await screen.findByText("Starter Pack");
 
       // Simulate session timeout before clicking purchase
       authState = createMockAuthReturn(null);
-      rerender(<MemoryRouter><BuyBids /></MemoryRouter>);
+      rerender(
+        <MemoryRouter>
+          <BuyBids />
+        </MemoryRouter>,
+      );
 
       expect(
-        await screen.findByRole("heading", { name: /your arsenal awaits/i })
+        await screen.findByRole("heading", { name: /your arsenal awaits/i }),
       ).toBeInTheDocument();
       expect(mockedClient.post).not.toHaveBeenCalled();
     });

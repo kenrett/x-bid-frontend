@@ -51,7 +51,7 @@ const renderComponent = () =>
   render(
     <MemoryRouter>
       <AdminBidPacksList />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 
 describe("AdminBidPacksList", () => {
@@ -70,8 +70,12 @@ describe("AdminBidPacksList", () => {
     const activeRow = screen.getByText("Starter").closest("tr")!;
     const retiredRow = screen.getByText("Legacy").closest("tr")!;
 
-    expect(within(activeRow).getByRole("button", { name: /retire/i })).toBeInTheDocument();
-    expect(within(retiredRow).getByRole("button", { name: /reactivate/i })).toBeInTheDocument();
+    expect(
+      within(activeRow).getByRole("button", { name: /retire/i }),
+    ).toBeInTheDocument();
+    expect(
+      within(retiredRow).getByRole("button", { name: /reactivate/i }),
+    ).toBeInTheDocument();
     expect(mockedListBidPacks).toHaveBeenCalledTimes(1);
   });
 
@@ -88,7 +92,9 @@ describe("AdminBidPacksList", () => {
 
     await waitFor(() => {
       expect(mockedDeleteBidPack).toHaveBeenCalledWith(activePack.id);
-      expect(mockedLogAdminAction).toHaveBeenCalledWith("bid_pack.retire", { id: activePack.id });
+      expect(mockedLogAdminAction).toHaveBeenCalledWith("bid_pack.retire", {
+        id: activePack.id,
+      });
       expect(mockedListBidPacks).toHaveBeenCalledTimes(2); // initial + refresh
     });
     expect(mockedShowToast).toHaveBeenCalledWith("Bid pack retired", "success");
@@ -98,18 +104,31 @@ describe("AdminBidPacksList", () => {
     mockedListBidPacks
       .mockResolvedValueOnce([retiredPack])
       .mockResolvedValueOnce([retiredPack, activePack]); // after reactivation
-    mockedUpdateBidPack.mockResolvedValue({ ...retiredPack, status: "active", active: true });
+    mockedUpdateBidPack.mockResolvedValue({
+      ...retiredPack,
+      status: "active",
+      active: true,
+    });
 
     renderComponent();
 
-    const reactivateButton = await screen.findByRole("button", { name: /reactivate/i });
+    const reactivateButton = await screen.findByRole("button", {
+      name: /reactivate/i,
+    });
     await userEvent.click(reactivateButton);
 
     await waitFor(() => {
-      expect(mockedUpdateBidPack).toHaveBeenCalledWith(retiredPack.id, { active: true });
-      expect(mockedLogAdminAction).toHaveBeenCalledWith("bid_pack.reactivate", { id: retiredPack.id });
+      expect(mockedUpdateBidPack).toHaveBeenCalledWith(retiredPack.id, {
+        active: true,
+      });
+      expect(mockedLogAdminAction).toHaveBeenCalledWith("bid_pack.reactivate", {
+        id: retiredPack.id,
+      });
       expect(mockedListBidPacks).toHaveBeenCalledTimes(2);
     });
-    expect(mockedShowToast).toHaveBeenCalledWith("Bid pack reactivated", "success");
+    expect(mockedShowToast).toHaveBeenCalledWith(
+      "Bid pack reactivated",
+      "success",
+    );
   });
 });

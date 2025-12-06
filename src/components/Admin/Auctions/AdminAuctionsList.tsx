@@ -14,10 +14,14 @@ export const AdminAuctionsList = () => {
   const [retiringId, setRetiringId] = useState<number | null>(null);
   const [reactivatingId, setReactivatingId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<AuctionSummary["status"] | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    AuctionSummary["status"] | "all"
+  >("all");
   const [startAfter, setStartAfter] = useState("");
   const [endBefore, setEndBefore] = useState("");
-  const [sortKey, setSortKey] = useState<"start_date" | "end_time" | "current_price">("start_date");
+  const [sortKey, setSortKey] = useState<
+    "start_date" | "end_time" | "current_price"
+  >("start_date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   const resetFilters = () => {
@@ -59,7 +63,7 @@ export const AdminAuctionsList = () => {
   const handleRetire = async (auction: AuctionSummary) => {
     const label = auction.title ?? `Auction ${auction.id}`;
     const confirmed = window.confirm(
-      `Retire "${label}"? This will set it inactive and block bidding.`
+      `Retire "${label}"? This will set it inactive and block bidding.`,
     );
     if (!confirmed) return;
 
@@ -71,7 +75,9 @@ export const AdminAuctionsList = () => {
       await fetchAuctions();
     } catch (err) {
       console.error(err);
-      const message = axios.isAxiosError(err) ? err.response?.data?.error : null;
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.error
+        : null;
       showToast(message || "Failed to retire auction", "error");
     } finally {
       setRetiringId(null);
@@ -81,7 +87,7 @@ export const AdminAuctionsList = () => {
   const handleReactivate = async (auction: AuctionSummary) => {
     const label = auction.title ?? `Auction ${auction.id}`;
     const confirmed = window.confirm(
-      `Reactivate "${label}"? It will return to active state immediately.`
+      `Reactivate "${label}"? It will return to active state immediately.`,
     );
     if (!confirmed) return;
 
@@ -93,28 +99,39 @@ export const AdminAuctionsList = () => {
       await fetchAuctions();
     } catch (err) {
       console.error(err);
-      const message = axios.isAxiosError(err) ? err.response?.data?.error : null;
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.error
+        : null;
       showToast(message || "Failed to reactivate auction", "error");
     } finally {
       setReactivatingId(null);
     }
   };
 
-  const handleStatusChange = async (auction: AuctionSummary, nextStatus: AuctionSummary["status"]) => {
+  const handleStatusChange = async (
+    auction: AuctionSummary,
+    nextStatus: AuctionSummary["status"],
+  ) => {
     const label = auction.title ?? `Auction ${auction.id}`;
     const confirmed = window.confirm(
-      `Change status of "${label}" from ${auction.status} to ${nextStatus}? This affects bidders immediately.`
+      `Change status of "${label}" from ${auction.status} to ${nextStatus}? This affects bidders immediately.`,
     );
     if (!confirmed) return;
 
     try {
       await updateAuction(auction.id, { status: nextStatus });
-      logAdminAction("auction.status_change", { id: auction.id, from: auction.status, to: nextStatus });
+      logAdminAction("auction.status_change", {
+        id: auction.id,
+        from: auction.status,
+        to: nextStatus,
+      });
       showToast(`Status set to ${nextStatus}`, "success");
       await fetchAuctions();
     } catch (err) {
       console.error(err);
-      const message = axios.isAxiosError(err) ? err.response?.data?.error : null;
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.error
+        : null;
       showToast(message || "Failed to update status", "error");
     }
   };
@@ -138,7 +155,9 @@ export const AdminAuctionsList = () => {
               ? "Cancelled"
               : "Active";
     return (
-      <span className={`text-xs font-semibold px-2 py-1 rounded-full ${styles[status]}`}>
+      <span
+        className={`text-xs font-semibold px-2 py-1 rounded-full ${styles[status]}`}
+      >
         {label}
       </span>
     );
@@ -149,8 +168,11 @@ export const AdminAuctionsList = () => {
     const parsedEndBefore = endBefore ? new Date(endBefore) : null;
 
     const filtered = auctions.filter((auction) => {
-      const matchesSearch = auction.title.toLowerCase().includes(search.toLowerCase());
-      const matchesStatus = statusFilter === "all" ? true : auction.status === statusFilter;
+      const matchesSearch = auction.title
+        .toLowerCase()
+        .includes(search.toLowerCase());
+      const matchesStatus =
+        statusFilter === "all" ? true : auction.status === statusFilter;
 
       const starts = auction.start_date ? new Date(auction.start_date) : null;
       const ends = auction.end_time ? new Date(auction.end_time) : null;
@@ -177,7 +199,10 @@ export const AdminAuctionsList = () => {
 
     return sorted;
   }, [auctions, search, statusFilter, startAfter, endBefore, sortKey, sortDir]);
-  const hasAuctions = useMemo(() => filteredAndSorted.length > 0, [filteredAndSorted]);
+  const hasAuctions = useMemo(
+    () => filteredAndSorted.length > 0,
+    [filteredAndSorted],
+  );
   const totalCount = auctions.length;
   const filteredCount = filteredAndSorted.length;
 
@@ -185,8 +210,12 @@ export const AdminAuctionsList = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wide text-gray-500">Auctions</p>
-          <h2 className="text-2xl font-serif font-bold text-white">Manage auctions</h2>
+          <p className="text-xs uppercase tracking-wide text-gray-500">
+            Auctions
+          </p>
+          <h2 className="text-2xl font-serif font-bold text-white">
+            Manage auctions
+          </h2>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -232,7 +261,16 @@ export const AdminAuctionsList = () => {
             className="rounded-lg bg-black/20 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
           />
           <div className="flex flex-wrap gap-2">
-            {(["all", "inactive", "scheduled", "active", "complete", "cancelled"] as const).map((status) => (
+            {(
+              [
+                "all",
+                "inactive",
+                "scheduled",
+                "active",
+                "complete",
+                "cancelled",
+              ] as const
+            ).map((status) => (
               <button
                 key={status}
                 type="button"
@@ -293,8 +331,12 @@ export const AdminAuctionsList = () => {
             <table className="min-w-full text-sm text-gray-200">
               <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-gray-400">
                 <tr>
-                  <th className="px-4 py-3 text-left text-gray-300 uppercase text-xs tracking-wide">Title</th>
-                  <th className="px-4 py-3 text-left text-gray-300 uppercase text-xs tracking-wide">Status</th>
+                  <th className="px-4 py-3 text-left text-gray-300 uppercase text-xs tracking-wide">
+                    Title
+                  </th>
+                  <th className="px-4 py-3 text-left text-gray-300 uppercase text-xs tracking-wide">
+                    Status
+                  </th>
                   <th className="px-4 py-3">
                     <button
                       type="button"
@@ -302,7 +344,11 @@ export const AdminAuctionsList = () => {
                       className="flex items-center gap-1 text-left text-gray-300 uppercase text-xs tracking-wide hover:text-white"
                     >
                       Start
-                      {sortKey === "start_date" && <span className="text-[10px]">{sortDir === "asc" ? "▲" : "▼"}</span>}
+                      {sortKey === "start_date" && (
+                        <span className="text-[10px]">
+                          {sortDir === "asc" ? "▲" : "▼"}
+                        </span>
+                      )}
                     </button>
                   </th>
                   <th className="px-4 py-3">
@@ -312,7 +358,11 @@ export const AdminAuctionsList = () => {
                       className="flex items-center gap-1 text-left text-gray-300 uppercase text-xs tracking-wide hover:text-white"
                     >
                       Current Price
-                      {sortKey === "current_price" && <span className="text-[10px]">{sortDir === "asc" ? "▲" : "▼"}</span>}
+                      {sortKey === "current_price" && (
+                        <span className="text-[10px]">
+                          {sortDir === "asc" ? "▲" : "▼"}
+                        </span>
+                      )}
                     </button>
                   </th>
                   <th className="px-4 py-3">
@@ -322,21 +372,37 @@ export const AdminAuctionsList = () => {
                       className="flex items-center gap-1 text-left text-gray-300 uppercase text-xs tracking-wide hover:text-white"
                     >
                       End
-                      {sortKey === "end_time" && <span className="text-[10px]">{sortDir === "asc" ? "▲" : "▼"}</span>}
+                      {sortKey === "end_time" && (
+                        <span className="text-[10px]">
+                          {sortDir === "asc" ? "▲" : "▼"}
+                        </span>
+                      )}
                     </button>
                   </th>
-                  <th className="px-4 py-3 text-left text-gray-300 uppercase text-xs tracking-wide">Highest Bidder</th>
-                  <th className="px-4 py-3 text-right text-gray-300 uppercase text-xs tracking-wide">Actions</th>
+                  <th className="px-4 py-3 text-left text-gray-300 uppercase text-xs tracking-wide">
+                    Highest Bidder
+                  </th>
+                  <th className="px-4 py-3 text-right text-gray-300 uppercase text-xs tracking-wide">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/10">
                 {filteredAndSorted.map((auction) => (
                   <tr key={auction.id} className="hover:bg-white/[0.04]">
-                    <td className="px-4 py-3 font-semibold text-white">{auction.title}</td>
+                    <td className="px-4 py-3 font-semibold text-white">
+                      {auction.title}
+                    </td>
                     <td className="px-4 py-3">{statusBadge(auction.status)}</td>
-                    <td className="px-4 py-3 text-gray-300">{auction.start_date || "—"}</td>
-                    <td className="px-4 py-3">${Number(auction.current_price).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-gray-300">{auction.end_time || "—"}</td>
+                    <td className="px-4 py-3 text-gray-300">
+                      {auction.start_date || "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      ${Number(auction.current_price).toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3 text-gray-300">
+                      {auction.end_time || "—"}
+                    </td>
                     <td className="px-4 py-3 text-gray-300">
                       {auction.winning_user_name ?? "—"}
                     </td>
@@ -355,7 +421,9 @@ export const AdminAuctionsList = () => {
                       </Link>
                       {["inactive", "scheduled"].includes(auction.status) && (
                         <button
-                          onClick={() => void handleStatusChange(auction, "active")}
+                          onClick={() =>
+                            void handleStatusChange(auction, "active")
+                          }
                           className="text-sm text-emerald-300 hover:text-emerald-200 underline underline-offset-2"
                         >
                           Publish
@@ -372,7 +440,9 @@ export const AdminAuctionsList = () => {
                       )}
                       {auction.status !== "complete" && (
                         <button
-                          onClick={() => void handleStatusChange(auction, "complete")}
+                          onClick={() =>
+                            void handleStatusChange(auction, "complete")
+                          }
                           className="text-sm text-red-300 hover:text-red-200 underline underline-offset-2"
                         >
                           Close
@@ -384,7 +454,9 @@ export const AdminAuctionsList = () => {
                           disabled={reactivatingId === auction.id}
                           className="text-sm text-emerald-300 hover:text-emerald-200 disabled:opacity-50 underline underline-offset-2"
                         >
-                          {reactivatingId === auction.id ? "Reactivating..." : "Reactivate"}
+                          {reactivatingId === auction.id
+                            ? "Reactivating..."
+                            : "Reactivate"}
                         </button>
                       )}
                     </td>

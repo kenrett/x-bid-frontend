@@ -10,7 +10,9 @@ import {
 
 test("user can log in and land on the auctions feed", async ({ page }) => {
   await page.route("**/login", (route) =>
-    isDocumentRequest(route) ? route.continue() : fulfillJson(route, loginResponse),
+    isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, loginResponse),
   );
   await page.route("**/auctions", (route) => {
     if (isDocumentRequest(route)) return route.continue();

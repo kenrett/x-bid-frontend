@@ -32,7 +32,7 @@ export const AdminAuctionEdit = () => {
         const data = await getAuction(auctionId);
         if (data.status === "active") {
           const confirmed = window.confirm(
-            "This auction is active. Editing may affect live bidders. Continue?"
+            "This auction is active. Editing may affect live bidders. Continue?",
           );
           if (!confirmed) {
             navigate("/admin/auctions");
@@ -52,11 +52,13 @@ export const AdminAuctionEdit = () => {
     void fetchAuction();
   }, [auctionId]);
 
-  const handleSubmit = async (payload: Partial<AuctionSummary> & { title: string }) => {
+  const handleSubmit = async (
+    payload: Partial<AuctionSummary> & { title: string },
+  ) => {
     if (!auctionId) return;
     if (auction?.status === "active" && !activeEditConfirmed) {
       const confirmed = window.confirm(
-        "This auction is active. Are you sure you want to save changes?"
+        "This auction is active. Are you sure you want to save changes?",
       );
       if (!confirmed) return;
       setActiveEditConfirmed(true);
@@ -79,7 +81,9 @@ export const AdminAuctionEdit = () => {
     <div className="space-y-4">
       <div>
         <p className="text-xs uppercase tracking-wide text-gray-500">Edit</p>
-        <h2 className="text-2xl font-serif font-bold text-white">Update auction</h2>
+        <h2 className="text-2xl font-serif font-bold text-white">
+          Update auction
+        </h2>
       </div>
 
       {loading && <p className="text-sm text-gray-400">Loading auction...</p>}

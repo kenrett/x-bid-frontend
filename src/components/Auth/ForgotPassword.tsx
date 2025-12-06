@@ -25,12 +25,18 @@ export const ForgotPassword = () => {
       if (response.data?.debug_token) {
         setDebugToken(String(response.data.debug_token));
       }
-      setMessage("If that account exists, we've emailed instructions to reset the password.");
+      setMessage(
+        "If that account exists, we've emailed instructions to reset the password.",
+      );
     } catch (err) {
-      const message = parseApiError(err).message || "We couldn't process your request. Please try again.";
+      const message =
+        parseApiError(err).message ||
+        "We couldn't process your request. Please try again.";
       // Still avoid user-enumeration; surface generic failure.
       setError(message);
-      setMessage("If that account exists, we've emailed instructions to reset the password.");
+      setMessage(
+        "If that account exists, we've emailed instructions to reset the password.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -51,7 +57,8 @@ export const ForgotPassword = () => {
             Forgot your password?
           </h1>
           <p className="text-base text-gray-300 sm:text-lg">
-            Enter the email tied to your account. If it exists, we'll send a secure link to reset your password.
+            Enter the email tied to your account. If it exists, we'll send a
+            secure link to reset your password.
           </p>
         </div>
 
@@ -59,8 +66,12 @@ export const ForgotPassword = () => {
           <div className="absolute inset-[-1px] rounded-[28px] bg-gradient-to-br from-pink-500/60 via-purple-500/40 to-indigo-500/60 opacity-60 blur-xl" />
           <div className="relative rounded-[24px] border border-white/10 bg-white/5 p-8 shadow-[0_25px_60px_rgba(0,0,0,0.35)] backdrop-blur">
             <div className="mb-6">
-              <p className="text-xs uppercase tracking-[0.18em] text-pink-200/80">Password reset</p>
-              <h2 className="text-2xl font-bold text-white">Email reset link</h2>
+              <p className="text-xs uppercase tracking-[0.18em] text-pink-200/80">
+                Password reset
+              </p>
+              <h2 className="text-2xl font-bold text-white">
+                Email reset link
+              </h2>
             </div>
 
             <form className="space-y-5" onSubmit={handleSubmit}>
@@ -85,12 +96,18 @@ export const ForgotPassword = () => {
               </div>
 
               {message && (
-                <p className="rounded-lg bg-green-500/10 px-3 py-2 text-sm text-green-200" role="status">
+                <p
+                  className="rounded-lg bg-green-500/10 px-3 py-2 text-sm text-green-200"
+                  role="status"
+                >
                   {message}
                 </p>
               )}
               {error && (
-                <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-200" role="alert">
+                <p
+                  className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-200"
+                  role="alert"
+                >
                   {error}
                 </p>
               )}
@@ -112,7 +129,10 @@ export const ForgotPassword = () => {
               </button>
 
               <div className="text-center text-sm font-medium text-gray-300">
-                <Link to="/login" className="text-pink-300 underline-offset-4 transition hover:text-white hover:underline">
+                <Link
+                  to="/login"
+                  className="text-pink-300 underline-offset-4 transition hover:text-white hover:underline"
+                >
                   Back to sign in
                 </Link>
               </div>

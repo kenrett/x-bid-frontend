@@ -14,7 +14,8 @@ export const SENTRY_ENABLED = Boolean(dsn) && !isTestEnv;
 if (SENTRY_ENABLED) {
   Sentry.init({
     dsn,
-    environment: import.meta.env.VITE_SENTRY_ENVIRONMENT ?? import.meta.env.MODE,
+    environment:
+      import.meta.env.VITE_SENTRY_ENVIRONMENT ?? import.meta.env.MODE,
     release:
       import.meta.env.VITE_SENTRY_RELEASE ??
       `x-bid-frontend@${import.meta.env.VITE_APP_VERSION ?? "0.0.0"}`,
@@ -41,7 +42,9 @@ if (SENTRY_ENABLED) {
   });
 }
 
-export const setSentryUser = (user: { id: number; email?: string; name?: string } | null) => {
+export const setSentryUser = (
+  user: { id: number; email?: string; name?: string } | null,
+) => {
   if (!SENTRY_ENABLED) return;
   if (user) {
     Sentry.setUser({

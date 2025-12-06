@@ -32,7 +32,13 @@ beforeEach(() => {
       bids: [],
     },
     bids: [
-      { id: 1, user_id: 9, amount: 123.45, created_at: "2024-01-01T00:00:00Z", username: "Bidder9" },
+      {
+        id: 1,
+        user_id: 9,
+        amount: 123.45,
+        created_at: "2024-01-01T00:00:00Z",
+        username: "Bidder9",
+      },
     ],
     loading: false,
     error: null,
@@ -57,7 +63,7 @@ describe("AdminAuctionDetail", () => {
         <Routes>
           <Route path="/admin/auctions/:id" element={<AdminAuctionDetail />} />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     expect(await screen.findByText("Live Auction")).toBeInTheDocument();
@@ -74,7 +80,7 @@ describe("AdminAuctionDetail", () => {
         <Routes>
           <Route path="/admin/auctions/:id" element={<AdminAuctionDetail />} />
         </Routes>
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     const refreshBtn = await screen.findByText("Force refresh");

@@ -13,7 +13,8 @@ const STRINGS = {
   LOG_OUT: "Log Out",
   SIGN_IN: "Sign In",
   ADMIN_BANNER: "Admin mode active — actions affect live data.",
-  SUPERADMIN_BANNER: "SUPERADMIN PRIVILEGES ACTIVE — CHANGES IMPACT THE ENTIRE PLATFORM.",
+  SUPERADMIN_BANNER:
+    "SUPERADMIN PRIVILEGES ACTIVE — CHANGES IMPACT THE ENTIRE PLATFORM.",
 };
 
 const variants = {
@@ -28,20 +29,18 @@ const variants = {
       admin: false,
     },
   }),
-  adminBanner: cva(
-    "text-center text-sm py-2 px-4 sticky top-0 z-[60]",
-    {
-      variants: {
-        super: {
-          true: "bg-red-700 text-white shadow-[0_8px_30px_rgba(255,0,0,0.45)] border-b border-red-300",
-          false: "bg-pink-700 text-white shadow-md shadow-pink-900/30 border-b border-pink-200/60",
-        },
+  adminBanner: cva("text-center text-sm py-2 px-4 sticky top-0 z-[60]", {
+    variants: {
+      super: {
+        true: "bg-red-700 text-white shadow-[0_8px_30px_rgba(255,0,0,0.45)] border-b border-red-300",
+        false:
+          "bg-pink-700 text-white shadow-md shadow-pink-900/30 border-b border-pink-200/60",
       },
-      defaultVariants: {
-        super: false,
-      },
-    }
-  ),
+    },
+    defaultVariants: {
+      super: false,
+    },
+  }),
   container: cva(
     "max-w-screen-xl flex flex-wrap items-center justify-between mx-auto transition-all duration-300",
     {
@@ -54,26 +53,26 @@ const variants = {
       defaultVariants: {
         compact: false,
       },
-    }
+    },
   ),
   logoLink: cva("relative flex items-center justify-center w-60 h-34"),
   logoSpotlight: cva(
-    "absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.15)_0%,rgba(255,255,255,0)_50%)] -z-0"
+    "absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.15)_0%,rgba(255,255,255,0)_50%)] -z-0",
   ),
   logoImage: cva(
-    "relative h-65 drop-shadow-[0_0_25px_rgba(255,105,180,0.8)] transition-transform duration-300 hover:scale-105"
+    "relative h-65 drop-shadow-[0_0_25px_rgba(255,105,180,0.8)] transition-transform duration-300 hover:scale-105",
   ),
   mobileMenuButton: cva(
-    "inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-400 rounded-lg md:hidden hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500"
+    "inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-400 rounded-lg md:hidden hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500",
   ),
   navList: cva(
-    "font-medium flex flex-col p-4 md:p-0 mt-4 border border-white/10 rounded-lg bg-[#0d0d1a] md:flex-row md:items-center md:space-x-2 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-[#0d0d1a]"
+    "font-medium flex flex-col p-4 md:p-0 mt-4 border border-white/10 rounded-lg bg-[#0d0d1a] md:flex-row md:items-center md:space-x-2 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-[#0d0d1a]",
   ),
   logoutButton: cva(
-    "flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-300 bg-white/10 border border-white/10 rounded-lg hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors duration-300"
+    "flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-300 bg-white/10 border border-white/10 rounded-lg hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors duration-300",
   ),
   signInLink: cva(
-    "inline-block text-sm bg-[#ff69b4] text-[#1a0d2e] px-4 py-2 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20"
+    "inline-block text-sm bg-[#ff69b4] text-[#1a0d2e] px-4 py-2 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20",
   ),
 };
 
@@ -92,11 +91,15 @@ export function Header() {
 
   const apiDocsHref = useMemo(() => {
     try {
-      const base = apiBase ? new URL("/api-docs", apiBase) : new URL("/api-docs", window.location.origin);
+      const base = apiBase
+        ? new URL("/api-docs", apiBase)
+        : new URL("/api-docs", window.location.origin);
       if (token) base.searchParams.set("token", token);
       return base.toString();
     } catch {
-      return token ? `/api-docs?token=${encodeURIComponent(token)}` : "/api-docs";
+      return token
+        ? `/api-docs?token=${encodeURIComponent(token)}`
+        : "/api-docs";
     }
   }, [apiBase, token]);
 
@@ -108,7 +111,7 @@ export function Header() {
             { name: "API Docs", href: apiDocsHref },
           ]
         : [],
-    [isAdmin, apiDocsHref]
+    [isAdmin, apiDocsHref],
   );
 
   const location = useLocation();
@@ -130,12 +133,17 @@ export function Header() {
       )}
       <div className={variants.container({ compact: isScrolled })}>
         <Link to="/" className={variants.logoLink()}>
-          <div className={variants.logoSpotlight()} style={{ transform: 'scale(3)' }}></div>
-          <img 
-            src={logo} alt="X-Bid Logo" 
-            className={`${variants.logoImage()} ${isScrolled ? "scale-90" : ""}`} />
+          <div
+            className={variants.logoSpotlight()}
+            style={{ transform: "scale(3)" }}
+          ></div>
+          <img
+            src={logo}
+            alt="X-Bid Logo"
+            className={`${variants.logoImage()} ${isScrolled ? "scale-90" : ""}`}
+          />
         </Link>
-        <button 
+        <button
           data-collapse-toggle="navbar-default"
           type="button"
           className={variants.mobileMenuButton()}
@@ -160,42 +168,41 @@ export function Header() {
                 {item.name}
               </NavItem>
             ))}
-              {user ? (
-                <>
-                  <li className="md:ml-4 flex items-center gap-4">
-                    <div className="hidden md:flex flex-col text-right">
-                      <span className="text-sm text-white font-medium flex items-center gap-2">
-                        {user.email}
-                        {isAdmin && (
-                          <span
-                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs border ${
-                              isSuperAdmin
-                                ? "bg-red-600 text-white border-red-300 shadow-[0_0_12px_rgba(255,0,0,0.6)]"
-                                : "bg-white/10 text-white border-white/20"
-                            }`}
-                          >
-                            {isSuperAdmin ? "Superadmin" : "Admin"}
-                          </span>
-                        )}
-                      </span>
-                      <span className="text-xs text-pink-400">{user.bidCredits} Bids</span>
-                    </div>
-                      <button
-                        onClick={logout}
-                        className={variants.logoutButton()}
-                      >
-                        {STRINGS.LOG_OUT}
-                      </button>
-                  </li>
-                </>
-              ) : (
-                <Link 
-                  to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
-                  className={variants.signInLink()}
-                >
-                  {STRINGS.SIGN_IN}
-                </Link>
-              )}
+            {user ? (
+              <>
+                <li className="md:ml-4 flex items-center gap-4">
+                  <div className="hidden md:flex flex-col text-right">
+                    <span className="text-sm text-white font-medium flex items-center gap-2">
+                      {user.email}
+                      {isAdmin && (
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs border ${
+                            isSuperAdmin
+                              ? "bg-red-600 text-white border-red-300 shadow-[0_0_12px_rgba(255,0,0,0.6)]"
+                              : "bg-white/10 text-white border-white/20"
+                          }`}
+                        >
+                          {isSuperAdmin ? "Superadmin" : "Admin"}
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-xs text-pink-400">
+                      {user.bidCredits} Bids
+                    </span>
+                  </div>
+                  <button onClick={logout} className={variants.logoutButton()}>
+                    {STRINGS.LOG_OUT}
+                  </button>
+                </li>
+              </>
+            ) : (
+              <Link
+                to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
+                className={variants.signInLink()}
+              >
+                {STRINGS.SIGN_IN}
+              </Link>
+            )}
           </ul>
         </div>
       </div>

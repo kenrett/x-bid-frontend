@@ -1,4 +1,8 @@
-import { render, screen, waitForElementToBeRemoved } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitForElementToBeRemoved,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
@@ -62,7 +66,15 @@ const defaultProps = {
   highestBidderUsername: "BidderTwo",
   onPlaceBid: vi.fn(),
   onTimerEnd: vi.fn(),
-  bids: [{ id: 1, amount: 250, created_at: new Date().toISOString(), user_id: 2, username: "BidderTwo" }],
+  bids: [
+    {
+      id: 1,
+      amount: 250,
+      created_at: new Date().toISOString(),
+      user_id: 2,
+      username: "BidderTwo",
+    },
+  ],
 };
 
 const renderComponent = (props = {}) => {
@@ -83,10 +95,15 @@ describe("AuctionView Component", () => {
 
   it("renders auction details correctly", async () => {
     renderComponent();
-    expect(screen.getByRole("heading", { name: "Vintage Masterpiece" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Vintage Masterpiece" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("A truly unique item.")).toBeInTheDocument();
     expect(screen.getByText("$250.00")).toBeInTheDocument();
-    expect(screen.getByAltText("Vintage Masterpiece")).toHaveAttribute("src", "/test-image.jpg");
+    expect(screen.getByAltText("Vintage Masterpiece")).toHaveAttribute(
+      "src",
+      "/test-image.jpg",
+    );
 
     await screen.findByTestId("bid-history");
   });
@@ -112,7 +129,9 @@ describe("AuctionView Component", () => {
   it("calls navigate with '/auctions' when the back button is clicked", async () => {
     renderComponent();
     const user = userEvent.setup();
-    const backButton = screen.getByRole("button", { name: /back to auctions/i });
+    const backButton = screen.getByRole("button", {
+      name: /back to auctions/i,
+    });
     await user.click(backButton);
     expect(mockNavigate).toHaveBeenCalledWith("/auctions");
   });
@@ -120,25 +139,33 @@ describe("AuctionView Component", () => {
   describe("Bidding Section", () => {
     it("shows the bidding section for an active auction and a logged-in, non-admin user", async () => {
       renderComponent();
-      expect(screen.getByRole("button", { name: /place your bid/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /place your bid/i }),
+      ).toBeInTheDocument();
       expect(await screen.findByTestId("bid-history")).toBeInTheDocument();
     });
 
     it("hides the bidding section if auction is not active", () => {
       renderComponent({ auction: { ...mockAuction, status: "ended" } });
-      expect(screen.queryByRole("button", { name: /place your bid/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /place your bid/i }),
+      ).not.toBeInTheDocument();
       expect(screen.queryByTestId("bid-history")).not.toBeInTheDocument();
     });
 
     it("hides the bidding section if no user is logged in", () => {
       renderComponent({ user: null });
-      expect(screen.queryByRole("button", { name: /place your bid/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /place your bid/i }),
+      ).not.toBeInTheDocument();
       expect(screen.queryByTestId("bid-history")).not.toBeInTheDocument();
     });
 
     it("hides the bidding section if the user is an admin", () => {
       renderComponent({ user: { ...mockUser, is_admin: true } });
-      expect(screen.queryByRole("button", { name: /place your bid/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /place your bid/i }),
+      ).not.toBeInTheDocument();
     });
 
     it("displays a bid error message when provided", () => {
@@ -189,7 +216,9 @@ describe("AuctionView Component", () => {
       renderComponent();
       expect(screen.getByText("Loading bid history...")).toBeInTheDocument();
 
-      await waitForElementToBeRemoved(() => screen.queryByText("Loading bid history..."));
+      await waitForElementToBeRemoved(() =>
+        screen.queryByText("Loading bid history..."),
+      );
       expect(await screen.findByTestId("bid-history")).toBeInTheDocument();
     });
 

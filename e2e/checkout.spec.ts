@@ -14,7 +14,9 @@ test("authenticated user can start a bid pack checkout", async ({ page }) => {
   await mockSessionRemaining(page);
 
   await page.route("**/bid_packs", (route) =>
-    isDocumentRequest(route) ? route.continue() : fulfillJson(route, bidPacksResponse),
+    isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, bidPacksResponse),
   );
   await page.route("**/checkouts", (route) => {
     if (route.request().method() === "POST") {
@@ -25,7 +27,9 @@ test("authenticated user can start a bid pack checkout", async ({ page }) => {
 
   await page.goto("/buy-bids");
 
-  await expect(page.getByRole("heading", { name: "Starter Pack" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Starter Pack" }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Acquire Pack" }).first().click();
 
   await expect(page.locator("#checkout")).toBeVisible();

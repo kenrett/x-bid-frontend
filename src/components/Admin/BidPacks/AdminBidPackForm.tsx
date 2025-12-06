@@ -13,7 +13,9 @@ interface AdminBidPackFormProps {
   initialValues?: Partial<BidPack>;
   submitLabel: string;
   isSubmitting?: boolean;
-  onSubmit: (payload: Partial<BidPack> & { name: string }) => Promise<void> | void;
+  onSubmit: (
+    payload: Partial<BidPack> & { name: string },
+  ) => Promise<void> | void;
 }
 
 const toFormState = (values?: Partial<BidPack>): FormState => ({
@@ -32,7 +34,9 @@ const computePricePerBid = (state: FormState) => {
   return Number.isFinite(value) ? value.toFixed(2) : "0.00";
 };
 
-const compactPayload = (state: FormState): Partial<BidPack> & { name: string } => {
+const compactPayload = (
+  state: FormState,
+): Partial<BidPack> & { name: string } => {
   const payload: Partial<BidPack> & { name: string } = {
     name: state.name.trim(),
     highlight: state.highlight,
@@ -64,13 +68,18 @@ export const AdminBidPackForm = ({
   isSubmitting,
   onSubmit,
 }: AdminBidPackFormProps) => {
-  const [formState, setFormState] = useState<FormState>(() => toFormState(initialValues));
+  const [formState, setFormState] = useState<FormState>(() =>
+    toFormState(initialValues),
+  );
   const [error, setError] = useState<string | null>(null);
 
   const handleChange =
     (key: keyof FormState) =>
     (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const value = key === "highlight" ? (event as React.ChangeEvent<HTMLInputElement>).target.checked : event.target.value;
+      const value =
+        key === "highlight"
+          ? (event as React.ChangeEvent<HTMLInputElement>).target.checked
+          : event.target.value;
       setFormState((prev) => ({ ...prev, [key]: value }));
     };
 

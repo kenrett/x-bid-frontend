@@ -6,7 +6,7 @@ import client from "@api/client";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   EmbeddedCheckoutProvider,
-  EmbeddedCheckout
+  EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
 import { Page } from "../Page";
 import { ErrorScreen } from "../ErrorScreen";
@@ -20,7 +20,9 @@ export const BuyBids = () => {
   const { user } = useAuth();
   const [bidPacks, setBidPacks] = useState<BidPack[]>([]);
   const [isLoadingPacks, setIsLoadingPacks] = useState(true);
-  const [isPurchasingPackId, setIsPurchasingPackId] = useState<number | null>(null);
+  const [isPurchasingPackId, setIsPurchasingPackId] = useState<number | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
 
@@ -31,7 +33,10 @@ export const BuyBids = () => {
         const normalized = response.data.map((pack) => {
           const bids = Number(pack.bids);
           const status = pack.status === "retired" ? "retired" : "active";
-          const active = typeof pack.active === "boolean" ? pack.active : status === "active";
+          const active =
+            typeof pack.active === "boolean"
+              ? pack.active
+              : status === "active";
           const price = Number(pack.price);
           const pricePerBid =
             pack.pricePerBid !== undefined && pack.pricePerBid !== null
@@ -68,8 +73,12 @@ export const BuyBids = () => {
   if (!user) {
     return (
       <Page centered>
-        <h2 className="font-serif text-4xl font-bold mb-4 text-white">Your Arsenal Awaits</h2>
-        <p className="mb-6 text-lg text-gray-400">Log in to arm yourself for the auction floor.</p>
+        <h2 className="font-serif text-4xl font-bold mb-4 text-white">
+          Your Arsenal Awaits
+        </h2>
+        <p className="mb-6 text-lg text-gray-400">
+          Log in to arm yourself for the auction floor.
+        </p>
         <Link
           to="/login"
           className="inline-block text-lg bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20"
@@ -92,13 +101,16 @@ export const BuyBids = () => {
 
   const handleBuy = async (id: number) => {
     const selectedPack = bidPacks.find((pack) => pack.id === id);
-    if (selectedPack && (selectedPack.status === "retired" || !selectedPack.active)) {
+    if (
+      selectedPack &&
+      (selectedPack.status === "retired" || !selectedPack.active)
+    ) {
       setError("This bid pack is retired and cannot be purchased.");
       return;
     }
 
     // Prevent multiple clicks while a request is in flight
-    if (isPurchasingPackId !== null) return; 
+    if (isPurchasingPackId !== null) return;
 
     if (!user) {
       setError("You must be logged in to purchase a pack.");
@@ -109,14 +121,18 @@ export const BuyBids = () => {
     setError(null);
 
     try {
-      const response = await client.post<{ clientSecret: string }>(`/checkouts`, {
-        bid_pack_id: id,
-      });
+      const response = await client.post<{ clientSecret: string }>(
+        `/checkouts`,
+        {
+          bid_pack_id: id,
+        },
+      );
 
       setClientSecret(response.data.clientSecret);
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        const message = err.response?.data?.error || "Something went wrong during purchase.";
+        const message =
+          err.response?.data?.error || "Something went wrong during purchase.";
         setError(message);
       } else {
         setError("An unexpected error occurred.");
@@ -135,7 +151,10 @@ export const BuyBids = () => {
           aria-busy="true"
         >
           <p className="text-gray-300">Loading secure checkout...</p>
-          <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret }}>
+          <EmbeddedCheckoutProvider
+            stripe={stripePromise}
+            options={{ clientSecret }}
+          >
             <EmbeddedCheckout />
           </EmbeddedCheckoutProvider>
         </div>
@@ -162,44 +181,59 @@ export const BuyBids = () => {
           {bidPacks
             .filter((pack) => pack.status === "active" && pack.active)
             .map((pack, index) => (
-            <div
-              key={pack.id}
-              className={`group flex flex-col text-center bg-[#1a0d2e]/50 backdrop-blur-sm border rounded-2xl p-6 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl ${
-                pack.highlight
-                  ? "border-pink-500 hover:shadow-pink-500/20 relative"
-                  : "border-white/10 hover:shadow-purple-500/20"
-              }`}
-              style={{ animation: `fadeInUp 0.5s ${index * 0.1}s ease-out both` }}
-            >
-              {pack.highlight && (
-                <div className="absolute -top-4 right-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg transform rotate-6">
-                  BEST VALUE
-                </div>
-              )}
-              <h2 className="font-serif text-3xl font-bold text-white tracking-tight">
-                {pack.name}
-              </h2>
-              <p className="text-sm text-gray-400 mb-4 h-10">{pack.description}</p>
-              <div className="my-4">
-                <span className="text-6xl font-extrabold text-white">{pack.bids}</span>
-                <span className="text-xl font-medium text-gray-400"> Bids</span>
-              </div>
-              <div className="text-4xl font-bold text-white mb-2">${Number(pack.price).toFixed(2)}</div>
-              <p className="text-pink-400 mb-6 font-medium">({pack.pricePerBid}/Bid)</p>
-              <button
-                onClick={() => handleBuy(pack.id)}
-                disabled={isPurchasingPackId !== null}
-                aria-busy={isPurchasingPackId === pack.id}
-                className={`mt-auto w-full font-bold py-3 px-6 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${
+              <div
+                key={pack.id}
+                className={`group flex flex-col text-center bg-[#1a0d2e]/50 backdrop-blur-sm border rounded-2xl p-6 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl ${
                   pack.highlight
-                    ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white transform hover:scale-105"
-                    : "bg-white/10 text-white hover:bg-white/20 transform hover:-translate-y-0.5"
+                    ? "border-pink-500 hover:shadow-pink-500/20 relative"
+                    : "border-white/10 hover:shadow-purple-500/20"
                 }`}
+                style={{
+                  animation: `fadeInUp 0.5s ${index * 0.1}s ease-out both`,
+                }}
               >
-                {isPurchasingPackId === pack.id ? "Processing..." : "Acquire Pack"}
-              </button>
-            </div>
-          ))}
+                {pack.highlight && (
+                  <div className="absolute -top-4 right-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg transform rotate-6">
+                    BEST VALUE
+                  </div>
+                )}
+                <h2 className="font-serif text-3xl font-bold text-white tracking-tight">
+                  {pack.name}
+                </h2>
+                <p className="text-sm text-gray-400 mb-4 h-10">
+                  {pack.description}
+                </p>
+                <div className="my-4">
+                  <span className="text-6xl font-extrabold text-white">
+                    {pack.bids}
+                  </span>
+                  <span className="text-xl font-medium text-gray-400">
+                    {" "}
+                    Bids
+                  </span>
+                </div>
+                <div className="text-4xl font-bold text-white mb-2">
+                  ${Number(pack.price).toFixed(2)}
+                </div>
+                <p className="text-pink-400 mb-6 font-medium">
+                  ({pack.pricePerBid}/Bid)
+                </p>
+                <button
+                  onClick={() => handleBuy(pack.id)}
+                  disabled={isPurchasingPackId !== null}
+                  aria-busy={isPurchasingPackId === pack.id}
+                  className={`mt-auto w-full font-bold py-3 px-6 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${
+                    pack.highlight
+                      ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white transform hover:scale-105"
+                      : "bg-white/10 text-white hover:bg-white/20 transform hover:-translate-y-0.5"
+                  }`}
+                >
+                  {isPurchasingPackId === pack.id
+                    ? "Processing..."
+                    : "Acquire Pack"}
+                </button>
+              </div>
+            ))}
         </div>
       </div>
     </Page>

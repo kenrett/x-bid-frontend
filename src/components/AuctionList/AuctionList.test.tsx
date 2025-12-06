@@ -9,7 +9,15 @@ vi.mock("@api/auctions");
 
 // Mock the child Auction component to isolate the AuctionList component
 vi.mock("../Auction/Auction", () => ({
-  Auction: ({ onClick, id, title }: { onClick: (id: number) => void; id: number; title: string; }) => (
+  Auction: ({
+    onClick,
+    id,
+    title,
+  }: {
+    onClick: (id: number) => void;
+    id: number;
+    title: string;
+  }) => (
     <div data-testid={`auction-${id}`} onClick={() => onClick(id)}>
       {title}
     </div>
@@ -30,20 +38,28 @@ const mockedGetAuctions = vi.mocked(getAuctions);
 
 const mockAuctions: AuctionSummary[] = [
   {
-    id: 1, title: "Vintage Watch", current_price: 150.0, end_time: new Date().toISOString(), image_url: "",
+    id: 1,
+    title: "Vintage Watch",
+    current_price: 150.0,
+    end_time: new Date().toISOString(),
+    image_url: "",
     description: "",
     status: "inactive",
     start_date: "",
     highest_bidder_id: 0,
-    bid_count: 0
+    bid_count: 0,
   },
   {
-    id: 2, title: "Art Painting", current_price: 300.0, end_time: new Date().toISOString(), image_url: "",
+    id: 2,
+    title: "Art Painting",
+    current_price: 300.0,
+    end_time: new Date().toISOString(),
+    image_url: "",
     description: "",
     status: "inactive",
     start_date: "",
     highest_bidder_id: 0,
-    bid_count: 0
+    bid_count: 0,
   },
 ];
 
@@ -52,7 +68,7 @@ describe("AuctionList", () => {
     // Clear mock history before each test
     vi.clearAllMocks();
     // Suppress console.error for tests that intentionally cause errors
-    vi.spyOn(console, "error").mockImplementation(() => { });
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -61,7 +77,7 @@ describe("AuctionList", () => {
 
   it("should display a loading message initially", () => {
     // Make this promise never resolve to test the initial loading state in isolation
-    mockedGetAuctions.mockReturnValue(new Promise(() => { }));
+    mockedGetAuctions.mockReturnValue(new Promise(() => {}));
     render(<AuctionList />);
     expect(screen.getByText("Loading auctions...")).toBeInTheDocument();
   });
@@ -106,7 +122,11 @@ describe("AuctionList", () => {
     render(<AuctionList />);
 
     // Wait for an auction to be on the screen
-    const auctionElement = await screen.findByTestId("auction-1", {}, { timeout: 2000 });
+    const auctionElement = await screen.findByTestId(
+      "auction-1",
+      {},
+      { timeout: 2000 },
+    );
 
     // Simulate a user click
     fireEvent.click(auctionElement);

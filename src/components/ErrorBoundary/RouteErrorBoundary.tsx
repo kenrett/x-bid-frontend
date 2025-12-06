@@ -13,7 +13,8 @@ export function RouteErrorBoundary() {
       message = "The page you are looking for does not exist.";
     } else {
       heading = `${error.status} - ${error.statusText}`;
-      message = error.data?.message || "An error occurred while loading this page.";
+      message =
+        error.data?.message || "An error occurred while loading this page.";
     }
   }
 

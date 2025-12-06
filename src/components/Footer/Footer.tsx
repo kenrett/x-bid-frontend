@@ -13,7 +13,7 @@ const variants = {
   logoLink: cva("flex items-center"),
   logoImage: cva("h-8 mr-3"),
   logoText: cva(
-    "self-center text-2xl font-semibold whitespace-nowrap text-white"
+    "self-center text-2xl font-semibold whitespace-nowrap text-white",
   ),
   navGrid: cva("grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3"),
   navCategoryTitle: cva("mb-6 text-sm font-semibold text-gray-200 uppercase"),
@@ -21,7 +21,7 @@ const variants = {
   navListItem: cva("mb-4"),
   navLink: cva("hover:text-pink-400 transition-colors"),
   bottomSection: cva(
-    "mt-8 pt-8 border-t border-white/10 sm:flex sm:items-center sm:justify-between"
+    "mt-8 pt-8 border-t border-white/10 sm:flex sm:items-center sm:justify-between",
   ),
   copyright: cva("text-sm text-gray-500 sm:text-center"),
 };

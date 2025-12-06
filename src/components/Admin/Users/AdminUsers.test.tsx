@@ -5,9 +5,27 @@ import { AdminUsers } from "./AdminUsers";
 import type { AdminUser } from "./types";
 
 const baseUsers: AdminUser[] = [
-  { id: 1, email: "admin@example.com", name: "Admin User", role: "admin", status: "active" },
-  { id: 2, email: "superadmin@example.com", name: "Super User", role: "superadmin", status: "active" },
-  { id: 3, email: "user@example.com", name: "Regular User", role: "admin", status: "disabled" },
+  {
+    id: 1,
+    email: "admin@example.com",
+    name: "Admin User",
+    role: "admin",
+    status: "active",
+  },
+  {
+    id: 2,
+    email: "superadmin@example.com",
+    name: "Super User",
+    role: "superadmin",
+    status: "active",
+  },
+  {
+    id: 3,
+    email: "user@example.com",
+    name: "Regular User",
+    role: "admin",
+    status: "disabled",
+  },
 ];
 
 describe("AdminUsers", () => {
@@ -22,7 +40,7 @@ describe("AdminUsers", () => {
         onDemote={vi.fn()}
         onBan={vi.fn()}
         onRemoveSuper={vi.fn()}
-      />
+      />,
     );
 
     expect(screen.getByText("Admin User")).toBeInTheDocument();
@@ -42,7 +60,7 @@ describe("AdminUsers", () => {
         onDemote={vi.fn()}
         onBan={vi.fn()}
         onRemoveSuper={vi.fn()}
-      />
+      />,
     );
 
     expect(screen.getByText("Remove superadmin")).toBeInTheDocument();
@@ -61,7 +79,7 @@ describe("AdminUsers", () => {
         onDemote={vi.fn()}
         onBan={vi.fn()}
         onRemoveSuper={vi.fn()}
-      />
+      />,
     );
 
     expect(screen.queryByText("Remove superadmin")).not.toBeInTheDocument();
@@ -84,7 +102,7 @@ describe("AdminUsers", () => {
         onDemote={vi.fn()}
         onBan={onBan}
         onRemoveSuper={onRemoveSuper}
-      />
+      />,
     );
 
     await user.click(screen.getAllByText("Ban user")[0]);
@@ -107,10 +125,13 @@ describe("AdminUsers", () => {
         onDemote={vi.fn()}
         onBan={vi.fn()}
         onRemoveSuper={vi.fn()}
-      />
+      />,
     );
 
-    await user.type(screen.getByPlaceholderText(/search by name or email/i), "admin");
+    await user.type(
+      screen.getByPlaceholderText(/search by name or email/i),
+      "admin",
+    );
 
     const values = onSearchChange.mock.calls.map((call) => call[0]);
     expect(values).toEqual(["a", "d", "m", "i", "n"]);

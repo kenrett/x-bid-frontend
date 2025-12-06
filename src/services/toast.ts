@@ -10,7 +10,8 @@ type ToastListener = (toast: ToastMessage) => void;
 
 const listeners = new Set<ToastListener>();
 
-const createId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+const createId = () =>
+  `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 export const showToast = (message: string, variant: ToastVariant = "info") => {
   const toast: ToastMessage = { id: createId(), message, variant };

@@ -19,8 +19,20 @@ const mockedUseAuth = vi.mocked(useAuth);
 const mockedAdminUsersApi = vi.mocked(adminUsersApi);
 
 const mockUsers = [
-  { id: 2, email: "admin@example.com", name: "Admin User", role: "admin", status: "active" },
-  { id: 3, email: "superadmin@example.com", name: "Super Admin", role: "superadmin", status: "active" },
+  {
+    id: 2,
+    email: "admin@example.com",
+    name: "Admin User",
+    role: "admin",
+    status: "active",
+  },
+  {
+    id: 3,
+    email: "superadmin@example.com",
+    name: "Super Admin",
+    role: "superadmin",
+    status: "active",
+  },
 ];
 
 const mockUpdatedUser = {
@@ -36,10 +48,22 @@ describe("AdminUsersPage", () => {
       logout: vi.fn(),
     } as any);
     mockedAdminUsersApi.getUsers.mockResolvedValue(mockUsers);
-    mockedAdminUsersApi.banUser.mockResolvedValue({ ...mockUpdatedUser, status: "disabled" } as any);
-    mockedAdminUsersApi.grantAdmin.mockResolvedValue({ ...mockUpdatedUser, role: "admin" } as any);
-    mockedAdminUsersApi.revokeAdmin.mockResolvedValue({ ...mockUpdatedUser, role: "user" } as any);
-    mockedAdminUsersApi.revokeSuperadmin.mockResolvedValue({ ...mockUpdatedUser, role: "admin" } as any);
+    mockedAdminUsersApi.banUser.mockResolvedValue({
+      ...mockUpdatedUser,
+      status: "disabled",
+    } as any);
+    mockedAdminUsersApi.grantAdmin.mockResolvedValue({
+      ...mockUpdatedUser,
+      role: "admin",
+    } as any);
+    mockedAdminUsersApi.revokeAdmin.mockResolvedValue({
+      ...mockUpdatedUser,
+      role: "user",
+    } as any);
+    mockedAdminUsersApi.revokeSuperadmin.mockResolvedValue({
+      ...mockUpdatedUser,
+      role: "admin",
+    } as any);
     vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
@@ -76,7 +100,9 @@ describe("AdminUsersPage", () => {
     const demoteButton = await screen.findByText(/remove admin/i);
     await user.click(demoteButton);
 
-    expect(mockedAdminUsersApi.revokeAdmin).toHaveBeenCalledWith(mockUsers[0].id);
+    expect(mockedAdminUsersApi.revokeAdmin).toHaveBeenCalledWith(
+      mockUsers[0].id,
+    );
     expect(showToast).toHaveBeenCalledWith("Admin access removed", "success");
   });
 

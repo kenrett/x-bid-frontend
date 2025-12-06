@@ -6,14 +6,14 @@ import type { Bid } from "../../types/bid";
 const mockBids: Bid[] = [
   {
     id: 1,
-    amount: 150.50,
+    amount: 150.5,
     created_at: new Date("2023-10-27T10:00:00Z").toISOString(),
     user_id: 1,
     username: "User A",
   },
   {
     id: 2,
-    amount: 151.00,
+    amount: 151.0,
     created_at: new Date("2023-10-27T10:01:00Z").toISOString(),
     user_id: 2,
     username: "User B",
@@ -35,14 +35,14 @@ describe("BidHistory Component", () => {
 
   describe("when there are no bids", () => {
     it('should render a "No bids yet." message', () => {
-      render(<BidHistory bids={[]} />)
+      render(<BidHistory bids={[]} />);
       expect(screen.getByText("No bids yet.")).toBeInTheDocument();
     });
 
     it("should not render the 'Bid History' title", () => {
       render(<BidHistory bids={[]} />);
       expect(
-        screen.queryByRole("heading", { name: /bid history/i })
+        screen.queryByRole("heading", { name: /bid history/i }),
       ).not.toBeInTheDocument();
     });
   });
@@ -54,7 +54,7 @@ describe("BidHistory Component", () => {
 
     it("should render the 'Bid History' title", () => {
       expect(
-        screen.getByRole("heading", { name: /bid history/i })
+        screen.getByRole("heading", { name: /bid history/i }),
       ).toBeInTheDocument();
     });
 
@@ -101,8 +101,20 @@ describe("BidHistory Component", () => {
     it("uses the id tiebreaker to keep higher ids first", () => {
       const sameTimestamp = new Date("2023-10-27T10:00:00Z").toISOString();
       const bidsWithTie: Bid[] = [
-        { id: 5, amount: 10, created_at: sameTimestamp, user_id: 1, username: "LaterId" },
-        { id: 4, amount: 9, created_at: sameTimestamp, user_id: 2, username: "EarlierId" },
+        {
+          id: 5,
+          amount: 10,
+          created_at: sameTimestamp,
+          user_id: 1,
+          username: "LaterId",
+        },
+        {
+          id: 4,
+          amount: 9,
+          created_at: sameTimestamp,
+          user_id: 2,
+          username: "EarlierId",
+        },
       ];
 
       render(<BidHistory bids={bidsWithTie} />);

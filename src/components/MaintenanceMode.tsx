@@ -17,7 +17,10 @@ export const MaintenanceMode = () => {
           navigate("/auctions", { replace: true });
         }
       } catch (err) {
-        if (axios.isAxiosError(err) && (err.response?.status === 401 || err.response?.status === 404)) {
+        if (
+          axios.isAxiosError(err) &&
+          (err.response?.status === 401 || err.response?.status === 404)
+        ) {
           // If we’re unauthorized to check or the endpoint is unavailable, assume maintenance is off.
           navigate("/auctions", { replace: true });
           return;
@@ -45,8 +48,9 @@ export const MaintenanceMode = () => {
             A little backstage action is happening right now.
           </h1>
           <p className="text-base sm:text-lg text-gray-300 max-w-2xl mx-auto">
-            We’re tuning up the auction floor—tightening bolts, smoothing edges, and getting everything ready to run even more beautifully.
-            Your bids and account are safe. Come back in a few and slip back into the fun.
+            We’re tuning up the auction floor—tightening bolts, smoothing edges,
+            and getting everything ready to run even more beautifully. Your bids
+            and account are safe. Come back in a few and slip back into the fun.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link

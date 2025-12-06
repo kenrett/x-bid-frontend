@@ -72,7 +72,9 @@ describe("Countdown Component", () => {
 
   it('should display "00:00" and not start the timer if status is not "active" or "complete"', () => {
     const endTime = new Date(Date.now() + 10000).toISOString();
-    render(<Countdown endTime={endTime} status="scheduled" onEnd={onEndMock} />);
+    render(
+      <Countdown endTime={endTime} status="scheduled" onEnd={onEndMock} />,
+    );
     expect(screen.getByText("00:00")).toBeInTheDocument();
 
     // Advance time and ensure nothing changes and onEnd is not called
@@ -87,7 +89,7 @@ describe("Countdown Component", () => {
     const clearIntervalSpy = vi.spyOn(global, "clearInterval");
     const endTime = new Date(Date.now() + 10000).toISOString();
     const { unmount } = render(
-      <Countdown endTime={endTime} status="active" onEnd={onEndMock} />
+      <Countdown endTime={endTime} status="active" onEnd={onEndMock} />,
     );
 
     unmount();
@@ -104,7 +106,7 @@ describe("Countdown Component", () => {
   it("should only call onEnd once even if re-rendered with the same expired endTime", () => {
     const endTime = new Date(Date.now() - 1000).toISOString();
     const { rerender } = render(
-      <Countdown endTime={endTime} status="active" onEnd={onEndMock} />
+      <Countdown endTime={endTime} status="active" onEnd={onEndMock} />,
     );
 
     expect(onEndMock).toHaveBeenCalledTimes(1);

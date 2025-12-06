@@ -28,9 +28,13 @@ export const getMaintenance = async (): Promise<MaintenanceState> => {
   return normalize(res.data);
 };
 
-export const setMaintenance = async (enabled: boolean): Promise<MaintenanceState> => {
+export const setMaintenance = async (
+  enabled: boolean,
+): Promise<MaintenanceState> => {
   // Rails controller accepts query param or JSON body; send JSON for clarity.
-  const res = await client.post<MaintenanceResponse>("/admin/maintenance", { enabled });
+  const res = await client.post<MaintenanceResponse>("/admin/maintenance", {
+    enabled,
+  });
   return normalize(res.data);
 };
 

@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { listBidPacks, deleteBidPack, updateBidPack } from "../../../api/admin/bidPacks";
+import {
+  listBidPacks,
+  deleteBidPack,
+  updateBidPack,
+} from "../../../api/admin/bidPacks";
 import type { BidPack } from "../../../types/bidPack";
 import { showToast } from "../../../services/toast";
 import { logAdminAction } from "../../../services/adminAudit";
@@ -13,7 +17,9 @@ export const AdminBidPacksList = () => {
   const [retiringId, setRetiringId] = useState<number | null>(null);
   const [reactivatingId, setReactivatingId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
-  const [highlightFilter, setHighlightFilter] = useState<"all" | "featured" | "standard">("all");
+  const [highlightFilter, setHighlightFilter] = useState<
+    "all" | "featured" | "standard"
+  >("all");
 
   const fetchPacks = useCallback(async () => {
     try {
@@ -37,7 +43,7 @@ export const AdminBidPacksList = () => {
     const target = packs.find((pack) => pack.id === id);
     const label = target?.name ?? `Bid pack ${id}`;
     const confirmed = window.confirm(
-      `Retire "${label}"? Retired bid packs cannot be purchased until reactivated.`
+      `Retire "${label}"? Retired bid packs cannot be purchased until reactivated.`,
     );
     if (!confirmed) return;
 
@@ -49,7 +55,9 @@ export const AdminBidPacksList = () => {
       await fetchPacks();
     } catch (err) {
       console.error(err);
-      const message = axios.isAxiosError(err) ? err.response?.data?.error : null;
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.error
+        : null;
       showToast(message || "Failed to retire bid pack", "error");
     } finally {
       setRetiringId(null);
@@ -58,7 +66,7 @@ export const AdminBidPacksList = () => {
 
   const handleReactivate = async (pack: BidPack) => {
     const confirmed = window.confirm(
-      `Reactivate "${pack.name}"? It will become purchasable immediately.`
+      `Reactivate "${pack.name}"? It will become purchasable immediately.`,
     );
     if (!confirmed) return;
 
@@ -70,7 +78,9 @@ export const AdminBidPacksList = () => {
       await fetchPacks();
     } catch (err) {
       console.error(err);
-      const message = axios.isAxiosError(err) ? err.response?.data?.error : null;
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.error
+        : null;
       showToast(message || "Failed to reactivate bid pack", "error");
     } finally {
       setReactivatingId(null);
@@ -79,7 +89,9 @@ export const AdminBidPacksList = () => {
 
   const filtered = useMemo(() => {
     return packs.filter((pack) => {
-      const matchesSearch = pack.name.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = pack.name
+        .toLowerCase()
+        .includes(search.toLowerCase());
       const matchesHighlight =
         highlightFilter === "all"
           ? true
@@ -96,8 +108,12 @@ export const AdminBidPacksList = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wide text-gray-500">Bid Packs</p>
-          <h2 className="text-2xl font-serif font-bold text-white">Manage bid packs</h2>
+          <p className="text-xs uppercase tracking-wide text-gray-500">
+            Bid Packs
+          </p>
+          <h2 className="text-2xl font-serif font-bold text-white">
+            Manage bid packs
+          </h2>
         </div>
         <Link
           to="/admin/bid-packs/new"
@@ -110,8 +126,10 @@ export const AdminBidPacksList = () => {
       <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-2 text-sm text-gray-300">
           <span>
-            Showing <span className="text-white font-semibold">{filtered.length}</span> of{" "}
-            <span className="text-white font-semibold">{packs.length}</span> packs
+            Showing{" "}
+            <span className="text-white font-semibold">{filtered.length}</span>{" "}
+            of <span className="text-white font-semibold">{packs.length}</span>{" "}
+            packs
           </span>
           <button
             type="button"
@@ -145,7 +163,11 @@ export const AdminBidPacksList = () => {
                     : "bg-white/5 border-white/10 text-gray-200 hover:bg-white/10"
                 }`}
               >
-                {filter === "all" ? "All" : filter === "featured" ? "Featured" : "Standard"}
+                {filter === "all"
+                  ? "All"
+                  : filter === "featured"
+                    ? "Featured"
+                    : "Standard"}
               </button>
             ))}
           </div>
@@ -193,9 +215,13 @@ export const AdminBidPacksList = () => {
               <tbody className="divide-y divide-white/10">
                 {filtered.map((pack) => (
                   <tr key={pack.id} className="hover:bg-white/[0.04]">
-                    <td className="px-4 py-3 font-semibold text-white">{pack.name}</td>
+                    <td className="px-4 py-3 font-semibold text-white">
+                      {pack.name}
+                    </td>
                     <td className="px-4 py-3">{pack.bids}</td>
-                    <td className="px-4 py-3">${Number(pack.price).toFixed(2)}</td>
+                    <td className="px-4 py-3">
+                      ${Number(pack.price).toFixed(2)}
+                    </td>
                     <td className="px-4 py-3">{pack.pricePerBid}</td>
                     <td className="px-4 py-3">
                       <span
@@ -232,7 +258,9 @@ export const AdminBidPacksList = () => {
                           disabled={reactivatingId === pack.id}
                           className="text-sm text-green-300 hover:text-green-200 disabled:opacity-50 underline underline-offset-2"
                         >
-                          {reactivatingId === pack.id ? "Reactivating..." : "Reactivate"}
+                          {reactivatingId === pack.id
+                            ? "Reactivating..."
+                            : "Reactivate"}
                         </button>
                       ) : (
                         <button

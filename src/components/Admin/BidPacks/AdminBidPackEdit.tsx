@@ -67,7 +67,7 @@ export const AdminBidPackEdit = () => {
         action === "retire"
           ? "Retired bid packs cannot be purchased until reactivated."
           : "It will become purchasable immediately."
-      }`
+      }`,
     );
     if (!confirmed) return;
 
@@ -78,11 +78,13 @@ export const AdminBidPackEdit = () => {
       logAdminAction(`bid_pack.${action}`, { id: bidPackId });
       showToast(
         action === "retire" ? "Bid pack retired" : "Bid pack reactivated",
-        "success"
+        "success",
       );
     } catch (err) {
       console.error(err);
-      const message = axios.isAxiosError(err) ? err.response?.data?.error : null;
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.error
+        : null;
       showToast(message || `Failed to ${action} bid pack`, "error");
     } finally {
       setIsTogglingStatus(false);
@@ -93,7 +95,9 @@ export const AdminBidPackEdit = () => {
     <div className="space-y-4">
       <div>
         <p className="text-xs uppercase tracking-wide text-gray-500">Edit</p>
-        <h2 className="text-2xl font-serif font-bold text-white">Update bid pack</h2>
+        <h2 className="text-2xl font-serif font-bold text-white">
+          Update bid pack
+        </h2>
       </div>
 
       {loading && <p className="text-sm text-gray-400">Loading bid pack...</p>}

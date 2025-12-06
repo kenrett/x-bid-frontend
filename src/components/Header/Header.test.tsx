@@ -16,7 +16,7 @@ const renderComponent = (initialPath = "/") => {
   return render(
     <MemoryRouter initialEntries={[initialPath]}>
       <Header />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 };
 
@@ -37,7 +37,9 @@ describe("Header Component", () => {
     // Check for main navigation items
     expect(screen.getByRole("link", { name: /auctions/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /buy bids/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /how it works/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /how it works/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /about/i })).toBeInTheDocument();
   });
 
@@ -55,7 +57,9 @@ describe("Header Component", () => {
     it("should not display the user's email or a 'Log Out' button", () => {
       renderComponent();
       expect(screen.queryByText(mockUser.email)).not.toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: /log out/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /log out/i }),
+      ).not.toBeInTheDocument();
     });
 
     it("should format the 'Sign In' link with a correct redirect path", () => {
@@ -69,18 +73,25 @@ describe("Header Component", () => {
 
   describe("when user is logged in", () => {
     beforeEach(() => {
-      mockedUseAuth.mockReturnValue({ user: mockUser, logout: mockLogout } as any);
+      mockedUseAuth.mockReturnValue({
+        user: mockUser,
+        logout: mockLogout,
+      } as any);
     });
 
     it("should display the user's email and a 'Log Out' button", () => {
       renderComponent();
       expect(screen.getByText(mockUser.email)).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /log out/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /log out/i }),
+      ).toBeInTheDocument();
     });
 
     it("should not display a 'Sign In' link", () => {
       renderComponent();
-      expect(screen.queryByRole("link", { name: /sign in/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: /sign in/i }),
+      ).not.toBeInTheDocument();
     });
 
     it("should call the logout function when the 'Log Out' button is clicked", () => {
@@ -94,13 +105,18 @@ describe("Header Component", () => {
   it("should render the mobile menu button", () => {
     mockedUseAuth.mockReturnValue({ user: null, logout: mockLogout } as any);
     renderComponent();
-    const mobileMenuButton = screen.getByRole("button", { name: /open main menu/i });
+    const mobileMenuButton = screen.getByRole("button", {
+      name: /open main menu/i,
+    });
     expect(mobileMenuButton).toBeInTheDocument();
   });
 
   describe("admin vs superadmin badges and banner", () => {
     it("shows admin banner and badge for admin", () => {
-      mockedUseAuth.mockReturnValue({ user: mockAdmin, logout: mockLogout } as any);
+      mockedUseAuth.mockReturnValue({
+        user: mockAdmin,
+        logout: mockLogout,
+      } as any);
       renderComponent();
 
       expect(screen.getByText(/admin mode active/i)).toBeInTheDocument();
@@ -110,20 +126,30 @@ describe("Header Component", () => {
     });
 
     it("shows superadmin banner and badge for superuser", () => {
-      mockedUseAuth.mockReturnValue({ user: mockSuper, logout: mockLogout } as any);
+      mockedUseAuth.mockReturnValue({
+        user: mockSuper,
+        logout: mockLogout,
+      } as any);
       renderComponent();
 
-      expect(screen.getByText(/superadmin privileges active/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/superadmin privileges active/i),
+      ).toBeInTheDocument();
       expect(screen.getByText("Superadmin")).toBeInTheDocument();
       expect(screen.queryAllByText("Admin").length).toBeGreaterThan(0); // nav link
     });
 
     it("shows no admin banner for regular user", () => {
-      mockedUseAuth.mockReturnValue({ user: mockUser, logout: mockLogout } as any);
+      mockedUseAuth.mockReturnValue({
+        user: mockUser,
+        logout: mockLogout,
+      } as any);
       renderComponent();
 
       expect(screen.queryByText(/admin mode active/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/superadmin privileges/i)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(/superadmin privileges/i),
+      ).not.toBeInTheDocument();
     });
   });
 });

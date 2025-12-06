@@ -16,7 +16,7 @@ const renderWithToken = (token = "abc123") =>
   render(
     <MemoryRouter initialEntries={[`/reset-password?token=${token}`]}>
       <ResetPassword />
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 
 describe("ResetPassword", () => {
@@ -33,7 +33,9 @@ describe("ResetPassword", () => {
       isReady: true,
       updateUserBalance: vi.fn(),
     });
-    mockedClient.post.mockResolvedValue({ data: { message: "Password updated" } });
+    mockedClient.post.mockResolvedValue({
+      data: { message: "Password updated" },
+    });
   });
 
   it("submits reset with token and new password", async () => {
@@ -55,7 +57,7 @@ describe("ResetPassword", () => {
     });
 
     expect(
-      await screen.findByText(/password updated\. please sign in/i)
+      await screen.findByText(/password updated\. please sign in/i),
     ).toBeInTheDocument();
   });
 
@@ -72,6 +74,8 @@ describe("ResetPassword", () => {
     await user.type(screen.getByLabelText(/confirm password/i), "password123");
     await user.click(screen.getByRole("button", { name: /update password/i }));
 
-    expect(await screen.findByText(/invalid or expired token/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/invalid or expired token/i),
+    ).toBeInTheDocument();
   });
 });

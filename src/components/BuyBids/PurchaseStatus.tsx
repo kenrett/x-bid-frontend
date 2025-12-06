@@ -30,25 +30,32 @@ export const PurchaseStatus = () => {
 
     const verifyPayment = async () => {
       try {
-        const response = await client.get<CheckoutSuccessResponse>(`/checkout/success`, {
-          params: { session_id: sessionId },
-        });
+        const response = await client.get<CheckoutSuccessResponse>(
+          `/checkout/success`,
+          {
+            params: { session_id: sessionId },
+          },
+        );
 
         if (response.data.status === "success") {
           setStatus("success");
-          setMessage(`Your purchase was successful! New balance: ${response.data.updated_bid_credits} credits.`);
+          setMessage(
+            `Your purchase was successful! New balance: ${response.data.updated_bid_credits} credits.`,
+          );
           updateUserBalance(response.data.updated_bid_credits);
         } else {
           setStatus("error");
           setMessage(
             response.data.error ??
-            "There was an issue with your payment. Please contact support."
+              "There was an issue with your payment. Please contact support.",
           );
         }
       } catch (err) {
         setStatus("error");
         if (axios.isAxiosError(err)) {
-          setMessage(err.response?.data?.error || "Failed to verify payment status.");
+          setMessage(
+            err.response?.data?.error || "Failed to verify payment status.",
+          );
         } else {
           setMessage("An unexpected error occurred.");
         }
@@ -75,10 +82,14 @@ export const PurchaseStatus = () => {
 
   return (
     <Page centered>
-      <h2 className={`font-serif text-4xl font-bold mb-4 ${status === 'success' ? 'text-green-400' : 'text-red-400'}`}>
+      <h2
+        className={`font-serif text-4xl font-bold mb-4 ${status === "success" ? "text-green-400" : "text-red-400"}`}
+      >
         {status === "success" ? "Payment Successful" : "Payment Error"}
       </h2>
-      <p className="mb-6 text-lg text-gray-400">{message ?? "Something went wrong."}</p>
+      <p className="mb-6 text-lg text-gray-400">
+        {message ?? "Something went wrong."}
+      </p>
       <Link
         to="/auctions"
         className="inline-block text-lg bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20"

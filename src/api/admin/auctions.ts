@@ -9,7 +9,7 @@ const normalizeAuction = (auction: AuctionSummary): AuctionSummary => ({
 });
 
 export const createAuction = async (
-  payload: Partial<AuctionSummary> & { title: string }
+  payload: Partial<AuctionSummary> & { title: string },
 ) => {
   const res = await client.post<AuctionSummary>("/auctions", {
     ...payload,
@@ -20,7 +20,7 @@ export const createAuction = async (
 
 export const updateAuction = async (
   id: number,
-  updates: Partial<AuctionSummary>
+  updates: Partial<AuctionSummary>,
 ) => {
   const res = await client.put<AuctionSummary>(`/auctions/${id}`, {
     ...updates,

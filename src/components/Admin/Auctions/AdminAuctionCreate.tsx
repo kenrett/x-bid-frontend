@@ -10,7 +10,9 @@ export const AdminAuctionCreate = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (payload: Partial<AuctionSummary> & { title: string }) => {
+  const handleSubmit = async (
+    payload: Partial<AuctionSummary> & { title: string },
+  ) => {
     try {
       setIsSubmitting(true);
       await createAuction(payload);
@@ -29,7 +31,9 @@ export const AdminAuctionCreate = () => {
     <div className="space-y-4">
       <div>
         <p className="text-xs uppercase tracking-wide text-gray-500">Create</p>
-        <h2 className="text-2xl font-serif font-bold text-white">New auction</h2>
+        <h2 className="text-2xl font-serif font-bold text-white">
+          New auction
+        </h2>
       </div>
 
       <div className="bg-white/5 border border-white/10 rounded-2xl p-6">

@@ -149,17 +149,20 @@ const isDocumentRequest = (route: Route) =>
   route.request().resourceType() === "document";
 
 const seedAuthState = async (page: Page, user = authedUser) => {
-  await page.addInitScript((auth) => {
-    localStorage.setItem("user", JSON.stringify(auth.user));
-    localStorage.setItem("token", auth.token);
-    localStorage.setItem("refreshToken", auth.refreshToken);
-    localStorage.setItem("sessionTokenId", auth.sessionTokenId);
-  }, {
-    user,
-    token: "token-authed",
-    refreshToken: "refresh-authed",
-    sessionTokenId: "session-authed",
-  });
+  await page.addInitScript(
+    (auth) => {
+      localStorage.setItem("user", JSON.stringify(auth.user));
+      localStorage.setItem("token", auth.token);
+      localStorage.setItem("refreshToken", auth.refreshToken);
+      localStorage.setItem("sessionTokenId", auth.sessionTokenId);
+    },
+    {
+      user,
+      token: "token-authed",
+      refreshToken: "refresh-authed",
+      sessionTokenId: "session-authed",
+    },
+  );
 };
 
 const mockSessionRemaining = async (page: Page, user = authedUser) => {
@@ -225,19 +228,31 @@ test("guest can browse auctions and open a detail page", async ({ page }) => {
 
   await page.goto("/auctions");
 
-  await expect(page.getByRole("heading", { name: "Your Next Obsession" })).toBeVisible();
-  await expect(page.getByTestId("auction-card-101")).toContainText("Vintage Camera");
+  await expect(
+    page.getByRole("heading", { name: "Your Next Obsession" }),
+  ).toBeVisible();
+  await expect(page.getByTestId("auction-card-101")).toContainText(
+    "Vintage Camera",
+  );
   await page.getByTestId("auction-card-101").click();
 
   await expect(page).toHaveURL(/\/auctions\/101$/);
-  await expect(page.getByRole("heading", { name: "Vintage Camera" })).toBeVisible();
-  await expect(page.locator("#current-price-label").locator("..")).toContainText("$125.00");
-  await expect(page.getByTestId("highest-bidder-info")).toContainText("Mason Wolfe");
+  await expect(
+    page.getByRole("heading", { name: "Vintage Camera" }),
+  ).toBeVisible();
+  await expect(
+    page.locator("#current-price-label").locator(".."),
+  ).toContainText("$125.00");
+  await expect(page.getByTestId("highest-bidder-info")).toContainText(
+    "Mason Wolfe",
+  );
 });
 
 test("user can log in and land on the auctions feed", async ({ page }) => {
   await page.route("**/login", (route) =>
-    isDocumentRequest(route) ? route.continue() : fulfillJson(route, loginResponse),
+    isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, loginResponse),
   );
   await page.route("**/auctions", (route) => {
     if (isDocumentRequest(route)) return route.continue();
@@ -270,7 +285,9 @@ test("user can log in and land on the auctions feed", async ({ page }) => {
   expect(stored.user).toContain(authedUser.email);
 });
 
-test("authenticated user can place a bid on an active auction", async ({ page }) => {
+test("authenticated user can place a bid on an active auction", async ({
+  page,
+}) => {
   await seedAuthState(page);
   await mockSessionRemaining(page);
 
@@ -303,14 +320,20 @@ test("authenticated user can place a bid on an active auction", async ({ page })
 
   await page.goto("/auctions/501");
 
-  await expect(page.getByRole("heading", { name: "Carbon Fiber eBike" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Carbon Fiber eBike" }),
+  ).toBeVisible();
   const bidButton = page.getByRole("button", { name: "Place Your Bid" });
   await expect(bidButton).toBeEnabled();
 
   await bidButton.click();
 
-  await expect(page.getByRole("button", { name: "You are the highest bidder" })).toBeDisabled();
-  await expect(page.getByTestId("highest-bidder-info")).toContainText(authedUser.name);
+  await expect(
+    page.getByRole("button", { name: "You are the highest bidder" }),
+  ).toBeDisabled();
+  await expect(page.getByTestId("highest-bidder-info")).toContainText(
+    authedUser.name,
+  );
   await expect(page.getByLabel("Current Price")).toHaveText("$150.00");
   await expect(page.getByText(`${authedUser.name} bid $150.00`)).toBeVisible();
 });
@@ -321,7 +344,9 @@ test("authenticated user can start a bid pack checkout", async ({ page }) => {
   await mockSessionRemaining(page);
 
   await page.route("**/bid_packs", (route) =>
-    isDocumentRequest(route) ? route.continue() : fulfillJson(route, bidPacksResponse),
+    isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, bidPacksResponse),
   );
   await page.route("**/checkouts", (route) => {
     if (route.request().method() === "POST") {
@@ -332,7 +357,9 @@ test("authenticated user can start a bid pack checkout", async ({ page }) => {
 
   await page.goto("/buy-bids");
 
-  await expect(page.getByRole("heading", { name: "Starter Pack" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Starter Pack" }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Acquire Pack" }).first().click();
 
   await expect(page.locator("#checkout")).toBeVisible();

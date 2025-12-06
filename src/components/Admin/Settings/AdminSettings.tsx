@@ -40,7 +40,10 @@ export const AdminSettings = () => {
       const state = await setMaintenance(nextValue);
       setMaintenanceMode(state.enabled);
       setUpdatedAt(state.updated_at);
-      showToast(`Maintenance ${state.enabled ? "enabled" : "disabled"}`, "success");
+      showToast(
+        `Maintenance ${state.enabled ? "enabled" : "disabled"}`,
+        "success",
+      );
     } catch (err) {
       const message =
         (err as any)?.response?.data?.error ||
@@ -55,8 +58,12 @@ export const AdminSettings = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wide text-gray-500">Settings</p>
-          <h2 className="text-3xl font-serif font-bold text-white">Platform configuration</h2>
+          <p className="text-xs uppercase tracking-wide text-gray-500">
+            Settings
+          </p>
+          <h2 className="text-3xl font-serif font-bold text-white">
+            Platform configuration
+          </h2>
           <p className="text-sm text-gray-400 mt-1">
             Toggle maintenance mode (superadmin only).
           </p>
@@ -66,10 +73,14 @@ export const AdminSettings = () => {
       <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-white">Maintenance mode</h3>
+            <h3 className="text-lg font-semibold text-white">
+              Maintenance mode
+            </h3>
             <p className="text-sm text-gray-400">
               Temporarily disable public access. Last updated:{" "}
-              <span className="text-gray-200">{updatedAt ? new Date(updatedAt).toLocaleString() : "—"}</span>
+              <span className="text-gray-200">
+                {updatedAt ? new Date(updatedAt).toLocaleString() : "—"}
+              </span>
             </p>
           </div>
           <label className="inline-flex items-center gap-2 text-sm text-white">

@@ -15,7 +15,10 @@ export const AdminRoute = () => {
     if (hasNotifiedRef.current) return;
 
     hasNotifiedRef.current = true;
-    showToast("Admin access only. Please sign in with an admin account.", "error");
+    showToast(
+      "Admin access only. Please sign in with an admin account.",
+      "error",
+    );
   }, [isAdmin, isReady]);
 
   if (!isReady) {
@@ -23,7 +26,9 @@ export const AdminRoute = () => {
   }
 
   if (!isAdmin) {
-    const redirectParam = encodeURIComponent(location.pathname + location.search);
+    const redirectParam = encodeURIComponent(
+      location.pathname + location.search,
+    );
     return <Navigate to={`/login?redirect=${redirectParam}`} replace />;
   }
 

@@ -16,7 +16,7 @@ const navLink = cva(
         false: "text-gray-300 hover:text-pink-400",
       },
     },
-  }
+  },
 );
 
 export const NavItem = ({ to, children }: NavItemProps) => {
@@ -29,7 +29,9 @@ export const NavItem = ({ to, children }: NavItemProps) => {
         {({ isActive }) => (
           <>
             {children}
-            {isActive && <div className="absolute inset-0 bg-[#ff69b4] rounded-md -z-10" />}
+            {isActive && (
+              <div className="absolute inset-0 bg-[#ff69b4] rounded-md -z-10" />
+            )}
           </>
         )}
       </NavLink>

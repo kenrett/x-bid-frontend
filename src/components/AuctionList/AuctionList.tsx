@@ -26,19 +26,22 @@ const AuctionList = () => {
 
     fetchAuctions();
   }, []);
-  
-  const handleAuctionClick = useCallback((id: number) => {
-    navigate(`/auctions/${id}`);
-  }, [navigate]);
-  
+
+  const handleAuctionClick = useCallback(
+    (id: number) => {
+      navigate(`/auctions/${id}`);
+    },
+    [navigate],
+  );
+
   if (loading) {
     return <div role="status">Loading auctions...</div>;
   }
 
   if (error) {
     return <div role="alert">{error}</div>;
-  };
-  
+  }
+
   return (
     <Page>
       {auctions.length === 0 ? (
@@ -55,7 +58,12 @@ const AuctionList = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {auctions.map((auction, index) => (
-              <Auction key={auction.id} {...auction} onClick={handleAuctionClick} index={index} />
+              <Auction
+                key={auction.id}
+                {...auction}
+                onClick={handleAuctionClick}
+                index={index}
+              />
             ))}
           </div>
         </div>

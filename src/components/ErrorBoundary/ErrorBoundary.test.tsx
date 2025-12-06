@@ -15,7 +15,11 @@ const CrashingComponent = () => {
 };
 
 // A component that can be controlled to throw an error or render normally
-const ControllableCrashingComponent = ({ shouldThrow }: { shouldThrow: boolean }) => {
+const ControllableCrashingComponent = ({
+  shouldThrow,
+}: {
+  shouldThrow: boolean;
+}) => {
   if (shouldThrow) {
     throw new Error("Transient error");
   }
@@ -36,7 +40,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <div>Happy path content</div>
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText("Happy path content")).toBeInTheDocument();
@@ -49,7 +53,7 @@ describe("ErrorBoundary", () => {
     render(
       <ErrorBoundary>
         <CrashingComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     // Verify the fallback UI is shown
@@ -62,17 +66,19 @@ describe("ErrorBoundary", () => {
       testError,
       expect.objectContaining({
         componentStack: expect.any(String),
-      })
+      }),
     );
   });
 
   it("should display a custom fallback component if provided", () => {
-    const CustomFallback = () => <div role="alert">A custom error occurred.</div>;
+    const CustomFallback = () => (
+      <div role="alert">A custom error occurred.</div>
+    );
 
     render(
       <ErrorBoundary fallback={<CustomFallback />}>
         <CrashingComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     // Verify the custom fallback is shown
@@ -86,7 +92,7 @@ describe("ErrorBoundary", () => {
     const { rerender } = render(
       <ErrorBoundary>
         <ControllableCrashingComponent shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     // Ensure fallback is visible
@@ -96,7 +102,7 @@ describe("ErrorBoundary", () => {
     rerender(
       <ErrorBoundary>
         <ControllableCrashingComponent shouldThrow={false} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     const user = userEvent.setup();
@@ -105,18 +111,20 @@ describe("ErrorBoundary", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Rendered successfully")).toBeInTheDocument();
-      expect(screen.queryByText("Something went wrong.")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Something went wrong."),
+      ).not.toBeInTheDocument();
     });
   });
 
   it('should call window.location.reload when "Reload Page" is clicked', async () => {
     const reloadMock = vi.fn();
-    vi.stubGlobal('location', { reload: reloadMock });
+    vi.stubGlobal("location", { reload: reloadMock });
 
     render(
       <ErrorBoundary>
         <CrashingComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     const reloadButton = screen.getByRole("button", { name: /reload page/i });

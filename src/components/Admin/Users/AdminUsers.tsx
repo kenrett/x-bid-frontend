@@ -55,23 +55,29 @@ export const AdminUsers = ({
             <tbody className="divide-y divide-white/10">
               {users.map((adminUser) => (
                 <tr key={adminUser.id} className="hover:bg-white/[0.04]">
-                  <td className="px-4 py-3 font-semibold text-white">{adminUser.name}</td>
+                  <td className="px-4 py-3 font-semibold text-white">
+                    {adminUser.name}
+                  </td>
                   <td className="px-4 py-3 text-gray-200">{adminUser.email}</td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      adminUser.role === "superadmin"
-                        ? "bg-red-900 text-red-100 border border-red-300/40"
-                        : "bg-white/10 text-gray-100 border border-white/20"
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        adminUser.role === "superadmin"
+                          ? "bg-red-900 text-red-100 border border-red-300/40"
+                          : "bg-white/10 text-gray-100 border border-white/20"
+                      }`}
+                    >
                       {adminUser.role}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      adminUser.status === "active"
-                        ? "bg-green-900 text-green-100 border border-green-300/30"
-                        : "bg-gray-700 text-gray-200 border border-gray-400/30"
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        adminUser.status === "active"
+                          ? "bg-green-900 text-green-100 border border-green-300/30"
+                          : "bg-gray-700 text-gray-200 border border-gray-400/30"
+                      }`}
+                    >
                       {adminUser.status}
                     </span>
                   </td>
@@ -84,14 +90,16 @@ export const AdminUsers = ({
                         Remove superadmin
                       </button>
                     )}
-                    {isSuperAdmin && adminUser.role !== "superadmin" && adminUser.role !== "admin" && (
-                      <button
-                        onClick={() => onPromote(adminUser.id)}
-                        className="text-sm text-blue-300 hover:text-blue-200 underline underline-offset-2"
-                      >
-                        Grant admin
-                      </button>
-                    )}
+                    {isSuperAdmin &&
+                      adminUser.role !== "superadmin" &&
+                      adminUser.role !== "admin" && (
+                        <button
+                          onClick={() => onPromote(adminUser.id)}
+                          className="text-sm text-blue-300 hover:text-blue-200 underline underline-offset-2"
+                        >
+                          Grant admin
+                        </button>
+                      )}
                     {isSuperAdmin && adminUser.role === "admin" && (
                       <button
                         onClick={() => onDemote(adminUser.id)}

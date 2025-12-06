@@ -71,7 +71,7 @@ describe("AdminAuctionsList", () => {
     render(
       <MemoryRouter initialEntries={["/admin/auctions"]}>
         <AdminAuctionsList />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     expect(await screen.findByText("Vintage Guitar")).toBeInTheDocument();
@@ -88,7 +88,7 @@ describe("AdminAuctionsList", () => {
     render(
       <MemoryRouter initialEntries={["/admin/auctions"]}>
         <AdminAuctionsList />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     const publishBtn = await screen.findByText("Publish");
@@ -106,7 +106,7 @@ describe("AdminAuctionsList", () => {
     render(
       <MemoryRouter initialEntries={["/admin/auctions"]}>
         <AdminAuctionsList />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     const retireBtn = await screen.findByText("Retire");

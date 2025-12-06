@@ -20,7 +20,8 @@ export default defineConfig({
     env: {
       ...process.env,
       VITE_API_URL: process.env.VITE_API_URL ?? "http://localhost:4173",
-      VITE_STRIPE_PUBLISHABLE_KEY: process.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "pk_test_stubbed",
+      VITE_STRIPE_PUBLISHABLE_KEY:
+        process.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "pk_test_stubbed",
     },
   },
   projects: [

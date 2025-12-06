@@ -11,7 +11,10 @@ const cableMocks = vi.hoisted(() => ({
 vi.mock("@api/client", () => {
   const get = vi.fn();
   return {
-    default: { get, interceptors: { request: { use: vi.fn() }, response: { use: vi.fn() } } },
+    default: {
+      get,
+      interceptors: { request: { use: vi.fn() }, response: { use: vi.fn() } },
+    },
   };
 });
 
@@ -35,7 +38,9 @@ const TestConsumer = () => {
     <div>
       <div data-testid="user">{auth.user?.email ?? "none"}</div>
       <div data-testid="token">{auth.token ?? "none"}</div>
-      <div data-testid="remaining">{auth.sessionRemainingSeconds ?? "none"}</div>
+      <div data-testid="remaining">
+        {auth.sessionRemainingSeconds ?? "none"}
+      </div>
       <button onClick={() => auth.logout()}>logout</button>
       <button
         onClick={() =>
@@ -43,7 +48,13 @@ const TestConsumer = () => {
             token: "jwt",
             refreshToken: "refresh",
             sessionTokenId: "sid",
-            user: { id: 1, email: "user@example.com", name: "User", bidCredits: 0, is_admin: false },
+            user: {
+              id: 1,
+              email: "user@example.com",
+              name: "User",
+              bidCredits: 0,
+              is_admin: false,
+            },
           } as any)
         }
       >
@@ -63,7 +74,9 @@ beforeEach(() => {
   vi.clearAllMocks();
   localStorage.clear();
   mockedClient.get.mockReset();
-  mockedClient.get.mockResolvedValue({ data: { remaining_seconds: 300 } } as any);
+  mockedClient.get.mockResolvedValue({
+    data: { remaining_seconds: 300 },
+  } as any);
   mockSubscription.unsubscribe.mockReset();
 });
 
@@ -76,7 +89,7 @@ describe("AuthProvider", () => {
     const view = render(
       <Wrapper>
         <TestConsumer />
-      </Wrapper>
+      </Wrapper>,
     );
 
     expect(screen.getByTestId("user")).toHaveTextContent("none");
@@ -86,7 +99,9 @@ describe("AuthProvider", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getAllByTestId("user")[0]).toHaveTextContent("user@example.com");
+      expect(screen.getAllByTestId("user")[0]).toHaveTextContent(
+        "user@example.com",
+      );
     });
     expect(localStorage.getItem("token")).toBe("jwt");
     expect(localStorage.getItem("refreshToken")).toBe("refresh");
@@ -97,7 +112,7 @@ describe("AuthProvider", () => {
     render(
       <Wrapper>
         <TestConsumer />
-      </Wrapper>
+      </Wrapper>,
     );
     await waitFor(() => {
       expect(screen.getByTestId("user")).toHaveTextContent("user@example.com");
@@ -109,7 +124,7 @@ describe("AuthProvider", () => {
     render(
       <Wrapper>
         <TestConsumer />
-      </Wrapper>
+      </Wrapper>,
     );
 
     await act(async () => {
@@ -128,13 +143,15 @@ describe("AuthProvider", () => {
   });
 
   it("handles session remaining responses and invalidation", async () => {
-    mockedClient.get.mockResolvedValueOnce({ data: { remaining_seconds: 0 } } as any);
+    mockedClient.get.mockResolvedValueOnce({
+      data: { remaining_seconds: 0 },
+    } as any);
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     render(
       <Wrapper>
         <TestConsumer />
-      </Wrapper>
+      </Wrapper>,
     );
 
     await act(async () => {
@@ -155,7 +172,13 @@ describe("AuthProvider", () => {
         token: "next-jwt",
         refresh_token: "next-refresh",
         session_token_id: "next-sid",
-        user: { id: 1, email: "user@example.com", name: "User", bidCredits: 0, is_admin: true },
+        user: {
+          id: 1,
+          email: "user@example.com",
+          name: "User",
+          bidCredits: 0,
+          is_admin: true,
+        },
         is_admin: true,
         is_superuser: false,
       },
@@ -164,7 +187,7 @@ describe("AuthProvider", () => {
     render(
       <Wrapper>
         <TestConsumer />
-      </Wrapper>
+      </Wrapper>,
     );
 
     await act(async () => {

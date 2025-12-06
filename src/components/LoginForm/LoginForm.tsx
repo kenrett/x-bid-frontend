@@ -20,7 +20,14 @@ export const LoginForm = () => {
 
     try {
       const response = await client.post("/login", { email_address, password });
-      const { token, refresh_token, session_token_id, user, is_admin, is_superuser } = response.data;
+      const {
+        token,
+        refresh_token,
+        session_token_id,
+        user,
+        is_admin,
+        is_superuser,
+      } = response.data;
       login({
         token,
         refreshToken: refresh_token,
@@ -33,7 +40,9 @@ export const LoginForm = () => {
       navigate(redirectTo); // Redirect on successful login
     } catch (err) {
       const parsed = parseApiError(err);
-      setError(parsed.message || "Invalid email or password. Please try again.");
+      setError(
+        parsed.message || "Invalid email or password. Please try again.",
+      );
       console.error(err);
     } finally {
       setLoading(false);
@@ -55,8 +64,8 @@ export const LoginForm = () => {
             Drop back into the bidding floor.
           </h1>
           <p className="text-base text-gray-300 sm:text-lg">
-            Sign in to track live auctions, reload bids, and keep your watchlist in motion.
-            The action is waiting.
+            Sign in to track live auctions, reload bids, and keep your watchlist
+            in motion. The action is waiting.
           </p>
           <div className="grid gap-3 text-sm text-gray-300 sm:grid-cols-2 sm:text-base">
             <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur">
@@ -79,8 +88,12 @@ export const LoginForm = () => {
           <div className="relative rounded-[24px] border border-white/10 bg-white/5 p-8 shadow-[0_25px_60px_rgba(0,0,0,0.35)] backdrop-blur">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-pink-200/80">Access</p>
-                <h2 className="text-2xl font-bold text-white">Sign in to your account</h2>
+                <p className="text-xs uppercase tracking-[0.18em] text-pink-200/80">
+                  Access
+                </p>
+                <h2 className="text-2xl font-bold text-white">
+                  Sign in to your account
+                </h2>
               </div>
               <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-pink-200">
                 Returning bidder
@@ -89,7 +102,10 @@ export const LoginForm = () => {
 
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="space-y-2">
-                <label htmlFor="email_address" className="block text-sm font-semibold text-white">
+                <label
+                  htmlFor="email_address"
+                  className="block text-sm font-semibold text-white"
+                >
                   Email address
                 </label>
                 <input
@@ -106,7 +122,10 @@ export const LoginForm = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="password" className="block text-sm font-semibold text-white">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-semibold text-white"
+                >
                   Password
                 </label>
                 <input
@@ -122,7 +141,14 @@ export const LoginForm = () => {
                 />
               </div>
 
-              {error && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-200" role="alert">{error}</p>}
+              {error && (
+                <p
+                  className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-200"
+                  role="alert"
+                >
+                  {error}
+                </p>
+              )}
 
               <button
                 type="submit"
@@ -130,18 +156,26 @@ export const LoginForm = () => {
                 className="group relative inline-flex w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-pink-500/20 transition hover:scale-[1.01] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-pink-300/50 disabled:opacity-60"
               >
                 <span className="absolute inset-0 translate-y-[120%] bg-white/10 transition duration-500 group-hover:translate-y-0" />
-                <span className="relative">{loading ? "Signing in..." : "Sign in"}</span>
+                <span className="relative">
+                  {loading ? "Signing in..." : "Sign in"}
+                </span>
               </button>
 
               <div className="text-center text-sm font-medium text-gray-300">
-                <Link to="/forgot-password" className="text-pink-300 underline-offset-4 transition hover:text-white hover:underline">
+                <Link
+                  to="/forgot-password"
+                  className="text-pink-300 underline-offset-4 transition hover:text-white hover:underline"
+                >
                   Forgot your password?
                 </Link>
               </div>
 
               <div className="text-center text-sm font-medium text-gray-300">
                 Not registered?{" "}
-                <Link to="/signup" className="text-pink-300 underline-offset-4 transition hover:text-white hover:underline">
+                <Link
+                  to="/signup"
+                  className="text-pink-300 underline-offset-4 transition hover:text-white hover:underline"
+                >
                   Create account
                 </Link>
               </div>

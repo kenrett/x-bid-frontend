@@ -9,7 +9,9 @@ interface PlaceBidResponse {
   auction?: AuctionDetail;
 }
 
-export const placeBid = async (auctionId: number): Promise<PlaceBidResponse> => {
+export const placeBid = async (
+  auctionId: number,
+): Promise<PlaceBidResponse> => {
   const response = await client.post(`/auctions/${auctionId}/bids`);
   return response.data;
 };
@@ -22,7 +24,11 @@ interface BidHistoryResponse {
   bids: Bid[];
 }
 
-export const getBidHistory = async (auctionId: number): Promise<BidHistoryResponse> => {
-  const response = await client.get<BidHistoryResponse>(`auctions/${auctionId}/bid_history`);
+export const getBidHistory = async (
+  auctionId: number,
+): Promise<BidHistoryResponse> => {
+  const response = await client.get<BidHistoryResponse>(
+    `auctions/${auctionId}/bid_history`,
+  );
   return response.data;
 };

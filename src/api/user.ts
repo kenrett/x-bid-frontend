@@ -3,24 +3,24 @@ import type { User } from "../types/user";
 const coerceAdminFlag = (value: unknown): boolean => {
   if (typeof value === "boolean") return value;
   if (typeof value === "number") return value !== 0;
-  if (typeof value === "string") return ["true", "1", "t", "yes"].includes(value.toLowerCase());
+  if (typeof value === "string")
+    return ["true", "1", "t", "yes"].includes(value.toLowerCase());
   return false;
 };
 
 export const normalizeUser = (apiUser: any): User => {
   const record = apiUser ?? {};
   const email =
-    record.email ??
-    record.email_address ??
-    record.emailAddress ??
-    "";
+    record.email ?? record.email_address ?? record.emailAddress ?? "";
 
   const hasAdminRole = (() => {
     const role = record.role;
     const roles = record.roles;
     if (typeof role === "string") return role.toLowerCase() === "admin";
     if (Array.isArray(roles)) {
-      return roles.some((r) => typeof r === "string" && r.toLowerCase() === "admin");
+      return roles.some(
+        (r) => typeof r === "string" && r.toLowerCase() === "admin",
+      );
     }
     return false;
   })();
@@ -30,7 +30,9 @@ export const normalizeUser = (apiUser: any): User => {
     const roles = record.roles;
     if (typeof role === "string") return role.toLowerCase() === "superadmin";
     if (Array.isArray(roles)) {
-      return roles.some((r) => typeof r === "string" && r.toLowerCase() === "superadmin");
+      return roles.some(
+        (r) => typeof r === "string" && r.toLowerCase() === "superadmin",
+      );
     }
     return false;
   })();
@@ -38,10 +40,10 @@ export const normalizeUser = (apiUser: any): User => {
   const isSuperuser =
     coerceAdminFlag(
       record.is_superuser ??
-      record.isSuperuser ??
-      record.superuser ??
-      record.super_admin ??
-      record.superAdmin
+        record.isSuperuser ??
+        record.superuser ??
+        record.super_admin ??
+        record.superAdmin,
     ) || hasSuperRole;
 
   const isAdmin =
@@ -53,7 +55,12 @@ export const normalizeUser = (apiUser: any): User => {
     id: Number(record.id ?? 0),
     name: record.name ?? "",
     email,
-    bidCredits: Number(record.bidCredits ?? record.bid_credits ?? record.bid_credits_balance ?? 0),
+    bidCredits: Number(
+      record.bidCredits ??
+        record.bid_credits ??
+        record.bid_credits_balance ??
+        0,
+    ),
     is_admin: isAdmin,
     is_superuser: isSuperuser,
   };

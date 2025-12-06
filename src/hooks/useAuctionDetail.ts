@@ -4,7 +4,10 @@ import { isAxiosError } from "axios";
 import { useAuth } from "@hooks/useAuth";
 import { getAuction } from "@api/auctions";
 import { placeBid, getBidHistory } from "@api/bids";
-import { useAuctionChannel, type AuctionChannelData } from "@hooks/useAuctionChannel";
+import {
+  useAuctionChannel,
+  type AuctionChannelData,
+} from "@hooks/useAuctionChannel";
 
 import type { AuctionDetail } from "../types/auction";
 import type { Bid } from "../types/bid";
@@ -29,7 +32,10 @@ type AuctionAction =
   | { type: "FETCH_SUCCESS"; payload: { auction: AuctionDetail; bids: Bid[] } }
   | { type: "FETCH_FAILURE"; payload: string }
   | { type: "BID_START" }
-  | { type: "BID_SUCCESS"; payload: { updatedAuction: Partial<AuctionDetail>; newBid: Bid } }
+  | {
+      type: "BID_SUCCESS";
+      payload: { updatedAuction: Partial<AuctionDetail>; newBid: Bid };
+    }
   | { type: "BID_FAILURE"; payload: string }
   | { type: "BID_END" }
   | { type: "CHANNEL_UPDATE"; payload: { data: AuctionChannelData } };
@@ -40,7 +46,10 @@ type AuctionAction =
  * @param state - The current state.
  * @param action - The action to be processed.
  */
-function auctionReducer(state: AuctionState, action: AuctionAction): AuctionState {
+function auctionReducer(
+  state: AuctionState,
+  action: AuctionAction,
+): AuctionState {
   let nextState: AuctionState;
 
   switch (action.type) {
@@ -62,7 +71,7 @@ function auctionReducer(state: AuctionState, action: AuctionAction): AuctionStat
       const { updatedAuction, newBid } = action.payload;
       // Prevent adding a duplicate bid if the reducer runs twice
       // or if a channel update has already added this bid.
-      const bidExists = state.bids.some(bid => bid.id === newBid.id);
+      const bidExists = state.bids.some((bid) => bid.id === newBid.id);
       const newBids = bidExists ? state.bids : [newBid, ...state.bids];
 
       nextState = {
@@ -78,7 +87,8 @@ function auctionReducer(state: AuctionState, action: AuctionAction): AuctionStat
       // On failure, re-enable bidding and show an error.
       nextState = { ...state, isBidding: false, bidError: action.payload };
       break;
-    } case "BID_END":
+    }
+    case "BID_END":
       nextState = { ...state, isBidding: false };
       break;
     case "CHANNEL_UPDATE": {
@@ -93,17 +103,24 @@ function auctionReducer(state: AuctionState, action: AuctionAction): AuctionStat
         nextState = { ...state, lastBidderId: null };
         break;
       }
-      
+
       const updatedAuction = {
         ...state.auction,
         // Fall back to incoming bid amount if current_price is not broadcast separately.
-        current_price: data.current_price ?? data.bid?.amount ?? state.auction.current_price,
-        highest_bidder_id: data.highest_bidder_id ?? data.bid?.user_id ?? state.auction.highest_bidder_id,
-        winning_user_name: data.highest_bidder_name ?? data.bid?.username ?? state.auction.winning_user_name,
+        current_price:
+          data.current_price ?? data.bid?.amount ?? state.auction.current_price,
+        highest_bidder_id:
+          data.highest_bidder_id ??
+          data.bid?.user_id ??
+          state.auction.highest_bidder_id,
+        winning_user_name:
+          data.highest_bidder_name ??
+          data.bid?.username ??
+          state.auction.winning_user_name,
         end_time: data.end_time ?? state.auction.end_time,
       };
       let updatedBids = [...state.bids];
-      if (data.bid && !updatedBids.some(b => b.id === data.bid?.id)) {
+      if (data.bid && !updatedBids.some((b) => b.id === data.bid?.id)) {
         const incomingBid = data.bid as Bid;
         updatedBids = [incomingBid, ...updatedBids];
       }
@@ -127,7 +144,15 @@ function auctionReducer(state: AuctionState, action: AuctionAction): AuctionStat
 /**
  * The initial state for the auction reducer.
  */
-const initialState: AuctionState = { auction: null, bids: [], loading: true, error: null, isBidding: false, bidError: null, lastBidderId: null };
+const initialState: AuctionState = {
+  auction: null,
+  bids: [],
+  loading: true,
+  error: null,
+  isBidding: false,
+  bidError: null,
+  lastBidderId: null,
+};
 
 /**
  * A custom hook to manage the state and logic for an auction detail page.
@@ -152,10 +177,10 @@ export function useAuctionDetail(auctionId: number) {
       ]);
 
       auctionData.highest_bidder_id =
-      bidHistoryResponse.auction.winning_user_id ??
-      auctionData.highest_bidder_id;
+        bidHistoryResponse.auction.winning_user_id ??
+        auctionData.highest_bidder_id;
       auctionData.winning_user_name =
-      bidHistoryResponse.auction.winning_user_name;
+        bidHistoryResponse.auction.winning_user_name;
 
       const bidHistory = bidHistoryResponse.bids;
 
@@ -235,16 +260,19 @@ export function useAuctionDetail(auctionId: number) {
         highest_bidder_id: normalizedBid.user_id,
         current_price: Number(
           updatedAuctionData?.current_price ??
-          normalizedBid.amount ??
-          baseAuction.current_price ??
-          0
+            normalizedBid.amount ??
+            baseAuction.current_price ??
+            0,
         ),
         winning_user_name: normalizedBid.username,
       };
 
       dispatch({
         type: "BID_SUCCESS",
-        payload: { updatedAuction: updatedAuctionWithId, newBid: normalizedBid },
+        payload: {
+          updatedAuction: updatedAuctionWithId,
+          newBid: normalizedBid,
+        },
       });
     } catch (err) {
       if (isAxiosError(err) && err.response?.data?.error) {
@@ -252,8 +280,7 @@ export function useAuctionDetail(auctionId: number) {
       } else {
         dispatch({
           type: "BID_FAILURE",
-          payload:
-            "An unexpected error occurred while placing your bid.",
+          payload: "An unexpected error occurred while placing your bid.",
         });
       }
     } finally {
