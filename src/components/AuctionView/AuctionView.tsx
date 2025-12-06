@@ -53,7 +53,6 @@ const AuctionViewComponent = ({
             Back to Auctions
           </button>
         </div>
-        $$$$$$$<div>${user?.id}</div>$$$$$$
         {/* Auction Layout */}
         <div className="grid md:grid-cols-2 gap-12 items-start">
           <div className="rounded-2xl overflow-hidden shadow-2xl shadow-[#a020f0]/10">
