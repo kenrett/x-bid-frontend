@@ -5,6 +5,7 @@ import App from './App'
 import { AuthProvider } from './auth/AuthProvider'
 import { FlowbiteInitializer } from './components/FlowbiteInitializer'
 import { ToastContainer } from './components/Toast/ToastContainer'
+import './sentryClient'
 
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Root element not found');

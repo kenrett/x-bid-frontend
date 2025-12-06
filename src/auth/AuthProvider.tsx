@@ -6,6 +6,7 @@ import type { LoginPayload } from "../types/auth";
 import client from "@api/client";
 import { cable } from "@/services/cable";
 import { normalizeUser } from "@api/user";
+import { setSentryUser } from "@/sentryClient";
 
 type SessionRemainingResponse = {
   remaining_seconds?: number;
@@ -89,6 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     persistValue("token", jwt);
     persistValue("refreshToken", refresh);
     persistValue("sessionTokenId", sessionId);
+    setSentryUser(normalizedUser);
   }, [persistValue, normalizeAuthUser]);
 
   const logout = useCallback(() => {
@@ -102,6 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     persistValue("token", null);
     persistValue("refreshToken", null);
     persistValue("sessionTokenId", null);
+    setSentryUser(null);
   }, [persistValue]);
 
   const handleSessionInvalidated = useCallback((reason?: string) => {
