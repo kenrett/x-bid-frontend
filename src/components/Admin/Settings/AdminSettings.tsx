@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { showToast } from "@/services/toast";
-import { getMaintenance, setMaintenance } from "@/api/admin/maintenance";
+import {
+  extractError,
+  getMaintenance,
+  setMaintenance,
+} from "@/api/admin/maintenance";
 import { useAuth } from "@/hooks/useAuth";
 
 export const AdminSettings = () => {
@@ -44,10 +48,9 @@ export const AdminSettings = () => {
         `Maintenance ${state.enabled ? "enabled" : "disabled"}`,
         "success",
       );
-    } catch (err) {
+    } catch (err: unknown) {
       const message =
-        (err as any)?.response?.data?.error ||
-        (err instanceof Error ? err.message : String(err));
+        extractError(err) ?? (err instanceof Error ? err.message : String(err));
       showToast(message || "Failed to update maintenance mode", "error");
     } finally {
       setSaving(false);

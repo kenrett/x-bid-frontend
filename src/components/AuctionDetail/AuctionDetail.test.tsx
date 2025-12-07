@@ -50,7 +50,7 @@ describe("AuctionDetail Container", () => {
     mockedUseAuctionDetail.mockReturnValue({
       loading: true,
       auction: null,
-    } as any);
+    } as ReturnType<typeof useAuctionDetail>);
 
     render(<AuctionDetail />, { wrapper: MemoryRouter });
 
@@ -61,7 +61,7 @@ describe("AuctionDetail Container", () => {
     mockedUseAuctionDetail.mockReturnValue({
       loading: true,
       auction: null,
-    } as any);
+    } as ReturnType<typeof useAuctionDetail>);
 
     render(<AuctionDetail />, { wrapper: MemoryRouter });
 
@@ -75,7 +75,7 @@ describe("AuctionDetail Container", () => {
       loading: false,
       auction: null,
       error: errorMessage,
-    } as any);
+    } as ReturnType<typeof useAuctionDetail>);
 
     render(<AuctionDetail />, { wrapper: MemoryRouter });
 
@@ -90,7 +90,7 @@ describe("AuctionDetail Container", () => {
       auction: mockAuction,
       error: null,
       // ... other return values
-    } as any);
+    } as ReturnType<typeof useAuctionDetail>);
 
     render(<AuctionDetail />, { wrapper: MemoryRouter });
 

@@ -1,6 +1,7 @@
 import client from "./client";
 import type { AuctionDetail, AuctionSummary } from "../types/auction";
 import type { Bid } from "../types/bid";
+import type { ApiJsonResponse } from "./openapi-helpers";
 import { statusFromApi } from "./status";
 
 const normalizePrice = (value: unknown) => {
@@ -10,12 +11,17 @@ const normalizePrice = (value: unknown) => {
 
 export const getAuctions = async () => {
   const res = await client.get<
-    AuctionSummary[] | { auctions?: AuctionSummary[] }
+    ApiJsonResponse<"/api/v1/auctions", "get"> | { auctions?: unknown }
   >("/auctions");
-  const list = Array.isArray(res.data)
-    ? res.data
-    : Array.isArray((res.data as { auctions?: AuctionSummary[] }).auctions)
-      ? (res.data as { auctions: AuctionSummary[] }).auctions
+
+  const payload = res.data as
+    | ApiJsonResponse<"/api/v1/auctions", "get">
+    | { auctions?: unknown };
+
+  const list = Array.isArray(payload)
+    ? payload
+    : Array.isArray((payload as { auctions?: unknown }).auctions)
+      ? ((payload as { auctions: unknown[] }).auctions as AuctionSummary[])
       : [];
 
   return list.map((auction) => ({
@@ -25,27 +31,44 @@ export const getAuctions = async () => {
   }));
 };
 
-export const getAuction = async (id: number) => {
-  const res = await client.get<
-    | AuctionDetail
-    | (AuctionDetail & { bids?: unknown })
-    | { auction?: AuctionDetail | (AuctionDetail & { bids?: unknown }) }
-  >(`/auctions/${id}`);
-  const data = res.data;
+type AuctionShowResponse =
+  | ApiJsonResponse<"/api/v1/auctions/{id}", "get">
+  | { auction?: unknown };
 
-  const rawAuction: AuctionDetail | (AuctionDetail & { bids?: unknown }) =
-    (data as { auction?: AuctionDetail }).auction ?? (data as AuctionDetail);
+type AuctionShowRecord = AuctionShowResponse extends { auction: infer A }
+  ? A
+  : AuctionShowResponse;
 
-  const bids: Bid[] = Array.isArray((rawAuction as { bids?: unknown }).bids)
-    ? ((rawAuction as { bids?: unknown }).bids as Bid[])
-    : Array.isArray((data as { bids?: unknown }).bids)
-      ? ((data as { bids?: unknown }).bids as Bid[])
+const normalizeAuctionDetail = (
+  raw: AuctionShowRecord,
+  fallbackBids?: Bid[],
+): AuctionDetail => {
+  const auction = (raw ?? {}) as AuctionDetail & { bids?: unknown };
+  const bids: Bid[] = Array.isArray(auction.bids)
+    ? (auction.bids as Bid[])
+    : Array.isArray(fallbackBids)
+      ? fallbackBids
       : [];
 
   return {
-    ...rawAuction,
+    ...auction,
     bids,
-    current_price: normalizePrice(rawAuction.current_price),
-    status: statusFromApi(rawAuction.status),
+    current_price: normalizePrice(auction.current_price),
+    status: statusFromApi(auction.status),
   };
+};
+
+export const getAuction = async (id: number) => {
+  const res = await client.get<AuctionShowResponse>(`/auctions/${id}`);
+  const data = res.data;
+
+  const rawAuction =
+    (data as { auction?: AuctionShowRecord }).auction ??
+    (data as AuctionShowRecord);
+
+  const fallbackBids = Array.isArray((data as { bids?: unknown }).bids)
+    ? ((data as { bids: Bid[] }).bids as Bid[])
+    : undefined;
+
+  return normalizeAuctionDetail(rawAuction, fallbackBids);
 };

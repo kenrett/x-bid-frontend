@@ -29,7 +29,7 @@ describe("AdminSettings (maintenance)", () => {
     vi.clearAllMocks();
     mockedUseAuth.mockReturnValue({
       user: { id: 1, email: "super@example.com", is_superuser: true },
-    } as any);
+    } as unknown as ReturnType<typeof useAuth>);
     mockedGetMaintenance.mockResolvedValue({
       enabled: false,
       updated_at: null,
@@ -65,7 +65,7 @@ describe("AdminSettings (maintenance)", () => {
   it("blocks non-superadmin from toggling", async () => {
     mockedUseAuth.mockReturnValue({
       user: { id: 2, email: "admin@example.com", is_superuser: false },
-    } as any);
+    } as unknown as ReturnType<typeof useAuth>);
     mockedGetMaintenance.mockResolvedValue({
       enabled: false,
       updated_at: null,

@@ -13,6 +13,9 @@ vi.mock("@/hooks/useAuctionDetail", () => ({
 vi.mock("@/services/toast", () => ({
   showToast: vi.fn(),
 }));
+vi.mock("@/services/adminAudit", () => ({
+  logAdminAction: vi.fn(),
+}));
 
 const mockRefresh = vi.fn();
 

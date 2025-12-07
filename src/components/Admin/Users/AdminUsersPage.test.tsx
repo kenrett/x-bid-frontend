@@ -18,7 +18,7 @@ vi.mock("@/services/adminUsersApi");
 const mockedUseAuth = vi.mocked(useAuth);
 const mockedAdminUsersApi = vi.mocked(adminUsersApi);
 
-const mockUsers = [
+const mockUsers: AdminUser[] = [
   {
     id: 2,
     email: "admin@example.com",
@@ -35,10 +35,12 @@ const mockUsers = [
   },
 ];
 
-const mockUpdatedUser = {
+const mockUpdatedUser: AdminUser = {
   id: 2,
   email: "admin@example.com",
   name: "Admin User",
+  role: "admin",
+  status: "active",
 };
 
 describe("AdminUsersPage", () => {
@@ -46,24 +48,24 @@ describe("AdminUsersPage", () => {
     mockedUseAuth.mockReturnValue({
       user: { id: 1, email: "super@example.com", is_superuser: true },
       logout: vi.fn(),
-    } as any);
+    } as unknown as ReturnType<typeof useAuth>);
     mockedAdminUsersApi.getUsers.mockResolvedValue(mockUsers);
     mockedAdminUsersApi.banUser.mockResolvedValue({
       ...mockUpdatedUser,
       status: "disabled",
-    } as any);
+    });
     mockedAdminUsersApi.grantAdmin.mockResolvedValue({
       ...mockUpdatedUser,
       role: "admin",
-    } as any);
+    });
     mockedAdminUsersApi.revokeAdmin.mockResolvedValue({
       ...mockUpdatedUser,
       role: "user",
-    } as any);
+    });
     mockedAdminUsersApi.revokeSuperadmin.mockResolvedValue({
       ...mockUpdatedUser,
       role: "admin",
-    } as any);
+    });
     vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
@@ -110,7 +112,7 @@ describe("AdminUsersPage", () => {
     mockedUseAuth.mockReturnValue({
       user: { id: 2, email: "admin@example.com", is_superuser: false },
       logout: vi.fn(),
-    } as any);
+    } as unknown as ReturnType<typeof useAuth>);
     render(<AdminUsersPage />);
 
     await screen.findByText("Admin User");

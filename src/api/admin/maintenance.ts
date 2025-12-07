@@ -1,17 +1,16 @@
 import axios from "axios";
 import client from "../client";
-
-type MaintenanceResponse = {
-  maintenance: {
-    enabled: boolean;
-    updated_at: string | null;
-  };
-};
+import type { ApiJsonResponse } from "../openapi-helpers";
 
 export type MaintenanceState = {
   enabled: boolean;
   updated_at: string | null;
 };
+
+type MaintenanceResponse =
+  | ApiJsonResponse<"/api/v1/admin/maintenance", "get">
+  | ApiJsonResponse<"/api/v1/maintenance", "get">
+  | { maintenance?: { enabled?: unknown; updated_at?: unknown } };
 
 export const getPublicMaintenance = async (): Promise<MaintenanceState> => {
   const res = await client.get<MaintenanceResponse>("/maintenance");

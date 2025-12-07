@@ -1,4 +1,5 @@
 import type { User } from "../types/user";
+import type { ApiJsonResponse } from "./openapi-helpers";
 
 const coerceAdminFlag = (value: unknown): boolean => {
   if (typeof value === "boolean") return value;
@@ -8,8 +9,17 @@ const coerceAdminFlag = (value: unknown): boolean => {
   return false;
 };
 
-export const normalizeUser = (apiUser: any): User => {
-  const record = apiUser ?? {};
+type LoginResponse = ApiJsonResponse<"/api/v1/login", "post">;
+type SignupResponse = ApiJsonResponse<"/api/v1/users", "post">;
+type UserPayload =
+  | LoginResponse
+  | SignupResponse
+  | (LoginResponse extends { user: infer U } ? U : never)
+  | (SignupResponse extends { user: infer U } ? U : never)
+  | Record<string, unknown>;
+
+export const normalizeUser = (apiUser: UserPayload): User => {
+  const record = (apiUser ?? {}) as Record<string, unknown>;
   const email =
     record.email ?? record.email_address ?? record.emailAddress ?? "";
 

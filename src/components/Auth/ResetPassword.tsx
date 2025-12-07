@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import axios from "axios";
 import client from "@api/client";
+import type { ApiJsonResponse } from "@/api/openapi-helpers";
 import { useAuth } from "../../hooks/useAuth";
 import { parseApiError } from "@/utils/apiError";
 
@@ -39,13 +39,16 @@ export const ResetPassword = () => {
 
     try {
       setIsSubmitting(true);
-      await client.post("/password/reset", {
-        password: {
-          token: token.trim(),
-          password,
-          password_confirmation: confirmPassword,
+      await client.post<ApiJsonResponse<"/api/v1/password/reset", "post">>(
+        "/password/reset",
+        {
+          password: {
+            token: token.trim(),
+            password,
+            password_confirmation: confirmPassword,
+          },
         },
-      });
+      );
       setMessage("Password updated. Please sign in with your new password.");
       setPassword("");
       setConfirmPassword("");

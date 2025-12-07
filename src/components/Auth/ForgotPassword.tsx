@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import client from "@api/client";
+import type { ApiJsonResponse } from "@/api/openapi-helpers";
 import { parseApiError } from "@/utils/apiError";
 
 export const ForgotPassword = () => {
@@ -19,11 +19,16 @@ export const ForgotPassword = () => {
 
     try {
       setIsSubmitting(true);
-      const response = await client.post("/password/forgot", {
+      const response = await client.post<
+        ApiJsonResponse<"/api/v1/password/forgot", "post"> & {
+          debug_token?: unknown;
+        }
+      >("/password/forgot", {
         password: { email_address: email.trim() },
       });
-      if (response.data?.debug_token) {
-        setDebugToken(String(response.data.debug_token));
+      const token = response.data?.debug_token;
+      if (token) {
+        setDebugToken(String(token));
       }
       setMessage(
         "If that account exists, we've emailed instructions to reset the password.",

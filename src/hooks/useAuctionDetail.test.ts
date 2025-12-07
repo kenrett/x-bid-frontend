@@ -36,7 +36,7 @@ const mockedPlaceBid = vi.mocked(bidsApi.placeBid);
 const mockedUseAuth = vi.mocked(useAuth);
 const mockedUseAuctionChannel = vi.mocked(useAuctionChannel);
 
-const baseAuction = {
+const baseAuction: auctionsApi.AuctionDetail = {
   id: 1,
   title: "Test Auction",
   description: "desc",
@@ -49,7 +49,7 @@ const baseAuction = {
   winning_user_name: null,
 };
 
-const bidHistoryResponse = {
+const bidHistoryResponse: bidsApi.BidHistoryResponse = {
   auction: { winning_user_id: null, winning_user_name: null },
   bids: [],
 };
@@ -58,14 +58,18 @@ const user = { id: 10, name: "User", is_admin: false, is_superuser: false };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockedUseAuctionChannel.mockReturnValue(true as any);
-  mockedGetAuction.mockResolvedValue(baseAuction as any);
-  mockedGetBidHistory.mockResolvedValue(bidHistoryResponse as any);
+  mockedUseAuctionChannel.mockReturnValue(
+    true as unknown as ReturnType<typeof useAuctionChannel>,
+  );
+  mockedGetAuction.mockResolvedValue(baseAuction);
+  mockedGetBidHistory.mockResolvedValue(bidHistoryResponse);
   mockedPlaceBid.mockResolvedValue({
     auction: baseAuction,
     bid: { id: 99, user_id: 10, amount: 2 },
-  } as any);
-  mockedUseAuth.mockReturnValue({ user } as any);
+  } as bidsApi.PlaceBidResponse);
+  mockedUseAuth.mockReturnValue({ user } as unknown as ReturnType<
+    typeof useAuth
+  >);
 });
 
 describe("useAuctionDetail", () => {
@@ -92,11 +96,11 @@ describe("useAuctionDetail", () => {
       ...baseAuction,
       winning_user_name: "Winner",
       highest_bidder_id: 20,
-    } as any);
+    });
     mockedGetBidHistory.mockResolvedValueOnce({
       auction: { winning_user_id: 20, winning_user_name: "Winner" },
       bids: [],
-    } as any);
+    });
 
     const { result } = renderHook(() => useAuctionDetail(1));
     await waitFor(() => expect(result.current.loading).toBe(false));

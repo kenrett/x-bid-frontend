@@ -14,7 +14,6 @@ import { RouteErrorBoundary } from "./components/ErrorBoundary/RouteErrorBoundar
 import { AdminRoute } from "./components/AdminRoute";
 import { AdminDashboard } from "./components/Admin/AdminDashboard";
 import { AdminLayout } from "./components/Admin/AdminLayout";
-import { AdminPlaceholder } from "./components/Admin/AdminPlaceholder";
 import { ADMIN_PATHS } from "./components/Admin/adminPaths";
 import { AdminAuctionsList } from "./components/Admin/Auctions/AdminAuctionsList";
 import { AdminAuctionCreate } from "./components/Admin/Auctions/AdminAuctionCreate";

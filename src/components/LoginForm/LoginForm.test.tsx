@@ -5,6 +5,8 @@ import { LoginForm } from "./LoginForm";
 import { useAuth } from "../../hooks/useAuth";
 import client from "@api/client";
 import userEvent from "@testing-library/user-event";
+import type { User } from "@/types/user";
+import type { LoginPayload } from "@/types/auth";
 
 // --- Mocks ---
 vi.mock("react-router-dom", async () => {
@@ -29,7 +31,13 @@ const mockedNavigate = vi.mocked(useNavigate);
 const mockedUseSearchParams = vi.mocked(useSearchParams);
 
 // --- Test Data ---
-const mockUser = { id: 1, name: "Test User" };
+const mockUser: User = {
+  id: 1,
+  name: "Test User",
+  email: "test@example.com",
+  bidCredits: 0,
+  is_admin: false,
+};
 const mockToken = "fake-jwt-token";
 const mockRefreshToken = "fake-refresh-token";
 const mockSessionTokenId = "session-token-id";
@@ -47,7 +55,9 @@ const renderComponent = (searchParams = "") => {
 describe("LoginForm Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedUseAuth.mockReturnValue({ login: mockLogin } as any);
+    mockedUseAuth.mockReturnValue({
+      login: mockLogin,
+    } as unknown as ReturnType<typeof useAuth>);
     // Suppress console.error for tests that intentionally cause errors
     vi.spyOn(console, "error").mockImplementation(() => {});
     // useSearchParams returns a tuple [params, setParams], so we mock both.
@@ -118,7 +128,7 @@ describe("LoginForm Component", () => {
           refreshToken: mockRefreshToken,
           sessionTokenId: mockSessionTokenId,
           user: mockUser,
-        });
+        } satisfies LoginPayload);
         expect(navigateFn).toHaveBeenCalledWith("/auctions");
       });
     });

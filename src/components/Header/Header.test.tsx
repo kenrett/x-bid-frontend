@@ -26,7 +26,10 @@ describe("Header Component", () => {
   });
 
   it("should render the logo and main navigation links", () => {
-    mockedUseAuth.mockReturnValue({ user: null, logout: mockLogout } as any);
+    mockedUseAuth.mockReturnValue({
+      user: null,
+      logout: mockLogout,
+    } as unknown as ReturnType<typeof useAuth>);
     renderComponent();
 
     // Check for logo linking to home
@@ -45,7 +48,10 @@ describe("Header Component", () => {
 
   describe("when user is not logged in", () => {
     beforeEach(() => {
-      mockedUseAuth.mockReturnValue({ user: null, logout: mockLogout } as any);
+      mockedUseAuth.mockReturnValue({
+        user: null,
+        logout: mockLogout,
+      } as unknown as ReturnType<typeof useAuth>);
     });
 
     it("should display a 'Sign In' link", () => {
@@ -76,7 +82,7 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockUser,
         logout: mockLogout,
-      } as any);
+      } as unknown as ReturnType<typeof useAuth>);
     });
 
     it("should display the user's email and a 'Log Out' button", () => {
@@ -103,7 +109,10 @@ describe("Header Component", () => {
   });
 
   it("should render the mobile menu button", () => {
-    mockedUseAuth.mockReturnValue({ user: null, logout: mockLogout } as any);
+    mockedUseAuth.mockReturnValue({
+      user: null,
+      logout: mockLogout,
+    } as unknown as ReturnType<typeof useAuth>);
     renderComponent();
     const mobileMenuButton = screen.getByRole("button", {
       name: /open main menu/i,
@@ -116,7 +125,7 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockAdmin,
         logout: mockLogout,
-      } as any);
+      } as unknown as ReturnType<typeof useAuth>);
       renderComponent();
 
       expect(screen.getByText(/admin mode active/i)).toBeInTheDocument();
@@ -129,7 +138,7 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockSuper,
         logout: mockLogout,
-      } as any);
+      } as unknown as ReturnType<typeof useAuth>);
       renderComponent();
 
       expect(
@@ -143,7 +152,7 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockUser,
         logout: mockLogout,
-      } as any);
+      } as unknown as ReturnType<typeof useAuth>);
       renderComponent();
 
       expect(screen.queryByText(/admin mode active/i)).not.toBeInTheDocument();

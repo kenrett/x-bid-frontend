@@ -1,35 +1,39 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Payment } from "./types";
 import { AdminPayments } from "./AdminPayments";
+import { adminPaymentsApi } from "@/services/adminPaymentsApi";
 import { showToast } from "@/services/toast";
 
-const mockPayments: Payment[] = [
-  {
-    id: 101,
-    userEmail: "admin@example.com",
-    amount: 49.99,
-    status: "succeeded",
-    createdAt: "2024-07-01T12:00:00Z",
-  },
-  {
-    id: 102,
-    userEmail: "superadmin@example.com",
-    amount: 99.99,
-    status: "failed",
-    createdAt: "2024-07-02T13:10:00Z",
-  },
-  {
-    id: 103,
-    userEmail: "user@example.com",
-    amount: 19.99,
-    status: "pending",
-    createdAt: "2024-07-03T15:45:00Z",
-  },
-];
-
 export const AdminPaymentsPage = () => {
-  const [payments] = useState<Payment[]>(mockPayments);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [paymentSearch, setPaymentSearch] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const isMounted = useRef(true);
+
+  const loadPayments = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await adminPaymentsApi.listPayments();
+      if (isMounted.current) {
+        setPayments(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      if (!isMounted.current) return;
+      const message = error instanceof Error ? error.message : String(error);
+      showToast(`Could not load payments: ${message}`, "error");
+    } finally {
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadPayments();
+    return () => {
+      isMounted.current = false;
+    };
+  }, [loadPayments]);
 
   const filteredPayments = useMemo(() => {
     return payments.filter((payment) =>
@@ -38,7 +42,7 @@ export const AdminPaymentsPage = () => {
   }, [payments, paymentSearch]);
 
   const handleRefresh = () => {
-    showToast("Refresh coming soon (wire to backend)", "info");
+    void loadPayments();
   };
 
   return (
@@ -52,14 +56,16 @@ export const AdminPaymentsPage = () => {
             Recent payments
           </h2>
           <p className="text-sm text-gray-400 mt-1">
-            Placeholder data shown; wire to backend for live data.
+            Live payment history pulled from the API. Use refresh to sync the
+            latest records.
           </p>
         </div>
         <button
           onClick={handleRefresh}
-          className="text-sm text-gray-200 bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg px-3 py-2 transition-colors"
+          disabled={isLoading}
+          className="text-sm text-gray-200 bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg px-3 py-2 transition-colors disabled:opacity-60"
         >
-          Refresh
+          {isLoading ? "Refreshing..." : "Refresh"}
         </button>
       </div>
 

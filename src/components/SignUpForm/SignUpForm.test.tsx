@@ -5,6 +5,8 @@ import userEvent from "@testing-library/user-event";
 import { SignUpForm } from "./SignUpForm";
 import { useAuth } from "../../hooks/useAuth";
 import client from "@api/client";
+import type { LoginPayload } from "@/types/auth";
+import type { User } from "@/types/user";
 
 const mockLogin = vi.fn();
 const mockNavigate = vi.fn();
@@ -33,7 +35,9 @@ const renderComponent = () =>
 describe("SignUpForm Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedUseAuth.mockReturnValue({ login: mockLogin } as any);
+    mockedUseAuth.mockReturnValue({
+      login: mockLogin,
+    } as unknown as ReturnType<typeof useAuth>);
   });
 
   it("renders all form fields", () => {
@@ -72,7 +76,13 @@ describe("SignUpForm Component", () => {
 
   it("submits successfully and navigates to /auctions", async () => {
     const user = userEvent.setup();
-    const mockUser = { id: 1, name: "Test User" };
+    const mockUser: User = {
+      id: 1,
+      name: "Test User",
+      email: "test@example.com",
+      bidCredits: 0,
+      is_admin: false,
+    };
     const mockToken = "fake-token";
     const mockRefreshToken = "refresh-token";
     const mockSessionTokenId = "session-token";
@@ -109,7 +119,7 @@ describe("SignUpForm Component", () => {
         refreshToken: mockRefreshToken,
         sessionTokenId: mockSessionTokenId,
         user: mockUser,
-      });
+      } satisfies LoginPayload);
       expect(mockNavigate).toHaveBeenCalledWith("/auctions");
     });
   });

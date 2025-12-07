@@ -1,6 +1,8 @@
 import React from "react";
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
+import type { LoginPayload } from "@/types/auth";
+import type { User } from "@/types/user";
 
 const cableMocks = vi.hoisted(() => ({
   connect: vi.fn(),
@@ -34,6 +36,13 @@ import client from "@api/client";
 // Minimal consumer to read context values
 const TestConsumer = () => {
   const auth = useAuth();
+  const mockUser: User = {
+    id: 1,
+    email: "user@example.com",
+    name: "User",
+    bidCredits: 0,
+    is_admin: false,
+  };
   return (
     <div>
       <div data-testid="user">{auth.user?.email ?? "none"}</div>
@@ -48,14 +57,8 @@ const TestConsumer = () => {
             token: "jwt",
             refreshToken: "refresh",
             sessionTokenId: "sid",
-            user: {
-              id: 1,
-              email: "user@example.com",
-              name: "User",
-              bidCredits: 0,
-              is_admin: false,
-            },
-          } as any)
+            user: mockUser,
+          } satisfies LoginPayload)
         }
       >
         login
@@ -76,7 +79,7 @@ beforeEach(() => {
   mockedClient.get.mockReset();
   mockedClient.get.mockResolvedValue({
     data: { remaining_seconds: 300 },
-  } as any);
+  });
   mockSubscription.unsubscribe.mockReset();
 });
 
@@ -145,7 +148,7 @@ describe("AuthProvider", () => {
   it("handles session remaining responses and invalidation", async () => {
     mockedClient.get.mockResolvedValueOnce({
       data: { remaining_seconds: 0 },
-    } as any);
+    });
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     render(
@@ -182,7 +185,7 @@ describe("AuthProvider", () => {
         is_admin: true,
         is_superuser: false,
       },
-    } as any);
+    });
 
     render(
       <Wrapper>
