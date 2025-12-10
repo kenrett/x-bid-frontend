@@ -31,7 +31,7 @@ export const PurchaseStatus = () => {
     const verifyPayment = async () => {
       try {
         const response = await client.get<CheckoutSuccessResponse>(
-          `/checkout/success`,
+          `/api/v1/checkout/success`,
           {
             params: { session_id: sessionId },
           },

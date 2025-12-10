@@ -119,7 +119,7 @@ describe("LoginForm Component", () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(mockedClient.post).toHaveBeenCalledWith("/login", {
+        expect(mockedClient.post).toHaveBeenCalledWith("/api/v1/login", {
           email_address: "test@example.com",
           password: "password123",
         });

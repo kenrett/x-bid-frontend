@@ -19,10 +19,13 @@ const normalizeAuction = (auction: AuctionSummary): AuctionSummary => ({
 export const createAuction = async (
   payload: Partial<AuctionSummary> & { title: string },
 ) => {
-  const res = await client.post<AdminAuctionResponse>("/auctions", {
-    ...payload,
-    status: statusToApi(payload.status),
-  });
+  const res = await client.post<AdminAuctionResponse>(
+    "/api/v1/admin/auctions",
+    {
+      ...payload,
+      status: statusToApi(payload.status),
+    },
+  );
   const data =
     (res.data as { auction?: AuctionSummary })?.auction ??
     (res.data as AuctionSummary);
@@ -33,10 +36,13 @@ export const updateAuction = async (
   id: number,
   updates: Partial<AuctionSummary>,
 ) => {
-  const res = await client.put<AdminAuctionResponse>(`/auctions/${id}`, {
-    ...updates,
-    status: statusToApi(updates.status),
-  });
+  const res = await client.put<AdminAuctionResponse>(
+    `/api/v1/admin/auctions/${id}`,
+    {
+      ...updates,
+      status: statusToApi(updates.status),
+    },
+  );
   const data =
     (res.data as { auction?: AuctionSummary })?.auction ??
     (res.data as AuctionSummary);
@@ -44,5 +50,5 @@ export const updateAuction = async (
 };
 
 export const deleteAuction = async (id: number) => {
-  await client.delete(`/auctions/${id}`);
+  await client.delete(`/api/v1/admin/auctions/${id}`);
 };

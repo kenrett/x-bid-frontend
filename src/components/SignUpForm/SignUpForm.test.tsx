@@ -109,7 +109,7 @@ describe("SignUpForm Component", () => {
     await user.click(screen.getByRole("button", { name: /create account/i }));
 
     await waitFor(() => {
-      expect(mockedClient.post).toHaveBeenCalledWith("/signup", {
+      expect(mockedClient.post).toHaveBeenCalledWith("/api/v1/signup", {
         name: "Test User",
         email_address: "test@example.com",
         password: "password123",

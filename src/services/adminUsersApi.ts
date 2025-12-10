@@ -70,7 +70,7 @@ export const adminUsersApi = {
   async getUsers(): Promise<AdminUser[]> {
     const response = await client.get<
       AdminUsersListResponse | { users?: AdminUsersListResponse }
-    >("/admin/users");
+    >("/api/v1/admin/users");
 
     const payload = response.data;
     const list = Array.isArray(payload)
@@ -85,7 +85,7 @@ export const adminUsersApi = {
   async grantAdmin(id: number): Promise<AdminUser> {
     const response = await client.post<
       AdminUserResponse<"/api/v1/admin/users/{id}/grant_admin", "post">
-    >(`/admin/users/${id}/grant_admin`);
+    >(`/api/v1/admin/users/${id}/grant_admin`);
     const data =
       (response.data as { user?: AdminUserRecord })?.user ?? response.data;
     return normalizeAdminUser(data as AdminUserRecord);
@@ -94,7 +94,7 @@ export const adminUsersApi = {
   async revokeAdmin(id: number): Promise<AdminUser> {
     const response = await client.post<
       AdminUserResponse<"/api/v1/admin/users/{id}/revoke_admin", "post">
-    >(`/admin/users/${id}/revoke_admin`);
+    >(`/api/v1/admin/users/${id}/revoke_admin`);
     const data =
       (response.data as { user?: AdminUserRecord })?.user ?? response.data;
     return normalizeAdminUser(data as AdminUserRecord);
@@ -103,7 +103,7 @@ export const adminUsersApi = {
   async grantSuperadmin(id: number): Promise<AdminUser> {
     const response = await client.post<
       AdminUserResponse<"/api/v1/admin/users/{id}/grant_superadmin", "post">
-    >(`/admin/users/${id}/grant_superadmin`);
+    >(`/api/v1/admin/users/${id}/grant_superadmin`);
     const data =
       (response.data as { user?: AdminUserRecord })?.user ?? response.data;
     return normalizeAdminUser(data as AdminUserRecord);
@@ -112,7 +112,7 @@ export const adminUsersApi = {
   async revokeSuperadmin(id: number): Promise<AdminUser> {
     const response = await client.post<
       AdminUserResponse<"/api/v1/admin/users/{id}/revoke_superadmin", "post">
-    >(`/admin/users/${id}/revoke_superadmin`);
+    >(`/api/v1/admin/users/${id}/revoke_superadmin`);
     const data =
       (response.data as { user?: AdminUserRecord })?.user ?? response.data;
     return normalizeAdminUser(data as AdminUserRecord);
@@ -121,7 +121,7 @@ export const adminUsersApi = {
   async banUser(id: number): Promise<AdminUser> {
     const response = await client.post<
       AdminUserResponse<"/api/v1/admin/users/{id}/ban", "post">
-    >(`/admin/users/${id}/ban`);
+    >(`/api/v1/admin/users/${id}/ban`);
     const data =
       (response.data as { user?: AdminUserRecord })?.user ?? response.data;
     return normalizeAdminUser(data as AdminUserRecord);
@@ -130,7 +130,7 @@ export const adminUsersApi = {
   async updateUser(id: number, data: Partial<AdminUser>): Promise<AdminUser> {
     const response = await client.patch<
       AdminUserResponse<"/api/v1/admin/users/{id}", "patch">
-    >(`/admin/users/${id}`, { user: data });
+    >(`/api/v1/admin/users/${id}`, { user: data });
     const payload =
       (response.data as { user?: AdminUserRecord })?.user ?? response.data;
     return normalizeAdminUser(payload as AdminUserRecord);

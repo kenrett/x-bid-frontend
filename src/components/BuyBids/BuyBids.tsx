@@ -29,7 +29,7 @@ export const BuyBids = () => {
   useEffect(() => {
     const fetchBidPacks = async () => {
       try {
-        const response = await client.get<BidPack[]>("/bid_packs");
+        const response = await client.get<BidPack[]>("/api/v1/bid_packs");
         const normalized = response.data.map((pack) => {
           const bids = Number(pack.bids);
           const status: BidPack["status"] =
@@ -123,7 +123,7 @@ export const BuyBids = () => {
 
     try {
       const response = await client.post<{ clientSecret: string }>(
-        `/checkouts`,
+        "/api/v1/checkouts",
         {
           bid_pack_id: id,
         },

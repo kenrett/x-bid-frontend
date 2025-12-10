@@ -19,7 +19,10 @@ export const LoginForm = () => {
     setError(null);
 
     try {
-      const response = await client.post("/login", { email_address, password });
+      const response = await client.post("/api/v1/login", {
+        email_address,
+        password,
+      });
       const {
         token,
         refresh_token,

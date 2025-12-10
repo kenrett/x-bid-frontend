@@ -23,7 +23,7 @@ export const ForgotPassword = () => {
         ApiJsonResponse<"/api/v1/password/forgot", "post"> & {
           debug_token?: unknown;
         }
-      >("/password/forgot", {
+      >("/api/v1/password/forgot", {
         password: { email_address: email.trim() },
       });
       const token = response.data?.debug_token;

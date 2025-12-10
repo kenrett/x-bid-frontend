@@ -46,7 +46,7 @@ const normalizeBidPack = (pack: BidPack): BidPack => {
 
 export const listBidPacks = async () => {
   const res = await client.get<AdminBidPackResponse | { bid_packs?: unknown }>(
-    "/admin/bid_packs",
+    "/api/v1/admin/bid-packs",
   );
 
   const payload = res.data;
@@ -60,7 +60,9 @@ export const listBidPacks = async () => {
 };
 
 export const getBidPack = async (id: number) => {
-  const res = await client.get<AdminBidPackResponse>(`/admin/bid_packs/${id}`);
+  const res = await client.get<AdminBidPackResponse>(
+    `/api/v1/admin/bid-packs/${id}`,
+  );
   const pack =
     (res.data as { bid_pack?: BidPack }).bid_pack ?? (res.data as BidPack);
   return normalizeBidPack(pack);
@@ -68,7 +70,7 @@ export const getBidPack = async (id: number) => {
 
 export const createBidPack = async (payload: BidPackPayload) => {
   const res = await client.post<AdminBidPackResponse>(
-    "/admin/bid_packs",
+    "/api/v1/admin/bid-packs",
     payload,
   );
   const pack =
@@ -78,7 +80,7 @@ export const createBidPack = async (payload: BidPackPayload) => {
 
 export const updateBidPack = async (id: number, payload: Partial<BidPack>) => {
   const res = await client.put<AdminBidPackResponse>(
-    `/admin/bid_packs/${id}`,
+    `/api/v1/admin/bid-packs/${id}`,
     payload,
   );
   const pack =
@@ -87,5 +89,5 @@ export const updateBidPack = async (id: number, payload: Partial<BidPack>) => {
 };
 
 export const deleteBidPack = async (id: number) => {
-  await client.delete(`/admin/bid_packs/${id}`);
+  await client.delete(`/api/v1/admin/bid-packs/${id}`);
 };

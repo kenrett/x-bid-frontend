@@ -162,7 +162,7 @@ describe("BuyBids Component", () => {
 
       await user.click(acquireButton);
 
-      expect(mockedClient.post).toHaveBeenCalledWith("/checkouts", {
+      expect(mockedClient.post).toHaveBeenCalledWith("/api/v1/checkouts", {
         bid_pack_id: 1,
       });
       expect(

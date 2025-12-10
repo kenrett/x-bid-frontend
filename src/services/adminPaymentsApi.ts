@@ -118,7 +118,7 @@ export const adminPaymentsApi = {
   async listPayments(): Promise<Payment[]> {
     const response = await client.get<
       AdminPaymentsResponse | { payments?: AdminPaymentsPayload }
-    >("/admin/payments");
+    >("/api/v1/admin/payments");
 
     const payload = response.data as
       | AdminPaymentsResponse

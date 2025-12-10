@@ -40,7 +40,7 @@ export const ResetPassword = () => {
     try {
       setIsSubmitting(true);
       await client.post<ApiJsonResponse<"/api/v1/password/reset", "post">>(
-        "/password/reset",
+        "/api/v1/password/reset",
         {
           password: {
             token: token.trim(),

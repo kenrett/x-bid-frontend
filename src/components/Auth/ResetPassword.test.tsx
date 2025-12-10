@@ -47,7 +47,7 @@ describe("ResetPassword", () => {
     await user.click(screen.getByRole("button", { name: /update password/i }));
 
     await waitFor(() => {
-      expect(mockedClient.post).toHaveBeenCalledWith("/password/reset", {
+      expect(mockedClient.post).toHaveBeenCalledWith("/api/v1/password/reset", {
         password: {
           token: "abc123",
           password: "password123",

@@ -13,7 +13,7 @@ type MaintenanceResponse =
   | { maintenance?: { enabled?: unknown; updated_at?: unknown } };
 
 export const getPublicMaintenance = async (): Promise<MaintenanceState> => {
-  const res = await client.get<MaintenanceResponse>("/maintenance");
+  const res = await client.get<MaintenanceResponse>("/api/v1/maintenance");
   return normalize(res.data);
 };
 
@@ -27,7 +27,9 @@ const normalize = (data: MaintenanceResponse): MaintenanceState => {
 };
 
 export const getMaintenance = async (): Promise<MaintenanceState> => {
-  const res = await client.get<MaintenanceResponse>("/admin/maintenance");
+  const res = await client.get<MaintenanceResponse>(
+    "/api/v1/admin/maintenance",
+  );
   return normalize(res.data);
 };
 
@@ -35,9 +37,12 @@ export const setMaintenance = async (
   enabled: boolean,
 ): Promise<MaintenanceState> => {
   // Rails controller accepts query param or JSON body; send JSON for clarity.
-  const res = await client.post<MaintenanceResponse>("/admin/maintenance", {
-    enabled,
-  });
+  const res = await client.post<MaintenanceResponse>(
+    "/api/v1/admin/maintenance",
+    {
+      enabled,
+    },
+  );
   return normalize(res.data);
 };
 

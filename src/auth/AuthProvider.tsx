@@ -157,7 +157,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const fetchRemaining = async () => {
       try {
         const response = await client.get<SessionRemainingResponse>(
-          "/session/remaining",
+          "/api/v1/session/remaining",
           {
             params: { session_token_id: sessionTokenId },
           },

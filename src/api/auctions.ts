@@ -14,7 +14,7 @@ const normalizePrice = (value: unknown) => {
 export const getAuctions = async () => {
   const res = await client.get<
     ApiJsonResponse<"/api/v1/auctions", "get"> | { auctions?: unknown }
-  >("/auctions");
+  >("/api/v1/auctions");
 
   const payload = res.data as
     | ApiJsonResponse<"/api/v1/auctions", "get">
@@ -61,7 +61,7 @@ const normalizeAuctionDetail = (
 };
 
 export const getAuction = async (id: number) => {
-  const res = await client.get<AuctionShowResponse>(`/auctions/${id}`);
+  const res = await client.get<AuctionShowResponse>(`/api/v1/auctions/${id}`);
   const data = res.data;
 
   const rawAuction =

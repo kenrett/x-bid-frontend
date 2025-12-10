@@ -26,7 +26,7 @@ export const SignUpForm = () => {
     setLoading(true);
 
     try {
-      const response = await client.post("/signup", {
+      const response = await client.post("/api/v1/signup", {
         name,
         email_address,
         password,
