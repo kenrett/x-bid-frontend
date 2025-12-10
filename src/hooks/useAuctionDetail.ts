@@ -176,13 +176,15 @@ export function useAuctionDetail(auctionId: number) {
         getBidHistory(auctionId),
       ]);
 
+      const historyAuction = bidHistoryResponse.auction ?? {};
       auctionData.highest_bidder_id =
-        bidHistoryResponse.auction.winning_user_id ??
-        auctionData.highest_bidder_id;
+        historyAuction.winning_user_id ?? auctionData.highest_bidder_id;
       auctionData.winning_user_name =
-        bidHistoryResponse.auction.winning_user_name;
+        historyAuction.winning_user_name ?? auctionData.winning_user_name;
 
-      const bidHistory = bidHistoryResponse.bids;
+      const bidHistory = Array.isArray(bidHistoryResponse.bids)
+        ? bidHistoryResponse.bids
+        : [];
 
       dispatch({
         type: "FETCH_SUCCESS",
@@ -246,6 +248,10 @@ export function useAuctionDetail(auctionId: number) {
         state.auction.id,
       );
 
+      if (!newBid) {
+        throw new Error("Bid response missing bid data");
+      }
+
       const normalizedBid: Bid = {
         ...newBid,
         id: Number(newBid.id),
@@ -300,6 +306,7 @@ export function useAuctionDetail(auctionId: number) {
     state.auction?.winning_user_name ??
     state.bids[0]?.username ??
     "No bids yet";
+  const highestBidderUsername = highestBidderDisplay;
 
   return {
     ...state,
@@ -308,5 +315,6 @@ export function useAuctionDetail(auctionId: number) {
     refreshAuction,
     onTimerEnd: handleTimerEnd,
     highestBidderDisplay,
+    highestBidderUsername,
   };
 }

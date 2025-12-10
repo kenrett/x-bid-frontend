@@ -44,8 +44,13 @@ describe("useAuctionChannel", () => {
   it("should call onData with parsed data when a message is received", async () => {
     renderHook(() => useAuctionChannel(auctionId, onData));
 
-    const receivedCallback = vi.mocked(cable.subscriptions.create).mock
-      .calls[0][1].received;
+    const [, callbacks] = vi.mocked(cable.subscriptions.create).mock.calls[0];
+    const receivedCallback = callbacks?.received as
+      | ((data: unknown) => void)
+      | undefined;
+    if (!receivedCallback) {
+      throw new Error("Expected received callback to be registered");
+    }
 
     const rawData = {
       current_price: "150.50",

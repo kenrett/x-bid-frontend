@@ -42,46 +42,50 @@ export function useAuctionChannel(
     // console.log(`[AuctionChannel] creating subscription for auction ${auctionId}`);
 
     // Create and set the subscription object
+    const callbacks = {
+      connected: () => {
+        // console.log("[AuctionChannel] connected");
+      },
+      disconnected: () => {
+        // console.log("[AuctionChannel] disconnected");
+      },
+      rejected: () => {
+        // console.warn("[AuctionChannel] subscription rejected");
+      },
+      received: (raw: unknown) => {
+        const rawData = (raw ?? {}) as RawAuctionChannelData;
+        const data: AuctionChannelData = {
+          current_price: rawData.current_price
+            ? Number(rawData.current_price)
+            : undefined,
+          // Use the bid's user info as the source of truth for the new highest bidder
+          // if it's not present at the top level of the broadcast.
+          highest_bidder_name:
+            rawData.highest_bidder_name ?? rawData.bid?.username,
+          highest_bidder_id:
+            rawData.highest_bidder_id !== undefined
+              ? Number(rawData.highest_bidder_id)
+              : rawData.bid?.user_id !== undefined
+                ? Number(rawData.bid.user_id)
+                : undefined,
+          end_time: rawData.end_time, // make sure we propagate end_time
+          bid: rawData.bid
+            ? {
+                ...rawData.bid,
+                id: Number(rawData.bid.id),
+                user_id: Number(rawData.bid.user_id),
+                amount: Number(rawData.bid.amount),
+              }
+            : undefined,
+        };
+        // console.log("[AuctionChannel] Received broadcast data:", data);
+        onDataRef.current(data);
+      },
+    };
+
     const sub = cable.subscriptions.create(
       { channel: "AuctionChannel", auction_id: auctionId },
-      {
-        connected: () => {
-          // console.log("[AuctionChannel] connected");
-        },
-        disconnected: () => {
-          // console.log("[AuctionChannel] disconnected");
-        },
-        rejected: () => {
-          // console.warn("[AuctionChannel] subscription rejected");
-        },
-        received: (raw: RawAuctionChannelData) => {
-          const data: AuctionChannelData = {
-            current_price: raw.current_price
-              ? Number(raw.current_price)
-              : undefined,
-            // Use the bid's user info as the source of truth for the new highest bidder
-            // if it's not present at the top level of the broadcast.
-            highest_bidder_name: raw.highest_bidder_name ?? raw.bid?.username,
-            highest_bidder_id:
-              raw.highest_bidder_id !== undefined
-                ? Number(raw.highest_bidder_id)
-                : raw.bid?.user_id !== undefined
-                  ? Number(raw.bid.user_id)
-                  : undefined,
-            end_time: raw.end_time, // make sure we propagate end_time
-            bid: raw.bid
-              ? {
-                  ...raw.bid,
-                  id: Number(raw.bid.id),
-                  user_id: Number(raw.bid.user_id),
-                  amount: Number(raw.bid.amount),
-                }
-              : undefined,
-          };
-          // console.log("[AuctionChannel] Received broadcast data:", data);
-          onDataRef.current(data);
-        },
-      },
+      callbacks as Parameters<typeof cable.subscriptions.create>[1],
     );
     setSubscription(sub);
 

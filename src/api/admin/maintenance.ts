@@ -17,10 +17,14 @@ export const getPublicMaintenance = async (): Promise<MaintenanceState> => {
   return normalize(res.data);
 };
 
-const normalize = (data: MaintenanceResponse): MaintenanceState => ({
-  enabled: Boolean(data?.maintenance?.enabled),
-  updated_at: data?.maintenance?.updated_at ?? null,
-});
+const normalize = (data: MaintenanceResponse): MaintenanceState => {
+  const updatedAt = data?.maintenance?.updated_at;
+
+  return {
+    enabled: Boolean(data?.maintenance?.enabled),
+    updated_at: typeof updatedAt === "string" ? updatedAt : null,
+  };
+};
 
 export const getMaintenance = async (): Promise<MaintenanceState> => {
   const res = await client.get<MaintenanceResponse>("/admin/maintenance");

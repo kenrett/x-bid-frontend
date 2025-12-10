@@ -47,6 +47,7 @@ const baseAuction: auctionsApi.AuctionDetail = {
   end_time: "2025-01-02",
   highest_bidder_id: null,
   winning_user_name: null,
+  bids: [],
 };
 
 const bidHistoryResponse: bidsApi.BidHistoryResponse = {

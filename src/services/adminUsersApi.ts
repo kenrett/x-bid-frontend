@@ -16,10 +16,14 @@ type AdminUserRecord =
 
 const normalizeAdminUser = (raw: AdminUserRecord): AdminUser => {
   const data = (raw ?? {}) as Record<string, unknown>;
-  const role =
-    typeof data.role === "string" && data.role.toLowerCase() === "superadmin"
+  const roleValue =
+    typeof data.role === "string" ? data.role.toLowerCase() : null;
+  const role: AdminUser["role"] =
+    roleValue === "superadmin"
       ? "superadmin"
-      : "admin";
+      : roleValue === "user"
+        ? "user"
+        : "admin";
 
   const statusValue =
     typeof data.status === "string" ? data.status.toLowerCase() : null;

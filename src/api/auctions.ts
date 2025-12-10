@@ -4,6 +4,8 @@ import type { Bid } from "../types/bid";
 import type { ApiJsonResponse } from "./openapi-helpers";
 import { statusFromApi } from "./status";
 
+export type { AuctionDetail, AuctionSummary };
+
 const normalizePrice = (value: unknown) => {
   const asNumber = Number(value);
   return Number.isFinite(asNumber) ? asNumber : 0;

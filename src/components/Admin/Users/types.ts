@@ -2,7 +2,7 @@ export type AdminUser = {
   id: number;
   email: string;
   name: string;
-  role: "admin" | "superadmin";
+  role: "admin" | "superadmin" | "user";
   status: "active" | "disabled";
 };
 

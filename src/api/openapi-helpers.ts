@@ -5,9 +5,15 @@ import type { BidPack } from "@/types/bidPack";
 import type { Payment } from "@/components/Admin/Users/types";
 import type { MaintenanceState } from "./admin/maintenance";
 import type { AdminUser } from "@/components/Admin/Users/types";
-import type { PlaceBidResponse as PlaceBidResponseShape } from "./bids";
 import type { CheckoutSuccessResponse } from "@/types/checkout";
 import type { User } from "@/types/user";
+
+type PlaceBidResponseShape = {
+  success?: boolean;
+  bid?: Bid;
+  bidCredits?: number;
+  auction?: AuctionDetail;
+};
 
 type OverrideResponses = {
   "/api/v1/auctions": {
@@ -40,7 +46,7 @@ type OverrideResponses = {
   "/api/v1/bid_packs": {
     get: BidPack[];
   };
-  "/api/v1/admin/bid_packs": {
+  "/api/v1/admin/bid-packs": {
     get:
       | BidPack[]
       | {
@@ -52,7 +58,7 @@ type OverrideResponses = {
           bid_pack?: BidPack;
         };
   };
-  "/api/v1/admin/bid_packs/{id}": {
+  "/api/v1/admin/bid-packs/{id}": {
     get:
       | BidPack
       | {

@@ -32,7 +32,8 @@ export const BuyBids = () => {
         const response = await client.get<BidPack[]>("/bid_packs");
         const normalized = response.data.map((pack) => {
           const bids = Number(pack.bids);
-          const status = pack.status === "retired" ? "retired" : "active";
+          const status: BidPack["status"] =
+            pack.status === "retired" ? "retired" : "active";
           const active =
             typeof pack.active === "boolean"
               ? pack.active

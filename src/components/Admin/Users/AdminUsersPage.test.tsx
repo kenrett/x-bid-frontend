@@ -5,6 +5,7 @@ import { AdminUsersPage } from "./AdminUsersPage";
 import { useAuth } from "@/hooks/useAuth";
 import { showToast } from "@/services/toast";
 import { adminUsersApi } from "@/services/adminUsersApi";
+import type { AdminUser } from "./types";
 
 vi.mock("@/hooks/useAuth");
 vi.mock("@/services/toast", () => ({

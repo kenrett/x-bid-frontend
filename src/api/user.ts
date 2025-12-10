@@ -61,10 +61,13 @@ export const normalizeUser = (apiUser: UserPayload): User => {
     hasAdminRole ||
     isSuperuser;
 
+  const normalizedName = typeof record.name === "string" ? record.name : "";
+  const normalizedEmail = typeof email === "string" ? email : "";
+
   return {
     id: Number(record.id ?? 0),
-    name: record.name ?? "",
-    email,
+    name: normalizedName,
+    email: normalizedEmail,
     bidCredits: Number(
       record.bidCredits ??
         record.bid_credits ??

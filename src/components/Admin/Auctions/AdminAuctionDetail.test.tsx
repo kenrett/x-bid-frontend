@@ -46,6 +46,8 @@ beforeEach(() => {
     loading: false,
     error: null,
     highestBidderUsername: "Bidder9",
+    highestBidderDisplay: "Bidder9",
+    onTimerEnd: vi.fn(),
     refreshAuction: mockRefresh,
     user: null,
     placeUserBid: vi.fn(),

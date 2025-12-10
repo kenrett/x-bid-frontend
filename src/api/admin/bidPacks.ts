@@ -5,11 +5,11 @@ import type { ApiJsonResponse } from "../openapi-helpers";
 type BidPackPayload = Partial<BidPack> & { name: string };
 
 type AdminBidPackResponse =
-  | ApiJsonResponse<"/api/v1/admin/bid_packs", "get">
-  | ApiJsonResponse<"/api/v1/admin/bid_packs/{id}", "get">
-  | ApiJsonResponse<"/api/v1/admin/bid_packs", "post">
-  | ApiJsonResponse<"/api/v1/admin/bid_packs/{id}", "put">
-  | ApiJsonResponse<"/api/v1/admin/bid_packs/{id}", "patch">
+  | ApiJsonResponse<"/api/v1/admin/bid-packs", "get">
+  | ApiJsonResponse<"/api/v1/admin/bid-packs/{id}", "get">
+  | ApiJsonResponse<"/api/v1/admin/bid-packs", "post">
+  | ApiJsonResponse<"/api/v1/admin/bid-packs/{id}", "put">
+  | ApiJsonResponse<"/api/v1/admin/bid-packs/{id}", "patch">
   | { bid_pack?: BidPack };
 
 const normalizeBidPack = (pack: BidPack): BidPack => {
