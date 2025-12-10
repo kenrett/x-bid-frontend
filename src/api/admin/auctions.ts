@@ -4,10 +4,10 @@ import { statusFromApi, statusToApi } from "../status";
 import type { ApiJsonResponse } from "../openapi-helpers";
 
 type AdminAuctionResponse =
-  | ApiJsonResponse<"/api/v1/admin/auctions/{id}", "get">
-  | ApiJsonResponse<"/api/v1/admin/auctions", "post">
-  | ApiJsonResponse<"/api/v1/admin/auctions/{id}", "put">
-  | ApiJsonResponse<"/api/v1/admin/auctions/{id}", "patch">
+  | ApiJsonResponse<"/api/v1/auctions/{id}", "get">
+  | ApiJsonResponse<"/api/v1/auctions", "post">
+  | ApiJsonResponse<"/api/v1/auctions/{id}", "put">
+  | ApiJsonResponse<"/api/v1/auctions/{id}", "patch">
   | { auction?: AuctionSummary };
 
 const normalizeAuction = (auction: AuctionSummary): AuctionSummary => ({
