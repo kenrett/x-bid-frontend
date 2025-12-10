@@ -1,12 +1,17 @@
-import axios from "axios";
+import axios, { type AxiosError, type AxiosInstance } from "axios";
+
+const baseURL =
+  typeof import.meta.env.VITE_API_URL === "string"
+    ? import.meta.env.VITE_API_URL
+    : undefined;
 
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL,
   headers: {
     "Content-Type": "application/json",
   },
   withCredentials: false, // set true if using cookies for auth
-});
+}) as AxiosInstance;
 
 client.interceptors.request.use(
   (config) => {
@@ -21,7 +26,7 @@ client.interceptors.request.use(
 
 client.interceptors.response.use(
   (response) => response,
-  (error) => {
+  (error: AxiosError) => {
     const status = error?.response?.status;
     if (status === 503) {
       const currentPath = window.location.pathname;

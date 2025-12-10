@@ -26,7 +26,7 @@ class ErrorBoundary extends Component<Props, State> {
    * @param _ - The error that was thrown.
    * @returns An object to update the state.
    */
-  public static getDerivedStateFromError(_: Error): State {
+  public static getDerivedStateFromError(): State {
     return { hasError: true };
   }
 

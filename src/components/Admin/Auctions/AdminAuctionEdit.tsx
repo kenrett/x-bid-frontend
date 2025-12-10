@@ -50,7 +50,7 @@ export const AdminAuctionEdit = () => {
     };
 
     void fetchAuction();
-  }, [auctionId]);
+  }, [auctionId, navigate]);
 
   const handleSubmit = async (
     payload: Partial<AuctionSummary> & { title: string },

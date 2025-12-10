@@ -3,7 +3,9 @@ import { createConsumer } from "@rails/actioncable";
 // Attach JWT + session token to the ActionCable URL so the backend Connection
 // (which requires authentication) can authorize the websocket handshake.
 const buildCableUrl = () => {
-  const base = import.meta.env.VITE_CABLE_URL || "ws://localhost:3000/cable";
+  const base = String(
+    import.meta.env.VITE_CABLE_URL ?? "ws://localhost:3000/cable",
+  );
   const url = new URL(base);
 
   const token = localStorage.getItem("token");

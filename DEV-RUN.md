@@ -21,6 +21,7 @@ Below are lightweight steps to boot both services in development. Adjust paths a
 
 2. **Frontend**  
    From this repo:
+
    ```bash
    npm install
    VITE_API_URL=http://localhost:3000 npm run dev -- --host --port 4173

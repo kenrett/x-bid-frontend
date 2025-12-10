@@ -238,13 +238,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         window.clearInterval(intervalId);
       }
     };
-  }, [
-    token,
-    sessionTokenId,
-    handleSessionInvalidated,
-    persistValue,
-    normalizeUser,
-  ]);
+  }, [token, sessionTokenId, handleSessionInvalidated, persistValue]);
 
   useEffect(() => {
     if (!token || !sessionTokenId) return;

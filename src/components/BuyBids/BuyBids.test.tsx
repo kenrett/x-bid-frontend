@@ -25,7 +25,6 @@ type UseAuthReturn = ReturnType<typeof useAuth>;
 const mockedUseAuth = vi.mocked(useAuth, true);
 const mockedClient = vi.mocked(client, true);
 
-const mockUser = { id: 1, name: "Test User" };
 const mockBidPacks: BidPack[] = [
   {
     id: 1,
