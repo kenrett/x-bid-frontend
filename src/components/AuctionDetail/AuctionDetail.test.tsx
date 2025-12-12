@@ -50,6 +50,7 @@ describe("AuctionDetail Container", () => {
     mockedUseAuctionDetail.mockReturnValue({
       loading: true,
       auction: null,
+      connectionState: "connecting",
     } as unknown as ReturnType<typeof useAuctionDetail>);
 
     render(<AuctionDetail />, { wrapper: MemoryRouter });
@@ -61,6 +62,7 @@ describe("AuctionDetail Container", () => {
     mockedUseAuctionDetail.mockReturnValue({
       loading: true,
       auction: null,
+      connectionState: "connecting",
     } as unknown as ReturnType<typeof useAuctionDetail>);
 
     render(<AuctionDetail />, { wrapper: MemoryRouter });
@@ -75,6 +77,7 @@ describe("AuctionDetail Container", () => {
       loading: false,
       auction: null,
       error: errorMessage,
+      connectionState: "disconnected",
     } as unknown as ReturnType<typeof useAuctionDetail>);
 
     render(<AuctionDetail />, { wrapper: MemoryRouter });
@@ -89,6 +92,7 @@ describe("AuctionDetail Container", () => {
       loading: false,
       auction: mockAuction,
       error: null,
+      connectionState: "connected",
       // ... other return values
     } as unknown as ReturnType<typeof useAuctionDetail>);
 

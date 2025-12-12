@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { useAuctionChannel } from "./useAuctionChannel";
 import { cable } from "@services/cable"; // This will be the mocked version
 
@@ -28,21 +28,23 @@ describe("useAuctionChannel", () => {
   });
 
   it("should not create a subscription if auctionId is invalid", () => {
-    renderHook(() => useAuctionChannel(0, onData));
+    const { result } = renderHook(() => useAuctionChannel(0, onData));
     expect(vi.mocked(cable.subscriptions.create)).not.toHaveBeenCalled();
+    expect(result.current.connectionState).toBe("disconnected");
   });
 
   it("should create a subscription with the correct channel and auction_id", () => {
-    renderHook(() => useAuctionChannel(auctionId, onData));
+    const { result } = renderHook(() => useAuctionChannel(auctionId, onData));
 
     expect(vi.mocked(cable.subscriptions.create)).toHaveBeenCalledWith(
       { channel: "AuctionChannel", auction_id: auctionId },
       expect.any(Object),
     );
+    expect(result.current.connectionState).toBe("connecting");
   });
 
   it("should call onData with parsed data when a message is received", async () => {
-    renderHook(() => useAuctionChannel(auctionId, onData));
+    const { result } = renderHook(() => useAuctionChannel(auctionId, onData));
 
     const [, callbacks] = vi.mocked(cable.subscriptions.create).mock.calls[0];
     const receivedCallback = callbacks?.received as
@@ -83,6 +85,7 @@ describe("useAuctionChannel", () => {
         },
       });
     });
+    expect(result.current.connectionState).toBe("connecting");
   });
 
   it("should unsubscribe on unmount", () => {
@@ -91,5 +94,22 @@ describe("useAuctionChannel", () => {
     unmount();
 
     expect(mockSubscription.unsubscribe).toHaveBeenCalledTimes(1);
+  });
+
+  it("updates connection state based on callbacks", async () => {
+    const { result } = renderHook(() => useAuctionChannel(auctionId, onData));
+    const [, callbacks] = vi.mocked(cable.subscriptions.create).mock.calls[0];
+    act(() => {
+      callbacks?.connected?.();
+    });
+    await waitFor(() =>
+      expect(result.current.connectionState).toBe("connected"),
+    );
+    act(() => {
+      callbacks?.disconnected?.();
+    });
+    await waitFor(() =>
+      expect(result.current.connectionState).toBe("disconnected"),
+    );
   });
 });

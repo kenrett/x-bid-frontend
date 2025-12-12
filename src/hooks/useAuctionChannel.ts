@@ -2,6 +2,11 @@ import { cable } from "@services/cable";
 import { Bid } from "@types/bid";
 import { useRef, useEffect, useState } from "react";
 
+export type AuctionConnectionState =
+  | "connecting"
+  | "connected"
+  | "disconnected";
+
 export type AuctionChannelData = {
   current_price?: number;
   highest_bidder_id?: number;
@@ -30,6 +35,8 @@ export function useAuctionChannel(
   onData: (data: AuctionChannelData) => void,
 ) {
   const onDataRef = useRef(onData);
+  const [connectionState, setConnectionState] =
+    useState<AuctionConnectionState>("disconnected");
   const [subscription, setSubscription] = useState<ReturnType<
     typeof cable.subscriptions.create
   > | null>(null);
@@ -37,19 +44,26 @@ export function useAuctionChannel(
 
   useEffect(() => {
     // Do not subscribe if the auctionId is not valid
-    if (!auctionId || auctionId <= 0) return;
+    if (!auctionId || auctionId <= 0) {
+      setConnectionState("disconnected");
+      return;
+    }
 
     // console.log(`[AuctionChannel] creating subscription for auction ${auctionId}`);
+    setConnectionState("connecting");
 
     // Create and set the subscription object
     const callbacks = {
       connected: () => {
+        setConnectionState("connected");
         // console.log("[AuctionChannel] connected");
       },
       disconnected: () => {
+        setConnectionState("disconnected");
         // console.log("[AuctionChannel] disconnected");
       },
       rejected: () => {
+        setConnectionState("disconnected");
         // console.warn("[AuctionChannel] subscription rejected");
       },
       received: (raw: unknown) => {
@@ -91,10 +105,11 @@ export function useAuctionChannel(
 
     return () => {
       // console.log(`[AuctionChannel] cleanup for auction ${auctionId}`);
+      setConnectionState("disconnected");
       sub.unsubscribe();
       setSubscription(null);
     };
   }, [auctionId]);
 
-  return subscription;
+  return { subscription, connectionState };
 }

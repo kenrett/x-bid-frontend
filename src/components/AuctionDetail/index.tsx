@@ -25,6 +25,7 @@ export function AuctionDetail() {
     highestBidderUsername,
     placeUserBid,
     bids,
+    connectionState,
   } = useAuctionDetail(auctionId);
 
   // Callback for when the timer ends
@@ -44,6 +45,7 @@ export function AuctionDetail() {
       user={user}
       isBidding={isBidding}
       bidError={bidError}
+      connectionState={connectionState}
       highestBidderUsername={highestBidderUsername ?? "No bids yet"}
       onPlaceBid={placeUserBid}
       onTimerEnd={onTimerEnd}

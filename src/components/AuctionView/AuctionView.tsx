@@ -11,6 +11,7 @@ const BidHistory = lazy(() =>
 
 import type { AuctionDetail } from "../../types/auction";
 import type { Bid } from "../../types/bid";
+import type { AuctionConnectionState } from "@hooks/useAuctionChannel";
 
 interface AuctionViewProps {
   auction: AuctionDetail;
@@ -23,6 +24,7 @@ interface AuctionViewProps {
   isBidding: boolean;
   bidError: string | null;
   highestBidderUsername: string | null;
+  connectionState: AuctionConnectionState;
   onPlaceBid: () => void;
   onTimerEnd: () => void;
   bids: Bid[];
@@ -34,11 +36,14 @@ const AuctionViewComponent = ({
   isBidding,
   bidError,
   highestBidderUsername,
+  connectionState,
   onPlaceBid,
   onTimerEnd,
   bids,
 }: AuctionViewProps) => {
   const navigate = useNavigate();
+  const isConnected = connectionState === "connected";
+  const isConnecting = connectionState === "connecting";
 
   return (
     <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4">
@@ -53,6 +58,47 @@ const AuctionViewComponent = ({
             Back to Auctions
           </button>
         </div>
+        <div className="flex items-center justify-between mb-4 text-sm text-gray-300">
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold tracking-wide uppercase ${
+                isConnected
+                  ? "border-green-500/60 bg-green-500/10 text-green-200"
+                  : isConnecting
+                    ? "border-amber-400/60 bg-amber-400/10 text-amber-200"
+                    : "border-red-400/60 bg-red-500/10 text-red-200"
+              }`}
+              aria-live="polite"
+            >
+              <span
+                className={`h-2.5 w-2.5 rounded-full ${
+                  isConnected
+                    ? "bg-green-400 animate-pulse"
+                    : isConnecting
+                      ? "bg-amber-300 animate-pulse"
+                      : "bg-red-400"
+                }`}
+              />
+              Live
+            </span>
+            {!isConnected && (
+              <span className="text-xs text-gray-400">
+                {isConnecting
+                  ? "Connecting to live feed..."
+                  : "Live feed disconnected. Trying to reconnect."}
+              </span>
+            )}
+          </div>
+        </div>
+        {!isConnected && (
+          <div
+            className="mb-4 rounded-xl border border-red-500/50 bg-red-950/60 px-4 py-3 text-red-100"
+            role="status"
+          >
+            Live updates are currently offline. Bids will refresh once the
+            connection returns.
+          </div>
+        )}
         {/* Auction Layout */}
         <div className="grid md:grid-cols-2 gap-12 items-start">
           <div className="rounded-2xl overflow-hidden shadow-2xl shadow-[#a020f0]/10">

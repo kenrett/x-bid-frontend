@@ -64,6 +64,7 @@ const defaultProps = {
   isBidding: false,
   bidError: null,
   highestBidderUsername: "BidderTwo",
+  connectionState: "connected" as const,
   onPlaceBid: vi.fn(),
   onTimerEnd: vi.fn(),
   bids: [
@@ -232,6 +233,23 @@ describe("AuctionView Component", () => {
       const bidHistory = await screen.findByTestId("bid-history");
       expect(bidHistory).toBeInTheDocument();
       expect(bidHistory).toHaveTextContent(`Bids: ${bids.length}`);
+    });
+  });
+
+  describe("Live connection indicators", () => {
+    it("shows a disconnect banner when offline", () => {
+      renderComponent({ connectionState: "disconnected" });
+      expect(
+        screen.getByText(/Live updates are currently offline/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/Live feed disconnected. Trying to reconnect./i),
+      ).toBeInTheDocument();
+    });
+
+    it("shows connecting message when connecting", () => {
+      renderComponent({ connectionState: "connecting" });
+      expect(screen.getByText(/Connecting to live feed/i)).toBeInTheDocument();
     });
   });
 });

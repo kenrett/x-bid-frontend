@@ -226,7 +226,8 @@ export function useAuctionDetail(auctionId: number) {
     [auctionId],
   );
 
-  const auctionSubscription = useAuctionChannel(auctionId, onChannelData);
+  const { subscription: auctionSubscription, connectionState } =
+    useAuctionChannel(auctionId, onChannelData);
 
   const placeUserBid = async () => {
     console.log("%c[placeUserBid] Attempting to place bid...", "color: blue");
@@ -329,5 +330,6 @@ export function useAuctionDetail(auctionId: number) {
     onTimerEnd: handleTimerEnd,
     highestBidderDisplay,
     highestBidderUsername,
+    connectionState,
   };
 }

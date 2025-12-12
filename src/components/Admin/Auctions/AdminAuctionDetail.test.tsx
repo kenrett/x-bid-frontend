@@ -54,6 +54,7 @@ beforeEach(() => {
     isBidding: false,
     bidError: null,
     lastBidderId: null,
+    connectionState: "connected",
   });
 });
 

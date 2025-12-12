@@ -59,9 +59,12 @@ const user = { id: 10, name: "User", is_admin: false, is_superuser: false };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockedUseAuctionChannel.mockReturnValue(
-    true as unknown as ReturnType<typeof useAuctionChannel>,
-  );
+  mockedUseAuctionChannel.mockReturnValue({
+    subscription: true as unknown as ReturnType<
+      typeof import("@services/cable").cable.subscriptions.create
+    >,
+    connectionState: "connected",
+  });
   mockedGetAuction.mockResolvedValue(baseAuction);
   mockedGetBidHistory.mockResolvedValue(bidHistoryResponse);
   mockedPlaceBid.mockResolvedValue({
