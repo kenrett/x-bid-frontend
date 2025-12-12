@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import client from "@api/client";
-import type { ApiJsonResponse } from "@/api/openapi-helpers";
-import { parseApiError } from "@/utils/apiError";
+import type { ApiJsonResponse } from "@api/openapi-helpers";
+import { parseApiError } from "@utils/apiError";
 
 export const ForgotPassword = () => {
   const [email, setEmail] = useState("");

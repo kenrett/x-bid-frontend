@@ -7,7 +7,7 @@ import { BuyBids } from "./BuyBids";
 import { useAuth } from "../../hooks/useAuth";
 import client from "@api/client";
 import type { BidPack } from "../../types/bidPack";
-import { UNEXPECTED_RESPONSE_MESSAGE } from "@/services/unexpectedResponse";
+import { UNEXPECTED_RESPONSE_MESSAGE } from "@services/unexpectedResponse";
 
 vi.mock("../../hooks/useAuth");
 vi.mock("@api/client");

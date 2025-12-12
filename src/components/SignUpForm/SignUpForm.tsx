@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import client from "@api/client";
 import { useAuth } from "../../hooks/useAuth";
-import { parseApiError } from "@/utils/apiError";
+import { parseApiError } from "@utils/apiError";
 
 export const SignUpForm = () => {
   const [name, setName] = useState("");

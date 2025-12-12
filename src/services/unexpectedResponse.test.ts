@@ -16,7 +16,7 @@ const withScope = vi.hoisted(() =>
 );
 const captureException = vi.hoisted(() => vi.fn());
 
-vi.mock("@/sentryClient", () => ({
+vi.mock("@sentryClient", () => ({
   Sentry: {
     withScope,
     captureException,

@@ -1,13 +1,14 @@
 import React from "react";
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
-import type { LoginPayload } from "@/types/auth";
-import type { User } from "@/types/user";
+import type { LoginPayload } from "@types/auth";
+import type { User } from "@types/user";
 
 const cableMocks = vi.hoisted(() => ({
   connect: vi.fn(),
   disconnect: vi.fn(),
   create: vi.fn(() => mockSubscription),
+  reset: vi.fn(),
 }));
 
 vi.mock("@api/client", () => {
@@ -21,12 +22,13 @@ vi.mock("@api/client", () => {
 });
 
 const mockSubscription = { unsubscribe: vi.fn() };
-vi.mock("@/services/cable", () => ({
+vi.mock("@services/cable", () => ({
   cable: {
     connect: cableMocks.connect,
     disconnect: cableMocks.disconnect,
     subscriptions: { create: cableMocks.create, remove: vi.fn() },
   },
+  resetCable: cableMocks.reset,
 }));
 
 import { AuthProvider } from "./AuthProvider";
@@ -109,6 +111,7 @@ describe("AuthProvider", () => {
     expect(localStorage.getItem("token")).toBe("jwt");
     expect(localStorage.getItem("refreshToken")).toBe("refresh");
     expect(localStorage.getItem("sessionTokenId")).toBe("sid");
+    expect(cableMocks.reset).toHaveBeenCalledTimes(1);
 
     // Remount to ensure values restore from storage
     view.unmount();
@@ -142,6 +145,7 @@ describe("AuthProvider", () => {
     expect(localStorage.getItem("token")).toBeNull();
     expect(localStorage.getItem("refreshToken")).toBeNull();
     expect(localStorage.getItem("sessionTokenId")).toBeNull();
+    expect(cableMocks.reset).toHaveBeenCalled();
     expect(mockSubscription.unsubscribe).toHaveBeenCalled();
   });
 
@@ -202,5 +206,6 @@ describe("AuthProvider", () => {
       expect(localStorage.getItem("refreshToken")).toBe("next-refresh");
       expect(localStorage.getItem("sessionTokenId")).toBe("next-sid");
     });
+    expect(cableMocks.reset).toHaveBeenCalledTimes(2);
   });
 });

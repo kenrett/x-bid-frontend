@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { useAuctionChannel } from "./useAuctionChannel";
-import { cable } from "@/services/cable"; // This will be the mocked version
+import { cable } from "@services/cable"; // This will be the mocked version
 
 // Define mock objects to be used in tests
 const mockSubscription = {
@@ -10,7 +10,7 @@ const mockSubscription = {
 };
 
 // Mock the cable service. The factory function is hoisted.
-vi.mock("@/services/cable", () => ({
+vi.mock("@services/cable", () => ({
   cable: {
     subscriptions: {
       // The mock implementation is now defined inside the factory

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import client from "@api/client";
-import type { ApiJsonResponse } from "@/api/openapi-helpers";
+import type { ApiJsonResponse } from "@api/openapi-helpers";
 import { useAuth } from "../../hooks/useAuth";
-import { parseApiError } from "@/utils/apiError";
+import { parseApiError } from "@utils/apiError";
 
 export const ResetPassword = () => {
   const [searchParams] = useSearchParams();

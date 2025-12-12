@@ -1,7 +1,7 @@
 import client from "../../src/api/client";
-import type { AdminUser } from "@/components/Admin/Users/types";
-import type { ApiJsonResponse } from "@/api/openapi-helpers";
-import type { paths } from "@/api/openapi-types";
+import type { AdminUser } from "@components/Admin/Users/types";
+import type { ApiJsonResponse } from "@api/openapi-helpers";
+import type { paths } from "@api/openapi-types";
 
 type AdminUsersListResponse = ApiJsonResponse<"/api/v1/admin/users", "get">;
 

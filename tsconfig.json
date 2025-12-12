@@ -18,11 +18,14 @@
     "jsx": "react-jsx",
     "types": ["vitest/globals"],
     "paths": {
-      "@/*": ["./src/*"],
       "@api/*": ["./src/api/*"],
       "@components/*": ["./src/components/*"],
       "@hooks/*": ["./src/hooks/*"],
-      "@auth/*": ["./src/auth/*"]
+      "@auth/*": ["./src/auth/*"],
+      "@services/*": ["./src/services/*"],
+      "@types/*": ["./src/types/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@sentryClient": ["./src/sentryClient"]
     }
   },
   "include": ["src", "postcss.config.js"],

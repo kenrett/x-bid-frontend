@@ -3,17 +3,17 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AdminAuctionDetail } from "./AdminAuctionDetail";
-import { useAuctionDetail } from "@/hooks/useAuctionDetail";
-import { showToast } from "@/services/toast";
+import { useAuctionDetail } from "@hooks/useAuctionDetail";
+import { showToast } from "@services/toast";
 
-vi.mock("@/hooks/useAuctionDetail", () => ({
+vi.mock("@hooks/useAuctionDetail", () => ({
   useAuctionDetail: vi.fn(),
 }));
 
-vi.mock("@/services/toast", () => ({
+vi.mock("@services/toast", () => ({
   showToast: vi.fn(),
 }));
-vi.mock("@/services/adminAudit", () => ({
+vi.mock("@services/adminAudit", () => ({
   logAdminAction: vi.fn(),
 }));
 

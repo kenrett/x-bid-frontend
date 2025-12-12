@@ -1,5 +1,5 @@
 import axios, { type AxiosError, type AxiosInstance } from "axios";
-import { showToast } from "@/services/toast";
+import { showToast } from "@services/toast";
 
 const baseURL =
   typeof import.meta.env.VITE_API_URL === "string"

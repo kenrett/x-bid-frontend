@@ -15,7 +15,7 @@ import {
   reportUnexpectedResponse,
   UNEXPECTED_RESPONSE_MESSAGE,
   UnexpectedResponseError,
-} from "@/services/unexpectedResponse";
+} from "@services/unexpectedResponse";
 
 // Initialize Stripe outside of the component render to avoid
 // recreating the `Stripe` object on every render.

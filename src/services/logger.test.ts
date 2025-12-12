@@ -20,7 +20,7 @@ describe("logError", () => {
       {
         captureException: mockCaptureException,
         withScope: mockWithScope,
-      } as unknown as typeof import("@/sentryClient").Sentry,
+      } as unknown as typeof import("@sentryClient").Sentry,
       true,
     );
 

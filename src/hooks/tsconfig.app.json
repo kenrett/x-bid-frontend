@@ -24,8 +24,15 @@
     /* Path Aliases */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@api/*": ["../api/*"],
+      "@auth/*": ["../auth/*"],
+      "@components/*": ["../components/*"],
+      "@hooks/*": ["./*"],
+      "@services/*": ["../services/*"],
+      "@types/*": ["../types/*"],
+      "@utils/*": ["../utils/*"],
+      "@sentryClient": ["../sentryClient"]
     }
   },
-  "include": ["src"]
+  "include": ["."]
 }

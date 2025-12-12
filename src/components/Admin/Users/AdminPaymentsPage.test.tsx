@@ -2,12 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AdminPaymentsPage } from "./AdminPaymentsPage";
-import { adminPaymentsApi } from "@/services/adminPaymentsApi";
-import { showToast } from "@/services/toast";
+import { adminPaymentsApi } from "@services/adminPaymentsApi";
+import { showToast } from "@services/toast";
 import type { Payment } from "./types";
 
-vi.mock("@/services/adminPaymentsApi");
-vi.mock("@/services/toast", () => ({
+vi.mock("@services/adminPaymentsApi");
+vi.mock("@services/toast", () => ({
   showToast: vi.fn(),
 }));
 

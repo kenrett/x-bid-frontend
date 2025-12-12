@@ -2,19 +2,19 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AdminUsersPage } from "./AdminUsersPage";
-import { useAuth } from "@/hooks/useAuth";
-import { showToast } from "@/services/toast";
-import { adminUsersApi } from "@/services/adminUsersApi";
+import { useAuth } from "@hooks/useAuth";
+import { showToast } from "@services/toast";
+import { adminUsersApi } from "@services/adminUsersApi";
 import type { AdminUser } from "./types";
 
-vi.mock("@/hooks/useAuth");
-vi.mock("@/services/toast", () => ({
+vi.mock("@hooks/useAuth");
+vi.mock("@services/toast", () => ({
   showToast: vi.fn(),
 }));
-vi.mock("@/services/adminAudit", () => ({
+vi.mock("@services/adminAudit", () => ({
   logAdminAction: vi.fn(),
 }));
-vi.mock("@/services/adminUsersApi");
+vi.mock("@services/adminUsersApi");
 
 const mockedUseAuth = vi.mocked(useAuth);
 const mockedAdminUsersApi = vi.mocked(adminUsersApi);

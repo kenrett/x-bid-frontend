@@ -1,11 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { AuctionDetail } from "./AuctionDetail";
-import { useAuctionDetail } from "@/hooks/useAuctionDetail";
+import { useAuctionDetail } from "@hooks/useAuctionDetail";
 import { MemoryRouter, useParams } from "react-router-dom";
 
 // Mock dependencies
-vi.mock("@/hooks/useAuctionDetail");
+vi.mock("@hooks/useAuctionDetail");
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {

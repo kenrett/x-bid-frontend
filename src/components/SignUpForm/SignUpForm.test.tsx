@@ -5,8 +5,8 @@ import userEvent from "@testing-library/user-event";
 import { SignUpForm } from "./SignUpForm";
 import { useAuth } from "../../hooks/useAuth";
 import client from "@api/client";
-import type { LoginPayload } from "@/types/auth";
-import type { User } from "@/types/user";
+import type { LoginPayload } from "@types/auth";
+import type { User } from "@types/user";
 
 const mockLogin = vi.fn();
 const mockNavigate = vi.fn();

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { showToast } from "@/services/toast";
+import { showToast } from "@services/toast";
 import {
   extractError,
   getMaintenance,
   setMaintenance,
-} from "@/api/admin/maintenance";
-import { useAuth } from "@/hooks/useAuth";
+} from "@api/admin/maintenance";
+import { useAuth } from "@hooks/useAuth";
 
 export const AdminSettings = () => {
   const { user } = useAuth();

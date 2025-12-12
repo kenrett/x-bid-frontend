@@ -15,7 +15,7 @@ import {
   reportUnexpectedResponse,
   UNEXPECTED_RESPONSE_MESSAGE,
   UnexpectedResponseError,
-} from "@/services/unexpectedResponse";
+} from "@services/unexpectedResponse";
 
 /**
  * Defines the shape of the state for an auction detail page.

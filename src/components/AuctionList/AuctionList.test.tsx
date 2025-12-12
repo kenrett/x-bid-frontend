@@ -5,7 +5,7 @@ import { getAuctions } from "@api/auctions";
 import {
   UnexpectedResponseError,
   UNEXPECTED_RESPONSE_MESSAGE,
-} from "@/services/unexpectedResponse";
+} from "@services/unexpectedResponse";
 import type { AuctionSummary } from "../../types/auction";
 
 // Mock the API module

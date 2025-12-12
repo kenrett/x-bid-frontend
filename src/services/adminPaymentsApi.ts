@@ -1,6 +1,6 @@
-import client from "@/api/client";
-import type { paths } from "@/api/openapi-types";
-import type { Payment } from "@/components/Admin/Users/types";
+import client from "@api/client";
+import type { paths } from "@api/openapi-types";
+import type { Payment } from "@components/Admin/Users/types";
 
 type AdminPaymentsResponse = paths["/api/v1/admin/payments"]["get"] extends {
   responses: { 200: { content: { "application/json": infer T } } };

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { AxiosError } from "axios";
 
 const showToast = vi.fn();
-vi.mock("@/services/toast", () => ({
+vi.mock("@services/toast", () => ({
   showToast: (...args: unknown[]) => showToast(...args),
 }));
 

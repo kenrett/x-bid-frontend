@@ -1,4 +1,4 @@
-import { Sentry } from "@/sentryClient";
+import { Sentry } from "@sentryClient";
 import { showToast } from "./toast";
 
 export const UNEXPECTED_RESPONSE_MESSAGE = "Something's off on our end.";

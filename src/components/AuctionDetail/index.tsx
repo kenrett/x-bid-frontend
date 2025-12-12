@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useParams } from "react-router-dom";
 
 import { AuctionView } from "../AuctionView/AuctionView";
-import { useAuctionDetail } from "@/hooks/useAuctionDetail";
+import { useAuctionDetail } from "@hooks/useAuctionDetail";
 import { LoadingScreen } from "../LoadingScreen";
 import { ErrorScreen } from "../ErrorScreen";
 

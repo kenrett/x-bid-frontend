@@ -1,4 +1,4 @@
-import client from "@/api/client";
+import client from "@api/client";
 
 type Payload = Record<string, unknown> | undefined;
 

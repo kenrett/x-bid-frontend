@@ -3,7 +3,7 @@ import type { AuctionDetail, AuctionSummary } from "../types/auction";
 import type { Bid } from "../types/bid";
 import type { ApiJsonResponse } from "./openapi-helpers";
 import { statusFromApi } from "./status";
-import { reportUnexpectedResponse } from "@/services/unexpectedResponse";
+import { reportUnexpectedResponse } from "@services/unexpectedResponse";
 
 export type { AuctionDetail, AuctionSummary };
 

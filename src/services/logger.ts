@@ -1,5 +1,5 @@
 import { ErrorInfo } from "react";
-import { Sentry, SENTRY_ENABLED } from "@/sentryClient";
+import { Sentry, SENTRY_ENABLED } from "@sentryClient";
 
 /**
  * A stub for a remote error logging service.

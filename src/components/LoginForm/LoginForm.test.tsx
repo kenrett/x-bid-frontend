@@ -5,8 +5,8 @@ import { LoginForm } from "./LoginForm";
 import { useAuth } from "../../hooks/useAuth";
 import client from "@api/client";
 import userEvent from "@testing-library/user-event";
-import type { User } from "@/types/user";
-import type { LoginPayload } from "@/types/auth";
+import type { User } from "@types/user";
+import type { LoginPayload } from "@types/auth";
 
 // --- Mocks ---
 vi.mock("react-router-dom", async () => {

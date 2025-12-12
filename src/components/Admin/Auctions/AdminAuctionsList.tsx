@@ -9,7 +9,7 @@ import type { AuctionSummary } from "../../../types/auction";
 import {
   UNEXPECTED_RESPONSE_MESSAGE,
   UnexpectedResponseError,
-} from "@/services/unexpectedResponse";
+} from "@services/unexpectedResponse";
 
 export const AdminAuctionsList = () => {
   const [auctions, setAuctions] = useState<AuctionSummary[]>([]);

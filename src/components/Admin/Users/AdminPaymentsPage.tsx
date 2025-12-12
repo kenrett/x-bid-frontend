@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Payment } from "./types";
 import { AdminPayments } from "./AdminPayments";
-import { adminPaymentsApi } from "@/services/adminPaymentsApi";
-import { showToast } from "@/services/toast";
+import { adminPaymentsApi } from "@services/adminPaymentsApi";
+import { showToast } from "@services/toast";
 
 export const AdminPaymentsPage = () => {
   const [payments, setPayments] = useState<Payment[]>([]);

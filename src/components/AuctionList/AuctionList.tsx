@@ -7,7 +7,7 @@ import { Page } from "../Page";
 import {
   UNEXPECTED_RESPONSE_MESSAGE,
   UnexpectedResponseError,
-} from "@/services/unexpectedResponse";
+} from "@services/unexpectedResponse";
 const AuctionList = () => {
   const [auctions, setAuctions] = useState<AuctionSummary[]>([]);
   const [loading, setLoading] = useState(true);

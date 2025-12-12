@@ -3,13 +3,13 @@ import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import client from "@api/client";
 import { useAuth } from "../../hooks/useAuth";
-import { CheckoutSuccessResponse } from "@/types/checkout";
+import { CheckoutSuccessResponse } from "@types/checkout";
 import { Page } from "../Page";
 import {
   reportUnexpectedResponse,
   UNEXPECTED_RESPONSE_MESSAGE,
   UnexpectedResponseError,
-} from "@/services/unexpectedResponse";
+} from "@services/unexpectedResponse";
 
 export const PurchaseStatus = () => {
   const navigate = useNavigate();
