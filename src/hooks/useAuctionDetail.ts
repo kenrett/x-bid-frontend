@@ -11,6 +11,11 @@ import {
 
 import type { AuctionDetail } from "../types/auction";
 import type { Bid } from "../types/bid";
+import {
+  reportUnexpectedResponse,
+  UNEXPECTED_RESPONSE_MESSAGE,
+  UnexpectedResponseError,
+} from "@/services/unexpectedResponse";
 
 /**
  * Defines the shape of the state for an auction detail page.
@@ -193,7 +198,10 @@ export function useAuctionDetail(auctionId: number) {
     } catch (err) {
       dispatch({
         type: "FETCH_FAILURE",
-        payload: "Failed to fetch auction details.",
+        payload:
+          err instanceof UnexpectedResponseError
+            ? UNEXPECTED_RESPONSE_MESSAGE
+            : "Failed to fetch auction details.",
       });
       console.error(err);
     }
@@ -249,7 +257,10 @@ export function useAuctionDetail(auctionId: number) {
       );
 
       if (!newBid) {
-        throw new Error("Bid response missing bid data");
+        throw reportUnexpectedResponse("placeBid", {
+          auction: updatedAuctionData,
+          bid: newBid,
+        });
       }
 
       const normalizedBid: Bid = {
@@ -281,7 +292,9 @@ export function useAuctionDetail(auctionId: number) {
         },
       });
     } catch (err) {
-      if (isAxiosError(err) && err.response?.data?.error) {
+      if (err instanceof UnexpectedResponseError) {
+        dispatch({ type: "BID_FAILURE", payload: UNEXPECTED_RESPONSE_MESSAGE });
+      } else if (isAxiosError(err) && err.response?.data?.error) {
         dispatch({ type: "BID_FAILURE", payload: err.response.data.error });
       } else {
         dispatch({

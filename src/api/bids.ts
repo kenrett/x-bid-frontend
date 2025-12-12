@@ -2,6 +2,7 @@ import client from "./client";
 import type { Bid } from "../types/bid";
 import type { AuctionDetail } from "../types/auction";
 import type { ApiJsonResponse } from "./openapi-helpers";
+import { reportUnexpectedResponse } from "@/services/unexpectedResponse";
 
 export type PlaceBidResponse = ApiJsonResponse<
   "/api/v1/auctions/{auction_id}/bids",
@@ -38,11 +39,30 @@ export const getBidHistory = async (
     `/api/v1/auctions/${auctionId}/bid_history`,
   );
   const data = response.data ?? {};
+
+  if (!data || typeof data !== "object") {
+    throw reportUnexpectedResponse("getBidHistory", data);
+  }
+
+  const incomingAuction = (data as { auction?: unknown }).auction;
+  if (incomingAuction !== undefined && incomingAuction !== null) {
+    if (typeof incomingAuction !== "object") {
+      throw reportUnexpectedResponse("getBidHistory.auction", data);
+    }
+  }
+
+  if (!Array.isArray((data as { bids?: unknown }).bids)) {
+    throw reportUnexpectedResponse("getBidHistory.bids", data);
+  }
   return {
     auction: {
-      winning_user_id: data.auction?.winning_user_id ?? null,
-      winning_user_name: data.auction?.winning_user_name ?? null,
+      winning_user_id:
+        (incomingAuction as { winning_user_id?: number | null })
+          ?.winning_user_id ?? null,
+      winning_user_name:
+        (incomingAuction as { winning_user_name?: string | null })
+          ?.winning_user_name ?? null,
     },
-    bids: Array.isArray(data.bids) ? data.bids : [],
+    bids: (data as { bids: Bid[] }).bids as Bid[],
   };
 };

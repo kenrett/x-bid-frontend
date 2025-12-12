@@ -6,6 +6,10 @@ import { deleteAuction, updateAuction } from "../../../api/admin/auctions";
 import { showToast } from "../../../services/toast";
 import { logAdminAction } from "../../../services/adminAudit";
 import type { AuctionSummary } from "../../../types/auction";
+import {
+  UNEXPECTED_RESPONSE_MESSAGE,
+  UnexpectedResponseError,
+} from "@/services/unexpectedResponse";
 
 export const AdminAuctionsList = () => {
   const [auctions, setAuctions] = useState<AuctionSummary[]>([]);
@@ -49,7 +53,11 @@ export const AdminAuctionsList = () => {
       const data = await getAuctions();
       setAuctions(data);
     } catch (err) {
-      setError("Failed to load auctions.");
+      setError(
+        err instanceof UnexpectedResponseError
+          ? UNEXPECTED_RESPONSE_MESSAGE
+          : "Failed to load auctions.",
+      );
       console.error(err);
     } finally {
       setLoading(false);

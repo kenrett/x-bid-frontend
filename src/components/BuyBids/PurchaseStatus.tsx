@@ -5,6 +5,11 @@ import client from "@api/client";
 import { useAuth } from "../../hooks/useAuth";
 import { CheckoutSuccessResponse } from "@/types/checkout";
 import { Page } from "../Page";
+import {
+  reportUnexpectedResponse,
+  UNEXPECTED_RESPONSE_MESSAGE,
+  UnexpectedResponseError,
+} from "@/services/unexpectedResponse";
 
 export const PurchaseStatus = () => {
   const navigate = useNavigate();
@@ -37,22 +42,38 @@ export const PurchaseStatus = () => {
           },
         );
 
-        if (response.data.status === "success") {
+        const payload = response.data;
+
+        if (!payload || typeof payload !== "object") {
+          throw reportUnexpectedResponse("checkoutSuccess", payload);
+        }
+
+        if (payload.status === "success") {
+          if (typeof payload.updated_bid_credits !== "number") {
+            throw reportUnexpectedResponse(
+              "checkoutSuccess.updated_bid_credits",
+              payload,
+            );
+          }
           setStatus("success");
           setMessage(
-            `Your purchase was successful! New balance: ${response.data.updated_bid_credits} credits.`,
+            `Your purchase was successful! New balance: ${payload.updated_bid_credits} credits.`,
           );
-          updateUserBalance(response.data.updated_bid_credits);
-        } else {
+          updateUserBalance(payload.updated_bid_credits);
+        } else if (payload.status === "error") {
           setStatus("error");
           setMessage(
-            response.data.error ??
+            payload.error ??
               "There was an issue with your payment. Please contact support.",
           );
+        } else {
+          throw reportUnexpectedResponse("checkoutSuccess.status", payload);
         }
       } catch (err) {
         setStatus("error");
-        if (axios.isAxiosError(err)) {
+        if (err instanceof UnexpectedResponseError) {
+          setMessage(UNEXPECTED_RESPONSE_MESSAGE);
+        } else if (axios.isAxiosError(err)) {
           setMessage(
             err.response?.data?.error || "Failed to verify payment status.",
           );

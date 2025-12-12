@@ -11,6 +11,11 @@ import {
 import { Page } from "../Page";
 import { ErrorScreen } from "../ErrorScreen";
 import axios from "axios";
+import {
+  reportUnexpectedResponse,
+  UNEXPECTED_RESPONSE_MESSAGE,
+  UnexpectedResponseError,
+} from "@/services/unexpectedResponse";
 
 // Initialize Stripe outside of the component render to avoid
 // recreating the `Stripe` object on every render.
@@ -30,6 +35,9 @@ export const BuyBids = () => {
     const fetchBidPacks = async () => {
       try {
         const response = await client.get<BidPack[]>("/api/v1/bid_packs");
+        if (!Array.isArray(response.data)) {
+          throw reportUnexpectedResponse("bidPacks", response.data);
+        }
         const normalized = response.data.map((pack) => {
           const bids = Number(pack.bids);
           const status: BidPack["status"] =
@@ -57,7 +65,11 @@ export const BuyBids = () => {
         });
         setBidPacks(normalized);
       } catch (err) {
-        setError("Failed to fetch bid packs.");
+        if (err instanceof UnexpectedResponseError) {
+          setError(UNEXPECTED_RESPONSE_MESSAGE);
+        } else {
+          setError("Failed to fetch bid packs.");
+        }
         console.error(err);
       } finally {
         setIsLoadingPacks(false);
@@ -129,9 +141,16 @@ export const BuyBids = () => {
         },
       );
 
-      setClientSecret(response.data.clientSecret);
+      const { clientSecret } = response.data ?? {};
+      if (typeof clientSecret !== "string") {
+        throw reportUnexpectedResponse("checkoutCreate", response.data);
+      }
+
+      setClientSecret(clientSecret);
     } catch (err) {
-      if (axios.isAxiosError(err)) {
+      if (err instanceof UnexpectedResponseError) {
+        setError(UNEXPECTED_RESPONSE_MESSAGE);
+      } else if (axios.isAxiosError(err)) {
         const message =
           err.response?.data?.error || "Something went wrong during purchase.";
         setError(message);

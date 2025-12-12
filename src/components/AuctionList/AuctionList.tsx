@@ -4,6 +4,10 @@ import type { AuctionSummary } from "../../types/auction";
 import { Auction } from "../Auction/Auction";
 import { useNavigate } from "react-router-dom";
 import { Page } from "../Page";
+import {
+  UNEXPECTED_RESPONSE_MESSAGE,
+  UnexpectedResponseError,
+} from "@/services/unexpectedResponse";
 const AuctionList = () => {
   const [auctions, setAuctions] = useState<AuctionSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +21,11 @@ const AuctionList = () => {
         const data = await getAuctions();
         setAuctions(data);
       } catch (err) {
-        setError("Failed to fetch auctions.");
+        setError(
+          err instanceof UnexpectedResponseError
+            ? UNEXPECTED_RESPONSE_MESSAGE
+            : "Failed to fetch auctions.",
+        );
         console.error(err);
       } finally {
         setLoading(false);
