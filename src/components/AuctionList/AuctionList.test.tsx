@@ -22,9 +22,9 @@ vi.mock("../Auction/Auction", () => ({
     id: number;
     title: string;
   }) => (
-    <div data-testid={`auction-${id}`} onClick={() => onClick(id)}>
+    <button data-testid={`auction-${id}`} onClick={() => onClick(id)}>
       {title}
-    </div>
+    </button>
   ),
 }));
 

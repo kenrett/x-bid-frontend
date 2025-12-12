@@ -18,10 +18,11 @@ export function Auction({
   index,
 }: AuctionProps) {
   return (
-    <div
+    <button
       data-testid={`auction-card-${id}`}
+      type="button"
       onClick={() => onClick(id)}
-      className="group cursor-pointer bg-[#1a0d2e]/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#a020f0]/20"
+      className="group block w-full text-left bg-[#1a0d2e]/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#a020f0]/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#a020f0] focus:ring-offset-[#0b0716]"
       style={{
         animation: `fadeInUp 0.5s ${(index * 0.1).toFixed(1)}s ease-out both`,
       }}
@@ -42,6 +43,6 @@ export function Auction({
           Current Price: ${current_price.toFixed(2)}
         </p>
       </div>
-    </div>
+    </button>
   );
 }

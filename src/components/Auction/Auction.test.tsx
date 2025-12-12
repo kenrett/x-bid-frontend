@@ -44,7 +44,9 @@ describe("Auction Component", () => {
     const user = userEvent.setup();
     render(<Auction {...mockAuctionProps} onClick={handleClick} />);
 
-    const component = screen.getByTestId(`auction-card-${mockAuctionProps.id}`);
+    const component = screen.getByRole("button", {
+      name: /Vintage Space Poster/i,
+    });
     await user.click(component);
 
     expect(handleClick).toHaveBeenCalledTimes(1);
