@@ -6,16 +6,20 @@ import { AuthProvider } from "./auth/AuthProvider";
 import { FlowbiteInitializer } from "./components/FlowbiteInitializer";
 import { ToastContainer } from "./components/Toast/ToastContainer";
 import "./sentryClient";
+import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary";
+import { logError } from "./services/logger";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Root element not found");
 
 createRoot(rootElement).render(
   <StrictMode>
-    <AuthProvider>
-      <FlowbiteInitializer />
-      <App />
-      <ToastContainer />
-    </AuthProvider>
+    <ErrorBoundary onError={logError}>
+      <AuthProvider>
+        <FlowbiteInitializer />
+        <App />
+        <ToastContainer />
+      </AuthProvider>
+    </ErrorBoundary>
   </StrictMode>,
 );

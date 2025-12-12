@@ -1,4 +1,5 @@
 import { ErrorInfo } from "react";
+import { Sentry, SENTRY_ENABLED } from "@/sentryClient";
 
 /**
  * A stub for a remote error logging service.
@@ -10,27 +11,29 @@ import { ErrorInfo } from "react";
  * @param errorInfo - An object with a `componentStack` property containing
  *   information about which component threw the error.
  */
-export const logError = (error: Error, errorInfo: ErrorInfo): void => {
-  // Example:
-  // Sentry.withScope((scope) => {
-  //   scope.setExtras(errorInfo);
-  //   Sentry.captureException(error);
-  // });
-  //
-  // Or a custom API call:
-  // fetch('/api/log-error', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     error: {
-  //       message: error.message,
-  //       stack: error.stack,
-  //     },
-  //     errorInfo,
-  //   }),
-  // });
+let sentryClient = Sentry;
+let sentryEnabled = SENTRY_ENABLED;
 
+export const __setSentryForTests = (
+  client: typeof Sentry,
+  enabled: boolean,
+) => {
+  sentryClient = client;
+  sentryEnabled = enabled;
+};
+
+export const logError = (error: Error, errorInfo: ErrorInfo): void => {
   console.error("ErrorBoundary caught an error", error, errorInfo);
+
+  if (sentryEnabled) {
+    try {
+      sentryClient.withScope((scope) => {
+        scope.setExtras(errorInfo);
+        sentryClient.captureException(error);
+      });
+    } catch (loggingError) {
+      // Guard: Ensure logging failures don't crash the app
+      console.error("Failed to report error to Sentry:", loggingError);
+    }
+  }
 };
