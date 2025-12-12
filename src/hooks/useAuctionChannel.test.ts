@@ -7,6 +7,10 @@ import { cable } from "@services/cable"; // This will be the mocked version
 const mockSubscription = {
   unsubscribe: vi.fn(),
   perform: vi.fn(),
+  connected: vi.fn(),
+  disconnected: vi.fn(),
+  rejected: vi.fn(),
+  received: vi.fn(),
 };
 
 // Mock the cable service. The factory function is hoisted.
