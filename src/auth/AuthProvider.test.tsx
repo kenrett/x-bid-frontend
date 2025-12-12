@@ -1,8 +1,8 @@
 import React from "react";
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
-import type { LoginPayload } from "@types/auth";
-import type { User } from "@types/user";
+import type { LoginPayload } from "@appTypes/auth";
+import type { User } from "@appTypes/user";
 
 const cableMocks = vi.hoisted(() => ({
   connect: vi.fn(),

@@ -23,7 +23,7 @@
       "@hooks/*": ["./src/hooks/*"],
       "@auth/*": ["./src/auth/*"],
       "@services/*": ["./src/services/*"],
-      "@types/*": ["./src/types/*"],
+      "@appTypes/*": ["./src/types/*"],
       "@utils/*": ["./src/utils/*"],
       "@sentryClient": ["./src/sentryClient"]
     }

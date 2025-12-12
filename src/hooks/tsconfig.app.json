@@ -29,7 +29,7 @@
       "@components/*": ["../components/*"],
       "@hooks/*": ["./*"],
       "@services/*": ["../services/*"],
-      "@types/*": ["../types/*"],
+      "@appTypes/*": ["../types/*"],
       "@utils/*": ["../utils/*"],
       "@sentryClient": ["../sentryClient"]
     }

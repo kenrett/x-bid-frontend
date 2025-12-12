@@ -1,5 +1,5 @@
 import { cable } from "@services/cable";
-import { Bid } from "@types/bid";
+import { Bid } from "@appTypes/bid";
 import { useRef, useEffect, useState } from "react";
 
 export type AuctionConnectionState =

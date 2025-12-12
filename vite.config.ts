@@ -15,7 +15,7 @@ const config: UserConfig & { test: VitestUserConfig["test"] } = {
       "@hooks": resolve(__dirname, "./src/hooks"),
       "@auth": resolve(__dirname, "./src/auth"),
       "@services": resolve(__dirname, "./src/services"),
-      "@types": resolve(__dirname, "./src/types"),
+      "@appTypes": resolve(__dirname, "./src/types"),
       "@utils": resolve(__dirname, "./src/utils"),
       "@sentryClient": resolve(__dirname, "./src/sentryClient"),
     },
