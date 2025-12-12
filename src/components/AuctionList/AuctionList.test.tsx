@@ -2,6 +2,10 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import AuctionList from "./AuctionList";
 import { getAuctions } from "@api/auctions";
+import {
+  UnexpectedResponseError,
+  UNEXPECTED_RESPONSE_MESSAGE,
+} from "@/services/unexpectedResponse";
 import type { AuctionSummary } from "../../types/auction";
 
 // Mock the API module
@@ -106,6 +110,16 @@ describe("AuctionList", () => {
     // Ensure loading message and auction list are not present
     expect(screen.queryByText("Loading auctions...")).not.toBeInTheDocument();
     expect(screen.queryByText("Vintage Watch")).not.toBeInTheDocument();
+  });
+
+  it("shows the unexpected-response message when response shape is invalid", async () => {
+    mockedGetAuctions.mockRejectedValue(
+      new UnexpectedResponseError("getAuctions"),
+    );
+    render(<AuctionList />);
+
+    const errorElement = await screen.findByText(UNEXPECTED_RESPONSE_MESSAGE);
+    expect(errorElement).toBeInTheDocument();
   });
 
   it('should display a "No auctions found" message when the fetch returns an empty array', async () => {

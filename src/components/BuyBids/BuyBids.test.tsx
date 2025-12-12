@@ -7,6 +7,7 @@ import { BuyBids } from "./BuyBids";
 import { useAuth } from "../../hooks/useAuth";
 import client from "@api/client";
 import type { BidPack } from "../../types/bidPack";
+import { UNEXPECTED_RESPONSE_MESSAGE } from "@/services/unexpectedResponse";
 
 vi.mock("../../hooks/useAuth");
 vi.mock("@api/client");
@@ -133,6 +134,15 @@ describe("BuyBids Component", () => {
       expect(console.error).toHaveBeenCalled();
     });
 
+    it("shows unexpected-response message if bid packs response is malformed", async () => {
+      mockedClient.get.mockResolvedValue({ data: { not: "an array" } });
+      renderComponent();
+
+      expect(
+        await screen.findByText(UNEXPECTED_RESPONSE_MESSAGE),
+      ).toBeInTheDocument();
+    });
+
     it("renders bid packs on successful fetch", async () => {
       mockedClient.get.mockResolvedValue({ data: mockBidPacks });
       renderComponent();
@@ -234,6 +244,29 @@ describe("BuyBids Component", () => {
 
       expect(
         await screen.findByText("An unexpected error occurred."),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("embedded-checkout-provider"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("surfaces unexpected-response message when checkout create payload is malformed", async () => {
+      mockedClient.get.mockResolvedValue({ data: mockBidPacks });
+      mockedClient.post.mockResolvedValue({ data: {} });
+      renderComponent();
+      const user = userEvent.setup();
+
+      const starterPackCard = (
+        await screen.findByRole("heading", { name: "Starter Pack" })
+      ).closest("div")!;
+      const acquireButton = within(starterPackCard).getByRole("button", {
+        name: /acquire pack/i,
+      });
+
+      await user.click(acquireButton);
+
+      expect(
+        await screen.findByText(UNEXPECTED_RESPONSE_MESSAGE),
       ).toBeInTheDocument();
       expect(
         screen.queryByTestId("embedded-checkout-provider"),
