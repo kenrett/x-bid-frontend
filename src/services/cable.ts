@@ -17,4 +17,16 @@ const buildCableUrl = () => {
   return url.toString();
 };
 
-export const cable = createConsumer(buildCableUrl());
+let cable = createConsumer(buildCableUrl());
+
+export const resetCable = () => {
+  try {
+    cable.disconnect();
+  } catch (err) {
+    console.warn("[cable] Failed to disconnect existing consumer", err);
+  }
+  cable = createConsumer(buildCableUrl());
+  return cable;
+};
+
+export { cable };

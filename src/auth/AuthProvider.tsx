@@ -4,9 +4,9 @@ import { AuthContext } from "../contexts/authContext";
 import type { User } from "../types/user";
 import type { LoginPayload } from "../types/auth";
 import client from "@api/client";
-import { cable } from "@/services/cable";
+import { cable, resetCable } from "@services/cable";
 import { normalizeUser } from "@api/user";
-import { setSentryUser } from "@/sentryClient";
+import { setSentryUser } from "@sentryClient";
 
 type SessionRemainingResponse = {
   remaining_seconds?: number;
@@ -103,6 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       persistValue("refreshToken", refresh);
       persistValue("sessionTokenId", sessionId);
       setSentryUser(normalizedUser);
+      resetCable();
     },
     [persistValue, normalizeAuthUser],
   );
@@ -119,6 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     persistValue("refreshToken", null);
     persistValue("sessionTokenId", null);
     setSentryUser(null);
+    resetCable();
   }, [persistValue]);
 
   const handleSessionInvalidated = useCallback(
@@ -186,6 +188,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           setSessionRemainingSeconds(null);
         }
 
+        const tokenChanged = nextToken && nextToken !== token;
+        const sessionChanged =
+          nextSessionTokenId && nextSessionTokenId !== sessionTokenId;
+
         if (nextToken && nextRefreshToken && nextSessionTokenId) {
           setToken(nextToken);
           persistValue("token", nextToken);
@@ -193,6 +199,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           persistValue("refreshToken", nextRefreshToken);
           setSessionTokenId(nextSessionTokenId);
           persistValue("sessionTokenId", nextSessionTokenId);
+
+          if (tokenChanged || sessionChanged) {
+            resetCable();
+          }
         }
 
         if (
