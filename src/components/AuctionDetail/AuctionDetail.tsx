@@ -33,6 +33,7 @@ function AuctionDetailInner({ auctionId }: { auctionId: number }) {
     placeUserBid,
     bids,
     onTimerEnd,
+    connectionState,
   } = useAuctionDetail(auctionId);
 
   if (error) return <ErrorScreen message={error} />;
@@ -45,6 +46,7 @@ function AuctionDetailInner({ auctionId }: { auctionId: number }) {
       isBidding={isBidding}
       bidError={bidError}
       highestBidderUsername={highestBidderDisplay}
+      connectionState={connectionState}
       onPlaceBid={placeUserBid}
       onTimerEnd={onTimerEnd}
       bids={bids}
