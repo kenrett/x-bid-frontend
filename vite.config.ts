@@ -41,6 +41,7 @@ const config: UserConfig & { test: VitestUserConfig["test"] } = {
         "src/**/index.tsx", // barrel-only files
         "src/components/**/PrivacyPolicy.tsx",
         "src/components/**/TermsAndConditions.tsx",
+        "src/components/**/HowItWorks.tsx",
         "playwright.config.*",
         "tailwind.config.*",
         "src/App.tsx",
