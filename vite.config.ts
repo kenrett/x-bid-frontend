@@ -29,6 +29,31 @@ const config: UserConfig & { test: VitestUserConfig["test"] } = {
     environment: "jsdom",
     setupFiles: resolve(__dirname, "./src/test/setup.ts"),
     exclude: ["**/node_modules/**", "**/dist/**", "**/e2e/**"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: [
+        "src/api/openapi-types.ts",
+        "src/api/openapi-helpers.ts",
+        "src/vendor/**",
+        "src/types/**",
+        "src/**/index.tsx", // barrel-only files
+        "src/components/**/PrivacyPolicy.tsx",
+        "src/components/**/TermsAndConditions.tsx",
+        "playwright.config.*",
+        "tailwind.config.*",
+        "src/App.tsx",
+        "src/main.tsx",
+        "src/vite-env.d.ts",
+      ],
+      thresholds: {
+        statements: 55,
+        branches: 60,
+        functions: 55,
+        lines: 55,
+      },
+    },
   },
 };
 
