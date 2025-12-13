@@ -46,6 +46,8 @@ const config: UserConfig & { test: VitestUserConfig["test"] } = {
         "src/App.tsx",
         "src/main.tsx",
         "src/vite-env.d.ts",
+        "**/*.test.{ts,tsx}",
+        "**/*.spec.{ts,tsx}",
       ],
       thresholds: {
         statements: 55,
