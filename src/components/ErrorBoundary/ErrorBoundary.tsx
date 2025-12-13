@@ -52,7 +52,10 @@ const ErrorBoundary = ({ children, fallback, onError }: Props) => {
       }
       onError={(error, info) => {
         const handler = onError ?? logError;
-        handler(error, info as ErrorInfo);
+        const plainInfo: ErrorInfo = {
+          componentStack: info?.componentStack ?? "",
+        };
+        handler(error, plainInfo);
       }}
     >
       {children}
