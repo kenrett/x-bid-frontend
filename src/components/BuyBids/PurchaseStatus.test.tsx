@@ -12,7 +12,13 @@ vi.mock("@api/client", () => ({
 }));
 vi.mock("../../hooks/useAuth");
 
-const mockedClient = client as unknown as { get: vi.Mock; post: vi.Mock };
+const mockedClient = vi.mocked(
+  client as unknown as {
+    get: ReturnType<typeof vi.fn>;
+    post: ReturnType<typeof vi.fn>;
+  },
+  { deep: true },
+);
 const mockUpdateUserBalance = vi.fn();
 
 let searchParamsValue = "";

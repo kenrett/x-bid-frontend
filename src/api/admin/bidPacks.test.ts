@@ -29,8 +29,8 @@ const buildPack = (overrides: Partial<BidPack> = {}): BidPack =>
   ({
     id: 1,
     name: "Pack",
-    price: "10.00",
-    bids: "20",
+    price: 10,
+    bids: 20,
     status: "active",
     active: undefined,
     highlight: undefined,

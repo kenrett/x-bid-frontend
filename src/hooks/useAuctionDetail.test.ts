@@ -75,7 +75,7 @@ beforeEach(() => {
           typeof import("@services/cable").cable.subscriptions.create
         >,
         connectionState: "connected",
-      };
+      } as ReturnType<typeof useAuctionChannel>;
     },
   );
   channelHandler = undefined;
