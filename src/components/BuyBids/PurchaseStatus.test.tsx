@@ -6,10 +6,13 @@ import { PurchaseStatus } from "./PurchaseStatus";
 import { UNEXPECTED_RESPONSE_MESSAGE } from "@services/unexpectedResponse";
 import { useAuth } from "../../hooks/useAuth";
 
-vi.mock("@api/client");
+vi.mock("@api/client", () => ({
+  __esModule: true,
+  default: { get: vi.fn(), post: vi.fn() },
+}));
 vi.mock("../../hooks/useAuth");
 
-const mockedClient = vi.mocked(client);
+const mockedClient = client as unknown as { get: vi.Mock; post: vi.Mock };
 const mockUpdateUserBalance = vi.fn();
 
 let searchParamsValue = "";
@@ -50,7 +53,6 @@ describe("PurchaseStatus", () => {
   });
 
   afterEach(() => {
-    vi.useRealTimers();
     vi.clearAllMocks();
     vi.restoreAllMocks();
   });
@@ -71,9 +73,10 @@ describe("PurchaseStatus", () => {
     const realSetTimeout = global.setTimeout;
     const setTimeoutSpy = vi
       .spyOn(global, "setTimeout")
-      .mockImplementation((fn: TimerHandler, _delay?: number, ...args: []) =>
-        realSetTimeout(fn as TimerHandler, 0, ...args),
+      .mockImplementation((handler: TimerHandler, _delay?: number, ...args) =>
+        realSetTimeout(handler as TimerHandler, 0, ...(args as [])),
       );
+
     mockedClient.get.mockResolvedValue({
       data: { status: "success", updated_bid_credits: 150 },
     });

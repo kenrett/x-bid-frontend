@@ -25,7 +25,10 @@ vi.mock("@hooks/useAuth", () => ({
 }));
 
 import { useAuctionDetail } from "./useAuctionDetail";
-import { useAuctionChannel } from "@hooks/useAuctionChannel";
+import {
+  useAuctionChannel,
+  type AuctionChannelData,
+} from "@hooks/useAuctionChannel";
 import * as auctionsApi from "@api/auctions";
 import * as bidsApi from "@api/bids";
 import { useAuth } from "@hooks/useAuth";
@@ -65,7 +68,7 @@ const user = { id: 10, name: "User", is_admin: false, is_superuser: false };
 beforeEach(() => {
   vi.clearAllMocks();
   mockedUseAuctionChannel.mockImplementation(
-    (_id, handler: (data: unknown) => void) => {
+    (_id: number, handler: (data: AuctionChannelData) => void) => {
       channelHandler = handler;
       return {
         subscription: true as unknown as ReturnType<

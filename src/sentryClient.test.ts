@@ -13,14 +13,13 @@ vi.mock("@sentry/react", () => ({
 const originalEnv = { ...import.meta.env };
 
 const applyEnv = (overrides: Record<string, unknown>) => {
+  const env = import.meta.env as unknown as Record<string, unknown>;
   const keys = new Set([
     ...Object.keys(originalEnv),
     ...Object.keys(overrides),
   ]);
-
   for (const key of keys) {
-    // @ts-expect-error: allow writing to Vite's env bag for tests
-    import.meta.env[key] =
+    env[key] =
       key in overrides
         ? overrides[key]
         : (originalEnv as Record<string, unknown>)[key];

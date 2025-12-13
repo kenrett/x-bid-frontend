@@ -12,7 +12,14 @@ const TestComponent = () => {
 describe("useAuth", () => {
   it("returns context when provided", () => {
     const value: AuthContextType = {
-      user: { id: 1, email: "test@example.com", name: "Test" },
+      user: {
+        id: 1,
+        email: "test@example.com",
+        name: "Test",
+        bidCredits: 0,
+        is_admin: false,
+        is_superuser: false,
+      },
       token: "token",
       refreshToken: "refresh",
       sessionTokenId: "session",

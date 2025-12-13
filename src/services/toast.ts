@@ -6,7 +6,7 @@ export type ToastMessage = {
   variant: ToastVariant;
 };
 
-type ToastListener = (toast: ToastMessage) => void;
+export type ToastListener = (toast: ToastMessage) => void;
 
 const listeners = new Set<ToastListener>();
 

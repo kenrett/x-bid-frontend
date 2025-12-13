@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import { ToastContainer } from "./ToastContainer";
-import { subscribeToToasts, type ToastMessage } from "../../services/toast";
+import { subscribeToToasts, type ToastListener } from "../../services/toast";
 
 vi.mock("../../services/toast");
 
 const mockSubscribe = vi.mocked(subscribeToToasts);
-let capturedListener: ((toast: ToastMessage) => void) | undefined;
+let capturedListener: ToastListener | undefined;
 
 describe("ToastContainer", () => {
   beforeEach(() => {
@@ -14,7 +14,7 @@ describe("ToastContainer", () => {
     capturedListener = undefined;
     mockSubscribe.mockImplementation((cb) => {
       capturedListener = cb;
-      return () => {};
+      return () => true;
     });
   });
 
