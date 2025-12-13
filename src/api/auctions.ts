@@ -86,14 +86,20 @@ export const getAuction = async (id: number) => {
     (data as { auction?: AuctionShowRecord }).auction ??
     (data as AuctionShowRecord);
 
+  const hasFiniteId = (
+    value: unknown,
+  ): value is AuctionShowRecord & {
+    id: number;
+  } =>
+    isRecord(value) &&
+    Number.isFinite((value as { id?: unknown }).id as number) &&
+    (value as { id?: unknown }).id !== undefined;
+
   if (!isRecord(rawAuction)) {
     throw reportUnexpectedResponse("getAuction", data);
   }
 
-  if (
-    !Number.isFinite((rawAuction as { id?: unknown }).id as number) ||
-    rawAuction.id === undefined
-  ) {
+  if (!hasFiniteId(rawAuction)) {
     throw reportUnexpectedResponse("getAuction.id", data);
   }
 

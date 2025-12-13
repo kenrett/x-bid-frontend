@@ -28,7 +28,7 @@ export const logError = (error: Error, errorInfo: ErrorInfo): void => {
   if (sentryEnabled) {
     try {
       sentryClient.withScope((scope) => {
-        scope.setExtras(errorInfo);
+        scope.setExtras({ componentStack: errorInfo.componentStack });
         sentryClient.captureException(error);
       });
     } catch (loggingError) {

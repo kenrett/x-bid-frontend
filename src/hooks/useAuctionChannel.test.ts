@@ -103,14 +103,18 @@ describe("useAuctionChannel", () => {
   it("updates connection state based on callbacks", async () => {
     const { result } = renderHook(() => useAuctionChannel(auctionId, onData));
     const [, callbacks] = vi.mocked(cable.subscriptions.create).mock.calls[0];
+    const typedCallbacks = callbacks as {
+      connected?: () => void;
+      disconnected?: () => void;
+    };
     act(() => {
-      callbacks?.connected?.();
+      typedCallbacks.connected?.();
     });
     await waitFor(() =>
       expect(result.current.connectionState).toBe("connected"),
     );
     act(() => {
-      callbacks?.disconnected?.();
+      typedCallbacks.disconnected?.();
     });
     await waitFor(() =>
       expect(result.current.connectionState).toBe("disconnected"),
