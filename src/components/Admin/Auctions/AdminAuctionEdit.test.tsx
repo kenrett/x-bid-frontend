@@ -1,0 +1,96 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { AdminAuctionEdit } from "./AdminAuctionEdit";
+
+const mockGetAuction = vi.fn();
+const mockUpdateAuction = vi.fn();
+const mockShowToast = vi.fn();
+const mockLogAdminAction = vi.fn();
+const mockNavigate = vi.fn();
+
+vi.mock("../../../api/auctions", () => ({
+  getAuction: (...args: unknown[]) => mockGetAuction(...args),
+}));
+vi.mock("../../../api/admin/auctions", () => ({
+  updateAuction: (...args: unknown[]) => mockUpdateAuction(...args),
+}));
+vi.mock("../../../services/toast", () => ({
+  showToast: (...args: unknown[]) => mockShowToast(...args),
+}));
+vi.mock("../../../services/adminAudit", () => ({
+  logAdminAction: (...args: unknown[]) => mockLogAdminAction(...args),
+}));
+vi.mock("react-router-dom", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("react-router-dom")>();
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
+
+const renderEdit = (initialPath = "/admin/auctions/5/edit") =>
+  render(
+    <MemoryRouter initialEntries={[initialPath]}>
+      <Routes>
+        <Route path="/admin/auctions/:id/edit" element={<AdminAuctionEdit />} />
+      </Routes>
+    </MemoryRouter>,
+  );
+
+describe("AdminAuctionEdit", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  it("shows error for invalid id", () => {
+    renderEdit("/admin/auctions/not-a-number/edit");
+
+    expect(screen.getByText("Invalid auction id.")).toBeInTheDocument();
+  });
+
+  it("loads auction and submits updates", async () => {
+    mockGetAuction.mockResolvedValue({
+      id: 5,
+      title: "Auction",
+      status: "inactive",
+      current_price: 10,
+    });
+    mockUpdateAuction.mockResolvedValue({});
+
+    const { container } = renderEdit();
+
+    expect(await screen.findByText("Update auction")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/Title/i), {
+      target: { value: "Updated Title" },
+    });
+    const form = container.querySelector("form");
+    if (!form) throw new Error("Form not found");
+    form.noValidate = true;
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(mockUpdateAuction).toHaveBeenCalledWith(
+        5,
+        expect.objectContaining({ title: "Updated Title" }),
+      );
+    });
+    expect(mockLogAdminAction).toHaveBeenCalledWith("auction.update", {
+      id: 5,
+      title: "Updated Title",
+    });
+    expect(mockShowToast).toHaveBeenCalledWith("Auction updated", "success");
+    expect(mockNavigate).toHaveBeenCalledWith("/admin/auctions");
+  });
+
+  it("handles fetch failure", async () => {
+    mockGetAuction.mockRejectedValue(new Error("fail"));
+
+    renderEdit();
+
+    expect(
+      await screen.findByText("Failed to load auction."),
+    ).toBeInTheDocument();
+  });
+});
