@@ -1,0 +1,56 @@
+import { describe, expect, it } from "vitest";
+import { router } from "./router";
+import { ADMIN_PATHS } from "./components/Admin/adminPaths";
+
+type RouteLike = {
+  path?: string;
+  children?: RouteLike[];
+  element?: unknown;
+  errorElement?: unknown;
+};
+
+const routes = router.routes as unknown as RouteLike[];
+
+const hasPath = (routes: readonly RouteLike[] | undefined, path: string) =>
+  routes?.some((route) => route.path === path) ?? false;
+
+describe("router configuration", () => {
+  it("exposes the main public routes", () => {
+    const root = routes[0];
+    if (!root) throw new Error("Root route missing");
+    const children = root.children;
+
+    expect(hasPath(children, "/")).toBe(true);
+    expect(hasPath(children, "/auctions")).toBe(true);
+    expect(hasPath(children, "/auctions/:id")).toBe(true);
+    expect(hasPath(children, "/login")).toBe(true);
+    expect(hasPath(children, "/signup")).toBe(true);
+    expect(hasPath(children, "/maintenance")).toBe(true);
+    expect(hasPath(children, "/admin")).toBe(true);
+    expect(root.errorElement).toBeTruthy();
+  });
+
+  it("protects admin routes behind AdminRoute and includes key admin pages", () => {
+    const root = routes[0];
+    if (!root) throw new Error("Root route missing");
+    const adminRoute = root.children?.find((route) => route.path === "/admin");
+    const adminLayout = adminRoute?.children?.[0];
+    const adminChildren = adminLayout?.children;
+
+    expect(adminRoute?.element).toBeTruthy();
+    expect(hasPath(adminChildren, ADMIN_PATHS.auctions)).toBe(true);
+    expect(hasPath(adminChildren, `${ADMIN_PATHS.auctions}/new`)).toBe(true);
+    expect(hasPath(adminChildren, `${ADMIN_PATHS.auctions}/:id`)).toBe(true);
+    expect(hasPath(adminChildren, `${ADMIN_PATHS.auctions}/:id/edit`)).toBe(
+      true,
+    );
+    expect(hasPath(adminChildren, ADMIN_PATHS.bidPacks)).toBe(true);
+    expect(hasPath(adminChildren, `${ADMIN_PATHS.bidPacks}/new`)).toBe(true);
+    expect(hasPath(adminChildren, `${ADMIN_PATHS.bidPacks}/:id/edit`)).toBe(
+      true,
+    );
+    expect(hasPath(adminChildren, ADMIN_PATHS.users)).toBe(true);
+    expect(hasPath(adminChildren, ADMIN_PATHS.payments)).toBe(true);
+    expect(hasPath(adminChildren, ADMIN_PATHS.settings)).toBe(true);
+  });
+});
