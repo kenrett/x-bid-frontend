@@ -29,12 +29,17 @@ import { useAuctionChannel } from "@hooks/useAuctionChannel";
 import * as auctionsApi from "@api/auctions";
 import * as bidsApi from "@api/bids";
 import { useAuth } from "@hooks/useAuth";
+import {
+  UNEXPECTED_RESPONSE_MESSAGE,
+  UnexpectedResponseError,
+} from "@services/unexpectedResponse";
 
 const mockedGetAuction = vi.mocked(auctionsApi.getAuction);
 const mockedGetBidHistory = vi.mocked(bidsApi.getBidHistory);
 const mockedPlaceBid = vi.mocked(bidsApi.placeBid);
 const mockedUseAuth = vi.mocked(useAuth);
 const mockedUseAuctionChannel = vi.mocked(useAuctionChannel);
+let channelHandler: ((data: unknown) => void) | undefined;
 
 const baseAuction: auctionsApi.AuctionDetail = {
   id: 1,
@@ -59,12 +64,18 @@ const user = { id: 10, name: "User", is_admin: false, is_superuser: false };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockedUseAuctionChannel.mockReturnValue({
-    subscription: true as unknown as ReturnType<
-      typeof import("@services/cable").cable.subscriptions.create
-    >,
-    connectionState: "connected",
-  });
+  mockedUseAuctionChannel.mockImplementation(
+    (_id, handler: (data: unknown) => void) => {
+      channelHandler = handler;
+      return {
+        subscription: true as unknown as ReturnType<
+          typeof import("@services/cable").cable.subscriptions.create
+        >,
+        connectionState: "connected",
+      };
+    },
+  );
+  channelHandler = undefined;
   mockedGetAuction.mockResolvedValue(baseAuction);
   mockedGetBidHistory.mockResolvedValue(bidHistoryResponse);
   mockedPlaceBid.mockResolvedValue({
@@ -77,6 +88,14 @@ beforeEach(() => {
 });
 
 describe("useAuctionDetail", () => {
+  it("surfaces fetch errors", async () => {
+    mockedGetAuction.mockRejectedValue(new UnexpectedResponseError("bad"));
+    const { result } = renderHook(() => useAuctionDetail(1));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.error).toBe(UNEXPECTED_RESPONSE_MESSAGE);
+  });
+
   it("exposes highestBidderDisplay fallback", async () => {
     const { result } = renderHook(() => useAuctionDetail(1));
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -123,5 +142,84 @@ describe("useAuctionDetail", () => {
     expect(result.current.auction?.highest_bidder_id).toBe(10);
     expect(result.current.isBidding).toBe(false);
     expect(result.current.bidError).toBeNull();
+  });
+
+  it("adds channel updates and ignores duplicate bid ids", async () => {
+    const { result } = renderHook(() => useAuctionDetail(1));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    act(() => {
+      channelHandler?.({
+        current_price: 5,
+        highest_bidder_id: 20,
+        highest_bidder_name: "Alice",
+        bid: {
+          id: 123,
+          user_id: 20,
+          username: "Alice",
+          amount: 5,
+          created_at: "now",
+        },
+      });
+    });
+
+    expect(result.current.auction?.highest_bidder_id).toBe(20);
+    expect(result.current.bids[0]?.id).toBe(123);
+
+    act(() => {
+      channelHandler?.({
+        bid: { id: 123, user_id: 20, username: "Alice", amount: 5 },
+      });
+    });
+    expect(result.current.bids).toHaveLength(1);
+  });
+
+  it("ignores channel update for last bidder", async () => {
+    const { result } = renderHook(() => useAuctionDetail(1));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    await act(async () => {
+      await result.current.placeUserBid();
+    });
+
+    act(() => {
+      channelHandler?.({
+        bid: { id: 200, user_id: user.id, username: "User", amount: 9 },
+      });
+    });
+
+    expect(result.current.bids[0]?.id).toBe(99);
+  });
+
+  it("sets bidError on axios failure and does not double add bids", async () => {
+    mockedPlaceBid.mockRejectedValue(
+      Object.assign(new Error("fail"), {
+        isAxiosError: true,
+        response: { data: { error: "nope" } },
+      }),
+    );
+    const { result } = renderHook(() => useAuctionDetail(1));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      await result.current.placeUserBid();
+    });
+
+    expect(result.current.bidError).toBe("nope");
+    expect(result.current.bids).toHaveLength(0);
+  });
+
+  it("does not place bid if no subscription", async () => {
+    mockedUseAuctionChannel.mockImplementation(() => ({
+      subscription: null,
+      connectionState: "disconnected",
+    }));
+    const { result } = renderHook(() => useAuctionDetail(1));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      await result.current.placeUserBid();
+    });
+
+    expect(mockedPlaceBid).not.toHaveBeenCalled();
   });
 });
