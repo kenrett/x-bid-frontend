@@ -109,6 +109,49 @@ describe("AdminUsersPage", () => {
     expect(showToast).toHaveBeenCalledWith("Admin access removed", "success");
   });
 
+  it("promotes a standard user when requested", async () => {
+    const promoteTarget = { ...mockUsers[0], id: 9, role: "user" as const };
+    mockedAdminUsersApi.getUsers.mockResolvedValue([promoteTarget]);
+    render(<AdminUsersPage />);
+    const user = userEvent.setup();
+
+    const grantButton = await screen.findByText(/grant admin/i);
+    await user.click(grantButton);
+
+    expect(mockedAdminUsersApi.grantAdmin).toHaveBeenCalledWith(
+      promoteTarget.id,
+    );
+    expect(showToast).toHaveBeenCalledWith("Admin granted", "success");
+  });
+
+  it("removes superadmin access", async () => {
+    mockedAdminUsersApi.getUsers.mockResolvedValue(mockUsers);
+    render(<AdminUsersPage />);
+    const user = userEvent.setup();
+
+    const removeSuperButton = await screen.findByText(/remove superadmin/i);
+    await user.click(removeSuperButton);
+
+    expect(mockedAdminUsersApi.revokeSuperadmin).toHaveBeenCalledWith(
+      mockUsers[1].id,
+    );
+    expect(showToast).toHaveBeenCalledWith(
+      "Superadmin access removed",
+      "success",
+    );
+  });
+
+  it("surfaces load errors", async () => {
+    mockedAdminUsersApi.getUsers.mockRejectedValue(new Error("nope"));
+    render(<AdminUsersPage />);
+
+    await screen.findByText(/admin accounts/i);
+    expect(showToast).toHaveBeenCalledWith(
+      "Could not load users: nope",
+      "error",
+    );
+  });
+
   it("blocks non-superadmin actions (no action buttons rendered)", async () => {
     mockedUseAuth.mockReturnValue({
       user: { id: 2, email: "admin@example.com", is_superuser: false },
