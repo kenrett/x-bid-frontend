@@ -38,6 +38,7 @@ const config: UserConfig & { test: VitestUserConfig["test"] } = {
         "src/api/openapi-helpers.ts",
         "src/vendor/**",
         "src/types/**",
+        "src/services/*.d.ts",
         "src/**/index.tsx", // barrel-only files
         "src/components/**/PrivacyPolicy.tsx",
         "src/components/**/TermsAndConditions.tsx",
