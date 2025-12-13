@@ -63,4 +63,42 @@ describe("adminPaymentsApi", () => {
       createdAt: "2024-02-02",
     });
   });
+
+  it("normalizes different status labels and cents fallback", async () => {
+    mockedGet.mockResolvedValue({
+      data: [
+        {
+          id: 3,
+          subtotal: "5.5",
+          status: "processing",
+          createdAt: "2024-03-03",
+          email: "c@example.com",
+        },
+        {
+          id: "4",
+          total_cents: 1234,
+          state: "refunded",
+          userEmail: "d@example.com",
+        },
+      ],
+    });
+
+    const payments = await adminPaymentsApi.listPayments();
+
+    expect(payments[0]).toMatchObject({
+      id: 3,
+      amount: 5.5,
+      status: "pending",
+      createdAt: "2024-03-03",
+      userEmail: "c@example.com",
+    });
+
+    expect(payments[1]).toMatchObject({
+      id: 4,
+      amount: 12.34,
+      status: "failed",
+      createdAt: expect.any(String),
+      userEmail: "d@example.com",
+    });
+  });
 });
