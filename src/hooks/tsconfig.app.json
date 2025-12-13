@@ -31,7 +31,8 @@
       "@services/*": ["../services/*"],
       "@appTypes/*": ["../types/*"],
       "@utils/*": ["../utils/*"],
-      "@sentryClient": ["../sentryClient"]
+      "@sentryClient": ["../sentryClient"],
+      "react-error-boundary": ["../vendor/react-error-boundary"]
     }
   },
   "include": ["."]

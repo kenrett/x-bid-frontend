@@ -25,7 +25,8 @@
       "@services/*": ["./src/services/*"],
       "@appTypes/*": ["./src/types/*"],
       "@utils/*": ["./src/utils/*"],
-      "@sentryClient": ["./src/sentryClient"]
+      "@sentryClient": ["./src/sentryClient"],
+      "react-error-boundary": ["./src/vendor/react-error-boundary"]
     }
   },
   "include": ["src", "postcss.config.js"],

@@ -18,6 +18,10 @@ const config: UserConfig & { test: VitestUserConfig["test"] } = {
       "@appTypes": resolve(__dirname, "./src/types"),
       "@utils": resolve(__dirname, "./src/utils"),
       "@sentryClient": resolve(__dirname, "./src/sentryClient"),
+      "react-error-boundary": resolve(
+        __dirname,
+        "./src/vendor/react-error-boundary",
+      ),
     },
   },
   test: {
