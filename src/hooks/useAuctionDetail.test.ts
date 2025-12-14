@@ -42,7 +42,7 @@ const mockedGetBidHistory = vi.mocked(bidsApi.getBidHistory);
 const mockedPlaceBid = vi.mocked(bidsApi.placeBid);
 const mockedUseAuth = vi.mocked(useAuth);
 const mockedUseAuctionChannel = vi.mocked(useAuctionChannel);
-let channelHandler: ((data: unknown) => void) | undefined;
+let channelHandler: ((data: AuctionChannelData) => void) | undefined;
 
 const baseAuction: auctionsApi.AuctionDetail = {
   id: 1,
@@ -67,17 +67,18 @@ const user = { id: 10, name: "User", is_admin: false, is_superuser: false };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockedUseAuctionChannel.mockImplementation(
-    (_id: number, handler: (data: AuctionChannelData) => void) => {
-      channelHandler = handler;
-      return {
-        subscription: true as unknown as ReturnType<
-          typeof import("@services/cable").cable.subscriptions.create
-        >,
-        connectionState: "connected",
-      } as ReturnType<typeof useAuctionChannel>;
-    },
-  );
+  mockedUseAuctionChannel.mockImplementation(((
+    _id: number,
+    handler: (data: unknown) => void,
+  ): ReturnType<typeof useAuctionChannel> => {
+    channelHandler = handler as (data: AuctionChannelData) => void;
+    return {
+      subscription: true as unknown as ReturnType<
+        typeof import("@services/cable").cable.subscriptions.create
+      >,
+      connectionState: "connected",
+    };
+  }) as unknown as typeof useAuctionChannel);
   channelHandler = undefined;
   mockedGetAuction.mockResolvedValue(baseAuction);
   mockedGetBidHistory.mockResolvedValue(bidHistoryResponse);
@@ -171,7 +172,13 @@ describe("useAuctionDetail", () => {
 
     act(() => {
       channelHandler?.({
-        bid: { id: 123, user_id: 20, username: "Alice", amount: 5 },
+        bid: {
+          id: 123,
+          user_id: 20,
+          username: "Alice",
+          amount: 5,
+          created_at: "now",
+        },
       });
     });
     expect(result.current.bids).toHaveLength(1);
@@ -186,7 +193,13 @@ describe("useAuctionDetail", () => {
 
     act(() => {
       channelHandler?.({
-        bid: { id: 200, user_id: user.id, username: "User", amount: 9 },
+        bid: {
+          id: 200,
+          user_id: user.id,
+          username: "User",
+          amount: 9,
+          created_at: "now",
+        },
       });
     });
 

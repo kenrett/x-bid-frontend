@@ -25,12 +25,22 @@ import {
   deleteBidPack,
 } from "./bidPacks";
 
-const buildPack = (overrides: Partial<BidPack> = {}): BidPack =>
+type RawBidPack = Omit<BidPack, "price" | "bids" | "active" | "highlight"> & {
+  price: number | string;
+  bids: number | string;
+  pricePerBid?: string | number | null;
+  active?: boolean | number | null;
+  highlight?: boolean | number | null;
+};
+
+const buildPack = (overrides: Partial<RawBidPack> = {}): BidPack =>
   ({
     id: 1,
     name: "Pack",
+    description: "Pack description",
     price: 10,
     bids: 20,
+    pricePerBid: "0.50",
     status: "active",
     active: undefined,
     highlight: undefined,
@@ -59,7 +69,9 @@ describe("api/admin/bidPacks", () => {
 
   it("lists bid packs from nested payload", async () => {
     clientMocks.get.mockResolvedValue({
-      data: { bid_packs: [buildPack({ price: "5", bids: "5" })] },
+      data: {
+        bid_packs: [buildPack({ price: 5, bids: 5, pricePerBid: undefined })],
+      },
     });
 
     const [pack] = await listBidPacks();

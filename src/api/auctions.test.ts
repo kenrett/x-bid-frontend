@@ -91,11 +91,17 @@ describe("api/auctions", () => {
   describe("getAuction", () => {
     it("normalizes auction detail and falls back to top-level bids", async () => {
       const fallbackBids: Bid[] = [{ id: 5 } as Bid];
-      const auction: Partial<AuctionDetail> = {
+      type RawAuctionDetail = Partial<
+        Omit<AuctionDetail, "current_price" | "status">
+      > & {
+        current_price?: number | string;
+        status?: string;
+      };
+      const auction: RawAuctionDetail = {
         id: 10,
         title: "Auction",
         current_price: "25.5",
-        status: "pending",
+        status: "scheduled",
       };
       clientMocks.get.mockResolvedValue({
         data: { auction, bids: fallbackBids },
@@ -105,9 +111,9 @@ describe("api/auctions", () => {
 
       expect(result.id).toBe(10);
       expect(result.current_price).toBe(25.5);
-      expect(result.status).toBe("status:pending");
+      expect(result.status).toBe("status:scheduled");
       expect(result.bids).toEqual(fallbackBids);
-      expect(mockStatusFromApi).toHaveBeenCalledWith("pending");
+      expect(mockStatusFromApi).toHaveBeenCalledWith("scheduled");
       expect(clientMocks.get).toHaveBeenCalledWith("/api/v1/auctions/10");
     });
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import client from "@api/client";
 import { PurchaseStatus } from "./PurchaseStatus";
@@ -76,32 +76,30 @@ describe("PurchaseStatus", () => {
   });
 
   it("handles successful verification, updates balance, and navigates after delay", async () => {
-    const realSetTimeout = global.setTimeout;
-    const setTimeoutSpy = vi
-      .spyOn(global, "setTimeout")
-      .mockImplementation((handler: TimerHandler, _delay?: number, ...args) =>
-        realSetTimeout(handler as TimerHandler, 0, ...(args as [])),
-      );
-
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     mockedClient.get.mockResolvedValue({
       data: { status: "success", updated_bid_credits: 150 },
     });
 
-    renderWithPath("?session_id=abc123");
+    try {
+      renderWithPath("?session_id=abc123");
 
-    await vi.waitFor(() => expect(mockedClient.get).toHaveBeenCalled());
-    expect(await screen.findByText(/payment successful/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Your purchase was successful! New balance: 150 credits.",
-      ),
-    ).toBeInTheDocument();
-    expect(mockUpdateUserBalance).toHaveBeenCalledWith(150);
+      await waitFor(() => expect(mockedClient.get).toHaveBeenCalled());
+      expect(
+        await screen.findByText(/payment successful/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "Your purchase was successful! New balance: 150 credits.",
+        ),
+      ).toBeInTheDocument();
+      expect(mockUpdateUserBalance).toHaveBeenCalledWith(150);
 
-    await vi.waitFor(() =>
-      expect(mockNavigate).toHaveBeenCalledWith("/auctions"),
-    );
-    expect(setTimeoutSpy).toHaveBeenCalled();
+      vi.runAllTimers();
+      expect(mockNavigate).toHaveBeenCalledWith("/auctions");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("renders error message from API response", async () => {
