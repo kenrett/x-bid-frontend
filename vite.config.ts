@@ -11,11 +11,9 @@ const config: UserConfig & { test: VitestUserConfig["test"] } = {
   resolve: {
     alias: {
       "@api": resolve(__dirname, "./src/api"),
+      "@features": resolve(__dirname, "./src/features"),
       "@components": resolve(__dirname, "./src/components"),
-      "@hooks": resolve(__dirname, "./src/hooks"),
-      "@auth": resolve(__dirname, "./src/auth"),
       "@services": resolve(__dirname, "./src/services"),
-      "@appTypes": resolve(__dirname, "./src/types"),
       "@utils": resolve(__dirname, "./src/utils"),
       "@sentryClient": resolve(__dirname, "./src/sentryClient"),
       "react-error-boundary": resolve(
@@ -38,6 +36,7 @@ const config: UserConfig & { test: VitestUserConfig["test"] } = {
         "src/api/openapi-helpers.ts",
         "src/vendor/**",
         "src/types/**",
+        "src/features/**/types/**",
         "src/services/*.d.ts",
         "src/**/index.tsx", // barrel-only files
         "src/components/**/PrivacyPolicy.tsx",

@@ -24,8 +24,15 @@ export default defineConfig([
   },
   {
     // Flag unsafe casts/usages of unknown outside our API normalizers.
-    files: ["src/api/**/*.{ts,tsx}", "src/services/**/*.{ts,tsx}"],
-    ignores: ["src/api/openapi-types.ts", "src/services/adminPaymentsApi.ts"],
+    files: [
+      "src/api/**/*.{ts,tsx}",
+      "src/features/**/api/**/*.{ts,tsx}",
+      "src/services/**/*.{ts,tsx}",
+    ],
+    ignores: [
+      "src/api/openapi-types.ts",
+      "src/features/admin/api/adminPaymentsApi.ts",
+    ],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {

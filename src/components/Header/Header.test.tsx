@@ -2,9 +2,9 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { Header } from "./Header";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../features/auth/hooks/useAuth";
 
-vi.mock("../../hooks/useAuth");
+vi.mock("../../features/auth/hooks/useAuth");
 const mockedUseAuth = vi.mocked(useAuth);
 
 const mockUser = { id: 1, email: "test@example.com", bidCredits: 100 };

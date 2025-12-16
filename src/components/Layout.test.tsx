@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { render, screen } from "@testing-library/react";
-import { AuthProvider } from "../auth/AuthProvider";
+import { AuthProvider } from "../features/auth/providers/AuthProvider";
 import { Layout } from "./Layout";
 
 const renderWithContent = () =>

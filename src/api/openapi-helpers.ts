@@ -1,12 +1,14 @@
 import type { paths } from "./openapi-types";
-import type { AuctionDetail, AuctionSummary } from "@appTypes/auction";
-import type { Bid } from "@appTypes/bid";
-import type { BidPack } from "@appTypes/bidPack";
-import type { Payment } from "@components/Admin/Users/types";
-import type { MaintenanceState } from "./admin/maintenance";
-import type { AdminUser } from "@components/Admin/Users/types";
-import type { CheckoutSuccessResponse } from "@appTypes/checkout";
-import type { User } from "@appTypes/user";
+import type {
+  AuctionDetail,
+  AuctionSummary,
+} from "@features/auctions/types/auction";
+import type { Bid } from "@features/auctions/types/bid";
+import type { BidPack } from "@features/auctions/types/bidPack";
+import type { Payment, AdminUser } from "@features/admin/types/users";
+import type { MaintenanceState } from "@features/admin/api/maintenance";
+import type { CheckoutSuccessResponse } from "@features/auctions/types/checkout";
+import type { User } from "@features/auth/types/user";
 
 type PlaceBidResponseShape = {
   success?: boolean;

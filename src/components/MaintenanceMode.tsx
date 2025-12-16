@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import axios from "axios";
 import { Page } from "./Page";
-import { getPublicMaintenance } from "@api/admin/maintenance";
+import { getPublicMaintenance } from "@features/admin/api/maintenance";
 
 export const MaintenanceMode = () => {
   const navigate = useNavigate();

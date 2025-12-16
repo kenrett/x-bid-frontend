@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
-import { AuthProvider } from "./auth/AuthProvider";
+import { AuthProvider } from "./features/auth/providers/AuthProvider";
 import { FlowbiteInitializer } from "./components/FlowbiteInitializer";
 import { ToastContainer } from "./components/Toast/ToastContainer";
 import "./sentryClient";

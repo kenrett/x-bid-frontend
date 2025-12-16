@@ -1,7 +1,5 @@
-// import logo from "../../assets/x-bid-alt-logo.png";
-// import logo from "../../assets/xbid_logo_high_res.png";
 import logo from "../../assets/biddersweet_logo.png";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../features/auth/hooks/useAuth";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { NavItem } from "../NavItem";
 import { Link, useLocation } from "react-router-dom";

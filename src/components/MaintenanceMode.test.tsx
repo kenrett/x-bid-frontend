@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { MaintenanceMode } from "./MaintenanceMode";
 
 const mockGetPublicMaintenance = vi.fn();
-vi.mock("@api/admin/maintenance", () => ({
+vi.mock("@features/admin/api/maintenance", () => ({
   getPublicMaintenance: () => mockGetPublicMaintenance(),
 }));
 
