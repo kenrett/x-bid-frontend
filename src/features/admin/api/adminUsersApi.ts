@@ -1,5 +1,5 @@
-import client from "../../src/api/client";
-import type { AdminUser } from "@components/Admin/Users/types";
+import client from "@api/client";
+import type { AdminUser } from "@features/admin/types/users";
 import type { ApiJsonResponse } from "@api/openapi-helpers";
 import type { paths } from "@api/openapi-types";
 

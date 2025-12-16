@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { cable } from "../services/cable";
+import { cable } from "@services/cable";
 
 export function useAuctionChannel<T = unknown>(
   auctionId: number,

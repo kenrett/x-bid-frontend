@@ -2,8 +2,8 @@ import { useParams } from "react-router-dom";
 
 import { AuctionView } from "../AuctionView/AuctionView";
 import { useAuctionDetail } from "@features/auctions/hooks/useAuctionDetail";
-import { LoadingScreen } from "../LoadingScreen";
-import { ErrorScreen } from "../ErrorScreen";
+import { LoadingScreen } from "@components/LoadingScreen";
+import { ErrorScreen } from "@components/ErrorScreen";
 
 // Wrapper: validate route params, then render the "real" component
 export function AuctionDetail() {

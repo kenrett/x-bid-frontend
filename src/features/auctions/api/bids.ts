@@ -1,7 +1,7 @@
-import client from "./client";
+import client from "@api/client";
 import type { Bid } from "../types/bid";
 import type { AuctionDetail } from "../types/auction";
-import type { ApiJsonResponse } from "./openapi-helpers";
+import type { ApiJsonResponse } from "@api/openapi-helpers";
 import { reportUnexpectedResponse } from "@services/unexpectedResponse";
 
 export type PlaceBidResponse = ApiJsonResponse<

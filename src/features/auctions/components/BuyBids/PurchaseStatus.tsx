@@ -4,7 +4,7 @@ import axios from "axios";
 import client from "@api/client";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { CheckoutSuccessResponse } from "../../types/checkout";
-import { Page } from "../Page";
+import { Page } from "@components/Page";
 import {
   reportUnexpectedResponse,
   UNEXPECTED_RESPONSE_MESSAGE,

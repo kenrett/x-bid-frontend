@@ -1,6 +1,6 @@
-import client from "../client";
-import type { BidPack } from "../../types/bidPack";
-import type { ApiJsonResponse } from "../openapi-helpers";
+import client from "@api/client";
+import type { BidPack } from "@features/auctions/types/bidPack";
+import type { ApiJsonResponse } from "@api/openapi-helpers";
 
 type BidPackPayload = Partial<BidPack> & { name: string };
 

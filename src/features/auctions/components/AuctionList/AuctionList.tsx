@@ -3,7 +3,7 @@ import { getAuctions } from "@features/auctions/api/auctions";
 import type { AuctionSummary } from "../../types/auction";
 import { Auction } from "../Auction/Auction";
 import { useNavigate } from "react-router-dom";
-import { Page } from "../Page";
+import { Page } from "@components/Page";
 import {
   UNEXPECTED_RESPONSE_MESSAGE,
   UnexpectedResponseError,

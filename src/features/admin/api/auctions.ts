@@ -1,7 +1,7 @@
-import client from "../client";
-import type { AuctionSummary } from "../../types/auction";
-import { statusFromApi, statusToApi } from "../status";
-import type { ApiJsonResponse } from "../openapi-helpers";
+import client from "@api/client";
+import type { AuctionSummary } from "@features/auctions/types/auction";
+import { statusFromApi, statusToApi } from "@features/auctions/api/status";
+import type { ApiJsonResponse } from "@api/openapi-helpers";
 
 type AdminAuctionResponse =
   | ApiJsonResponse<"/api/v1/auctions/{id}", "get">

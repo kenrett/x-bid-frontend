@@ -5,7 +5,7 @@ import type { User } from "../types/user";
 import type { LoginPayload } from "../types/auth";
 import client from "@api/client";
 import { cable, resetCable } from "@services/cable";
-import { normalizeUser } from "@api/user";
+import { normalizeUser } from "../api/user";
 import { setSentryUser } from "@sentryClient";
 
 type SessionRemainingResponse = {

@@ -8,8 +8,8 @@ import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
-import { Page } from "../Page";
-import { ErrorScreen } from "../ErrorScreen";
+import { Page } from "@components/Page";
+import { ErrorScreen } from "@components/ErrorScreen";
 import axios from "axios";
 import {
   reportUnexpectedResponse,

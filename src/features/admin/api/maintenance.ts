@@ -1,5 +1,5 @@
 import axios from "axios";
-import client from "../client";
+import client from "@api/client";
 import type { ApiJsonResponse } from "../openapi-helpers";
 
 export type MaintenanceState = {

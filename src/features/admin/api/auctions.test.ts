@@ -7,7 +7,7 @@ const clientMocks = vi.hoisted(() => ({
   delete: vi.fn(),
 }));
 
-vi.mock("../client", () => ({
+vi.mock("@api/client", () => ({
   default: {
     post: clientMocks.post,
     put: clientMocks.put,
@@ -20,7 +20,7 @@ const statusMocks = vi.hoisted(() => ({
   toApi: vi.fn((status: unknown) => `to:${String(status)}`),
 }));
 
-vi.mock("../status", () => ({
+vi.mock("@features/auctions/api/status", () => ({
   statusFromApi: (s: unknown) => statusMocks.fromApi(s),
   statusToApi: (s: unknown) => statusMocks.toApi(s),
 }));

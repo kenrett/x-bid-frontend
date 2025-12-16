@@ -1,7 +1,7 @@
-import client from "./client";
+import client from "@api/client";
 import type { AuctionDetail, AuctionSummary } from "../types/auction";
 import type { Bid } from "../types/bid";
-import type { ApiJsonResponse } from "./openapi-helpers";
+import type { ApiJsonResponse } from "@api/openapi-helpers";
 import { statusFromApi } from "./status";
 import { reportUnexpectedResponse } from "@services/unexpectedResponse";
 
