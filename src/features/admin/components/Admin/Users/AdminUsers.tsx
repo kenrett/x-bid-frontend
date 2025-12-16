@@ -1,5 +1,5 @@
 import type { ChangeEvent } from "react";
-import type { AdminUser } from "./types";
+import type { AdminUser } from "@features/admin/types/users";
 
 interface AdminUsersProps {
   users: AdminUser[];

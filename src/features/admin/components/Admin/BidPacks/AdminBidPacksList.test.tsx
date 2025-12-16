@@ -8,14 +8,14 @@ import {
   listBidPacks,
   deleteBidPack,
   updateBidPack,
-} from "@api/admin/bidPacks";
-import { showToast } from "../../../services/toast";
-import { logAdminAction } from "../../../services/adminAudit";
-import type { BidPack } from "../../../types/bidPack";
+} from "@features/admin/api/bidPacks";
+import { showToast } from "@services/toast";
+import { logAdminAction } from "@features/admin/api/adminAudit";
+import type { BidPack } from "@features/auctions/types/bidPack";
 
-vi.mock("@api/admin/bidPacks");
-vi.mock("../../../services/toast");
-vi.mock("../../../services/adminAudit");
+vi.mock("@features/admin/api/bidPacks");
+vi.mock("@services/toast");
+vi.mock("@features/admin/api/adminAudit");
 
 const mockedListBidPacks = vi.mocked(listBidPacks);
 const mockedDeleteBidPack = vi.mocked(deleteBidPack);

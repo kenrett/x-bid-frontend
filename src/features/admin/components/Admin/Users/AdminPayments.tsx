@@ -1,5 +1,5 @@
 import type { ChangeEvent } from "react";
-import type { Payment } from "./types";
+import type { Payment } from "@features/admin/types/users";
 
 interface AdminPaymentsProps {
   payments: Payment[];

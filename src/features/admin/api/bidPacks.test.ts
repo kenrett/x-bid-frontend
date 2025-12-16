@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import type { BidPack } from "../../types/bidPack";
+import type { BidPack } from "@features/auctions/types/bidPack";
 
 const clientMocks = vi.hoisted(() => ({
   get: vi.fn(),

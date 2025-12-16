@@ -3,10 +3,13 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { AdminSettings } from "./AdminSettings";
-import { getMaintenance, setMaintenance } from "@api/admin/maintenance";
+import {
+  getMaintenance,
+  setMaintenance,
+} from "@features/admin/api/maintenance";
 import { useAuth } from "@features/auth/hooks/useAuth";
 
-vi.mock("@api/admin/maintenance", () => ({
+vi.mock("@features/admin/api/maintenance", () => ({
   getMaintenance: vi.fn(),
   setMaintenance: vi.fn(),
 }));

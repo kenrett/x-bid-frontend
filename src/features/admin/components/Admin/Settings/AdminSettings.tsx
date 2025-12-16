@@ -4,7 +4,7 @@ import {
   extractError,
   getMaintenance,
   setMaintenance,
-} from "@api/admin/maintenance";
+} from "@features/admin/api/maintenance";
 import { useAuth } from "@features/auth/hooks/useAuth";
 
 export const AdminSettings = () => {

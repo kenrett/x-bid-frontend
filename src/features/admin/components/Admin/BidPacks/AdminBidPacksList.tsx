@@ -5,10 +5,10 @@ import {
   listBidPacks,
   deleteBidPack,
   updateBidPack,
-} from "../../../api/admin/bidPacks";
-import type { BidPack } from "../../../types/bidPack";
-import { showToast } from "../../../services/toast";
-import { logAdminAction } from "../../../services/adminAudit";
+} from "@features/admin/api/bidPacks";
+import type { BidPack } from "@features/auctions/types/bidPack";
+import { showToast } from "@services/toast";
+import { logAdminAction } from "@features/admin/api/adminAudit";
 
 export const AdminBidPacksList = () => {
   const [packs, setPacks] = useState<BidPack[]>([]);

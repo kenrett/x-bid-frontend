@@ -9,14 +9,14 @@ const mockShowToast = vi.fn();
 const mockLogAdminAction = vi.fn();
 const mockNavigate = vi.fn();
 
-vi.mock("../../../api/admin/bidPacks", () => ({
+vi.mock("@features/admin/api/bidPacks", () => ({
   getBidPack: (...args: unknown[]) => mockGetBidPack(...args),
   updateBidPack: (...args: unknown[]) => mockUpdateBidPack(...args),
 }));
-vi.mock("../../../services/toast", () => ({
+vi.mock("@services/toast", () => ({
   showToast: (...args: unknown[]) => mockShowToast(...args),
 }));
-vi.mock("../../../services/adminAudit", () => ({
+vi.mock("@features/admin/api/adminAudit", () => ({
   logAdminAction: (...args: unknown[]) => mockLogAdminAction(...args),
 }));
 vi.mock("react-router-dom", async (importOriginal) => {

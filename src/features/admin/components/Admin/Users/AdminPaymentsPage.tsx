@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Payment } from "./types";
+import type { Payment } from "@features/admin/types/users";
 import { AdminPayments } from "./AdminPayments";
-import { adminPaymentsApi } from "@services/adminPaymentsApi";
+import { adminPaymentsApi } from "@features/admin/api/adminPaymentsApi";
 import { showToast } from "@services/toast";
 
 export const AdminPaymentsPage = () => {

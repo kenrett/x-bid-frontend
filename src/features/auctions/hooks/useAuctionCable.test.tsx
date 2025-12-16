@@ -5,7 +5,7 @@ import { useAuctionChannel } from "./useAuctionCable";
 const createMock = vi.fn();
 const unsubscribeMock = vi.fn();
 
-vi.mock("../services/cable", () => ({
+vi.mock("@services/cable", () => ({
   cable: {
     subscriptions: {
       create: (...args: unknown[]) => createMock(...args),

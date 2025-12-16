@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAuction } from "../../../api/auctions";
-import { updateAuction } from "../../../api/admin/auctions";
-import { showToast } from "../../../services/toast";
-import { logAdminAction } from "../../../services/adminAudit";
-import type { AuctionSummary } from "../../../types/auction";
+import { getAuction } from "@features/auctions/api/auctions";
+import { updateAuction } from "@features/admin/api/auctions";
+import { showToast } from "@services/toast";
+import { logAdminAction } from "@features/admin/api/adminAudit";
+import type { AuctionSummary } from "@features/auctions/types/auction";
 import { AdminAuctionForm } from "./AdminAuctionForm";
 
 export const AdminAuctionEdit = () => {

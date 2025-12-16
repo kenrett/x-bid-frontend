@@ -1,16 +1,16 @@
 import { createBrowserRouter } from "react-router-dom";
 import { Layout } from "./components/Layout";
-import AuctionList from "./components/AuctionList/AuctionList";
-import { AuctionDetail } from "./components/AuctionDetail/AuctionDetail";
-import { LoginForm } from "./components/LoginForm/LoginForm";
-import { SignUpForm } from "./components/SignUpForm/SignUpForm";
 import { About } from "./components/About/About";
 import { HowItWorks } from "./components/HowItWorks";
-import { BuyBids } from "./components/BuyBids/BuyBids";
-import { PurchaseStatus } from "./components/BuyBids/PurchaseStatus";
 import { PrivacyPolicy } from "./components/PrivacyPolicy";
 import { TermsAndConditions } from "./components/TermsAndConditions";
 import { RouteErrorBoundary } from "./components/ErrorBoundary/RouteErrorBoundary";
+import AuctionList from "@features/auctions/components/AuctionList/AuctionList";
+import { AuctionDetail } from "@features/auctions/components/AuctionDetail";
+import { BuyBids } from "@features/auctions/components/BuyBids/BuyBids";
+import { PurchaseStatus } from "@features/auctions/components/BuyBids/PurchaseStatus";
+import { LoginForm } from "@features/auth/components/LoginForm/LoginForm";
+import { SignUpForm } from "@features/auth/components/SignUpForm/SignUpForm";
 import { AdminRoute } from "@features/admin/components/AdminRoute";
 import { AdminDashboard } from "@features/admin/components/Admin/AdminDashboard";
 import { AdminLayout } from "@features/admin/components/Admin/AdminLayout";
@@ -25,8 +25,8 @@ import { AdminBidPackEdit } from "@features/admin/components/Admin/BidPacks/Admi
 import { AdminUsersPage } from "@features/admin/components/Admin/Users/AdminUsersPage";
 import { AdminSettings } from "@features/admin/components/Admin/Settings/AdminSettings";
 import { AdminPaymentsPage } from "@features/admin/components/Admin/Users/AdminPaymentsPage";
-import { ForgotPassword } from "./components/Auth/ForgotPassword";
-import { ResetPassword } from "./components/Auth/ResetPassword";
+import { ForgotPassword } from "@features/auth/components/Auth/ForgotPassword";
+import { ResetPassword } from "@features/auth/components/Auth/ResetPassword";
 import { MaintenanceMode } from "./components/MaintenanceMode";
 
 export const router = createBrowserRouter([

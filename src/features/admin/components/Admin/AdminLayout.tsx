@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
-import { Page } from "../Page";
+import { useAuth } from "@features/auth/hooks/useAuth";
+import { Page } from "@components/Page";
 import { ADMIN_PATHS } from "./adminPaths";
 
 const NAV_ITEMS = [

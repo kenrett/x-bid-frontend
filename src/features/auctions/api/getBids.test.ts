@@ -9,7 +9,7 @@ vi.mock("@api/client", () => ({
   default: { get: clientMocks.get },
 }));
 
-import { getBids } from "./bids";
+import { getBids } from "./getBids";
 
 describe("components/bids (API helper)", () => {
   beforeEach(() => {

@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { getAuctions } from "../../../api/auctions";
-import { deleteAuction, updateAuction } from "../../../api/admin/auctions";
-import { showToast } from "../../../services/toast";
-import { logAdminAction } from "../../../services/adminAudit";
-import type { AuctionSummary } from "../../../types/auction";
+import { getAuctions } from "@features/auctions/api/auctions";
+import { deleteAuction, updateAuction } from "@features/admin/api/auctions";
+import { showToast } from "@services/toast";
+import { logAdminAction } from "@features/admin/api/adminAudit";
+import type { AuctionSummary } from "@features/auctions/types/auction";
 import {
   UNEXPECTED_RESPONSE_MESSAGE,
   UnexpectedResponseError,

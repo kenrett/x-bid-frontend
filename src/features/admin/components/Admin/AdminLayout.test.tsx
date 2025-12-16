@@ -6,7 +6,7 @@ import { AdminLayout } from "./AdminLayout";
 const mockUseAuth = vi.fn();
 const mockLogout = vi.fn();
 
-vi.mock("../../hooks/useAuth", () => ({
+vi.mock("@features/auth/hooks/useAuth", () => ({
   useAuth: () => mockUseAuth(),
 }));
 

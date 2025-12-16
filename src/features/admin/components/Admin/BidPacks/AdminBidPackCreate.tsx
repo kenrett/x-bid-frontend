@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createBidPack } from "../../../api/admin/bidPacks";
-import { showToast } from "../../../services/toast";
-import { logAdminAction } from "../../../services/adminAudit";
-import type { BidPack } from "../../../types/bidPack";
+import { createBidPack } from "@features/admin/api/bidPacks";
+import { showToast } from "@services/toast";
+import { logAdminAction } from "@features/admin/api/adminAudit";
+import type { BidPack } from "@features/auctions/types/bidPack";
 import { AdminBidPackForm } from "./AdminBidPackForm";
 
 export const AdminBidPackCreate = () => {

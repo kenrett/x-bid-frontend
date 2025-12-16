@@ -4,24 +4,24 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { AdminAuctionsList } from "./AdminAuctionsList";
 import { getAuctions } from "@features/auctions/api/auctions";
-import { updateAuction, deleteAuction } from "@api/admin/auctions";
-import { showToast } from "../../../services/toast";
-import type { AuctionSummary } from "../../../types/auction";
+import { updateAuction, deleteAuction } from "@features/admin/api/auctions";
+import { showToast } from "@services/toast";
+import type { AuctionSummary } from "@features/auctions/types/auction";
 
 vi.mock("@features/auctions/api/auctions", () => ({
   getAuctions: vi.fn(),
 }));
 
-vi.mock("@api/admin/auctions", () => ({
+vi.mock("@features/admin/api/auctions", () => ({
   deleteAuction: vi.fn(),
   updateAuction: vi.fn(),
 }));
 
-vi.mock("../../../services/toast", () => ({
+vi.mock("@services/toast", () => ({
   showToast: vi.fn(),
 }));
 
-vi.mock("../../../services/adminAudit", () => ({
+vi.mock("@features/admin/api/adminAudit", () => ({
   logAdminAction: vi.fn(),
 }));
 

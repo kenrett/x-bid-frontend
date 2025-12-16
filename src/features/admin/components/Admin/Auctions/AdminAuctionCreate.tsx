@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createAuction } from "../../../api/admin/auctions";
-import { showToast } from "../../../services/toast";
-import { logAdminAction } from "../../../services/adminAudit";
-import type { AuctionSummary } from "../../../types/auction";
+import { createAuction } from "@features/admin/api/auctions";
+import { showToast } from "@services/toast";
+import { logAdminAction } from "@features/admin/api/adminAudit";
+import type { AuctionSummary } from "@features/auctions/types/auction";
 import { AdminAuctionForm } from "./AdminAuctionForm";
 
 export const AdminAuctionCreate = () => {

@@ -1,10 +1,10 @@
 import { useMemo, useState, useEffect } from "react";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { showToast } from "@services/toast";
-import { logAdminAction } from "@services/adminAudit";
-import type { AdminUser } from "./types";
+import { logAdminAction } from "@features/admin/api/adminAudit";
+import type { AdminUser } from "@features/admin/types/users";
 import { AdminUsers } from "./AdminUsers";
-import { adminUsersApi } from "@services/adminUsersApi";
+import { adminUsersApi } from "@features/admin/api/adminUsersApi";
 
 export const AdminUsersPage = () => {
   const { user } = useAuth();

@@ -1,6 +1,6 @@
 import axios from "axios";
 import client from "@api/client";
-import type { ApiJsonResponse } from "../openapi-helpers";
+import type { ApiJsonResponse } from "@api/openapi-helpers";
 
 export type MaintenanceState = {
   enabled: boolean;

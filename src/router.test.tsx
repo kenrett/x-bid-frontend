@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { router } from "./router";
-import { ADMIN_PATHS } from "./components/Admin/adminPaths";
+import { ADMIN_PATHS } from "@features/admin/components/Admin/adminPaths";
 
 type RouteLike = {
   path?: string;

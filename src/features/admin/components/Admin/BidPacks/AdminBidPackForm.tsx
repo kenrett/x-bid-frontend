@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import type { BidPack } from "../../../types/bidPack";
+import type { BidPack } from "@features/auctions/types/bidPack";
 
 type FormState = {
   name: string;

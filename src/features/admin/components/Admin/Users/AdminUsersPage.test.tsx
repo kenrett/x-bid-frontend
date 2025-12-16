@@ -4,17 +4,17 @@ import userEvent from "@testing-library/user-event";
 import { AdminUsersPage } from "./AdminUsersPage";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { showToast } from "@services/toast";
-import { adminUsersApi } from "@services/adminUsersApi";
-import type { AdminUser } from "./types";
+import { adminUsersApi } from "@features/admin/api/adminUsersApi";
+import type { AdminUser } from "@features/admin/types/users";
 
 vi.mock("@features/auth/hooks/useAuth");
 vi.mock("@services/toast", () => ({
   showToast: vi.fn(),
 }));
-vi.mock("@services/adminAudit", () => ({
+vi.mock("@features/admin/api/adminAudit", () => ({
   logAdminAction: vi.fn(),
 }));
-vi.mock("@services/adminUsersApi");
+vi.mock("@features/admin/api/adminUsersApi");
 
 const mockedUseAuth = vi.mocked(useAuth);
 const mockedAdminUsersApi = vi.mocked(adminUsersApi);

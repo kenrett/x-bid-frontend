@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuctionDetail } from "@features/auctions/hooks/useAuctionDetail";
-import { BidHistory } from "@components/BidHistory/BidHistory";
+import { BidHistory } from "@features/auctions/components/BidHistory/BidHistory";
 import { ErrorScreen } from "@components/ErrorScreen";
 import { LoadingScreen } from "@components/LoadingScreen";
 import { showToast } from "@services/toast";
-import { logAdminAction } from "@services/adminAudit";
+import { logAdminAction } from "@features/admin/api/adminAudit";
 
 export const AdminAuctionDetail = () => {
   const { id } = useParams();

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AdminPayments } from "./AdminPayments";
-import type { Payment } from "./types";
+import type { Payment } from "@features/admin/types/users";
 
 const payments: Payment[] = [
   {

@@ -4,12 +4,12 @@ import { render, screen } from "@testing-library/react";
 import { AdminRoute } from "./AdminRoute";
 
 const mockUseAuth = vi.fn();
-vi.mock("../hooks/useAuth", () => ({
+vi.mock("@features/auth/hooks/useAuth", () => ({
   useAuth: () => mockUseAuth(),
 }));
 
 const showToast = vi.fn();
-vi.mock("../services/toast", () => ({
+vi.mock("@services/toast", () => ({
   showToast: (...args: unknown[]) => showToast(...args),
 }));
 

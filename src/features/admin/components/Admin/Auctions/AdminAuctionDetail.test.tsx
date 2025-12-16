@@ -13,7 +13,7 @@ vi.mock("@features/auctions/hooks/useAuctionDetail", () => ({
 vi.mock("@services/toast", () => ({
   showToast: vi.fn(),
 }));
-vi.mock("@services/adminAudit", () => ({
+vi.mock("@features/admin/api/adminAudit", () => ({
   logAdminAction: vi.fn(),
 }));
 

@@ -1,5 +1,8 @@
 import React, { useMemo, useState } from "react";
-import type { AuctionSummary, AuctionStatus } from "../../../types/auction";
+import type {
+  AuctionSummary,
+  AuctionStatus,
+} from "@features/auctions/types/auction";
 
 type FormPayload = Partial<AuctionSummary> & { title: string };
 
