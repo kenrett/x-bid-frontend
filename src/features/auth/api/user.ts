@@ -1,5 +1,5 @@
 import type { User } from "../types/user";
-import type { ApiJsonResponse } from "./openapi-helpers";
+import type { ApiJsonResponse } from "@api/openapi-helpers";
 
 const coerceAdminFlag = (value: unknown): boolean => {
   if (typeof value === "boolean") return value;
