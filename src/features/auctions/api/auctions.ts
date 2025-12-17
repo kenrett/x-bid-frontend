@@ -15,6 +15,36 @@ const normalizePrice = (value: unknown) => {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === "object";
 
+const extractAuctionsArray = (value: unknown): AuctionSummary[] | undefined => {
+  if (Array.isArray(value)) return value as AuctionSummary[];
+  if (!isRecord(value)) return undefined;
+
+  const nestedAuctions = (value as { auctions?: unknown }).auctions;
+  const nestedData = (value as { data?: unknown }).data;
+
+  if (Array.isArray(nestedAuctions)) return nestedAuctions as AuctionSummary[];
+  if (Array.isArray(nestedData)) return nestedData as AuctionSummary[];
+
+  if (isRecord(nestedAuctions)) {
+    if (Array.isArray((nestedAuctions as { data?: unknown }).data)) {
+      return (nestedAuctions as { data: AuctionSummary[] }).data;
+    }
+    if (Array.isArray((nestedAuctions as { auctions?: unknown }).auctions)) {
+      return (nestedAuctions as { auctions: AuctionSummary[] }).auctions;
+    }
+  }
+
+  if (isRecord(nestedData)) {
+    if (Array.isArray((nestedData as { data?: unknown }).data)) {
+      return (nestedData as { data: AuctionSummary[] }).data;
+    }
+    if (Array.isArray((nestedData as { auctions?: unknown }).auctions)) {
+      return (nestedData as { auctions: AuctionSummary[] }).auctions;
+    }
+  }
+  return undefined;
+};
+
 export const getAuctions = async () => {
   const res = await client.get<
     ApiJsonResponse<"/api/v1/auctions", "get"> | { auctions?: unknown }
@@ -24,15 +54,11 @@ export const getAuctions = async () => {
     | ApiJsonResponse<"/api/v1/auctions", "get">
     | { auctions?: unknown };
 
-  let list: AuctionSummary[];
-  if (Array.isArray(payload)) {
-    list = payload;
-  } else if (
-    isRecord(payload) &&
-    Array.isArray((payload as { auctions?: unknown }).auctions)
-  ) {
-    list = (payload as { auctions: AuctionSummary[] }).auctions;
-  } else {
+  const list =
+    extractAuctionsArray(payload) ??
+    extractAuctionsArray((payload as { auctions?: unknown }).auctions);
+
+  if (!list) {
     throw reportUnexpectedResponse("getAuctions", payload);
   }
 
@@ -46,6 +72,7 @@ export const getAuctions = async () => {
 
   return list.map((auction) => ({
     ...auction,
+    id: Number((auction as { id: unknown }).id),
     current_price: normalizePrice(auction.current_price),
     status: statusFromApi(auction.status),
   }));
