@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import AuctionList from "./AuctionList";
 import { getAuctions } from "@features/auctions/api/auctions";
@@ -7,6 +8,10 @@ import {
   UNEXPECTED_RESPONSE_MESSAGE,
 } from "@services/unexpectedResponse";
 import type { AuctionSummary } from "../../types/auction";
+import {
+  useAuctionListChannel,
+  type AuctionListUpdate,
+} from "../../hooks/useAuctionListChannel";
 
 // Mock the API module
 vi.mock("@features/auctions/api/auctions");
@@ -17,15 +22,21 @@ vi.mock("../Auction/Auction", () => ({
     onClick,
     id,
     title,
+    current_price,
   }: {
     onClick: (id: number) => void;
     id: number;
     title: string;
+    current_price: number;
   }) => (
     <button data-testid={`auction-${id}`} onClick={() => onClick(id)}>
-      {title}
+      {title} - {current_price}
     </button>
   ),
+}));
+
+vi.mock("../../hooks/useAuctionListChannel", () => ({
+  useAuctionListChannel: vi.fn(),
 }));
 
 // Mock react-router-dom's useNavigate
@@ -39,6 +50,8 @@ vi.mock("react-router-dom", async () => {
 });
 
 const mockedGetAuctions = vi.mocked(getAuctions);
+const mockedUseAuctionListChannel = vi.mocked(useAuctionListChannel);
+let liveUpdateHandler: ((update: AuctionListUpdate) => void) | null = null;
 
 const mockAuctions: AuctionSummary[] = [
   {
@@ -73,9 +86,16 @@ describe("AuctionList", () => {
     vi.clearAllMocks();
     // Suppress console.error for tests that intentionally cause errors
     vi.spyOn(console, "error").mockImplementation(() => {});
+    mockedUseAuctionListChannel.mockImplementation((handler) => {
+      liveUpdateHandler = handler;
+      return { connectionState: "connected" } as ReturnType<
+        typeof useAuctionListChannel
+      >;
+    });
   });
 
   afterEach(() => {
+    liveUpdateHandler = null;
     vi.restoreAllMocks();
   });
 
@@ -91,8 +111,10 @@ describe("AuctionList", () => {
     render(<AuctionList />);
 
     // Wait for the loading to finish and auctions to be displayed
-    expect(await screen.findByText("Vintage Watch")).toBeInTheDocument();
-    expect(screen.getByText("Art Painting")).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Vintage Watch\s*-\s*150/),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Art Painting\s*-\s*300/)).toBeInTheDocument();
 
     // Ensure loading message is gone
     expect(screen.queryByText("Loading auctions...")).not.toBeInTheDocument();
@@ -132,6 +154,7 @@ describe("AuctionList", () => {
   });
 
   it("should navigate to the auction detail page when an auction is clicked", async () => {
+    const user = userEvent.setup();
     mockedGetAuctions.mockResolvedValue(mockAuctions);
     render(<AuctionList />);
 
@@ -143,7 +166,7 @@ describe("AuctionList", () => {
     );
 
     // Simulate a user click
-    fireEvent.click(auctionElement);
+    await user.click(auctionElement);
 
     // Assert that navigate was called with the correct path
     expect(mockNavigate).toHaveBeenCalledWith("/auctions/1");
@@ -176,5 +199,53 @@ describe("AuctionList", () => {
     // The main assertion is that no "Can't perform a React state update on an unmounted component" warning is logged.
     // The `console.error` spy in `beforeEach` will catch this. We expect it to NOT have been called.
     expect(console.error).not.toHaveBeenCalled();
+  });
+
+  it("shows live status indicator", async () => {
+    mockedGetAuctions.mockResolvedValue(mockAuctions);
+    render(<AuctionList />);
+
+    expect(await screen.findByTestId("live-status")).toHaveTextContent(
+      "Live updates on",
+    );
+  });
+
+  it("applies live updates to existing auctions", async () => {
+    mockedGetAuctions.mockResolvedValue(mockAuctions);
+    render(<AuctionList />);
+    await screen.findByText(/Vintage Watch\s*-\s*150/);
+
+    liveUpdateHandler?.({ id: 1, current_price: 200, title: "Vintage Watch" });
+
+    expect(
+      await screen.findByText(/Vintage Watch\s*-\s*200/),
+    ).toBeInTheDocument();
+  });
+
+  it("adds new auctions from live updates", async () => {
+    mockedGetAuctions.mockResolvedValue([mockAuctions[0]]);
+    render(<AuctionList />);
+    await screen.findByText(/Vintage Watch\s*-\s*150/);
+
+    liveUpdateHandler?.({
+      id: 3,
+      title: "New Arrival",
+      current_price: 50,
+      status: "active",
+    });
+
+    expect(await screen.findByText(/New Arrival\s*-\s*50/)).toBeInTheDocument();
+  });
+
+  it("removes cancelled auctions from live updates", async () => {
+    mockedGetAuctions.mockResolvedValue(mockAuctions);
+    render(<AuctionList />);
+    await screen.findByText(/Vintage Watch\s*-\s*150/);
+
+    liveUpdateHandler?.({ id: 1, status: "cancelled" });
+
+    await waitFor(() =>
+      expect(screen.queryByText(/Vintage Watch\s*-\s*150/)).toBeNull(),
+    );
   });
 });
