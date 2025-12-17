@@ -66,6 +66,15 @@ export const authedUser = {
   is_superuser: false,
 };
 
+export const adminUser = {
+  ...authedUser,
+  id: 999,
+  name: "Ada Admin",
+  email: "ada@example.com",
+  is_admin: true,
+  is_superuser: true,
+};
+
 export const loginResponse = {
   token: "token-login",
   refresh_token: "refresh-login",
@@ -166,7 +175,7 @@ export const seedAuthState = async (page: Page, user = authedUser) => {
 };
 
 export const mockSessionRemaining = async (page: Page, user = authedUser) => {
-  await page.route("**/session/remaining", (route) =>
+  await page.route("**/api/v1/session/remaining", (route) =>
     fulfillJson(route, {
       remaining_seconds: 1800,
       token: "token-authed",
@@ -203,4 +212,86 @@ export const stubStripe = async (page: Page) => {
       `,
     }),
   );
+};
+
+export const setupMockCable = async (page: Page) => {
+  await page.addInitScript(() => {
+    // Track active subscription identifiers for tests to wait on
+    // @ts-expect-error test-only global
+    const subscriptionSet: Set<string> = new Set();
+    // @ts-expect-error expose for tests
+    window.__cableSubscriptions = subscriptionSet;
+
+    class MockWebSocket {
+      static sockets: MockWebSocket[] = [];
+      readyState = 1;
+      subscriptions = new Set<string>();
+      onopen: ((event: unknown) => void) | null = null;
+      onmessage: ((event: { data: string }) => void) | null = null;
+      onclose: ((event: unknown) => void) | null = null;
+      constructor(public url: string) {
+        MockWebSocket.sockets.push(this);
+        setTimeout(() => {
+          this.onopen?.({});
+          this.onmessage?.({ data: JSON.stringify({ type: "welcome" }) });
+        }, 0);
+      }
+      send(data: string) {
+        try {
+          const parsed = JSON.parse(data) as {
+            command?: string;
+            identifier?: string;
+          };
+          if (parsed.command === "subscribe" && parsed.identifier) {
+            this.subscriptions.add(parsed.identifier);
+            subscriptionSet.add(parsed.identifier);
+            setTimeout(() => {
+              this.onmessage?.(
+                this.buildMessage({
+                  type: "confirm_subscription",
+                  identifier: parsed.identifier,
+                }),
+              );
+            }, 0);
+          }
+        } catch {
+          // ignore malformed data
+        }
+      }
+      buildMessage(payload: unknown) {
+        return { data: JSON.stringify(payload) };
+      }
+      close() {
+        this.readyState = 3;
+        this.onclose?.({});
+      }
+      static push(payload: unknown) {
+        for (const socket of MockWebSocket.sockets) {
+          const identifier = (payload as { identifier?: string }).identifier;
+          if (!identifier || socket.subscriptions.has(identifier)) {
+            socket.onmessage?.(
+              socket.buildMessage(
+                payload as {
+                  identifier?: string;
+                  message?: unknown;
+                },
+              ),
+            );
+          }
+        }
+      }
+    }
+    // @ts-expect-error override for tests
+    window.WebSocket = MockWebSocket;
+    // @ts-expect-error helper for tests
+    window.__pushCableMessage = (payload: unknown) =>
+      MockWebSocket.push(payload);
+  });
+};
+
+export const pushCableMessage = async (page: Page, payload: unknown) => {
+  await page.evaluate((message) => {
+    // @ts-expect-error injected helper
+    window.__pushCableMessage?.(message);
+  }, payload);
 };

@@ -9,19 +9,16 @@ import {
 } from "./fixtures/mocks";
 
 test("user can log in and land on the auctions feed", async ({ page }) => {
-  await page.route("**/login", (route) =>
+  await page.route("**/api/v1/login", (route) =>
     isDocumentRequest(route)
       ? route.continue()
       : fulfillJson(route, loginResponse),
   );
-  await page.route("**/auctions", (route) => {
-    if (isDocumentRequest(route)) return route.continue();
-    const pathname = new URL(route.request().url()).pathname;
-    if (pathname === "/auctions") {
-      return fulfillJson(route, auctionList);
-    }
-    return route.continue();
-  });
+  await page.route("**/api/v1/auctions", (route) =>
+    isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, auctionList),
+  );
   await mockSessionRemaining(page);
 
   await page.goto("/login");

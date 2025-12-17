@@ -206,21 +206,18 @@ const stubStripe = async (page: Page) => {
 };
 
 test("guest can browse auctions and open a detail page", async ({ page }) => {
-  await page.route("**/auctions", (route) => {
-    if (isDocumentRequest(route)) return route.continue();
-    const pathname = new URL(route.request().url()).pathname;
-    if (pathname === "/auctions") {
-      return fulfillJson(route, auctionList);
-    }
-    return route.continue();
-  });
+  await page.route("**/api/v1/auctions", (route) =>
+    isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, auctionList),
+  );
 
-  await page.route("**/auctions/101/bid_history", (route) =>
+  await page.route("**/api/v1/auctions/101/bid_history", (route) =>
     isDocumentRequest(route)
       ? route.continue()
       : fulfillJson(route, auction101BidHistory),
   );
-  await page.route("**/auctions/101", (route) =>
+  await page.route("**/api/v1/auctions/101", (route) =>
     isDocumentRequest(route)
       ? route.continue()
       : fulfillJson(route, auctionDetail101),
@@ -249,19 +246,16 @@ test("guest can browse auctions and open a detail page", async ({ page }) => {
 });
 
 test("user can log in and land on the auctions feed", async ({ page }) => {
-  await page.route("**/login", (route) =>
+  await page.route("**/api/v1/login", (route) =>
     isDocumentRequest(route)
       ? route.continue()
       : fulfillJson(route, loginResponse),
   );
-  await page.route("**/auctions", (route) => {
-    if (isDocumentRequest(route)) return route.continue();
-    const pathname = new URL(route.request().url()).pathname;
-    if (pathname === "/auctions") {
-      return fulfillJson(route, auctionList);
-    }
-    return route.continue();
-  });
+  await page.route("**/api/v1/auctions", (route) =>
+    isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, auctionList),
+  );
   await mockSessionRemaining(page);
 
   await page.goto("/login");
@@ -291,12 +285,12 @@ test("authenticated user can place a bid on an active auction", async ({
   await seedAuthState(page);
   await mockSessionRemaining(page);
 
-  await page.route("**/auctions/501/bid_history", (route) =>
+  await page.route("**/api/v1/auctions/501/bid_history", (route) =>
     isDocumentRequest(route)
       ? route.continue()
       : fulfillJson(route, auction501BidHistory),
   );
-  await page.route("**/auctions/501/bids", (route) => {
+  await page.route("**/api/v1/auctions/501/bids", (route) => {
     if (route.request().method() === "POST") {
       return fulfillJson(route, {
         success: true,
@@ -312,7 +306,7 @@ test("authenticated user can place a bid on an active auction", async ({
     }
     return route.continue();
   });
-  await page.route("**/auctions/501", (route) =>
+  await page.route("**/api/v1/auctions/501", (route) =>
     isDocumentRequest(route)
       ? route.continue()
       : fulfillJson(route, auctionDetail501),
@@ -343,12 +337,12 @@ test("authenticated user can start a bid pack checkout", async ({ page }) => {
   await seedAuthState(page);
   await mockSessionRemaining(page);
 
-  await page.route("**/bid_packs", (route) =>
+  await page.route("**/api/v1/bid_packs", (route) =>
     isDocumentRequest(route)
       ? route.continue()
       : fulfillJson(route, bidPacksResponse),
   );
-  await page.route("**/checkouts", (route) => {
+  await page.route("**/api/v1/checkouts", (route) => {
     if (route.request().method() === "POST") {
       return fulfillJson(route, { clientSecret: "cs_test_fake" });
     }

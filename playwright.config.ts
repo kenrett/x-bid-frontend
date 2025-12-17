@@ -13,13 +13,13 @@ export default defineConfig({
     video: "retain-on-failure",
   },
   webServer: {
-    command: "npm run dev -- --host --port 4173",
-    url: "http://localhost:4173",
+    command: "npm run dev -- --host 127.0.0.1 --port 4173",
+    url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
     env: {
       ...process.env,
-      VITE_API_URL: process.env.VITE_API_URL ?? "http://localhost:4173",
+      VITE_API_URL: process.env.VITE_API_URL ?? "http://127.0.0.1:4173",
       VITE_STRIPE_PUBLISHABLE_KEY:
         process.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "pk_test_stubbed",
     },
