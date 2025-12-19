@@ -121,6 +121,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     persistValue("sessionTokenId", null);
     setSentryUser(null);
     resetCable();
+
+    if (import.meta.env.VITE_E2E_TESTS === "true") {
+      // @ts-expect-error test-only marker
+      (window as { __lastSessionState?: unknown }).__lastSessionState = {
+        loggedOut: true,
+      };
+    }
   }, [persistValue]);
 
   const handleSessionInvalidated = useCallback(
@@ -153,84 +160,106 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
+    const isE2E = import.meta.env.VITE_E2E_TESTS === "true";
     let cancelled = false;
     let intervalId: number | null = null;
 
-    const fetchRemaining = async () => {
+    const handleRemainingResponse = (
+      data: SessionRemainingResponse | null | undefined,
+    ) => {
+      if (cancelled || !data) return;
+
+      const {
+        remaining_seconds,
+        token: nextToken,
+        refresh_token: nextRefreshToken,
+        session_token_id: nextSessionTokenId,
+        user: refreshedUser,
+        is_admin: refreshedAdminFlag,
+        is_superuser: refreshedSuperFlag,
+      } = data;
+
+      if (typeof remaining_seconds === "number") {
+        setSessionRemainingSeconds(remaining_seconds);
+        if (remaining_seconds <= 0) {
+          handleSessionInvalidated("expired");
+          return;
+        }
+      } else {
+        // If the backend doesn't send remaining_seconds, keep the session alive
+        // and clear the countdown rather than invalidating/loggin the user out
+        setSessionRemainingSeconds(null);
+      }
+
+      const tokenChanged = nextToken && nextToken !== token;
+      const sessionChanged =
+        nextSessionTokenId && nextSessionTokenId !== sessionTokenId;
+
+      if (nextToken && nextRefreshToken && nextSessionTokenId) {
+        setToken(nextToken);
+        persistValue("token", nextToken);
+        setRefreshToken(nextRefreshToken);
+        persistValue("refreshToken", nextRefreshToken);
+        setSessionTokenId(nextSessionTokenId);
+        persistValue("sessionTokenId", nextSessionTokenId);
+
+        if (tokenChanged || sessionChanged) {
+          resetCable();
+        }
+      }
+
+      if (
+        refreshedUser ||
+        typeof refreshedAdminFlag === "boolean" ||
+        typeof refreshedSuperFlag === "boolean"
+      ) {
+        setUser((currentUser) => {
+          const baseUser = refreshedUser ?? currentUser;
+          if (!baseUser) return currentUser;
+
+          const mergedUser = normalizeUser({
+            ...baseUser,
+            ...(refreshedUser ?? {}),
+            is_admin:
+              (refreshedUser ?? baseUser).is_admin ??
+              refreshedAdminFlag ??
+              currentUser?.is_admin,
+            is_superuser:
+              (refreshedUser ?? baseUser).is_superuser ??
+              refreshedSuperFlag ??
+              currentUser?.is_superuser,
+          } as User);
+
+          localStorage.setItem("user", JSON.stringify(mergedUser));
+          return mergedUser;
+        });
+      }
+
+      if (isE2E) {
+        // @ts-expect-error test-only marker
+        (window as { __lastSessionState?: unknown }).__lastSessionState = {
+          token: nextToken ?? token,
+          refreshToken: nextRefreshToken ?? refreshToken,
+          sessionTokenId: nextSessionTokenId ?? sessionTokenId,
+          remaining: remaining_seconds,
+          user: user ?? null,
+        };
+      }
+    };
+
+    const fetchRemaining = async (override?: SessionRemainingResponse) => {
       try {
+        if (override) {
+          handleRemainingResponse(override);
+          return;
+        }
         const response = await client.get<SessionRemainingResponse>(
           "/api/v1/session/remaining",
           {
             params: { session_token_id: sessionTokenId },
           },
         );
-        if (cancelled) return;
-
-        const {
-          remaining_seconds,
-          token: nextToken,
-          refresh_token: nextRefreshToken,
-          session_token_id: nextSessionTokenId,
-          user: refreshedUser,
-          is_admin: refreshedAdminFlag,
-          is_superuser: refreshedSuperFlag,
-        } = response.data;
-
-        if (typeof remaining_seconds === "number") {
-          setSessionRemainingSeconds(remaining_seconds);
-          if (remaining_seconds <= 0) {
-            handleSessionInvalidated("expired");
-            return;
-          }
-        } else {
-          // If the backend doesn't send remaining_seconds, keep the session alive
-          // and clear the countdown rather than invalidating/loggin the user out
-          setSessionRemainingSeconds(null);
-        }
-
-        const tokenChanged = nextToken && nextToken !== token;
-        const sessionChanged =
-          nextSessionTokenId && nextSessionTokenId !== sessionTokenId;
-
-        if (nextToken && nextRefreshToken && nextSessionTokenId) {
-          setToken(nextToken);
-          persistValue("token", nextToken);
-          setRefreshToken(nextRefreshToken);
-          persistValue("refreshToken", nextRefreshToken);
-          setSessionTokenId(nextSessionTokenId);
-          persistValue("sessionTokenId", nextSessionTokenId);
-
-          if (tokenChanged || sessionChanged) {
-            resetCable();
-          }
-        }
-
-        if (
-          refreshedUser ||
-          typeof refreshedAdminFlag === "boolean" ||
-          typeof refreshedSuperFlag === "boolean"
-        ) {
-          setUser((currentUser) => {
-            const baseUser = refreshedUser ?? currentUser;
-            if (!baseUser) return currentUser;
-
-            const mergedUser = normalizeUser({
-              ...baseUser,
-              ...(refreshedUser ?? {}),
-              is_admin:
-                (refreshedUser ?? baseUser).is_admin ??
-                refreshedAdminFlag ??
-                currentUser?.is_admin,
-              is_superuser:
-                (refreshedUser ?? baseUser).is_superuser ??
-                refreshedSuperFlag ??
-                currentUser?.is_superuser,
-            } as User);
-
-            localStorage.setItem("user", JSON.stringify(mergedUser));
-            return mergedUser;
-          });
-        }
+        handleRemainingResponse(response.data);
       } catch (error) {
         console.error("Failed to fetch session remaining time", error);
         if (isAxiosError(error) && error.response?.status === 401) {
@@ -239,6 +268,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     };
 
+    if (isE2E) {
+      // @ts-expect-error test-only hook
+      (
+        window as {
+          __triggerSessionPoll?: (
+            override?: SessionRemainingResponse,
+          ) => Promise<void>;
+        }
+      ).__triggerSessionPoll = (override?: SessionRemainingResponse) =>
+        fetchRemaining(override);
+    }
+
     void fetchRemaining();
     intervalId = window.setInterval(fetchRemaining, SESSION_POLL_INTERVAL_MS);
 
@@ -246,6 +287,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       cancelled = true;
       if (intervalId) {
         window.clearInterval(intervalId);
+      }
+      if (isE2E) {
+        // @ts-expect-error cleanup
+        delete (window as { __triggerSessionPoll?: () => Promise<void> })
+          .__triggerSessionPoll;
       }
     };
   }, [token, sessionTokenId, handleSessionInvalidated, persistValue]);
