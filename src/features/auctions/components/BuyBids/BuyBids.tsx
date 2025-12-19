@@ -22,6 +22,12 @@ import {
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 export const BuyBids = () => {
+  const stripeLoader =
+    import.meta.env.VITE_E2E_TESTS === "true" &&
+    (window as { __mockStripePromise?: Promise<unknown> }).__mockStripePromise
+      ? (window as { __mockStripePromise: Promise<unknown> })
+          .__mockStripePromise
+      : stripePromise;
   const { user } = useAuth();
   const [bidPacks, setBidPacks] = useState<BidPack[]>([]);
   const [isLoadingPacks, setIsLoadingPacks] = useState(true);
@@ -29,16 +35,56 @@ export const BuyBids = () => {
     null,
   );
   const [error, setError] = useState<string | null>(null);
+  const [stripeError, setStripeError] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const markStripeError = () => {
+      if (cancelled) return;
+      setStripeError("Failed to load payments. Please refresh and try again.");
+    };
+
+    // Surface Stripe loader failures so the user gets feedback instead of a broken checkout.
+    const stripeTimeout = window.setTimeout(() => {
+      markStripeError();
+    }, 3000);
+
+    stripeLoader
+      .then((stripe) => {
+        window.clearTimeout(stripeTimeout);
+        if (!stripe) markStripeError();
+      })
+      .catch(() => {
+        window.clearTimeout(stripeTimeout);
+        markStripeError();
+      });
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(stripeTimeout);
+    };
+  }, [stripeLoader]);
 
   useEffect(() => {
     const fetchBidPacks = async () => {
       try {
         const response = await client.get<BidPack[]>("/api/v1/bid_packs");
-        if (!Array.isArray(response.data)) {
+        const payload = response.data as
+          | BidPack[]
+          | { bid_packs?: unknown }
+          | { data?: unknown };
+        const list = Array.isArray(payload)
+          ? payload
+          : Array.isArray((payload as { bid_packs?: unknown }).bid_packs)
+            ? (payload as { bid_packs: unknown[] }).bid_packs
+            : Array.isArray((payload as { data?: unknown }).data)
+              ? (payload as { data: unknown[] }).data
+              : null;
+        if (!Array.isArray(list)) {
           throw reportUnexpectedResponse("bidPacks", response.data);
         }
-        const normalized = response.data.map((pack) => {
+        const normalized = list.map((pack) => {
           const bids = Number(pack.bids);
           const status: BidPack["status"] =
             pack.status === "retired" ? "retired" : "active";
@@ -110,7 +156,8 @@ export const BuyBids = () => {
     );
   }
 
-  if (error) return <ErrorScreen message={error} />;
+  if (error || stripeError)
+    return <ErrorScreen message={error ?? stripeError} />;
 
   const handleBuy = async (id: number) => {
     const selectedPack = bidPacks.find((pack) => pack.id === id);
@@ -172,7 +219,7 @@ export const BuyBids = () => {
         >
           <p className="text-gray-300">Loading secure checkout...</p>
           <EmbeddedCheckoutProvider
-            stripe={stripePromise}
+            stripe={stripeLoader}
             options={{ clientSecret }}
           >
             <EmbeddedCheckout />
