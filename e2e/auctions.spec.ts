@@ -103,4 +103,19 @@ test("authenticated user can place a bid on an active auction", async ({
   );
   await expect(page.getByLabel("Current Price")).toHaveText("$150.00");
   await expect(page.getByText(`${authedUser.name} bid $150.00`)).toBeVisible();
+
+  // Outbid broadcast should update UI/history.
+  await page.route("**/api/v1/auctions/501", (route) =>
+    isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, { ...auctionDetail501, highest_bidder_id: 77 }),
+  );
+  await page.reload();
+
+  await expect(
+    page.getByRole("button", { name: "You are the highest bidder" }),
+  ).toHaveCount(0);
+  await expect(page.getByTestId("highest-bidder-info")).toContainText(
+    "Early Bird",
+  );
 });

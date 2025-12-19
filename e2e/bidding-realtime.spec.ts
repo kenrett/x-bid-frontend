@@ -117,6 +117,9 @@ test("user can buy bids, place a bid, and see realtime updates", async ({
     authedUser.name,
   );
   await expect(page.getByLabel("Current Price")).toHaveText("$100.00");
+  await expect(
+    page.getByRole("button", { name: "You are the highest bidder" }),
+  ).toBeDisabled();
 
   await pushCableMessage(page, {
     identifier: JSON.stringify({
