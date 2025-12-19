@@ -223,8 +223,12 @@ export const setupMockCable = async (page: Page) => {
     window.__cableSubscriptions = subscriptionSet;
 
     class MockWebSocket {
+      static CONNECTING = 0;
+      static OPEN = 1;
+      static CLOSING = 2;
+      static CLOSED = 3;
       static sockets: MockWebSocket[] = [];
-      readyState = 1;
+      readyState = MockWebSocket.CONNECTING;
       subscriptions = new Set<string>();
       onopen: ((event: unknown) => void) | null = null;
       onmessage: ((event: { data: string }) => void) | null = null;
@@ -232,6 +236,7 @@ export const setupMockCable = async (page: Page) => {
       constructor(public url: string) {
         MockWebSocket.sockets.push(this);
         setTimeout(() => {
+          this.readyState = MockWebSocket.OPEN;
           this.onopen?.({});
           this.onmessage?.({ data: JSON.stringify({ type: "welcome" }) });
         }, 0);
@@ -262,7 +267,7 @@ export const setupMockCable = async (page: Page) => {
         return { data: JSON.stringify(payload) };
       }
       close() {
-        this.readyState = 3;
+        this.readyState = MockWebSocket.CLOSED;
         this.onclose?.({});
       }
       static push(payload: unknown) {
@@ -287,10 +292,86 @@ export const setupMockCable = async (page: Page) => {
     window.__pushCableMessage = (payload: unknown) =>
       MockWebSocket.push(payload);
   });
+  // Provide a mock consumer that bypasses the real ActionCable transport.
+  await page.addInitScript(() => {
+    // @ts-expect-error test-only injection for services/cable
+    window.__mockCreateConsumer = () => {
+      // console.log("[mock cable] createConsumer", url);
+      return {
+        subscriptions: {
+          create(identifier: unknown, callbacks: Record<string, () => void>) {
+            const id =
+              typeof identifier === "string"
+                ? identifier
+                : JSON.stringify(identifier);
+            // Immediately treat the subscription as confirmed
+            // @ts-expect-error shared test-only global
+            window.__cableSubscriptions?.add(id);
+            // @ts-expect-error shared helper
+            window.__mockCableRegister?.(id, callbacks);
+            callbacks?.connected?.();
+            return {
+              identifier: id,
+              perform: () => {},
+              send: () => {},
+              unsubscribe: () => {
+                // @ts-expect-error shared test-only global
+                window.__cableSubscriptions?.delete(id);
+                // @ts-expect-error shared helper
+                window.__mockCableUnregister?.(id);
+                callbacks?.disconnected?.();
+              },
+            };
+          },
+        },
+        disconnect: () => {},
+      };
+    };
+  });
+  await page.addInitScript(() => {
+    // Register/unregister handlers for the consumer mock.
+    const cbMap =
+      // @ts-expect-error shared map populated earlier
+      (window.__mockCableCallbacks as Map<
+        string,
+        (payload: unknown) => void
+      >) ??
+      // @ts-expect-error create once
+      (window.__mockCableCallbacks = new Map());
+    // @ts-expect-error expose register/unregister helpers
+    window.__mockCableRegister = (
+      id: string,
+      callbacks?: Record<string, () => void>,
+    ) => {
+      if (callbacks?.received) {
+        cbMap.set(id, callbacks.received as (payload: unknown) => void);
+      }
+    };
+    // @ts-expect-error expose helper
+    window.__mockCableUnregister = (id: string) => cbMap.delete(id);
+    // @ts-expect-error share for delivery helper
+    window.__mockCableDeliver = (payload: {
+      identifier?: string;
+      message?: unknown;
+    }) => {
+      const { identifier, message } = payload ?? {};
+      if (identifier) {
+        cbMap.get(identifier)?.(message ?? payload);
+        return;
+      }
+      cbMap.forEach((cb) => cb(message ?? payload));
+    };
+  });
 };
 
 export const pushCableMessage = async (page: Page, payload: unknown) => {
   await page.evaluate((message) => {
+    // @ts-expect-error support consumer mock delivery
+    if (window.__mockCableDeliver) {
+      // @ts-expect-error helper for tests
+      window.__mockCableDeliver(message);
+      return;
+    }
     // @ts-expect-error injected helper
     window.__pushCableMessage?.(message);
   }, payload);

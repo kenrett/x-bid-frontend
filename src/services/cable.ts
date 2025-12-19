@@ -17,7 +17,18 @@ const buildCableUrl = () => {
   return url.toString();
 };
 
-let cable = createConsumer(buildCableUrl());
+type CreateConsumerFn = typeof createConsumer;
+
+const getCreateConsumer = (): CreateConsumerFn => {
+  const maybeMock = (
+    globalThis as {
+      __mockCreateConsumer?: CreateConsumerFn;
+    }
+  ).__mockCreateConsumer;
+  return maybeMock ?? createConsumer;
+};
+
+let cable = getCreateConsumer()(buildCableUrl());
 
 export const resetCable = () => {
   try {
@@ -25,7 +36,7 @@ export const resetCable = () => {
   } catch (err) {
     console.warn("[cable] Failed to disconnect existing consumer", err);
   }
-  cable = createConsumer(buildCableUrl());
+  cable = getCreateConsumer()(buildCableUrl());
   return cable;
 };
 
