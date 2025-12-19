@@ -330,12 +330,14 @@ export const setupMockCable = async (page: Page) => {
   });
   await page.addInitScript(() => {
     // Register/unregister handlers for the consumer mock.
+    type CallbackEntry = {
+      received?: (payload: unknown) => void;
+      connected?: () => void;
+      disconnected?: () => void;
+    };
     const cbMap =
       // @ts-expect-error shared map populated earlier
-      (window.__mockCableCallbacks as Map<
-        string,
-        (payload: unknown) => void
-      >) ??
+      (window.__mockCableCallbacks as Map<string, CallbackEntry>) ??
       // @ts-expect-error create once
       (window.__mockCableCallbacks = new Map());
     // @ts-expect-error expose register/unregister helpers
@@ -343,12 +345,26 @@ export const setupMockCable = async (page: Page) => {
       id: string,
       callbacks?: Record<string, () => void>,
     ) => {
-      if (callbacks?.received) {
-        cbMap.set(id, callbacks.received as (payload: unknown) => void);
-      }
+      cbMap.set(id, {
+        received: callbacks?.received as
+          | ((payload: unknown) => void)
+          | undefined,
+        connected: callbacks?.connected as (() => void) | undefined,
+        disconnected: callbacks?.disconnected as (() => void) | undefined,
+      });
     };
     // @ts-expect-error expose helper
     window.__mockCableUnregister = (id: string) => cbMap.delete(id);
+    // @ts-expect-error expose helper to change connection state
+    window.__mockCableSetState = (
+      id: string,
+      state: "connected" | "disconnected",
+    ) => {
+      const entry = cbMap.get(id);
+      if (!entry) return;
+      if (state === "connected") entry.connected?.();
+      else entry.disconnected?.();
+    };
     // @ts-expect-error share for delivery helper
     window.__mockCableDeliver = (payload: {
       identifier?: string;
@@ -356,10 +372,10 @@ export const setupMockCable = async (page: Page) => {
     }) => {
       const { identifier, message } = payload ?? {};
       if (identifier) {
-        cbMap.get(identifier)?.(message ?? payload);
+        cbMap.get(identifier)?.received?.(message ?? payload);
         return;
       }
-      cbMap.forEach((cb) => cb(message ?? payload));
+      cbMap.forEach((cb) => cb.received?.(message ?? payload));
     };
   });
 };
