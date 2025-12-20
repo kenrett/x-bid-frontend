@@ -35,14 +35,11 @@ client.interceptors.response.use(
         window.location.assign("/maintenance");
       }
     } else if (status === 401 || status === 403) {
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("sessionTokenId");
+      // Centralize unauthorized handling via AuthProvider listener.
+      window.dispatchEvent(
+        new CustomEvent("app:unauthorized", { detail: { status } }),
+      );
       showToast("Your session expired; please sign in again.", "error");
-      if (!window.location.pathname.startsWith("/login")) {
-        window.location.assign("/login");
-      }
     }
     return Promise.reject(error);
   },

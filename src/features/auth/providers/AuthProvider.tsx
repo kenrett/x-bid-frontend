@@ -7,6 +7,7 @@ import client from "@api/client";
 import { cable, resetCable } from "@services/cable";
 import { normalizeUser } from "../api/user";
 import { setSentryUser } from "@sentryClient";
+import { showToast } from "@services/toast";
 
 type SessionRemainingResponse = {
   remaining_seconds?: number;
@@ -135,6 +136,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.warn(
         `[AuthProvider] Session invalidated${reason ? ` (${reason})` : ""}`,
       );
+      if (!window.location.pathname.startsWith("/login")) {
+        showToast("Your session expired; please sign in again.", "error");
+        const redirectParam = encodeURIComponent(
+          window.location.pathname + window.location.search,
+        );
+        window.location.assign(`/login?redirect=${redirectParam}`);
+      }
       logout();
     },
     [logout],
@@ -295,6 +303,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     };
   }, [token, sessionTokenId, handleSessionInvalidated, persistValue]);
+
+  useEffect(() => {
+    const onUnauthorized = () => handleSessionInvalidated("unauthorized");
+    window.addEventListener("app:unauthorized", onUnauthorized);
+    return () => window.removeEventListener("app:unauthorized", onUnauthorized);
+  }, [handleSessionInvalidated]);
 
   useEffect(() => {
     if (!token || !sessionTokenId) return;
