@@ -39,26 +39,31 @@ describe("api client response interceptor", () => {
   beforeEach(() => {
     localStorage.clear();
     showToast.mockClear();
+    vi.restoreAllMocks();
   });
 
-  it("handles 401/403 by clearing auth, toasting, and redirecting to login", async () => {
+  it("handles 401/403 by dispatching unauthorized and toasting", async () => {
     localStorage.setItem("user", "user");
     localStorage.setItem("token", "token");
     localStorage.setItem("refreshToken", "refresh");
     localStorage.setItem("sessionTokenId", "session");
     setPath("/auctions");
+    const dispatchSpy = vi.spyOn(window, "dispatchEvent");
 
     const error = { response: { status: 401 } } as AxiosError;
 
     await expect(rejected(error)).rejects.toBe(error);
 
-    expect(localStorage.getItem("user")).toBeNull();
-    expect(localStorage.getItem("token")).toBeNull();
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "app:unauthorized" }),
+    );
+    expect(localStorage.getItem("user")).toBe("user");
+    expect(localStorage.getItem("token")).toBe("token");
     expect(showToast).toHaveBeenCalledWith(
       "Your session expired; please sign in again.",
       "error",
     );
-    expect(window.location.assign).toHaveBeenCalledWith("/login");
+    expect(window.location.assign).not.toHaveBeenCalled();
   });
 
   it("keeps maintenance redirect behavior for 503", async () => {
