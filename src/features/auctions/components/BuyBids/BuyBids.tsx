@@ -22,11 +22,14 @@ import {
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 export const BuyBids = () => {
+  const mockStripePromise = (
+    window as unknown as {
+      __mockStripePromise?: Promise<import("@stripe/stripe-js").Stripe | null>;
+    }
+  ).__mockStripePromise;
   const stripeLoader =
-    import.meta.env.VITE_E2E_TESTS === "true" &&
-    (window as { __mockStripePromise?: Promise<unknown> }).__mockStripePromise
-      ? (window as { __mockStripePromise: Promise<unknown> })
-          .__mockStripePromise
+    import.meta.env.VITE_E2E_TESTS === "true" && mockStripePromise
+      ? mockStripePromise
       : stripePromise;
   const { user } = useAuth();
   const [bidPacks, setBidPacks] = useState<BidPack[]>([]);
@@ -85,28 +88,29 @@ export const BuyBids = () => {
           throw reportUnexpectedResponse("bidPacks", response.data);
         }
         const normalized = list.map((pack) => {
-          const bids = Number(pack.bids);
+          const typed = pack as BidPack;
+          const bids = Number(typed.bids);
           const status: BidPack["status"] =
-            pack.status === "retired" ? "retired" : "active";
+            typed.status === "retired" ? "retired" : "active";
           const active =
-            typeof pack.active === "boolean"
-              ? pack.active
+            typeof typed.active === "boolean"
+              ? typed.active
               : status === "active";
-          const price = Number(pack.price);
+          const price = Number(typed.price);
           const pricePerBid =
-            pack.pricePerBid !== undefined && pack.pricePerBid !== null
-              ? String(pack.pricePerBid)
+            typed.pricePerBid !== undefined && typed.pricePerBid !== null
+              ? String(typed.pricePerBid)
               : bids > 0 && !Number.isNaN(price)
                 ? (price / bids).toFixed(2)
                 : "0.00";
           return {
-            ...pack,
+            ...(typed as BidPack),
             status,
             active,
             price: Number.isNaN(price) ? 0 : price,
             bids: Number.isNaN(bids) ? 0 : bids,
             pricePerBid,
-            highlight: Boolean(pack.highlight),
+            highlight: Boolean(typed.highlight),
           };
         });
         setBidPacks(normalized);
@@ -157,7 +161,11 @@ export const BuyBids = () => {
   }
 
   if (error || stripeError)
-    return <ErrorScreen message={error ?? stripeError} />;
+    return (
+      <ErrorScreen
+        message={error ?? stripeError ?? "Unable to load bid packs."}
+      />
+    );
 
   const handleBuy = async (id: number) => {
     const selectedPack = bidPacks.find((pack) => pack.id === id);

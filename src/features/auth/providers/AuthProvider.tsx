@@ -124,7 +124,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     resetCable();
 
     if (import.meta.env.VITE_E2E_TESTS === "true") {
-      // @ts-expect-error test-only marker
       (window as { __lastSessionState?: unknown }).__lastSessionState = {
         loggedOut: true,
       };
@@ -244,7 +243,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       if (isE2E) {
-        // @ts-expect-error test-only marker
         (window as { __lastSessionState?: unknown }).__lastSessionState = {
           token: nextToken ?? token,
           refreshToken: nextRefreshToken ?? refreshToken,
@@ -277,7 +275,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     if (isE2E) {
-      // @ts-expect-error test-only hook
       (
         window as {
           __triggerSessionPoll?: (
@@ -297,7 +294,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         window.clearInterval(intervalId);
       }
       if (isE2E) {
-        // @ts-expect-error cleanup
         delete (window as { __triggerSessionPoll?: () => Promise<void> })
           .__triggerSessionPoll;
       }

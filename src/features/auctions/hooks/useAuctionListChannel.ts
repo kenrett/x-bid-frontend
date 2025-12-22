@@ -79,7 +79,7 @@ export const useAuctionListChannel = (
             onUpdateRef.current(normalized);
           }
         },
-      },
+      } as Parameters<typeof cable.subscriptions.create>[1],
     );
 
     return () => {
