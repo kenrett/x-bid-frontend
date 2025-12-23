@@ -22,6 +22,9 @@ const config: UserConfig & { test: VitestUserConfig["test"] } = {
       ),
     },
   },
+  build: {
+    sourcemap: true,
+  },
   test: {
     globals: true,
     environment: "jsdom",
