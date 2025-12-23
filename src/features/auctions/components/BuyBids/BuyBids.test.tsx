@@ -85,11 +85,23 @@ const createMockAuthReturn = (
   isReady: true,
 });
 
+type MutableEnv = {
+  env: Record<string, unknown> & { VITE_STRIPE_PUBLISHABLE_KEY?: string };
+};
+
+const setStripeKey = (value: string | undefined) => {
+  (import.meta as unknown as MutableEnv).env.VITE_STRIPE_PUBLISHABLE_KEY =
+    value;
+};
+
 const renderComponent = () => render(<BuyBids />, { wrapper: MemoryRouter });
 
 describe("BuyBids Component", () => {
   beforeEach(() => {
     vi.spyOn(console, "error").mockImplementation(() => {});
+    setStripeKey("pk_test_123");
+    delete (globalThis as Record<string, unknown>).__forceStripeKeyRequired;
+    mockedClient.get.mockResolvedValue({ data: mockBidPacks });
   });
 
   afterEach(() => {
@@ -111,6 +123,26 @@ describe("BuyBids Component", () => {
       expect(mockedClient.get).not.toHaveBeenCalled();
       expect(mockedClient.post).not.toHaveBeenCalled();
     });
+  });
+
+  it("shows a Stripe error when the publishable key is missing", async () => {
+    const originalKey = (import.meta as unknown as MutableEnv).env
+      .VITE_STRIPE_PUBLISHABLE_KEY;
+    setStripeKey("");
+    (globalThis as Record<string, unknown>).__forceStripeKeyRequired = true;
+    mockedClient.get.mockResolvedValue({ data: mockBidPacks });
+    vi.resetModules();
+    const { BuyBids: BuyBidsWithoutKey } = await import("./BuyBids");
+
+    mockedUseAuth.mockReturnValue(createMockAuthReturn(mockUserLoggedIn));
+    render(<BuyBidsWithoutKey />, { wrapper: MemoryRouter });
+
+    expect(
+      await screen.findByText(/failed to load payments/i),
+    ).toBeInTheDocument();
+
+    setStripeKey(originalKey);
+    delete (globalThis as Record<string, unknown>).__forceStripeKeyRequired;
   });
 
   describe("when user is logged in", () => {

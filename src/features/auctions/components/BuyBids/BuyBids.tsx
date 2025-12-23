@@ -16,10 +16,38 @@ import {
   UNEXPECTED_RESPONSE_MESSAGE,
   UnexpectedResponseError,
 } from "@services/unexpectedResponse";
+import { Sentry } from "@sentryClient";
 
-// Initialize Stripe outside of the component render to avoid
-// recreating the `Stripe` object on every render.
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+type StripeLoader = {
+  promise: Promise<import("@stripe/stripe-js").Stripe | null>;
+  hasKey: boolean;
+};
+
+// Lazily build the Stripe loader so tests can set env vars before render.
+const buildStripeLoader = (
+  mockStripePromise?: Promise<import("@stripe/stripe-js").Stripe | null>,
+): StripeLoader => {
+  const rawKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+  const forceKeyRequired =
+    (globalThis as { __forceStripeKeyRequired?: boolean })
+      .__forceStripeKeyRequired === true;
+  if (import.meta.env.VITE_E2E_TESTS === "true" && mockStripePromise) {
+    return { promise: mockStripePromise, hasKey: true };
+  }
+  let keyToUse =
+    typeof rawKey === "string" && rawKey.trim().length > 0
+      ? rawKey.trim()
+      : null;
+  if (!keyToUse && import.meta.env.MODE === "test" && !forceKeyRequired) {
+    // In tests, fall back to a dummy key so the UI can render unless a test explicitly
+    // forces the missing-key path.
+    keyToUse = "pk_test_dummy";
+  }
+  if (!keyToUse) {
+    return { promise: Promise.resolve(null), hasKey: false };
+  }
+  return { promise: loadStripe(keyToUse), hasKey: true };
+};
 
 export const BuyBids = () => {
   const mockStripePromise = (
@@ -27,10 +55,8 @@ export const BuyBids = () => {
       __mockStripePromise?: Promise<import("@stripe/stripe-js").Stripe | null>;
     }
   ).__mockStripePromise;
-  const stripeLoader =
-    import.meta.env.VITE_E2E_TESTS === "true" && mockStripePromise
-      ? mockStripePromise
-      : stripePromise;
+  const { promise: stripeLoader, hasKey: hasStripeKey } =
+    buildStripeLoader(mockStripePromise);
   const { user } = useAuth();
   const [bidPacks, setBidPacks] = useState<BidPack[]>([]);
   const [isLoadingPacks, setIsLoadingPacks] = useState(true);
@@ -46,12 +72,24 @@ export const BuyBids = () => {
     const markStripeError = () => {
       if (cancelled) return;
       setStripeError("Failed to load payments. Please refresh and try again.");
+      Sentry.captureMessage("Stripe publishable key missing or invalid", {
+        level: "error",
+        extra: { route: "buy-bids" },
+      });
     };
 
     // Surface Stripe loader failures so the user gets feedback instead of a broken checkout.
     const stripeTimeout = window.setTimeout(() => {
       markStripeError();
     }, 3000);
+
+    if (!hasStripeKey) {
+      markStripeError();
+      return () => {
+        cancelled = true;
+        window.clearTimeout(stripeTimeout);
+      };
+    }
 
     stripeLoader
       .then((stripe) => {
@@ -67,7 +105,7 @@ export const BuyBids = () => {
       cancelled = true;
       window.clearTimeout(stripeTimeout);
     };
-  }, [stripeLoader]);
+  }, [stripeLoader, hasStripeKey]);
 
   useEffect(() => {
     const fetchBidPacks = async () => {

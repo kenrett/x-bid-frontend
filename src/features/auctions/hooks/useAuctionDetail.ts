@@ -142,7 +142,6 @@ function auctionReducer(
   }
 
   // console.log('[auctionReducer] State after:', { ...nextState });
-  console.groupEnd();
   return nextState;
 }
 
@@ -203,7 +202,6 @@ export function useAuctionDetail(auctionId: number) {
             ? UNEXPECTED_RESPONSE_MESSAGE
             : "Failed to fetch auction details.",
       });
-      console.error(err);
     }
   }, [auctionId]);
 
@@ -214,11 +212,6 @@ export function useAuctionDetail(auctionId: number) {
 
   const onChannelData = useCallback(
     (data: AuctionChannelData) => {
-      console.log(
-        "%c[onChannelData] Received WebSocket data:",
-        "color: green",
-        data,
-      );
       if (auctionId > 0) {
         dispatch({ type: "CHANNEL_UPDATE", payload: { data } });
       }
@@ -230,15 +223,6 @@ export function useAuctionDetail(auctionId: number) {
     useAuctionChannel(auctionId, onChannelData);
 
   const placeUserBid = async () => {
-    console.log("%c[placeUserBid] Attempting to place bid...", "color: blue");
-    console.log("[placeUserBid] Current state:", {
-      auctionId: state.auction?.id,
-      isBidding: state.isBidding,
-      currentHighestBidderId: state.auction?.highest_bidder_id,
-      userId: user?.id,
-      isSelf: user?.id === state.auction?.highest_bidder_id,
-    });
-
     if (
       !state.auction ||
       !user ||
@@ -246,7 +230,6 @@ export function useAuctionDetail(auctionId: number) {
       user.id === state.auction.highest_bidder_id ||
       !auctionSubscription
     ) {
-      console.error("Cannot place bid. Conditions not met or not subscribed.");
       return;
     }
 

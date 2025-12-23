@@ -140,7 +140,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const redirectParam = encodeURIComponent(
           window.location.pathname + window.location.search,
         );
-        window.location.assign(`/login?redirect=${redirectParam}`);
+        const targetUrl = `/login?redirect=${redirectParam}`;
+        if (import.meta.env.MODE === "test") {
+          (window as { __lastRedirect?: string }).__lastRedirect = targetUrl;
+        } else {
+          window.location.assign(targetUrl);
+        }
       }
       logout();
     },
