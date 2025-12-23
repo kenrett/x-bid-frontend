@@ -187,29 +187,34 @@ export const mockSessionRemaining = async (page: Page, user = authedUser) => {
 };
 
 export const stubStripe = async (page: Page) => {
-  await page.context().route("https://js.stripe.com/v3", (route) =>
+  const stripeStub = `
+    (() => {
+      function createCheckout() {
+        return {
+          mount: () => {},
+          unmount: () => {},
+          setClientSecret: () => {},
+          addEventListener: () => {},
+          removeEventListener: () => {},
+        };
+      }
+      const Stripe = () => ({
+        elements: () => ({ create: () => ({ mount() {}, destroy() {} }) }),
+        initEmbeddedCheckout: () => Promise.resolve(createCheckout()),
+      });
+      Stripe.setLoadParameters = () => {};
+      window.Stripe = Stripe;
+      // Provide a fast path for tests that look for __mockStripePromise when VITE_E2E_TESTS is true.
+      // @ts-expect-error test-only hook
+      window.__mockStripePromise = Promise.resolve(Stripe());
+    })();
+  `;
+
+  await page.context().route("**/js.stripe.com/v3**", (route) =>
     route.fulfill({
       status: 200,
       contentType: "application/javascript",
-      body: `
-        (() => {
-          function createCheckout() {
-            return {
-              mount: () => {},
-              unmount: () => {},
-              setClientSecret: () => {},
-              addEventListener: () => {},
-              removeEventListener: () => {},
-            };
-          }
-          const Stripe = () => ({
-            elements: () => ({ create: () => ({ mount() {}, destroy() {} }) }),
-            initEmbeddedCheckout: () => Promise.resolve(createCheckout()),
-          });
-          Stripe.setLoadParameters = () => {};
-          window.Stripe = Stripe;
-        })();
-      `,
+      body: stripeStub,
     }),
   );
 };
