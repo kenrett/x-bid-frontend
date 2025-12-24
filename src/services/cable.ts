@@ -1,4 +1,4 @@
-import { adapters, createConsumer } from "@rails/actioncable";
+import * as ActionCable from "@rails/actioncable";
 
 // Attach JWT via Authorization header so the backend can authorize the websocket handshake.
 const buildCableUrl = () => {
@@ -8,7 +8,7 @@ const buildCableUrl = () => {
   return new URL(base).toString();
 };
 
-type CreateConsumerFn = typeof createConsumer;
+type CreateConsumerFn = typeof ActionCable.createConsumer;
 
 const getCreateConsumer = (): CreateConsumerFn => {
   const maybeMock = (
@@ -16,11 +16,17 @@ const getCreateConsumer = (): CreateConsumerFn => {
       __mockCreateConsumer?: CreateConsumerFn;
     }
   ).__mockCreateConsumer;
-  return maybeMock ?? createConsumer;
+  return maybeMock ?? ActionCable.createConsumer;
 };
 
-const buildAuthorizedWebSocket = () => {
-  const BaseWebSocket = adapters.WebSocket;
+const getAdapters = () =>
+  (
+    ActionCable as unknown as {
+      adapters?: { WebSocket?: typeof WebSocket };
+    }
+  ).adapters;
+
+const buildAuthorizedWebSocket = (BaseWebSocket?: typeof WebSocket) => {
   if (!BaseWebSocket) return undefined;
 
   return class AuthorizedWebSocket extends BaseWebSocket {
@@ -42,9 +48,10 @@ const buildAuthorizedWebSocket = () => {
 };
 
 const createCableConsumer = () => {
-  const AuthorizedWebSocket = buildAuthorizedWebSocket();
-  if (AuthorizedWebSocket) {
-    adapters.WebSocket = AuthorizedWebSocket;
+  const adapters = getAdapters();
+  const AuthorizedWebSocket = buildAuthorizedWebSocket(adapters?.WebSocket);
+  if (AuthorizedWebSocket && adapters) {
+    adapters.WebSocket = AuthorizedWebSocket as typeof adapters.WebSocket;
   }
   return getCreateConsumer()(buildCableUrl());
 };

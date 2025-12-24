@@ -51,8 +51,10 @@ describe("cable service", () => {
     expect(url.searchParams.get("token")).toBeNull();
     expect(url.searchParams.get("session_token_id")).toBeNull();
 
-    const AuthorizedWebSocket = (await import("@rails/actioncable")).adapters
-      .WebSocket as typeof MockWebSocket;
+    const module = await import("@rails/actioncable");
+    const AuthorizedWebSocket = (
+      module as unknown as { adapters: { WebSocket: typeof MockWebSocket } }
+    ).adapters.WebSocket;
     expect(AuthorizedWebSocket).not.toBe(MockWebSocket);
 
     new AuthorizedWebSocket("ws://example.com/cable", ["actioncable-v1-json"]);
