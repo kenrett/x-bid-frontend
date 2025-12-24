@@ -66,3 +66,4 @@ Then run `run-xbid-dev` from this repo. It assumes the backend is in `../x-bid-b
 - If you use websockets, also set `VITE_CABLE_URL` to the ActionCable/websocket endpoint.
 - Stripe checkout uses `VITE_STRIPE_PUBLISHABLE_KEY`; set a test key in `.env.development`.
 - Playwright e2e runs set `VITE_E2E_TESTS=true` to enable test-only hooks (e.g., Stripe loader overrides); you don’t need this for normal development.
+- Backend limits/timeouts: requests are capped at ~1MB bodies and the service timeout is ~15s (rack-timeout). Keep calls small and avoid long polls.

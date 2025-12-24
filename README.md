@@ -63,7 +63,7 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
 
     - `VITE_API_URL`: Base URL for the XBid backend API (e.g., `http://localhost:3000/api/v1`).
     - `VITE_STRIPE_PUBLISHABLE_KEY`: Stripe publishable key used for embedded checkout.
-    - `VITE_CABLE_URL` (optional): Action Cable WebSocket endpoint; defaults to `ws://localhost:3000/cable`.
+    - `VITE_CABLE_URL` (optional): Action Cable WebSocket endpoint; defaults to `ws://localhost:3000/cable`. The cable handshake must include `Authorization: Bearer <token>`; query params are rejected.
 
 4.  **Run the development server:**
     ```sh
@@ -91,6 +91,12 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
 
 - Forgot password: `/api/v1/password/forgot` with `email_address`, always shows a generic success message.
 - Reset password: `/api/v1/password/reset` with token + new password. Errors (401/403/422) are surfaced inline.
+
+### Authentication & API Contracts
+
+- CORS is non-credentialed; clients should keep `withCredentials=false` and send `Authorization: Bearer <token>` on HTTP and cable connections.
+- Login (example): `POST /api/v1/login` with `{ "session": { "email_address": "...", "password": "..." } }` returns `token`, `refresh_token`, `session` (`session_token_id`, `session_expires_at`, `seconds_remaining`), `is_admin`, `is_superuser`, optional `redirect_path`, and `user`.
+- Error shapes tolerated: `{error_code, message, details?}` (preferred), `{error: "text"}`, or `{error: {code, message}}` (rack-attack/throttling). Use `message` for user feedback when present.
 
 ### Maintenance Mode
 
