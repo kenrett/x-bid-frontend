@@ -35,6 +35,47 @@ describe("parseApiError", () => {
     });
   });
 
+  it("handles new error shapes with error_code/message and nested error objects", () => {
+    const errorCodeShape = Object.assign(new Error("axios"), {
+      isAxiosError: true,
+      response: {
+        status: 401,
+        data: {
+          error_code: "invalid_credentials",
+          message: "Invalid credentials",
+        },
+      },
+    });
+    expect(parseApiError(errorCodeShape)).toEqual({
+      type: "unauthorized",
+      message: "Invalid credentials",
+      code: "invalid_credentials",
+    });
+
+    const nestedErrorShape = Object.assign(new Error("axios"), {
+      isAxiosError: true,
+      response: {
+        status: 422,
+        data: { error: { code: "too_many_attempts", message: "Throttled" } },
+      },
+    });
+    expect(parseApiError(nestedErrorShape)).toEqual({
+      type: "validation",
+      message: "Throttled",
+      code: "too_many_attempts",
+    });
+
+    const stringErrorShape = Object.assign(new Error("axios"), {
+      isAxiosError: true,
+      response: { status: 400, data: { error: "Bad request" } },
+    });
+    expect(parseApiError(stringErrorShape)).toEqual({
+      type: "validation",
+      message: "Bad request",
+      code: 400,
+    });
+  });
+
   it("falls back to network when no status is present", () => {
     const err = Object.assign(new Error("network-ish"), {
       isAxiosError: true,
