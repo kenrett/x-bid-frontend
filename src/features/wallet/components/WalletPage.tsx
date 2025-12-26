@@ -157,7 +157,8 @@ export const WalletPage = () => {
 
   useEffect(() => {
     if (!isReady) return;
-    if (!user) {
+    const userId = user?.id;
+    if (!userId) {
       setWallet(null);
       setTransactions([]);
       setPageInfo({ page: 1, perPage: DEFAULT_PAGE_SIZE, hasMore: false });
@@ -165,7 +166,7 @@ export const WalletPage = () => {
       return;
     }
     void handleLoad();
-  }, [isReady, user, handleLoad]);
+  }, [isReady, user?.id, handleLoad]);
 
   const handleLoadMore = async () => {
     if (isLoadingMore || !pageInfo.hasMore) return;
