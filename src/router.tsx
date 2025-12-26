@@ -29,6 +29,7 @@ import { AdminPaymentDetailPage } from "@features/admin/components/Admin/Users/A
 import { ForgotPassword } from "@features/auth/components/Auth/ForgotPassword";
 import { ResetPassword } from "@features/auth/components/Auth/ResetPassword";
 import { MaintenanceMode } from "./components/MaintenanceMode";
+import { WalletPage } from "@features/wallet/components/WalletPage";
 
 export const router = createBrowserRouter([
   {
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
       { path: "/how-it-works", element: <HowItWorks /> },
       { path: "/buy-bids", element: <BuyBids /> },
       { path: "/purchase-status", element: <PurchaseStatus /> },
+      { path: "/account/wallet", element: <WalletPage /> },
       { path: "/privacy-policy", element: <PrivacyPolicy /> },
       { path: "/terms-and-conditions", element: <TermsAndConditions /> },
       { path: "/maintenance", element: <MaintenanceMode /> },

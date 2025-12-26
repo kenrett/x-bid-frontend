@@ -111,6 +111,10 @@ export function Header() {
         : [],
     [isAdmin, apiDocsHref],
   );
+  const accountNavItems = useMemo(
+    () => (user ? [{ name: "Wallet", href: "/account/wallet" }] : []),
+    [user],
+  );
 
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -157,6 +161,11 @@ export function Header() {
         >
           <ul className={variants.navList()}>
             {NAV_ITEMS.map((item) => (
+              <NavItem key={item.name} to={item.href}>
+                {item.name}
+              </NavItem>
+            ))}
+            {accountNavItems.map((item) => (
               <NavItem key={item.name} to={item.href}>
                 {item.name}
               </NavItem>

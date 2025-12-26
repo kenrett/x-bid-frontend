@@ -25,6 +25,7 @@ describe("router configuration", () => {
     expect(hasPath(children, "/auctions/:id")).toBe(true);
     expect(hasPath(children, "/login")).toBe(true);
     expect(hasPath(children, "/signup")).toBe(true);
+    expect(hasPath(children, "/account/wallet")).toBe(true);
     expect(hasPath(children, "/maintenance")).toBe(true);
     expect(hasPath(children, "/admin")).toBe(true);
     expect(root.errorElement).toBeTruthy();
