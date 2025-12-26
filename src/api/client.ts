@@ -1,18 +1,57 @@
 import axios, { type AxiosError, type AxiosInstance } from "axios";
 import { showToast } from "@services/toast";
 
-const baseURL =
+const rawBaseURL =
   typeof import.meta.env.VITE_API_URL === "string"
     ? import.meta.env.VITE_API_URL
     : undefined;
 
+const normalizeBase = (value: string | undefined): string | undefined => {
+  if (!value) return undefined;
+  const trimmed = value.trim();
+  return trimmed.replace(/\/+$/, "") || undefined;
+};
+
+const normalizedBaseURL = normalizeBase(rawBaseURL);
+
+const buildApiPath = (path: string): string => {
+  const [pathname, ...rest] = path.split("?");
+  const normalizedPath = `/${pathname.replace(/^\/+/, "")}`;
+  const query = rest.length ? `?${rest.join("?")}` : "";
+  return `${normalizedPath}${query}`;
+};
+
+export const buildApiUrl = (
+  path: string,
+  base: string | undefined = normalizedBaseURL,
+): string => {
+  const url = String(path);
+  if (/^https?:\/\//i.test(url)) return url;
+
+  const normalizedPath = buildApiPath(url);
+  if (!base) return normalizedPath;
+
+  const trimmedBase = base.replace(/\/+$/, "");
+  return `${trimmedBase}${normalizedPath}`;
+};
+
 const client = axios.create({
-  baseURL,
   headers: {
     "Content-Type": "application/json",
   },
   withCredentials: false, // set true if using cookies for auth
 }) as AxiosInstance;
+
+client.interceptors.request.use(
+  (config) => {
+    if (typeof config.url === "string") {
+      config.url = buildApiUrl(config.url);
+      config.baseURL = undefined;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
 
 client.interceptors.request.use(
   (config) => {
