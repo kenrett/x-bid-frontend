@@ -4,10 +4,11 @@ import { adminPaymentsApi } from "./adminPaymentsApi";
 
 vi.mock("@api/client", () => ({
   __esModule: true,
-  default: { get: vi.fn() },
+  default: { get: vi.fn(), post: vi.fn() },
 }));
 
 const mockedGet = vi.mocked(client.get);
+const mockedPost = vi.mocked(client.post);
 
 describe("adminPaymentsApi", () => {
   beforeEach(() => {
@@ -99,6 +100,78 @@ describe("adminPaymentsApi", () => {
       status: "failed",
       createdAt: expect.any(String),
       userEmail: "d@example.com",
+    });
+  });
+
+  it("fetches and normalizes payment reconciliation", async () => {
+    mockedGet.mockResolvedValue({
+      data: {
+        payment: {
+          id: "10",
+          user_email: "payer@example.com",
+          amount_cents: "2500",
+          status: "success",
+          created_at: "2024-05-01T00:00:00Z",
+          bid_pack: { id: "5", name: "Starter" },
+          stripe_payment_intent_id: "pi_123",
+        },
+        ledger_entries: [
+          {
+            id: "1",
+            created_at: "2024-05-01T00:00:01Z",
+            kind: "credit",
+            amount: "25",
+            reason: "purchase",
+            idempotency_key: "key-1",
+          },
+        ],
+        balance_audit: {
+          cached_balance: "100",
+          derived_balance: "125",
+        },
+      },
+    });
+
+    const result = await adminPaymentsApi.getPayment(10);
+
+    expect(mockedGet).toHaveBeenCalledWith("/api/v1/admin/payments/10");
+    expect(result).toMatchObject({
+      id: 10,
+      userEmail: "payer@example.com",
+      amount: 25,
+      status: "succeeded",
+      createdAt: "2024-05-01T00:00:00Z",
+      bidPackId: 5,
+      bidPackName: "Starter",
+      stripePaymentIntentId: "pi_123",
+      balanceAudit: {
+        cachedBalance: 100,
+        derivedBalance: 125,
+        difference: 25,
+      },
+    });
+    expect(result.ledgerEntries[0]).toMatchObject({
+      id: 1,
+      kind: "credit",
+      reason: "purchase",
+      idempotencyKey: "key-1",
+    });
+  });
+
+  it("calls repair credits and surfaces repair flags", async () => {
+    mockedPost.mockResolvedValue({
+      data: { repaired: true, idempotent: false, message: "Applied fixes" },
+    });
+
+    const response = await adminPaymentsApi.repairCredits(10);
+
+    expect(mockedPost).toHaveBeenCalledWith(
+      "/api/v1/admin/payments/10/repair_credits",
+    );
+    expect(response).toEqual({
+      repaired: true,
+      idempotent: false,
+      message: "Applied fixes",
     });
   });
 });

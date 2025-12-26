@@ -25,6 +25,7 @@ import { AdminBidPackEdit } from "@features/admin/components/Admin/BidPacks/Admi
 import { AdminUsersPage } from "@features/admin/components/Admin/Users/AdminUsersPage";
 import { AdminSettings } from "@features/admin/components/Admin/Settings/AdminSettings";
 import { AdminPaymentsPage } from "@features/admin/components/Admin/Users/AdminPaymentsPage";
+import { AdminPaymentDetailPage } from "@features/admin/components/Admin/Users/AdminPaymentDetailPage";
 import { ForgotPassword } from "@features/auth/components/Auth/ForgotPassword";
 import { ResetPassword } from "@features/auth/components/Auth/ResetPassword";
 import { MaintenanceMode } from "./components/MaintenanceMode";
@@ -91,6 +92,10 @@ export const router = createBrowserRouter([
               {
                 path: ADMIN_PATHS.payments,
                 element: <AdminPaymentsPage />,
+              },
+              {
+                path: `${ADMIN_PATHS.payments}/:id`,
+                element: <AdminPaymentDetailPage />,
               },
               {
                 path: ADMIN_PATHS.settings,

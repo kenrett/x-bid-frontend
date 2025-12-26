@@ -1,5 +1,7 @@
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, KeyboardEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import type { Payment } from "@features/admin/types/users";
+import { ADMIN_PATHS } from "../adminPaths";
 
 interface AdminPaymentsProps {
   payments: Payment[];
@@ -12,8 +14,24 @@ export const AdminPayments = ({
   search,
   onSearchChange,
 }: AdminPaymentsProps) => {
+  const navigate = useNavigate();
+
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
     onSearchChange(event.target.value);
+  };
+
+  const handleNavigate = (paymentId: number) => {
+    navigate(`/admin/${ADMIN_PATHS.payments}/${paymentId}`);
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLTableRowElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      const paymentId = Number(event.currentTarget.dataset.paymentId);
+      if (paymentId) {
+        handleNavigate(paymentId);
+      }
+    }
   };
 
   return (
@@ -44,8 +62,16 @@ export const AdminPayments = ({
             </thead>
             <tbody className="divide-y divide-white/10">
               {payments.map((payment) => (
-                <tr key={payment.id} className="hover:bg-white/[0.04]">
-                  <td className="px-4 py-3 font-semibold text-white">
+                <tr
+                  key={payment.id}
+                  data-payment-id={payment.id}
+                  tabIndex={0}
+                  onClick={() => handleNavigate(payment.id)}
+                  onKeyDown={handleKeyDown}
+                  className="hover:bg-white/[0.04] cursor-pointer focus:outline-none focus:bg-white/[0.08]"
+                  aria-label={`Payment ${payment.id}`}
+                >
+                  <td className="px-4 py-3 font-semibold text-white underline decoration-dotted">
                     #{payment.id}
                   </td>
                   <td className="px-4 py-3 text-gray-200">

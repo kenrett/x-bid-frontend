@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AdminPaymentsPage } from "./AdminPaymentsPage";
 import { adminPaymentsApi } from "@features/admin/api/adminPaymentsApi";
 import { showToast } from "@services/toast";
@@ -39,7 +40,13 @@ describe("AdminPaymentsPage", () => {
   });
 
   it("renders payments header and rows", async () => {
-    render(<AdminPaymentsPage />);
+    render(
+      <MemoryRouter initialEntries={["/admin/payments"]}>
+        <Routes>
+          <Route path="/admin/payments" element={<AdminPaymentsPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
 
     expect(mockedAdminPaymentsApi.listPayments).toHaveBeenCalled();
     expect(screen.getAllByText(/recent payments/i).length).toBeGreaterThan(0);
@@ -49,7 +56,13 @@ describe("AdminPaymentsPage", () => {
   });
 
   it("fetches and displays payments", async () => {
-    render(<AdminPaymentsPage />);
+    render(
+      <MemoryRouter initialEntries={["/admin/payments"]}>
+        <Routes>
+          <Route path="/admin/payments" element={<AdminPaymentsPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
 
     expect(await screen.findByText("admin@example.com")).toBeInTheDocument();
     expect(
@@ -70,7 +83,13 @@ describe("AdminPaymentsPage", () => {
         },
       ]);
 
-    render(<AdminPaymentsPage />);
+    render(
+      <MemoryRouter initialEntries={["/admin/payments"]}>
+        <Routes>
+          <Route path="/admin/payments" element={<AdminPaymentsPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
     const user = userEvent.setup();
 
     await screen.findByText("admin@example.com");
@@ -85,7 +104,13 @@ describe("AdminPaymentsPage", () => {
       new Error("boom"),
     );
 
-    render(<AdminPaymentsPage />);
+    render(
+      <MemoryRouter initialEntries={["/admin/payments"]}>
+        <Routes>
+          <Route path="/admin/payments" element={<AdminPaymentsPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
 
     await waitFor(() =>
       expect(showToast).toHaveBeenCalledWith(

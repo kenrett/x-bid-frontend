@@ -4,6 +4,19 @@ import userEvent from "@testing-library/user-event";
 import { AdminPayments } from "./AdminPayments";
 import type { Payment } from "@features/admin/types/users";
 
+const mockedNavigate = vi.fn();
+
+vi.mock("react-router-dom", async () => {
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
+  return {
+    ...actual,
+    useNavigate: () => mockedNavigate,
+  };
+});
+
 const payments: Payment[] = [
   {
     id: 1,
@@ -22,6 +35,10 @@ const payments: Payment[] = [
 ];
 
 describe("AdminPayments", () => {
+  beforeEach(() => {
+    mockedNavigate.mockReset();
+  });
+
   it("renders payments table", () => {
     render(
       <AdminPayments payments={payments} search="" onSearchChange={() => {}} />,
@@ -54,5 +71,17 @@ describe("AdminPayments", () => {
 
     const values = onSearchChange.mock.calls.map((call) => call[0]);
     expect(values).toEqual(["b", "@"]);
+  });
+
+  it("navigates to payment details when row is clicked", async () => {
+    const user = userEvent.setup();
+    render(
+      <AdminPayments payments={payments} search="" onSearchChange={() => {}} />,
+    );
+
+    const row = screen.getByLabelText(/payment 1/i);
+    await user.click(row);
+
+    expect(mockedNavigate).toHaveBeenCalledWith("/admin/payments/1");
   });
 });
