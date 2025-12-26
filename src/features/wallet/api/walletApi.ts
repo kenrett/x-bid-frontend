@@ -248,7 +248,7 @@ const extractPageMeta = (
 
 export const walletApi = {
   async getWallet(): Promise<WalletSummary> {
-    const response = await client.get("/api/v1/wallet");
+    const response = await client.get<unknown>("/api/v1/wallet");
     const record = extractWalletRecord(response.data);
     return normalizeWallet(record);
   },
@@ -258,11 +258,11 @@ export const walletApi = {
   ): Promise<WalletTransactionsPage> {
     const page = params.page ?? 1;
     const perPage = params.perPage ?? 25;
-    const response = await client.get("/api/v1/wallet/transactions", {
+    const response = await client.get<unknown>("/api/v1/wallet/transactions", {
       params: { page, per_page: perPage },
     });
 
-    const payload = response.data ?? {};
+    const payload: unknown = response.data ?? {};
     const list = extractTransactionsArray(payload);
     if (!Array.isArray(list)) {
       throw reportUnexpectedResponse("wallet.listTransactions", payload);

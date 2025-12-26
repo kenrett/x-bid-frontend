@@ -132,7 +132,7 @@ export const WalletPage = () => {
         walletApi.getWallet(),
         walletApi.listTransactions({
           page: 1,
-          perPage: pageInfo.perPage,
+          perPage: DEFAULT_PAGE_SIZE,
         }),
       ]);
 
@@ -141,7 +141,7 @@ export const WalletPage = () => {
       setTransactions(txPage.transactions);
       setPageInfo({
         page: txPage.page ?? 1,
-        perPage: txPage.perPage ?? pageInfo.perPage,
+        perPage: txPage.perPage ?? DEFAULT_PAGE_SIZE,
         hasMore: txPage.hasMore,
       });
     } catch (err) {
@@ -153,7 +153,7 @@ export const WalletPage = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [pageInfo.perPage, updateUserBalance]);
+  }, [updateUserBalance]);
 
   useEffect(() => {
     if (!isReady) return;
