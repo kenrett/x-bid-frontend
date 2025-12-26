@@ -24,6 +24,9 @@ describe("adminPaymentsApi", () => {
           status: "paid",
           created_at: "2024-01-01",
           user_email: "a@example.com",
+          stripe_checkout_session_id: "cs_123",
+          stripe_payment_intent_id: "pi_123",
+          stripe_event_id: "evt_123",
         },
       ],
     });
@@ -36,6 +39,9 @@ describe("adminPaymentsApi", () => {
         amount: 19.99,
         status: "succeeded",
         createdAt: "2024-01-01",
+        stripeCheckoutSessionId: "cs_123",
+        stripePaymentIntentId: "pi_123",
+        stripeEventId: "evt_123",
       },
     ]);
   });
@@ -80,6 +86,7 @@ describe("adminPaymentsApi", () => {
           total_cents: 1234,
           state: "refunded",
           userEmail: "d@example.com",
+          stripe_checkout_session_id: "cs_456",
         },
       ],
     });
@@ -100,22 +107,26 @@ describe("adminPaymentsApi", () => {
       status: "failed",
       createdAt: expect.any(String),
       userEmail: "d@example.com",
+      stripeCheckoutSessionId: "cs_456",
     });
   });
 
   it("fetches and normalizes payment reconciliation", async () => {
     mockedGet.mockResolvedValue({
       data: {
-        payment: {
+        purchase: {
           id: "10",
           user_email: "payer@example.com",
           amount_cents: "2500",
+          currency: "usd",
           status: "success",
           created_at: "2024-05-01T00:00:00Z",
           bid_pack: { id: "5", name: "Starter" },
           stripe_payment_intent_id: "pi_123",
+          stripe_checkout_session_id: "cs_123",
+          stripe_event_id: "evt_123",
         },
-        ledger_entries: [
+        credit_transactions: [
           {
             id: "1",
             created_at: "2024-05-01T00:00:01Z",
@@ -126,8 +137,9 @@ describe("adminPaymentsApi", () => {
           },
         ],
         balance_audit: {
-          cached_balance: "100",
-          derived_balance: "125",
+          cached: "100",
+          derived: "125",
+          matches: false,
         },
       },
     });
@@ -140,14 +152,18 @@ describe("adminPaymentsApi", () => {
       userEmail: "payer@example.com",
       amount: 25,
       status: "succeeded",
+      currency: "usd",
       createdAt: "2024-05-01T00:00:00Z",
       bidPackId: 5,
       bidPackName: "Starter",
+      stripeCheckoutSessionId: "cs_123",
       stripePaymentIntentId: "pi_123",
+      stripeEventId: "evt_123",
       balanceAudit: {
         cachedBalance: 100,
         derivedBalance: 125,
         difference: 25,
+        matches: false,
       },
     });
     expect(result.ledgerEntries[0]).toMatchObject({

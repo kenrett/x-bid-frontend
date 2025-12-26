@@ -23,10 +23,13 @@ type RawPayment =
       ? Item
       : Record<string, unknown>;
 
-type AdminPaymentDetailResponse = Record<string, unknown> & {
+type AdminPaymentDetailResponse = {
+  purchase?: unknown;
   payment?: unknown;
   ledger_entries?: unknown[];
   ledgerEntries?: unknown[];
+  credit_transactions?: unknown[];
+  creditTransactions?: unknown[];
   balance_audit?: Record<string, unknown>;
   balance?: Record<string, unknown>;
   balanceAudit?: Record<string, unknown>;
@@ -134,6 +137,23 @@ const normalizePayment = (raw: RawPayment): Payment => {
     amount: Number.isFinite(amount) ? amount : 0,
     status,
     createdAt,
+    stripeCheckoutSessionId:
+      typeof (data as { stripe_checkout_session_id?: unknown })
+        .stripe_checkout_session_id === "string"
+        ? (data as { stripe_checkout_session_id: string })
+            .stripe_checkout_session_id
+        : null,
+    stripePaymentIntentId:
+      typeof (data as { stripe_payment_intent_id?: unknown })
+        .stripe_payment_intent_id === "string"
+        ? (data as { stripe_payment_intent_id: string })
+            .stripe_payment_intent_id
+        : null,
+    stripeEventId:
+      typeof (data as { stripe_event_id?: unknown }).stripe_event_id ===
+      "string"
+        ? (data as { stripe_event_id: string }).stripe_event_id
+        : null,
   };
 };
 
@@ -187,9 +207,9 @@ const normalizeReconciliation = (
 ): AdminPaymentReconciliation => {
   const data = raw ?? {};
   const payment =
-    (data as { payment?: unknown }).payment !== undefined
-      ? (data as { payment?: unknown }).payment
-      : data;
+    (data as { purchase?: unknown }).purchase ??
+    (data as { payment?: unknown }).payment ??
+    data;
 
   const paymentData = (payment ?? {}) as Record<string, unknown>;
   const bidPack =
@@ -215,12 +235,18 @@ const normalizeReconciliation = (
       : (amountSource ?? 0);
 
   const ledgerEntries = Array.isArray(
-    (data as { ledger_entries?: unknown }).ledger_entries,
+    (data as { credit_transactions?: unknown }).credit_transactions,
   )
-    ? (data as { ledger_entries: unknown[] }).ledger_entries
-    : Array.isArray((data as { ledgerEntries?: unknown }).ledgerEntries)
-      ? (data as { ledgerEntries: unknown[] }).ledgerEntries
-      : [];
+    ? (data as { credit_transactions: unknown[] }).credit_transactions
+    : Array.isArray(
+          (data as { creditTransactions?: unknown }).creditTransactions,
+        )
+      ? (data as { creditTransactions: unknown[] }).creditTransactions
+      : Array.isArray((data as { ledger_entries?: unknown }).ledger_entries)
+        ? (data as { ledger_entries: unknown[] }).ledger_entries
+        : Array.isArray((data as { ledgerEntries?: unknown }).ledgerEntries)
+          ? (data as { ledgerEntries: unknown[] }).ledgerEntries
+          : [];
 
   const balanceSource =
     (data as { balance_audit?: unknown }).balance_audit ??
@@ -230,21 +256,26 @@ const normalizeReconciliation = (
 
   const cachedBalance =
     toNumber(
-      (balanceSource as { cached_balance?: unknown }).cached_balance ??
-        (balanceSource as { cachedBalance?: unknown }).cachedBalance ??
-        (balanceSource as { cached?: unknown }).cached,
+      (balanceSource as { cached?: unknown }).cached ??
+        (balanceSource as { cached_balance?: unknown }).cached_balance ??
+        (balanceSource as { cachedBalance?: unknown }).cachedBalance,
     ) ?? 0;
 
   const derivedBalance =
     toNumber(
-      (balanceSource as { derived_balance?: unknown }).derived_balance ??
-        (balanceSource as { derivedBalance?: unknown }).derivedBalance ??
-        (balanceSource as { derived?: unknown }).derived,
+      (balanceSource as { derived?: unknown }).derived ??
+        (balanceSource as { derived_balance?: unknown }).derived_balance ??
+        (balanceSource as { derivedBalance?: unknown }).derivedBalance,
     ) ?? cachedBalance;
 
   const difference =
     toNumber((balanceSource as { difference?: unknown }).difference) ??
     derivedBalance - cachedBalance;
+
+  const matches =
+    typeof (balanceSource as { matches?: unknown }).matches === "boolean"
+      ? Boolean((balanceSource as { matches: boolean }).matches)
+      : Math.abs(difference) < 0.0001;
 
   const id =
     toNumber(paymentData.id) ??
@@ -260,6 +291,13 @@ const normalizeReconciliation = (
           ? paymentData.userEmail
           : "",
     amount: Number.isFinite(amount) ? amount : 0,
+    currency:
+      typeof paymentData.currency === "string"
+        ? paymentData.currency
+        : typeof (paymentData as { currency_code?: unknown }).currency_code ===
+            "string"
+          ? (paymentData as { currency_code: string }).currency_code
+          : null,
     status: normalizeStatus(
       paymentData.status ??
         (paymentData as { payment_status?: unknown }).payment_status ??
@@ -281,6 +319,12 @@ const normalizeReconciliation = (
         : typeof (bidPack as { title?: unknown })?.title === "string"
           ? (bidPack as { title: string }).title
           : null,
+    stripeCheckoutSessionId:
+      typeof (paymentData as { stripe_checkout_session_id?: unknown })
+        .stripe_checkout_session_id === "string"
+        ? (paymentData as { stripe_checkout_session_id: string })
+            .stripe_checkout_session_id
+        : null,
     stripePaymentIntentId:
       typeof (paymentData as { stripe_payment_intent_id?: unknown })
         .stripe_payment_intent_id === "string"
@@ -305,11 +349,17 @@ const normalizeReconciliation = (
         .stripe_invoice_id === "string"
         ? (paymentData as { stripe_invoice_id: string }).stripe_invoice_id
         : null,
+    stripeEventId:
+      typeof (paymentData as { stripe_event_id?: unknown }).stripe_event_id ===
+      "string"
+        ? (paymentData as { stripe_event_id: string }).stripe_event_id
+        : null,
     ledgerEntries: ledgerEntries.map((entry) => normalizeLedgerEntry(entry)),
     balanceAudit: {
       cachedBalance,
       derivedBalance,
       difference,
+      matches,
     },
   };
 };

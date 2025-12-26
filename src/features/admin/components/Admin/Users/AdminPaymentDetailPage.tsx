@@ -67,7 +67,10 @@ export const AdminPaymentDetailPage = () => {
 
   const hasMismatch = useMemo(() => {
     if (!payment) return false;
-    return Math.abs(payment.balanceAudit.difference) > 0.0001;
+    return (
+      payment.balanceAudit.matches === false ||
+      Math.abs(payment.balanceAudit.difference) > 0.0001
+    );
   }, [payment]);
 
   if (!paymentId) return <ErrorScreen message="Invalid payment id." />;
@@ -140,7 +143,10 @@ export const AdminPaymentDetailPage = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <DetailCard label="Amount" value={`$${payment.amount.toFixed(2)}`} />
+        <DetailCard
+          label="Amount"
+          value={`${payment.currency ? payment.currency.toUpperCase() + " " : "$"}${payment.amount.toFixed(2)}`}
+        />
         <DetailCard
           label="Status"
           value={
@@ -166,28 +172,21 @@ export const AdminPaymentDetailPage = () => {
           }
         />
         <DetailCard
+          label="Stripe checkout session"
+          value={payment.stripeCheckoutSessionId || "—"}
+        />
+        <DetailCard
           label="Stripe payment intent"
           value={payment.stripePaymentIntentId || "—"}
         />
-        <DetailCard
-          label="Stripe charge"
-          value={payment.stripeChargeId || "—"}
-        />
-        <DetailCard
-          label="Stripe invoice"
-          value={payment.stripeInvoiceId || "—"}
-        />
-        <DetailCard
-          label="Stripe customer"
-          value={payment.stripeCustomerId || "—"}
-        />
+        <DetailCard label="Stripe event" value={payment.stripeEventId || "—"} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
             <h3 className="text-lg font-semibold text-white">
-              Ledger entries ({payment.ledgerEntries.length})
+              Credit transactions ({payment.ledgerEntries.length})
             </h3>
           </div>
           {payment.ledgerEntries.length === 0 ? (

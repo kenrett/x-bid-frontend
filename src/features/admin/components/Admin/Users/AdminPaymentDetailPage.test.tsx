@@ -25,12 +25,12 @@ const mockPayment: AdminPaymentReconciliation = {
   amount: 25,
   status: "succeeded",
   createdAt: "2024-05-01T00:00:00Z",
+  currency: "usd",
   bidPackId: 5,
   bidPackName: "Starter Pack",
+  stripeCheckoutSessionId: "cs_123",
   stripePaymentIntentId: "pi_123",
-  stripeChargeId: "ch_123",
-  stripeCustomerId: "cus_123",
-  stripeInvoiceId: "in_123",
+  stripeEventId: "evt_123",
   ledgerEntries: [
     {
       id: 1,
@@ -45,6 +45,7 @@ const mockPayment: AdminPaymentReconciliation = {
     cachedBalance: 100,
     derivedBalance: 125,
     difference: 25,
+    matches: false,
   },
 };
 
@@ -79,6 +80,8 @@ describe("AdminPaymentDetailPage", () => {
     expect(await screen.findByText(/payer@example.com/i)).toBeInTheDocument();
     expect(screen.getByText(/starter pack/i)).toBeInTheDocument();
     expect(screen.getByText(/pi_123/i)).toBeInTheDocument();
+    expect(screen.getByText(/cs_123/i)).toBeInTheDocument();
+    expect(screen.getByText(/evt_123/i)).toBeInTheDocument();
     expect(screen.getByText("credit")).toBeInTheDocument();
 
     const repairButton = screen.getByRole("button", {

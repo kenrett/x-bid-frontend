@@ -12,6 +12,9 @@ export type Payment = {
   amount: number;
   status: "succeeded" | "failed" | "pending";
   createdAt: string;
+  stripeCheckoutSessionId?: string | null;
+  stripePaymentIntentId?: string | null;
+  stripeEventId?: string | null;
 };
 
 export type AdminLedgerEntry = {
@@ -29,16 +32,20 @@ export type AdminPaymentReconciliation = {
   amount: number;
   status: Payment["status"];
   createdAt: string;
+  currency?: string | null;
   bidPackId?: number | null;
   bidPackName?: string | null;
+  stripeCheckoutSessionId?: string | null;
   stripePaymentIntentId?: string | null;
   stripeChargeId?: string | null;
   stripeCustomerId?: string | null;
   stripeInvoiceId?: string | null;
+  stripeEventId?: string | null;
   ledgerEntries: AdminLedgerEntry[];
   balanceAudit: {
     cachedBalance: number;
     derivedBalance: number;
     difference: number;
+    matches: boolean;
   };
 };
