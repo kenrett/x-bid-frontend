@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { WalletPage } from "./WalletPage";
+import { BidHistoryPage } from "./BidHistoryPage";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { walletApi } from "../api/walletApi";
 import type { WalletTransaction } from "../types/wallet";
@@ -37,7 +37,7 @@ const createAuthReturn = () =>
 const renderComponent = () =>
   render(
     <MemoryRouter>
-      <WalletPage />
+      <BidHistoryPage />
     </MemoryRouter>,
   );
 
@@ -53,7 +53,7 @@ const baseTransactions: WalletTransaction[] = [
   },
 ];
 
-describe("WalletPage", () => {
+describe("BidHistoryPage", () => {
   beforeEach(() => {
     mockedUseAuth.mockReturnValue(createAuthReturn());
     mockedWalletApi.getWallet.mockResolvedValue({

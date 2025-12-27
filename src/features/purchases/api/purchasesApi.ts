@@ -37,7 +37,7 @@ const normalizeStatus = (value: unknown): PurchaseStatus => {
 };
 
 const extractPurchasesArray = (payload: unknown): unknown[] | null => {
-  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload)) return payload as unknown[];
   if (!payload || typeof payload !== "object") return null;
 
   const record = payload as Record<string, unknown>;

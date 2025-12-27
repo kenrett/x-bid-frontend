@@ -111,7 +111,7 @@ const LinksCell = ({
   );
 };
 
-export const WalletPage = () => {
+export const BidHistoryPage = () => {
   const { user, isReady, updateUserBalance } = useAuth();
   const [wallet, setWallet] = useState<WalletSummary | null>(null);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
@@ -216,7 +216,7 @@ export const WalletPage = () => {
     return (
       <Page centered>
         <h2 className="font-serif text-4xl font-bold mb-3 text-white">
-          Your Wallet Awaits
+          Your Bid History Awaits
         </h2>
         <p className="mb-6 text-lg text-gray-400">
           Sign in to see your credits and activity.
@@ -238,7 +238,9 @@ export const WalletPage = () => {
           <p className="text-xs uppercase tracking-[0.2em] text-pink-400">
             Account
           </p>
-          <h1 className="font-serif text-4xl font-bold text-white">Wallet</h1>
+          <h1 className="font-serif text-4xl font-bold text-white">
+            Bid History
+          </h1>
           <p className="text-gray-400">
             Track your credits balance and the activity behind every change.
           </p>

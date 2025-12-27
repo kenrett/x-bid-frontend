@@ -29,9 +29,13 @@ import { AdminPaymentDetailPage } from "@features/admin/components/Admin/Users/A
 import { ForgotPassword } from "@features/auth/components/Auth/ForgotPassword";
 import { ResetPassword } from "@features/auth/components/Auth/ResetPassword";
 import { MaintenanceMode } from "./components/MaintenanceMode";
-import { WalletPage } from "@features/wallet/components/WalletPage";
+import { BidHistoryPage } from "@features/wallet/components/BidHistoryPage";
 import { PurchasesListPage } from "@features/purchases/components/PurchasesListPage";
 import { PurchaseDetailPage } from "@features/purchases/components/PurchaseDetailPage";
+import { VaultRoute } from "@features/vault/components/VaultRoute";
+import { VaultLayout } from "@features/vault/components/VaultLayout";
+import { VaultOverviewPage } from "@features/vault/components/VaultOverviewPage";
+import { VaultProfilePage } from "@features/vault/components/VaultProfilePage";
 
 export const router = createBrowserRouter([
   {
@@ -49,9 +53,22 @@ export const router = createBrowserRouter([
       { path: "/how-it-works", element: <HowItWorks /> },
       { path: "/buy-bids", element: <BuyBids /> },
       { path: "/purchase-status", element: <PurchaseStatus /> },
-      { path: "/account/purchases", element: <PurchasesListPage /> },
-      { path: "/account/purchases/:id", element: <PurchaseDetailPage /> },
-      { path: "/account/wallet", element: <WalletPage /> },
+      {
+        path: "/account",
+        element: <VaultRoute />,
+        children: [
+          {
+            element: <VaultLayout />,
+            children: [
+              { index: true, element: <VaultOverviewPage /> },
+              { path: "wallet", element: <BidHistoryPage /> },
+              { path: "purchases", element: <PurchasesListPage /> },
+              { path: "purchases/:id", element: <PurchaseDetailPage /> },
+              { path: "profile", element: <VaultProfilePage /> },
+            ],
+          },
+        ],
+      },
       { path: "/privacy-policy", element: <PrivacyPolicy /> },
       { path: "/terms-and-conditions", element: <TermsAndConditions /> },
       { path: "/maintenance", element: <MaintenanceMode /> },
