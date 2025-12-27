@@ -56,7 +56,11 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
       const delta = item.balanceDelta;
       const sign = delta <= 0 ? "-" : "+";
       const abs = Math.abs(delta);
-      return `Bid: ${sign}${abs.toFixed(0)} credit${abs === 1 ? "" : "s"}`;
+      const formatted = abs.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+      return `Bid: ${sign}${formatted} credit${abs === 1 ? "" : "s"}`;
     }
     if (item.kind === "outcome") {
       return item.outcome === "won"
@@ -71,9 +75,11 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
       ? "Bid placed"
       : item.kind === "watch"
         ? "Watching"
-        : item.outcome === "won"
-          ? "Won"
-          : "Lost";
+        : item.kind === "outcome"
+          ? item.outcome === "won"
+            ? "Won"
+            : "Lost"
+          : "Activity";
 
   const icon = kindIcon(
     item.kind,

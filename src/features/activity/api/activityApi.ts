@@ -48,9 +48,10 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
       ? (data.auction as Record<string, unknown>)
       : null;
 
-  const auctionId =
+  const auctionIdRaw =
     toNumber((auction as { id?: unknown })?.id) ??
     toNumber((data as { auction_id?: unknown }).auction_id);
+  const auctionId = auctionIdRaw ?? 0;
 
   const auctionTitle =
     typeof (auction as { title?: unknown })?.title === "string"
@@ -104,7 +105,7 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
     const id =
       typeof bidId === "number"
         ? String(bidId)
-        : `${type ?? "bid"}:${auctionId ?? "unknown"}:${occurredAt || "unknown"}`;
+        : `${type ?? "bid"}:${auctionId || "unknown"}:${occurredAt || "unknown"}`;
 
     return {
       id,
@@ -127,7 +128,7 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
     const id =
       typeof watchId === "number"
         ? String(watchId)
-        : `${type ?? "watch"}:${auctionId ?? "unknown"}:${occurredAt || "unknown"}`;
+        : `${type ?? "watch"}:${auctionId || "unknown"}:${occurredAt || "unknown"}`;
 
     return {
       id,
@@ -150,7 +151,7 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
       toNumber((typedData as { amount?: unknown }).amount) ??
       null;
 
-    const id = `${type ?? "outcome"}:${auctionId ?? "unknown"}:${occurredAt || "unknown"}`;
+    const id = `${type ?? "outcome"}:${auctionId || "unknown"}:${occurredAt || "unknown"}`;
 
     return {
       id,
@@ -166,11 +167,11 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
     };
   }
 
-  const id = `${type ?? "unknown"}:${auctionId ?? "unknown"}:${occurredAt || "unknown"}`;
+  const id = `${type ?? "unknown"}:${auctionId || "unknown"}:${occurredAt || "unknown"}`;
   return {
     id,
     occurredAt,
-    auctionId: auctionId ?? 0,
+    auctionId,
     auctionTitle,
     auctionStatus,
     auctionEndsAt,
