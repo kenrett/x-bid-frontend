@@ -30,6 +30,8 @@ import { ForgotPassword } from "@features/auth/components/Auth/ForgotPassword";
 import { ResetPassword } from "@features/auth/components/Auth/ResetPassword";
 import { MaintenanceMode } from "./components/MaintenanceMode";
 import { WalletPage } from "@features/wallet/components/WalletPage";
+import { PurchasesListPage } from "@features/purchases/components/PurchasesListPage";
+import { PurchaseDetailPage } from "@features/purchases/components/PurchaseDetailPage";
 
 export const router = createBrowserRouter([
   {
@@ -47,6 +49,8 @@ export const router = createBrowserRouter([
       { path: "/how-it-works", element: <HowItWorks /> },
       { path: "/buy-bids", element: <BuyBids /> },
       { path: "/purchase-status", element: <PurchaseStatus /> },
+      { path: "/account/purchases", element: <PurchasesListPage /> },
+      { path: "/account/purchases/:id", element: <PurchaseDetailPage /> },
       { path: "/account/wallet", element: <WalletPage /> },
       { path: "/privacy-policy", element: <PrivacyPolicy /> },
       { path: "/terms-and-conditions", element: <TermsAndConditions /> },

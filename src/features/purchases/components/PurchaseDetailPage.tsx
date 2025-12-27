@@ -1,0 +1,303 @@
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import { Link, useLocation, useParams } from "react-router-dom";
+import { Page } from "@components/Page";
+import { LoadingScreen } from "@components/LoadingScreen";
+import { useAuth } from "@features/auth/hooks/useAuth";
+import { purchasesApi } from "../api/purchasesApi";
+import type { PurchaseDetail } from "../types/purchase";
+import { parseApiError } from "@utils/apiError";
+
+const formatDate = (value: string) => {
+  if (!value) return "—";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(parsed);
+};
+
+const formatMoney = (amount: number, currency: string | null) => {
+  if (currency && currency.length === 3) {
+    try {
+      return new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency: currency.toUpperCase(),
+      }).format(amount);
+    } catch {
+      // ignore invalid currency codes and fall back
+    }
+  }
+  return `$${amount.toFixed(2)}`;
+};
+
+const StatusBadge = ({ status }: { status: PurchaseDetail["status"] }) => {
+  const styles =
+    status === "succeeded"
+      ? "bg-green-900 text-green-100 border border-green-300/40"
+      : status === "refunded"
+        ? "bg-blue-900 text-blue-100 border border-blue-300/40"
+        : status === "pending"
+          ? "bg-amber-900 text-amber-100 border border-amber-300/40"
+          : "bg-red-900 text-red-100 border border-red-300/40";
+
+  const label =
+    status === "succeeded"
+      ? "Succeeded"
+      : status === "refunded"
+        ? "Refunded"
+        : status === "pending"
+          ? "Pending"
+          : "Failed";
+
+  return (
+    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${styles}`}>
+      {label}
+    </span>
+  );
+};
+
+const DetailRow = ({ label, value }: { label: string; value: string }) => (
+  <div className="flex items-center justify-between text-sm text-white">
+    <span className="text-gray-300">{label}</span>
+    <span className="font-semibold break-all text-right">{value || "—"}</span>
+  </div>
+);
+
+const SummaryItem = ({ label, value }: { label: string; value: ReactNode }) => (
+  <div className="bg-white/5 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/10 space-y-1">
+    <p className="text-xs uppercase tracking-wide text-gray-400">{label}</p>
+    <div className="text-sm text-white">{value || "—"}</div>
+  </div>
+);
+
+export const PurchaseDetailPage = () => {
+  const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const { isReady, user } = useAuth();
+  const [purchase, setPurchase] = useState<PurchaseDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showTechnical, setShowTechnical] = useState(false);
+
+  const loginRedirect = useMemo(
+    () =>
+      `/login?redirect=${encodeURIComponent(
+        location.pathname + location.search,
+      )}`,
+    [location.pathname, location.search],
+  );
+
+  const handleLoad = useCallback(async () => {
+    if (!id) {
+      setError("Invalid purchase id.");
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await purchasesApi.get(id);
+      setPurchase(data);
+    } catch (err) {
+      const parsed = parseApiError(err);
+      if (parsed.type === "not_found") {
+        setError("Purchase not found.");
+      } else if (parsed.type === "forbidden") {
+        setError("You do not have access to this purchase.");
+      } else {
+        setError(parsed.message);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    if (!user) {
+      setPurchase(null);
+      setError(null);
+      return;
+    }
+    void handleLoad();
+  }, [handleLoad, isReady, user?.id]);
+
+  if (!isReady) return <LoadingScreen item="purchase" />;
+
+  if (!user) {
+    return (
+      <Page centered>
+        <h2 className="font-serif text-4xl font-bold mb-3 text-white">
+          Sign in to view this purchase
+        </h2>
+        <p className="mb-6 text-lg text-gray-400">
+          You need an account to view purchase details and receipts.
+        </p>
+        <Link
+          to={loginRedirect}
+          className="inline-block text-lg bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20"
+        >
+          Log In
+        </Link>
+      </Page>
+    );
+  }
+
+  if (isLoading && !purchase) return <LoadingScreen item="purchase" />;
+
+  if (error && !purchase) {
+    return (
+      <Page centered>
+        <div className="max-w-xl mx-auto space-y-4">
+          <p className="text-lg text-red-200 font-semibold">{error}</p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => void handleLoad()}
+              className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-white transition-colors"
+            >
+              Retry
+            </button>
+            <Link
+              to="/account/purchases"
+              className="text-sm font-semibold bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-4 py-2 text-white transition-colors"
+            >
+              Back to purchases
+            </Link>
+          </div>
+        </div>
+      </Page>
+    );
+  }
+
+  if (!purchase) return null;
+
+  const statusBadge = <StatusBadge status={purchase.status} />;
+
+  return (
+    <Page>
+      <div className="max-w-5xl mx-auto space-y-8">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <Link
+              to="/account/purchases"
+              className="text-xs text-gray-400 hover:text-white transition-colors"
+            >
+              ← Back to purchases
+            </Link>
+            <p className="text-xs uppercase tracking-[0.2em] text-pink-400">
+              Purchase #{purchase.id}
+            </p>
+            <h1 className="font-serif text-4xl font-bold text-white">
+              {purchase.bidPackName || "Bid pack purchase"}
+            </h1>
+            <p className="text-gray-400">
+              Placed {formatDate(purchase.createdAt)}
+            </p>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            {statusBadge}
+            {purchase.receiptUrl ? (
+              <a
+                href={purchase.receiptUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm text-pink-200 hover:text-pink-100 underline underline-offset-2"
+              >
+                View receipt
+              </a>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <SummaryItem
+            label="Amount"
+            value={formatMoney(purchase.amount, purchase.currency)}
+          />
+          <SummaryItem label="Status" value={statusBadge} />
+          <SummaryItem
+            label="Bid pack"
+            value={
+              purchase.bidPackName ? (
+                <span className="text-white">
+                  {purchase.bidPackName}
+                  {purchase.bidPackId ? (
+                    <span className="text-gray-400">{` (#${purchase.bidPackId})`}</span>
+                  ) : null}
+                </span>
+              ) : (
+                <span className="text-gray-400">Unknown</span>
+              )
+            }
+          />
+          <SummaryItem
+            label="Credits"
+            value={
+              purchase.credits !== null && purchase.credits !== undefined ? (
+                `${purchase.credits.toLocaleString()} credits`
+              ) : (
+                <span className="text-gray-400">—</span>
+              )
+            }
+          />
+          <SummaryItem
+            label="Created at"
+            value={formatDate(purchase.createdAt)}
+          />
+        </div>
+
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg shadow-black/10 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-white">
+              Technical details
+            </h3>
+            <button
+              onClick={() => setShowTechnical((prev) => !prev)}
+              className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors"
+            >
+              {showTechnical ? "Hide" : "Show"}
+            </button>
+          </div>
+          {showTechnical ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <DetailRow
+                label="Stripe checkout session"
+                value={purchase.stripeCheckoutSessionId || "—"}
+              />
+              <DetailRow
+                label="Stripe payment intent"
+                value={purchase.stripePaymentIntentId || "—"}
+              />
+              <DetailRow
+                label="Stripe charge"
+                value={purchase.stripeChargeId || "—"}
+              />
+              <DetailRow
+                label="Stripe invoice"
+                value={purchase.stripeInvoiceId || "—"}
+              />
+              <DetailRow
+                label="Stripe customer"
+                value={purchase.stripeCustomerId || "—"}
+              />
+              <DetailRow
+                label="Stripe event"
+                value={purchase.stripeEventId || "—"}
+              />
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400">
+              Stripe ids and receipt details are available here when needed.
+            </p>
+          )}
+        </div>
+      </div>
+    </Page>
+  );
+};

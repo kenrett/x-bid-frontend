@@ -112,7 +112,13 @@ export function Header() {
     [isAdmin, apiDocsHref],
   );
   const accountNavItems = useMemo(
-    () => (user ? [{ name: "Wallet", href: "/account/wallet" }] : []),
+    () =>
+      user
+        ? [
+            { name: "The Vault", href: "/account/wallet" },
+            { name: "Purchases", href: "/account/purchases" },
+          ]
+        : [],
     [user],
   );
 
