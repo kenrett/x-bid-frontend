@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
@@ -18,7 +18,12 @@ vi.mock("@stripe/react-stripe-js", () => ({
   EmbeddedCheckoutProvider: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="embedded-checkout-provider">{children}</div>
   ),
-  EmbeddedCheckout: () => <div data-testid="embedded-checkout" />,
+  EmbeddedCheckout: ({ onReady }: { onReady?: () => void }) => {
+    useEffect(() => {
+      if (onReady) onReady();
+    }, [onReady]);
+    return <div data-testid="embedded-checkout" />;
+  },
 }));
 
 type UseAuthReturn = ReturnType<typeof useAuth>;
@@ -207,11 +212,12 @@ describe("BuyBids Component", () => {
       expect(mockedClient.post).toHaveBeenCalledWith("/api/v1/checkouts", {
         bid_pack_id: 1,
       });
-      expect(
-        await screen.findByTestId("embedded-checkout-provider"),
-      ).toBeInTheDocument();
+      expect(await screen.findByTestId("embedded-checkout-provider"));
       expect(screen.getByTestId("embedded-checkout")).toBeInTheDocument();
       expect(screen.queryByText("Arm Yourself")).not.toBeInTheDocument();
+      expect(
+        await screen.findByText(/loading secure checkout/i),
+      ).toBeInTheDocument();
     });
 
     it("prevents double submissions while a purchase is in flight", async () => {

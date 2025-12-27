@@ -66,6 +66,20 @@ export const BuyBids = () => {
   const [error, setError] = useState<string | null>(null);
   const [stripeError, setStripeError] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [isCheckoutReady, setIsCheckoutReady] = useState(false);
+
+  useEffect(() => {
+    setIsCheckoutReady(false);
+    if (!clientSecret) return;
+    // Fallback in case Stripe never fires onReady; hide the loader after the iframe should be mounted.
+    const timeoutId = window.setTimeout(() => {
+      setIsCheckoutReady(true);
+    }, 2000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [clientSecret]);
 
   useEffect(() => {
     let cancelled = false;
@@ -263,12 +277,14 @@ export const BuyBids = () => {
           className="min-h-[320px] flex items-center justify-center bg-[#1a0d2e]/40 rounded-2xl border border-white/10 p-6"
           aria-busy="true"
         >
-          <p className="text-gray-300">Loading secure checkout...</p>
+          {!isCheckoutReady && (
+            <p className="text-gray-300">Loading secure checkout...</p>
+          )}
           <EmbeddedCheckoutProvider
             stripe={stripeLoader}
             options={{ clientSecret }}
           >
-            <EmbeddedCheckout />
+            <EmbeddedCheckout onReady={() => setIsCheckoutReady(true)} />
           </EmbeddedCheckoutProvider>
         </div>
       </Page>
