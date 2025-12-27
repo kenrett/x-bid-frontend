@@ -20,6 +20,26 @@ type ParsedErrorBody = {
   code?: string | number;
 };
 
+const getHeaderValue = (headers: unknown, key: string): string | undefined => {
+  if (!headers || typeof headers !== "object") return undefined;
+  const record = headers as Record<string, unknown>;
+  const needle = key.toLowerCase();
+
+  for (const [headerKey, value] of Object.entries(record)) {
+    if (headerKey.toLowerCase() !== needle) continue;
+    if (typeof value === "string") return value;
+    if (typeof value === "number") return String(value);
+    return undefined;
+  }
+
+  return undefined;
+};
+
+const getSupportId = (headers: unknown): string | undefined =>
+  getHeaderValue(headers, "x-request-id") ??
+  getHeaderValue(headers, "rndr-id") ??
+  getHeaderValue(headers, "cf-ray");
+
 const parseErrorBody = (data: unknown): ParsedErrorBody => {
   if (!data || typeof data !== "object") return {};
 
@@ -50,8 +70,13 @@ const parseErrorBody = (data: unknown): ParsedErrorBody => {
 export const parseApiError = (error: unknown): ApiErrorResult => {
   if (axios.isAxiosError(error)) {
     const status = error.response?.status;
+    const supportId = getSupportId(error.response?.headers);
     const parsedBody = parseErrorBody(error.response?.data);
-    const message = parsedBody.message || DEFAULT_MESSAGE;
+    const messageBase = parsedBody.message || DEFAULT_MESSAGE;
+    const message =
+      status && status >= 500 && supportId
+        ? `${messageBase} (support id: ${supportId})`
+        : messageBase;
     const code = parsedBody.code ?? status;
 
     if (status === 401) return { type: "unauthorized", message, code };

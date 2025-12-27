@@ -5,7 +5,11 @@ const makeAxiosError = (status?: number, message?: string) =>
   Object.assign(new Error("axios"), {
     isAxiosError: true,
     response: status
-      ? { status, data: message ? { error: message } : {} }
+      ? {
+          status,
+          headers: status >= 500 ? { "x-request-id": "req_123" } : undefined,
+          data: message ? { error: message } : {},
+        }
       : undefined,
   });
 
@@ -33,6 +37,7 @@ describe("parseApiError", () => {
       type: "server",
       code: 503,
     });
+    expect(parseApiError(makeAxiosError(503)).message).toContain("support id:");
   });
 
   it("handles new error shapes with error_code/message and nested error objects", () => {
