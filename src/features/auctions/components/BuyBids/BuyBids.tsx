@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ComponentType } from "react";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { Link } from "react-router-dom";
 import type { BidPack } from "../../types/bidPack";
@@ -17,6 +17,15 @@ import {
   UnexpectedResponseError,
 } from "@services/unexpectedResponse";
 import { Sentry } from "@sentryClient";
+
+type EmbeddedCheckoutWithReadyProps = React.ComponentProps<
+  typeof EmbeddedCheckout
+> & {
+  onReady?: () => void;
+};
+
+const EmbeddedCheckoutWithReady =
+  EmbeddedCheckout as unknown as ComponentType<EmbeddedCheckoutWithReadyProps>;
 
 type StripeLoader = {
   promise: Promise<import("@stripe/stripe-js").Stripe | null>;
@@ -284,7 +293,9 @@ export const BuyBids = () => {
             stripe={stripeLoader}
             options={{ clientSecret }}
           >
-            <EmbeddedCheckout onReady={() => setIsCheckoutReady(true)} />
+            <EmbeddedCheckoutWithReady
+              onReady={() => setIsCheckoutReady(true)}
+            />
           </EmbeddedCheckoutProvider>
         </div>
       </Page>
