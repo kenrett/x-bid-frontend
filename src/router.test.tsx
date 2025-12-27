@@ -25,7 +25,13 @@ describe("router configuration", () => {
     expect(hasPath(children, "/auctions/:id")).toBe(true);
     expect(hasPath(children, "/login")).toBe(true);
     expect(hasPath(children, "/signup")).toBe(true);
-    expect(hasPath(children, "/account/wallet")).toBe(true);
+    expect(hasPath(children, "/account")).toBe(true);
+    const accountRoute = children?.find((route) => route.path === "/account");
+    const accountLayout = accountRoute?.children?.[0];
+    const accountChildren = accountLayout?.children;
+    expect(hasPath(accountChildren, "wallet")).toBe(true);
+    expect(hasPath(accountChildren, "purchases")).toBe(true);
+    expect(hasPath(accountChildren, "activity")).toBe(true);
     expect(hasPath(children, "/maintenance")).toBe(true);
     expect(hasPath(children, "/admin")).toBe(true);
     expect(root.errorElement).toBeTruthy();

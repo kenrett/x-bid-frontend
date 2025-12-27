@@ -5,6 +5,7 @@ import { useAuth } from "@features/auth/hooks/useAuth";
 const NAV_ITEMS = [
   { label: "Overview", to: "/account" },
   { label: "Bid History", to: "/account/wallet" },
+  { label: "My Activity", to: "/account/activity" },
   { label: "Purchases", to: "/account/purchases" },
   { label: "Profile", to: "/account/profile" },
 ];

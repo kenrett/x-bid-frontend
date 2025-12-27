@@ -11,7 +11,17 @@ export const VaultOverviewPage = () => (
       </p>
     </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <Link to="/account/activity" className={CARD_CLASSES}>
+        <p className="text-xs uppercase tracking-wide text-pink-300">
+          My Activity
+        </p>
+        <h3 className="text-xl font-semibold text-white">Feed</h3>
+        <p className="text-sm text-gray-400">
+          Recent bids, watches, and auction outcomes.
+        </p>
+      </Link>
+
       <Link to="/account/wallet" className={CARD_CLASSES}>
         <p className="text-xs uppercase tracking-wide text-pink-300">
           Bid History
