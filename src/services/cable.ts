@@ -1,11 +1,23 @@
 import * as ActionCable from "@rails/actioncable";
 
-// Attach JWT via Authorization header so the backend can authorize the websocket handshake.
-const buildCableUrl = () => {
+const getStoredToken = () =>
+  typeof localStorage !== "undefined" ? localStorage.getItem("token") : null;
+
+const buildCableUrl = (
+  tokenOverride?: string | null,
+  baseOverride?: string,
+) => {
   const base = String(
-    import.meta.env.VITE_CABLE_URL ?? "ws://localhost:3000/cable",
+    baseOverride ??
+      import.meta.env.VITE_CABLE_URL ??
+      "ws://localhost:3000/cable",
   );
-  return new URL(base).toString();
+  const url = new URL(base);
+  const token = tokenOverride ?? getStoredToken();
+  if (token) {
+    url.searchParams.set("token", token);
+  }
+  return url.toString();
 };
 
 type CreateConsumerFn = typeof ActionCable.createConsumer;
@@ -31,10 +43,7 @@ const buildAuthorizedWebSocket = (BaseWebSocket?: typeof WebSocket) => {
 
   return class AuthorizedWebSocket extends BaseWebSocket {
     constructor(url: string, protocols?: string | string[]) {
-      const token =
-        typeof localStorage !== "undefined"
-          ? localStorage.getItem("token")
-          : null;
+      const token = getStoredToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
       const args: unknown[] = headers
         ? [url, protocols as unknown, { headers }]
@@ -68,4 +77,4 @@ export const resetCable = () => {
   return cable;
 };
 
-export { cable };
+export { cable, buildCableUrl };

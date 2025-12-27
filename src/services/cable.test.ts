@@ -35,20 +35,21 @@ describe("cable service", () => {
     vi.clearAllMocks();
     localStorage.clear();
     socketCalls.length = 0;
+    (import.meta as unknown as { env: Record<string, unknown> }).env = {};
   });
 
   afterEach(() => {
     vi.resetModules();
   });
 
-  it("creates consumer without query auth and sets Authorization header on WebSocket", async () => {
+  it("creates consumer with token query param and sets Authorization header on WebSocket", async () => {
     localStorage.setItem("token", "abc");
     const { resetCable } = await import("./cable");
 
     const firstCallUrl = createConsumerMock.mock.calls.at(0)?.[0];
     if (!firstCallUrl) throw new Error("createConsumer not called");
     const url = new URL(firstCallUrl as string);
-    expect(url.searchParams.get("token")).toBeNull();
+    expect(url.searchParams.get("token")).toBe("abc");
     expect(url.searchParams.get("session_token_id")).toBeNull();
 
     const module = await import("@rails/actioncable");
@@ -68,7 +69,18 @@ describe("cable service", () => {
     const nextCallUrl = createConsumerMock.mock.calls.at(-1)?.[0];
     if (!nextCallUrl) throw new Error("reset call missing");
     const nextUrl = new URL(nextCallUrl as string);
-    expect(nextUrl.searchParams.get("token")).toBeNull();
+    expect(nextUrl.searchParams.get("token")).toBe("abc");
     expect(nextUrl.searchParams.get("session_token_id")).toBeNull();
+  });
+
+  it("appends token without clobbering existing query params and encodes token", async () => {
+    localStorage.setItem("token", "a b");
+    const { buildCableUrl } = await import("./cable");
+    const built = buildCableUrl(undefined, "ws://example.com/cable?foo=bar");
+    const url = new URL(built);
+
+    expect(url.searchParams.get("foo")).toBe("bar");
+    expect(url.searchParams.get("token")).toBe("a b");
+    expect(built).toBe("ws://example.com/cable?foo=bar&token=a+b");
   });
 });
