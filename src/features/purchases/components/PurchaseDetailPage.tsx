@@ -211,7 +211,9 @@ export const PurchaseDetailPage = () => {
               >
                 View receipt
               </a>
-            ) : null}
+            ) : (
+              <span className="text-sm text-gray-400">Payment details</span>
+            )}
           </div>
         </div>
 
@@ -293,7 +295,7 @@ export const PurchaseDetailPage = () => {
             </div>
           ) : (
             <p className="text-sm text-gray-400">
-              Stripe ids and receipt details are available here when needed.
+              Stripe ids and billing details are available here when needed.
             </p>
           )}
         </div>

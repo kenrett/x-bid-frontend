@@ -9,10 +9,10 @@ export type PurchaseSummary = {
   amount: number;
   currency: string | null;
   status: PurchaseStatus;
+  receiptUrl?: string | null;
 };
 
 export type PurchaseDetail = PurchaseSummary & {
-  receiptUrl?: string | null;
   stripeCheckoutSessionId?: string | null;
   stripePaymentIntentId?: string | null;
   stripeChargeId?: string | null;

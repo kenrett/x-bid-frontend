@@ -89,6 +89,30 @@ describe("PurchaseDetailPage", () => {
     );
   });
 
+  it("does not render a receipt link when receiptUrl is missing", async () => {
+    mockedPurchasesApi.get.mockResolvedValue({
+      ...baseDetail,
+      receiptUrl: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/account/purchases/12"]}>
+        <Routes>
+          <Route
+            path="/account/purchases/:id"
+            element={<PurchaseDetailPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: /elite pack/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /view receipt/i })).toBeNull();
+    expect(screen.getByText(/payment details/i)).toBeInTheDocument();
+  });
+
   it("handles 404 errors gracefully", async () => {
     mockedPurchasesApi.get.mockRejectedValue(makeAxiosError(404));
 

@@ -139,7 +139,15 @@ const normalizePurchase = (raw: unknown): PurchaseDetail => {
             ? (data as { bidPackName: string }).bidPackName
             : null;
 
-  const receiptUrl = null;
+  const rawReceiptUrl =
+    typeof (data as { receipt_url?: unknown }).receipt_url === "string"
+      ? (data as { receipt_url: string }).receipt_url
+      : typeof (data as { receiptUrl?: unknown }).receiptUrl === "string"
+        ? (data as { receiptUrl: string }).receiptUrl
+        : null;
+
+  const receiptUrl =
+    rawReceiptUrl && rawReceiptUrl.trim() !== "" ? rawReceiptUrl : null;
 
   const stripeCheckoutSessionId =
     typeof (data as { stripe_checkout_session_id?: unknown })
@@ -187,6 +195,7 @@ const toSummary = (purchase: PurchaseDetail): PurchaseSummary => ({
   amount: purchase.amount,
   currency: purchase.currency,
   status: purchase.status,
+  receiptUrl: purchase.receiptUrl ?? null,
 });
 
 const list = async (): Promise<PurchaseSummary[]> => {

@@ -69,7 +69,7 @@ const TableSkeleton = () => (
   <tbody className="divide-y divide-white/10">
     {Array.from({ length: 4 }).map((_, index) => (
       <tr key={index} className="animate-pulse">
-        {Array.from({ length: 5 }).map((__, cellIdx) => (
+        {Array.from({ length: 6 }).map((__, cellIdx) => (
           <td key={cellIdx} className="px-4 py-3">
             <div className="h-3 w-28 bg-white/10 rounded" />
           </td>
@@ -192,6 +192,7 @@ export const PurchasesListPage = () => {
                   <th className="px-4 py-3">Credits</th>
                   <th className="px-4 py-3">Amount</th>
                   <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Payment details</th>
                 </tr>
               </thead>
               {isLoading ? (
@@ -201,7 +202,7 @@ export const PurchasesListPage = () => {
                   <tr>
                     <td
                       className="px-4 py-6 text-center text-gray-400"
-                      colSpan={5}
+                      colSpan={6}
                     >
                       No purchases yet.
                     </td>
@@ -234,6 +235,21 @@ export const PurchasesListPage = () => {
                       </td>
                       <td className="px-4 py-3">
                         <StatusBadge status={purchase.status} />
+                      </td>
+                      <td className="px-4 py-3">
+                        {purchase.receiptUrl ? (
+                          <a
+                            href={purchase.receiptUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(event) => event.stopPropagation()}
+                            className="text-pink-200 hover:text-pink-100 underline underline-offset-2"
+                          >
+                            View receipt
+                          </a>
+                        ) : (
+                          <span className="text-gray-400">Payment details</span>
+                        )}
                       </td>
                     </tr>
                   ))}

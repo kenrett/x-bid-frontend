@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route, useParams } from "react-router-dom";
 import { PurchasesListPage } from "./PurchasesListPage";
@@ -42,6 +42,7 @@ const purchases: PurchaseSummary[] = [
     amount: 10,
     currency: "usd",
     status: "succeeded",
+    receiptUrl: "https://stripe.com/receipt/7",
   },
   {
     id: 8,
@@ -52,6 +53,7 @@ const purchases: PurchaseSummary[] = [
     amount: 40,
     currency: "usd",
     status: "pending",
+    receiptUrl: null,
   },
 ];
 
@@ -80,11 +82,38 @@ describe("PurchasesListPage", () => {
 
     expect(await screen.findByText(/starter pack/i)).toBeInTheDocument();
     expect(screen.getByText(/\$10\.00/)).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /view receipt/i })).toHaveLength(
+      1,
+    );
 
     const user = userEvent.setup();
     await user.click(screen.getByText(/starter pack/i));
 
     expect(await screen.findByText(/purchase detail 7/i)).toBeInTheDocument();
+  });
+
+  it("renders a receipt link only when the url is present", async () => {
+    mockedPurchasesApi.list.mockResolvedValue(purchases);
+
+    render(
+      <MemoryRouter initialEntries={["/account/purchases"]}>
+        <Routes>
+          <Route path="/account/purchases" element={<PurchasesListPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    const receiptLink = await screen.findByRole("link", {
+      name: /view receipt/i,
+    });
+    expect(receiptLink).toHaveAttribute("href", purchases[0].receiptUrl);
+
+    const megaRow = screen.getByText(/mega pack/i).closest("tr");
+    expect(megaRow).not.toBeNull();
+    expect(within(megaRow as HTMLElement).queryByRole("link")).toBeNull();
+    expect(
+      within(megaRow as HTMLElement).getByText(/payment details/i),
+    ).toBeInTheDocument();
   });
 
   it("shows an empty state when there are no purchases", async () => {
