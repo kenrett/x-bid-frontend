@@ -11,6 +11,7 @@ vi.mock("@features/admin/api/adminPaymentsApi", () => ({
   adminPaymentsApi: {
     getPayment: vi.fn(),
     repairCredits: vi.fn(),
+    refundPayment: vi.fn(),
   },
 }));
 
@@ -94,6 +95,88 @@ describe("AdminPaymentDetailPage", () => {
     );
     expect(showToast).toHaveBeenCalledWith("Credits repaired", "success");
     expect(mockedApi.getPayment).toHaveBeenCalledTimes(2);
+  });
+
+  it("allows issuing a refund and shows confirmation details", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    mockedApi.getPayment
+      .mockResolvedValueOnce(mockPayment)
+      .mockResolvedValueOnce({ ...mockPayment, status: "failed" });
+    mockedApi.refundPayment.mockResolvedValueOnce({
+      id: 10,
+      userEmail: "payer@example.com",
+      amount: 25,
+      status: "failed",
+      createdAt: "2024-05-01T00:00:00Z",
+      stripePaymentIntentId: "pi_123",
+      refundId: "re_123",
+      refundedCents: 2500,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/admin/payments/10"]}>
+        <Routes>
+          <Route
+            path="/admin/payments/:id"
+            element={<AdminPaymentDetailPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/payer@example.com/i)).toBeInTheDocument();
+
+    await user.type(screen.getByPlaceholderText("e.g. 5.00"), "5.00");
+    await user.type(
+      screen.getByPlaceholderText("e.g. duplicate purchase"),
+      " duplicate ",
+    );
+    await user.click(screen.getByRole("button", { name: /issue refund/i }));
+
+    await waitFor(() =>
+      expect(mockedApi.refundPayment).toHaveBeenCalledWith(10, {
+        amountCents: 500,
+        reason: "duplicate",
+      }),
+    );
+
+    expect(await screen.findByText("Refund issued.")).toBeInTheDocument();
+    expect(screen.getByText("Refunded: $25.00")).toBeInTheDocument();
+    expect(screen.getByText("Refund ID: re_123")).toBeInTheDocument();
+    expect(showToast).toHaveBeenCalledWith(
+      "Refund issued (re_123).",
+      "success",
+    );
+    expect(await screen.findByText("failed")).toBeInTheDocument();
+  });
+
+  it("shows an error message when refund fails", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    mockedApi.refundPayment.mockRejectedValueOnce(new Error("nope"));
+
+    render(
+      <MemoryRouter initialEntries={["/admin/payments/10"]}>
+        <Routes>
+          <Route
+            path="/admin/payments/:id"
+            element={<AdminPaymentDetailPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/payer@example.com/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /issue refund/i }));
+
+    expect(await screen.findByText("nope")).toBeInTheDocument();
+    expect(showToast).toHaveBeenCalledWith(
+      "Failed to issue refund: nope",
+      "error",
+    );
   });
 
   it("surfaces API errors when loading fails", async () => {

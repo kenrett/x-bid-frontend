@@ -8,6 +8,11 @@ import { LoadingScreen } from "@components/LoadingScreen";
 import { ErrorScreen } from "@components/ErrorScreen";
 import { ADMIN_PATHS } from "../adminPaths";
 
+type RefundResult = {
+  refundId: string | null;
+  refundedCents: number | null;
+};
+
 export const AdminPaymentDetailPage = () => {
   const { id } = useParams();
   const paymentId = id ? Number(id) : null;
@@ -16,6 +21,11 @@ export const AdminPaymentDetailPage = () => {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isRepairing, setIsRepairing] = useState(false);
+  const [isRefunding, setIsRefunding] = useState(false);
+  const [refundAmount, setRefundAmount] = useState("");
+  const [refundReason, setRefundReason] = useState("");
+  const [refundError, setRefundError] = useState<string | null>(null);
+  const [refundResult, setRefundResult] = useState<RefundResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const isMounted = useRef(true);
 
@@ -35,6 +45,17 @@ export const AdminPaymentDetailPage = () => {
       if (isMounted.current) setIsLoading(false);
     }
   }, [paymentId]);
+
+  const parseRefundAmountCents = useCallback(
+    (value: string): number | undefined => {
+      const trimmed = value.trim();
+      if (!trimmed) return undefined;
+      const parsed = Number(trimmed);
+      if (!Number.isFinite(parsed) || parsed <= 0) return NaN;
+      return Math.round(parsed * 100);
+    },
+    [],
+  );
 
   useEffect(() => {
     void loadPayment();
@@ -64,6 +85,59 @@ export const AdminPaymentDetailPage = () => {
       if (isMounted.current) setIsRepairing(false);
     }
   }, [paymentId, loadPayment]);
+
+  const handleRefund = useCallback(async () => {
+    if (!paymentId) return;
+    setRefundError(null);
+
+    const amountCents = parseRefundAmountCents(refundAmount);
+    if (Number.isNaN(amountCents)) {
+      setRefundError("Enter a valid refund amount in dollars (e.g. 5.00).");
+      return;
+    }
+
+    const reason = refundReason.trim() || undefined;
+
+    const confirmMessage = `Issue refund for payment #${paymentId}?`;
+    if (!window.confirm(confirmMessage)) return;
+
+    try {
+      setIsRefunding(true);
+      const result = await adminPaymentsApi.refundPayment(paymentId, {
+        amountCents,
+        reason,
+      });
+
+      const refundId =
+        typeof result.refundId === "string" ? result.refundId : null;
+      const refundedCents =
+        typeof result.refundedCents === "number" ? result.refundedCents : null;
+
+      setRefundResult({ refundId, refundedCents });
+      setPayment((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: result.status,
+            }
+          : prev,
+      );
+      showToast(`Refund issued${refundId ? ` (${refundId})` : ""}.`, "success");
+      await loadPayment();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setRefundError(message);
+      showToast(`Failed to issue refund: ${message}`, "error");
+    } finally {
+      if (isMounted.current) setIsRefunding(false);
+    }
+  }, [
+    paymentId,
+    parseRefundAmountCents,
+    refundAmount,
+    refundReason,
+    loadPayment,
+  ]);
 
   const hasMismatch = useMemo(() => {
     if (!payment) return false;
@@ -138,6 +212,64 @@ export const AdminPaymentDetailPage = () => {
             className="text-sm text-white bg-pink-600 hover:bg-pink-700 border border-pink-400/60 rounded-lg px-3 py-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isRepairing ? "Repairing..." : "Repair credits"}
+          </button>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
+        <h3 className="text-lg font-semibold text-white">Refund</h3>
+        <p className="text-sm text-gray-300">
+          Amount is in dollars. Leave blank for a full refund.
+        </p>
+        {refundError ? (
+          <div className="rounded-xl border border-red-400/40 bg-red-900/30 p-3 text-sm text-red-100">
+            {refundError}
+          </div>
+        ) : null}
+        {refundResult ? (
+          <div className="rounded-xl border border-green-300/40 bg-green-900/20 p-3 text-sm text-green-100">
+            <div>Refund issued.</div>
+            <div>
+              Refunded:{" "}
+              {refundResult.refundedCents !== null
+                ? `$${(refundResult.refundedCents / 100).toFixed(2)}`
+                : "—"}
+            </div>
+            <div>Refund ID: {refundResult.refundId ?? "—"}</div>
+          </div>
+        ) : null}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="space-y-1">
+            <label className="block text-xs uppercase tracking-wide text-gray-400">
+              Refund amount ($)
+            </label>
+            <input
+              value={refundAmount}
+              onChange={(event) => setRefundAmount(event.target.value)}
+              placeholder="e.g. 5.00"
+              inputMode="decimal"
+              className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+            />
+          </div>
+          <div className="space-y-1 md:col-span-2">
+            <label className="block text-xs uppercase tracking-wide text-gray-400">
+              Reason (optional)
+            </label>
+            <input
+              value={refundReason}
+              onChange={(event) => setRefundReason(event.target.value)}
+              placeholder="e.g. duplicate purchase"
+              className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+            />
+          </div>
+        </div>
+        <div className="flex items-center justify-end">
+          <button
+            onClick={() => void handleRefund()}
+            disabled={isRefunding || isLoading || isRepairing}
+            className="text-sm text-white bg-red-600 hover:bg-red-700 border border-red-400/60 rounded-lg px-3 py-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {isRefunding ? "Refunding..." : "Issue refund"}
           </button>
         </div>
       </div>
