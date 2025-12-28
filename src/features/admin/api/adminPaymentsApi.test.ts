@@ -190,4 +190,44 @@ describe("adminPaymentsApi", () => {
       message: "Applied fixes",
     });
   });
+
+  it("posts refund request and preserves refund metadata", async () => {
+    mockedPost.mockResolvedValue({
+      data: {
+        payment: {
+          id: "10",
+          user_email: "payer@example.com",
+          amount_cents: "2500",
+          status: "refunded",
+          created_at: "2024-05-01T00:00:00Z",
+          stripe_payment_intent_id: "pi_123",
+        },
+        refunded_cents: "2500",
+        refund_id: "re_123",
+      },
+    });
+
+    const result = await adminPaymentsApi.refundPayment(10, {
+      amountCents: 500,
+      reason: " duplicate ",
+    });
+
+    expect(mockedPost).toHaveBeenCalledWith(
+      "/api/v1/admin/payments/10/refund",
+      {
+        amountCents: 500,
+        reason: "duplicate",
+      },
+    );
+    expect(result).toMatchObject({
+      id: 10,
+      userEmail: "payer@example.com",
+      amount: 25,
+      status: "failed",
+      createdAt: "2024-05-01T00:00:00Z",
+      stripePaymentIntentId: "pi_123",
+      refundedCents: 2500,
+      refundId: "re_123",
+    });
+  });
 });

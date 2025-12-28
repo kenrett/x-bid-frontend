@@ -45,6 +45,15 @@ type AdminRepairCreditsResponse = {
   detail?: string;
 };
 
+type AdminRefundPaymentResponse = {
+  payment?: unknown;
+  purchase?: unknown;
+  refund_id?: unknown;
+  refundId?: unknown;
+  refunded_cents?: unknown;
+  refundedCents?: unknown;
+} & Record<string, unknown>;
+
 const toNumber = (value: unknown): number | null => {
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
   if (typeof value === "string" && value.trim() !== "") {
@@ -76,6 +85,24 @@ const normalizeStatus = (value: unknown): Payment["status"] => {
     return "pending";
   }
   return "pending";
+};
+
+const extractRefundMeta = (
+  raw: unknown,
+): { refundId: string | null; refundedCents: number | null } => {
+  const record =
+    raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const refundId =
+    typeof record.refund_id === "string"
+      ? record.refund_id
+      : typeof record.refundId === "string"
+        ? record.refundId
+        : null;
+
+  const refundedCents =
+    toNumber(record.refunded_cents) ?? toNumber(record.refundedCents) ?? null;
+
+  return { refundId, refundedCents };
 };
 
 const normalizePayment = (raw: RawPayment): Payment => {
@@ -419,5 +446,42 @@ export const adminPaymentsApi = {
       `/api/v1/admin/payments/${id}/repair_credits`,
     );
     return normalizeRepairResponse(response.data ?? {});
+  },
+
+  async refundPayment(
+    id: number,
+    payload: { amountCents?: number; reason?: string },
+  ): Promise<
+    Payment & { refundId?: string | null; refundedCents?: number | null }
+  > {
+    const body: { amountCents?: number; reason?: string } = {};
+    if (typeof payload.amountCents === "number") {
+      body.amountCents = payload.amountCents;
+    }
+    if (typeof payload.reason === "string") {
+      const normalizedReason = payload.reason.trim();
+      if (normalizedReason) body.reason = normalizedReason;
+    }
+
+    const response = await client.post<AdminRefundPaymentResponse>(
+      `/api/v1/admin/payments/${id}/refund`,
+      body,
+    );
+
+    const raw = response.data ?? {};
+    const paymentPayload =
+      (raw as { payment?: unknown }).payment ??
+      (raw as { purchase?: unknown }).purchase ??
+      raw;
+
+    const payment = normalizePayment(paymentPayload as RawPayment);
+    const rawMeta = extractRefundMeta(raw);
+    const paymentMeta = extractRefundMeta(paymentPayload);
+    const meta = {
+      refundId: paymentMeta.refundId ?? rawMeta.refundId,
+      refundedCents: paymentMeta.refundedCents ?? rawMeta.refundedCents,
+    };
+
+    return { ...payment, ...meta };
   },
 };
