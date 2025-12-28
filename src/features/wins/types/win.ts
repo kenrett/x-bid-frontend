@@ -30,4 +30,7 @@ export type WinSummary = {
 
 export type WinDetail = WinSummary & {
   fulfillmentNote?: string | null;
+  shippingCarrier?: string | null;
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
 };

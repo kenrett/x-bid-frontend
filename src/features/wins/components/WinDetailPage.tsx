@@ -39,14 +39,14 @@ const formatMoney = (amount: number, currency: string | null) => {
 const statusMeta = (status: WinFulfillmentStatus) => {
   if (status === "pending" || status === "unclaimed") {
     return {
-      label: "Pending",
+      label: "Awaiting claim",
       styles: "bg-amber-900 text-amber-100 border border-amber-300/40",
       action: "Claim prize",
     };
   }
   if (status === "claimed") {
     return {
-      label: "Claimed",
+      label: "Preparing shipment",
       styles: "bg-blue-900 text-blue-100 border border-blue-300/40",
       action: "View auction",
     };
@@ -65,16 +65,9 @@ const statusMeta = (status: WinFulfillmentStatus) => {
       action: "View auction",
     };
   }
-  if (status === "delivered") {
+  if (status === "delivered" || status === "fulfilled") {
     return {
-      label: "Delivered",
-      styles: "bg-green-900 text-green-100 border border-green-300/40",
-      action: "View auction",
-    };
-  }
-  if (status === "fulfilled") {
-    return {
-      label: "Fulfilled",
+      label: "Completed",
       styles: "bg-green-900 text-green-100 border border-green-300/40",
       action: "View auction",
     };
@@ -283,6 +276,19 @@ export const WinDetailPage = () => {
     void handleLoad();
   }, [handleLoad, isReady, user?.id]);
 
+  useEffect(() => {
+    if (!isReady || !user || !auction_id) return;
+    const intervalId = window.setInterval(() => {
+      void winsApi
+        .get(auction_id)
+        .then((data) => setWin(data))
+        .catch(() => {
+          // keep existing state; errors are surfaced via manual retry
+        });
+    }, 30_000);
+    return () => window.clearInterval(intervalId);
+  }, [auction_id, isReady, user?.id]);
+
   if (!isReady) return <LoadingScreen item="win" />;
 
   if (!user) {
@@ -333,6 +339,9 @@ export const WinDetailPage = () => {
   if (!win) return null;
 
   const meta = statusMeta(win.fulfillmentStatus);
+  const showTracking =
+    win.fulfillmentStatus === "shipped" &&
+    (win.trackingNumber || win.shippingCarrier || win.trackingUrl);
 
   return (
     <Page>
@@ -372,6 +381,38 @@ export const WinDetailPage = () => {
           <SummaryItem label="Ended" value={formatDate(win.endedAt)} />
           <SummaryItem label="Fulfillment" value={meta.label} />
         </div>
+
+        {showTracking ? (
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg shadow-black/10 space-y-3">
+            <div className="flex items-center justify-between gap-4">
+              <h3 className="text-lg font-semibold text-white">Tracking</h3>
+              {win.trackingUrl ? (
+                <a
+                  href={win.trackingUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-pink-200 hover:text-pink-100 underline underline-offset-2"
+                >
+                  Track package
+                </a>
+              ) : null}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                <span className="text-gray-300">Carrier</span>
+                <span className="font-semibold text-white">
+                  {win.shippingCarrier || "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                <span className="text-gray-300">Tracking #</span>
+                <span className="font-semibold text-white break-all text-right">
+                  {win.trackingNumber || "—"}
+                </span>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {claimCompleted || win.fulfillmentStatus === "claimed" ? (
           <div className="rounded-2xl border border-green-400/30 bg-green-900/20 p-5 text-green-100 shadow-lg shadow-black/10">

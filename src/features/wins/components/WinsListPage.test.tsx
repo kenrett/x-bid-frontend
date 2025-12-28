@@ -76,7 +76,7 @@ describe("WinsListPage", () => {
 
     expect(await screen.findByText(/macbook pro/i)).toBeInTheDocument();
     expect(screen.getByText(/\$12\.50/)).toBeInTheDocument();
-    expect(screen.getByText(/pending/i)).toBeInTheDocument();
+    expect(screen.getByText(/awaiting claim/i)).toBeInTheDocument();
 
     const user = userEvent.setup();
     await user.click(
@@ -98,5 +98,63 @@ describe("WinsListPage", () => {
     expect(
       await screen.findByText(/you haven’t won any auctions yet/i),
     ).toBeInTheDocument();
+  });
+
+  it("shows the correct status copy per win", async () => {
+    mockedWinsApi.list.mockResolvedValue([
+      {
+        auctionId: 1,
+        auctionTitle: "Prize A",
+        endedAt: "2024-05-01T10:00:00Z",
+        finalPrice: 10,
+        currency: "usd",
+        fulfillmentStatus: "pending",
+      },
+      {
+        auctionId: 2,
+        auctionTitle: "Prize B",
+        endedAt: "2024-05-01T10:00:00Z",
+        finalPrice: 10,
+        currency: "usd",
+        fulfillmentStatus: "claimed",
+      },
+      {
+        auctionId: 3,
+        auctionTitle: "Prize C",
+        endedAt: "2024-05-01T10:00:00Z",
+        finalPrice: 10,
+        currency: "usd",
+        fulfillmentStatus: "processing",
+      },
+      {
+        auctionId: 4,
+        auctionTitle: "Prize D",
+        endedAt: "2024-05-01T10:00:00Z",
+        finalPrice: 10,
+        currency: "usd",
+        fulfillmentStatus: "shipped",
+      },
+      {
+        auctionId: 5,
+        auctionTitle: "Prize E",
+        endedAt: "2024-05-01T10:00:00Z",
+        finalPrice: 10,
+        currency: "usd",
+        fulfillmentStatus: "fulfilled",
+      },
+    ]);
+
+    render(
+      <MemoryRouter>
+        <WinsListPage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/prize a/i)).toBeInTheDocument();
+    expect(screen.getByText(/awaiting claim/i)).toBeInTheDocument();
+    expect(screen.getByText(/preparing shipment/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/processing/i)[0]).toBeInTheDocument();
+    expect(screen.getByText(/shipped/i)).toBeInTheDocument();
+    expect(screen.getByText(/completed/i)).toBeInTheDocument();
   });
 });

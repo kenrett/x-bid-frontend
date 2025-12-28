@@ -33,13 +33,13 @@ const formatMoney = (amount: number, currency: string | null) => {
 const statusMeta = (status: WinFulfillmentStatus) => {
   if (status === "pending" || status === "unclaimed") {
     return {
-      label: "Pending",
+      label: "Awaiting claim",
       styles: "bg-amber-900 text-amber-100 border border-amber-300/40",
     };
   }
   if (status === "claimed") {
     return {
-      label: "Claimed",
+      label: "Preparing shipment",
       styles: "bg-blue-900 text-blue-100 border border-blue-300/40",
     };
   }
@@ -55,15 +55,9 @@ const statusMeta = (status: WinFulfillmentStatus) => {
       styles: "bg-sky-900 text-sky-100 border border-sky-300/40",
     };
   }
-  if (status === "delivered") {
+  if (status === "delivered" || status === "fulfilled") {
     return {
-      label: "Delivered",
-      styles: "bg-green-900 text-green-100 border border-green-300/40",
-    };
-  }
-  if (status === "fulfilled") {
-    return {
-      label: "Fulfilled",
+      label: "Completed",
       styles: "bg-green-900 text-green-100 border border-green-300/40",
     };
   }
@@ -137,6 +131,14 @@ export const WinsListPage = () => {
       return;
     }
     void handleLoad();
+  }, [handleLoad, isReady, user?.id]);
+
+  useEffect(() => {
+    if (!isReady || !user) return;
+    const intervalId = window.setInterval(() => {
+      void handleLoad();
+    }, 60_000);
+    return () => window.clearInterval(intervalId);
   }, [handleLoad, isReady, user?.id]);
 
   if (!isReady) {

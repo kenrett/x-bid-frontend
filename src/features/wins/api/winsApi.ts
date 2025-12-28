@@ -83,6 +83,53 @@ const normalizeMoney = (data: Record<string, unknown>) => {
   };
 };
 
+const normalizeCarrier = (value: unknown): string | null => {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+};
+
+const normalizeTrackingNumber = (value: unknown): string | null => {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+};
+
+const normalizeTrackingUrl = (value: unknown): string | null => {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return /^https?:\/\//i.test(trimmed) ? trimmed : null;
+};
+
+const buildTrackingUrl = (
+  carrier: string | null,
+  trackingNumber: string | null,
+): string | null => {
+  if (!trackingNumber) return null;
+
+  const normalizedCarrier = (carrier ?? "").toLowerCase();
+  const encoded = encodeURIComponent(trackingNumber);
+
+  if (normalizedCarrier.includes("ups")) {
+    return `https://www.ups.com/track?tracknum=${encoded}`;
+  }
+  if (normalizedCarrier.includes("usps")) {
+    return `https://tools.usps.com/go/TrackConfirmAction?tLabels=${encoded}`;
+  }
+  if (
+    normalizedCarrier.includes("fedex") ||
+    normalizedCarrier.includes("fed ex")
+  ) {
+    return `https://www.fedex.com/fedextrack/?trknbr=${encoded}`;
+  }
+  if (normalizedCarrier.includes("dhl")) {
+    return `https://www.dhl.com/global-en/home/tracking.html?tracking-id=${encoded}`;
+  }
+
+  return null;
+};
+
 const normalizeWin = (raw: unknown): WinDetail => {
   const data = (raw ?? {}) as Record<string, unknown>;
   const auction =
@@ -147,6 +194,50 @@ const normalizeWin = (raw: unknown): WinDetail => {
         ? (data as { fulfillmentNote: string }).fulfillmentNote
         : null;
 
+  const fulfillment =
+    (data as { fulfillment?: unknown }).fulfillment &&
+    typeof (data as { fulfillment: unknown }).fulfillment === "object"
+      ? ((data as { fulfillment: Record<string, unknown> })
+          .fulfillment as Record<string, unknown>)
+      : null;
+
+  const shippingCarrier =
+    normalizeCarrier((fulfillment as { carrier?: unknown })?.carrier) ??
+    normalizeCarrier(
+      (fulfillment as { shipping_carrier?: unknown })?.shipping_carrier,
+    ) ??
+    normalizeCarrier(
+      (data as { shipping_carrier?: unknown }).shipping_carrier,
+    ) ??
+    normalizeCarrier((data as { carrier?: unknown }).carrier) ??
+    null;
+
+  const trackingNumber =
+    normalizeTrackingNumber(
+      (fulfillment as { tracking_number?: unknown })?.tracking_number,
+    ) ??
+    normalizeTrackingNumber(
+      (fulfillment as { trackingNumber?: unknown })?.trackingNumber,
+    ) ??
+    normalizeTrackingNumber(
+      (data as { tracking_number?: unknown }).tracking_number,
+    ) ??
+    normalizeTrackingNumber(
+      (data as { trackingNumber?: unknown }).trackingNumber,
+    ) ??
+    null;
+
+  const trackingUrl =
+    normalizeTrackingUrl(
+      (fulfillment as { tracking_url?: unknown })?.tracking_url,
+    ) ??
+    normalizeTrackingUrl(
+      (fulfillment as { trackingUrl?: unknown })?.trackingUrl,
+    ) ??
+    normalizeTrackingUrl((data as { tracking_url?: unknown }).tracking_url) ??
+    normalizeTrackingUrl((data as { trackingUrl?: unknown }).trackingUrl) ??
+    buildTrackingUrl(shippingCarrier, trackingNumber);
+
   return {
     auctionId,
     auctionTitle,
@@ -155,6 +246,9 @@ const normalizeWin = (raw: unknown): WinDetail => {
     currency,
     fulfillmentStatus,
     fulfillmentNote,
+    shippingCarrier,
+    trackingNumber,
+    trackingUrl,
   };
 };
 

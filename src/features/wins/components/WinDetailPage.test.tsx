@@ -40,6 +40,9 @@ const detail: WinDetail = {
   currency: "usd",
   fulfillmentStatus: "processing",
   fulfillmentNote: "We are preparing your shipment.",
+  shippingCarrier: null,
+  trackingNumber: null,
+  trackingUrl: null,
 };
 
 const pendingDetail: WinDetail = {
@@ -50,6 +53,9 @@ const pendingDetail: WinDetail = {
   currency: "usd",
   fulfillmentStatus: "pending",
   fulfillmentNote: null,
+  shippingCarrier: null,
+  trackingNumber: null,
+  trackingUrl: null,
 };
 
 describe("WinDetailPage", () => {
@@ -143,7 +149,7 @@ describe("WinDetailPage", () => {
     await user.click(screen.getByRole("button", { name: /submit claim/i }));
 
     expect(await screen.findByText(/claim submitted/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/claimed/i)[0]).toBeInTheDocument();
+    expect(screen.getAllByText(/preparing shipment/i)[0]).toBeInTheDocument();
   });
 
   it("does not allow claiming when already claimed", async () => {
@@ -166,5 +172,40 @@ describe("WinDetailPage", () => {
     expect(
       screen.queryByRole("button", { name: /claim prize/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it("shows tracking details when shipped", async () => {
+    mockedWinsApi.get.mockResolvedValue({
+      ...pendingDetail,
+      auctionId: 555,
+      auctionTitle: "PlayStation 5",
+      fulfillmentStatus: "shipped",
+      shippingCarrier: "UPS",
+      trackingNumber: "1Z999AA10123456784",
+      trackingUrl: "https://www.ups.com/track?tracknum=1Z999AA10123456784",
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/account/wins/555"]}>
+        <Routes>
+          <Route path="/account/wins/:auction_id" element={<WinDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: /playstation 5/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /tracking/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/ups/i)).toBeInTheDocument();
+    expect(screen.getByText(/1z999aa10123456784/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /track package/i }),
+    ).toHaveAttribute(
+      "href",
+      "https://www.ups.com/track?tracknum=1Z999AA10123456784",
+    );
   });
 });
