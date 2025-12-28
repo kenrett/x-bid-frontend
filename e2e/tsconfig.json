@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node", "@playwright/test"],
+    "lib": ["ESNext"]
+  },
+  "include": ["./**/*.ts", "./**/*.tsx"]
+}
