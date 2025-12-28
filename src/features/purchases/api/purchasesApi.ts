@@ -199,7 +199,7 @@ const toSummary = (purchase: PurchaseDetail): PurchaseSummary => ({
 });
 
 const list = async (): Promise<PurchaseSummary[]> => {
-  const response = await client.get("/api/v1/purchases");
+  const response = await client.get("/api/v1/me/purchases");
   const rawPurchases = extractPurchasesArray(response.data);
 
   if (!rawPurchases) {
@@ -216,7 +216,7 @@ const list = async (): Promise<PurchaseSummary[]> => {
 };
 
 const get = async (id: number | string): Promise<PurchaseDetail> => {
-  const response = await client.get(`/api/v1/purchases/${id}`);
+  const response = await client.get(`/api/v1/me/purchases/${id}`);
   try {
     return normalizePurchase(response.data);
   } catch {
