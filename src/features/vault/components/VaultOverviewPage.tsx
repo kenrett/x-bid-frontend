@@ -42,6 +42,16 @@ export const VaultOverviewPage = () => (
         </p>
       </Link>
 
+      <Link to="/account/wins" className={CARD_CLASSES}>
+        <p className="text-xs uppercase tracking-wide text-pink-300">
+          Won Auctions
+        </p>
+        <h3 className="text-xl font-semibold text-white">Your prizes</h3>
+        <p className="text-sm text-gray-400">
+          Track winning bids and fulfillment status.
+        </p>
+      </Link>
+
       <Link to="/account/profile" className={CARD_CLASSES}>
         <p className="text-xs uppercase tracking-wide text-pink-300">Profile</p>
         <h3 className="text-xl font-semibold text-white">Account details</h3>

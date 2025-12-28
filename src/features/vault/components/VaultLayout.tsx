@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { label: "Bid History", to: "/account/wallet" },
   { label: "My Activity", to: "/account/activity" },
   { label: "Purchases", to: "/account/purchases" },
+  { label: "Won Auctions", to: "/account/wins" },
   { label: "Profile", to: "/account/profile" },
 ];
 

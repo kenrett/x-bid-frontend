@@ -37,6 +37,8 @@ import { VaultLayout } from "@features/vault/components/VaultLayout";
 import { VaultOverviewPage } from "@features/vault/components/VaultOverviewPage";
 import { VaultProfilePage } from "@features/vault/components/VaultProfilePage";
 import { ActivityPage } from "@features/activity/components/ActivityPage";
+import { WinsListPage } from "@features/wins/components/WinsListPage";
+import { WinDetailPage } from "@features/wins/components/WinDetailPage";
 
 export const router = createBrowserRouter([
   {
@@ -65,6 +67,8 @@ export const router = createBrowserRouter([
               { path: "wallet", element: <BidHistoryPage /> },
               { path: "purchases", element: <PurchasesListPage /> },
               { path: "purchases/:id", element: <PurchaseDetailPage /> },
+              { path: "wins", element: <WinsListPage /> },
+              { path: "wins/:auction_id", element: <WinDetailPage /> },
               { path: "activity", element: <ActivityPage /> },
               { path: "profile", element: <VaultProfilePage /> },
             ],

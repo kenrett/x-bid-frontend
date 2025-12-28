@@ -31,6 +31,7 @@ describe("router configuration", () => {
     const accountChildren = accountLayout?.children;
     expect(hasPath(accountChildren, "wallet")).toBe(true);
     expect(hasPath(accountChildren, "purchases")).toBe(true);
+    expect(hasPath(accountChildren, "wins")).toBe(true);
     expect(hasPath(accountChildren, "activity")).toBe(true);
     expect(hasPath(children, "/maintenance")).toBe(true);
     expect(hasPath(children, "/admin")).toBe(true);
