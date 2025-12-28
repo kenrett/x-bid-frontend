@@ -21,7 +21,8 @@ export default defineConfig({
       ...process.env,
       VITE_API_URL: process.env.VITE_API_URL ?? "http://127.0.0.1:4173",
       VITE_STRIPE_PUBLISHABLE_KEY:
-        process.env.VITE_STRIPE_PUBLISHABLE_KEY ?? "pk_test_stubbed",
+        process.env.VITE_STRIPE_PUBLISHABLE_KEY ??
+        "pk_test_123456789012345678901234567890",
       VITE_E2E_TESTS: "true",
     },
   },
