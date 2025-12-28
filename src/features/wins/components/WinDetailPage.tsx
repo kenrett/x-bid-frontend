@@ -11,6 +11,7 @@ import type {
 } from "../types/win";
 import { parseApiError } from "@utils/apiError";
 import axios from "axios";
+import { showToast } from "@services/toast";
 
 const formatDate = (value: string) => {
   if (!value) return "—";
@@ -256,6 +257,7 @@ export const WinDetailPage = () => {
       setShowClaimForm(false);
       setClaimError(null);
       setFieldErrors({});
+      showToast("Claim submitted.", "success");
     } catch (err) {
       const parsed = parseApiError(err);
       if (parsed.type === "validation") {
@@ -428,6 +430,20 @@ export const WinDetailPage = () => {
             <p className="text-sm text-green-100/80 mt-1">
               We&apos;ll follow up if we need anything else.
             </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                to="/account/wins"
+                className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-white transition-colors"
+              >
+                Back to wins
+              </Link>
+              <Link
+                to={`/auctions/${win.auctionId}`}
+                className="text-sm font-semibold bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-4 py-2 text-white transition-colors"
+              >
+                View auction
+              </Link>
+            </div>
           </div>
         ) : null}
 
