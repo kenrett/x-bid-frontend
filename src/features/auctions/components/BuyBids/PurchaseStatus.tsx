@@ -5,6 +5,7 @@ import client from "@api/client";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { CheckoutSuccessResponse } from "../../types/checkout";
 import { Page } from "@components/Page";
+import { parseApiError } from "@utils/apiError";
 import {
   reportUnexpectedResponse,
   UNEXPECTED_RESPONSE_MESSAGE,
@@ -74,9 +75,7 @@ export const PurchaseStatus = () => {
         if (err instanceof UnexpectedResponseError) {
           setMessage(UNEXPECTED_RESPONSE_MESSAGE);
         } else if (axios.isAxiosError(err)) {
-          setMessage(
-            err.response?.data?.error || "Failed to verify payment status.",
-          );
+          setMessage(parseApiError(err).message);
         } else {
           setMessage("An unexpected error occurred.");
         }
