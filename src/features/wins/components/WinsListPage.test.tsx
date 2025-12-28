@@ -39,7 +39,7 @@ const wins: WinSummary[] = [
     endedAt: "2024-05-04T09:00:00Z",
     finalPrice: 12.5,
     currency: "usd",
-    fulfillmentStatus: "unclaimed",
+    fulfillmentStatus: "pending",
   },
   {
     auctionId: 102,
@@ -76,7 +76,7 @@ describe("WinsListPage", () => {
 
     expect(await screen.findByText(/macbook pro/i)).toBeInTheDocument();
     expect(screen.getByText(/\$12\.50/)).toBeInTheDocument();
-    expect(screen.getByText(/unclaimed/i)).toBeInTheDocument();
+    expect(screen.getByText(/pending/i)).toBeInTheDocument();
 
     const user = userEvent.setup();
     await user.click(

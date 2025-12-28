@@ -4,8 +4,13 @@ import { Page } from "@components/Page";
 import { LoadingScreen } from "@components/LoadingScreen";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { winsApi } from "../api/winsApi";
-import type { WinDetail, WinFulfillmentStatus } from "../types/win";
+import type {
+  WinClaimAddress,
+  WinDetail,
+  WinFulfillmentStatus,
+} from "../types/win";
 import { parseApiError } from "@utils/apiError";
+import axios from "axios";
 
 const formatDate = (value: string) => {
   if (!value) return "—";
@@ -32,9 +37,9 @@ const formatMoney = (amount: number, currency: string | null) => {
 };
 
 const statusMeta = (status: WinFulfillmentStatus) => {
-  if (status === "unclaimed") {
+  if (status === "pending" || status === "unclaimed") {
     return {
-      label: "Unclaimed",
+      label: "Pending",
       styles: "bg-amber-900 text-amber-100 border border-amber-300/40",
       action: "Claim prize",
     };
@@ -111,6 +116,21 @@ export const WinDetailPage = () => {
   const [win, setWin] = useState<WinDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [claimCompleted, setClaimCompleted] = useState(false);
+  const [showClaimForm, setShowClaimForm] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<keyof WinClaimAddress, string>>
+  >({});
+  const [claimAddress, setClaimAddress] = useState<WinClaimAddress>({
+    name: "",
+    street: "",
+    city: "",
+    state: "",
+    zip: "",
+    country: "",
+  });
 
   const loginRedirect = useMemo(
     () =>
@@ -127,6 +147,10 @@ export const WinDetailPage = () => {
     }
     setIsLoading(true);
     setError(null);
+    setClaimCompleted(false);
+    setShowClaimForm(false);
+    setClaimError(null);
+    setFieldErrors({});
     try {
       const data = await winsApi.get(auction_id);
       setWin(data);
@@ -143,6 +167,111 @@ export const WinDetailPage = () => {
       setIsLoading(false);
     }
   }, [auction_id]);
+
+  const canClaim = win?.fulfillmentStatus === "pending";
+
+  const validateClaim = (address: WinClaimAddress) => {
+    const next: Partial<Record<keyof WinClaimAddress, string>> = {};
+    const required: (keyof WinClaimAddress)[] = [
+      "name",
+      "street",
+      "city",
+      "state",
+      "zip",
+      "country",
+    ];
+    for (const key of required) {
+      if (!address[key]?.trim()) next[key] = "Required.";
+    }
+    return next;
+  };
+
+  const parseClaimValidationErrors = (
+    err: unknown,
+  ): {
+    fields: Partial<Record<keyof WinClaimAddress, string>>;
+    message: string | null;
+  } => {
+    if (!axios.isAxiosError(err)) {
+      return { fields: {}, message: parseApiError(err).message };
+    }
+
+    const data = err.response?.data as unknown;
+    if (!data || typeof data !== "object") {
+      return { fields: {}, message: parseApiError(err).message };
+    }
+
+    const record = data as Record<string, unknown>;
+    const errors = record.errors;
+    if (!errors || typeof errors !== "object") {
+      return { fields: {}, message: parseApiError(err).message };
+    }
+
+    const errorMap = errors as Record<string, unknown>;
+    const fields: Partial<Record<keyof WinClaimAddress, string>> = {};
+    const keys: (keyof WinClaimAddress)[] = [
+      "name",
+      "street",
+      "city",
+      "state",
+      "zip",
+      "country",
+    ];
+
+    for (const key of keys) {
+      const value = errorMap[key];
+      if (typeof value === "string" && value.trim()) {
+        fields[key] = value;
+      } else if (Array.isArray(value) && typeof value[0] === "string") {
+        fields[key] = value[0];
+      }
+    }
+
+    const message =
+      typeof record.message === "string" && record.message.trim()
+        ? record.message
+        : null;
+    return { fields, message };
+  };
+
+  const handleClaimSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!auction_id || !win) return;
+
+    setClaimError(null);
+    setFieldErrors({});
+
+    const clientErrors = validateClaim(claimAddress);
+    if (Object.keys(clientErrors).length > 0) {
+      setFieldErrors(clientErrors);
+      return;
+    }
+
+    setIsClaiming(true);
+    try {
+      const updated = await winsApi.claim(auction_id, claimAddress);
+      setWin({ ...updated, fulfillmentStatus: "claimed" });
+      setClaimCompleted(true);
+      setShowClaimForm(false);
+      setClaimError(null);
+      setFieldErrors({});
+    } catch (err) {
+      const parsed = parseApiError(err);
+      if (parsed.type === "validation") {
+        const details = parseClaimValidationErrors(err);
+        setFieldErrors(details.fields);
+        setClaimError(
+          details.message ?? "Please review the highlighted fields.",
+        );
+      } else {
+        setClaimError(
+          "We couldn't submit your claim right now. Please try again.",
+        );
+      }
+    } finally {
+      setIsClaiming(false);
+    }
+  };
 
   useEffect(() => {
     if (!isReady) return;
@@ -230,7 +359,7 @@ export const WinDetailPage = () => {
               to={`/auctions/${win.auctionId}`}
               className="text-sm text-pink-200 hover:text-pink-100 underline underline-offset-2"
             >
-              {meta.action}
+              View auction
             </Link>
           </div>
         </div>
@@ -243,6 +372,114 @@ export const WinDetailPage = () => {
           <SummaryItem label="Ended" value={formatDate(win.endedAt)} />
           <SummaryItem label="Fulfillment" value={meta.label} />
         </div>
+
+        {claimCompleted || win.fulfillmentStatus === "claimed" ? (
+          <div className="rounded-2xl border border-green-400/30 bg-green-900/20 p-5 text-green-100 shadow-lg shadow-black/10">
+            <p className="font-semibold">Claim submitted.</p>
+            <p className="text-sm text-green-100/80 mt-1">
+              We&apos;ll follow up if we need anything else.
+            </p>
+          </div>
+        ) : null}
+
+        {canClaim ? (
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg shadow-black/10 space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-white">
+                  Claim prize
+                </h3>
+                <p className="text-sm text-gray-300">
+                  Provide your shipping details to claim this win.
+                </p>
+              </div>
+              {!showClaimForm ? (
+                <button
+                  onClick={() => setShowClaimForm(true)}
+                  className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-white transition-colors whitespace-nowrap"
+                >
+                  Claim prize
+                </button>
+              ) : null}
+            </div>
+
+            {showClaimForm ? (
+              <form className="space-y-4" onSubmit={handleClaimSubmit}>
+                {claimError ? (
+                  <p
+                    className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-200"
+                    role="alert"
+                  >
+                    {claimError}
+                  </p>
+                ) : null}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {(
+                    [
+                      ["name", "Full name", "Jane Winner"],
+                      ["street", "Street address", "123 Main St"],
+                      ["city", "City", "Austin"],
+                      ["state", "State", "TX"],
+                      ["zip", "ZIP", "78701"],
+                      ["country", "Country", "US"],
+                    ] as const
+                  ).map(([key, label, placeholder]) => (
+                    <div key={key} className="space-y-2">
+                      <label
+                        htmlFor={`claim-${key}`}
+                        className="block text-sm font-semibold text-white"
+                      >
+                        {label}
+                      </label>
+                      <input
+                        id={`claim-${key}`}
+                        name={key}
+                        type="text"
+                        value={claimAddress[key]}
+                        onChange={(e) =>
+                          setClaimAddress((prev) => ({
+                            ...prev,
+                            [key]: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
+                        placeholder={placeholder}
+                        aria-invalid={fieldErrors[key] ? "true" : "false"}
+                      />
+                      {fieldErrors[key] ? (
+                        <p className="text-xs text-red-200" role="alert">
+                          {fieldErrors[key]}
+                        </p>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowClaimForm(false);
+                      setClaimError(null);
+                      setFieldErrors({});
+                    }}
+                    className="text-sm font-semibold bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-4 py-2 text-white transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isClaiming}
+                    className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-white transition-colors disabled:opacity-60"
+                  >
+                    {isClaiming ? "Submitting..." : "Submit claim"}
+                  </button>
+                </div>
+              </form>
+            ) : null}
+          </div>
+        ) : null}
 
         {win.fulfillmentNote ? (
           <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg shadow-black/10 space-y-2">

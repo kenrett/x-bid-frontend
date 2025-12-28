@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { WinDetailPage } from "./WinDetailPage";
 import { useAuth } from "@features/auth/hooks/useAuth";
@@ -41,6 +42,16 @@ const detail: WinDetail = {
   fulfillmentNote: "We are preparing your shipment.",
 };
 
+const pendingDetail: WinDetail = {
+  auctionId: 321,
+  auctionTitle: "DJI Drone",
+  endedAt: "2024-05-07T12:00:00Z",
+  finalPrice: 88,
+  currency: "usd",
+  fulfillmentStatus: "pending",
+  fulfillmentNote: null,
+};
+
 describe("WinDetailPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -66,5 +77,94 @@ describe("WinDetailPage", () => {
     expect(
       screen.getByText(/we are preparing your shipment/i),
     ).toBeInTheDocument();
+  });
+
+  it("renders claim form when win is pending", async () => {
+    mockedWinsApi.get.mockResolvedValue(pendingDetail);
+
+    render(
+      <MemoryRouter initialEntries={["/account/wins/321"]}>
+        <Routes>
+          <Route path="/account/wins/:auction_id" element={<WinDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: /dji drone/i }),
+    ).toBeInTheDocument();
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /claim prize/i }));
+
+    expect(
+      screen.getByRole("textbox", { name: /full name/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /submit claim/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("submitting a claim updates the UI to claimed", async () => {
+    mockedWinsApi.get.mockResolvedValue(pendingDetail);
+    mockedWinsApi.claim.mockResolvedValue({
+      ...pendingDetail,
+      fulfillmentStatus: "claimed",
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/account/wins/321"]}>
+        <Routes>
+          <Route path="/account/wins/:auction_id" element={<WinDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: /dji drone/i }),
+    ).toBeInTheDocument();
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /claim prize/i }));
+
+    await user.type(
+      screen.getByRole("textbox", { name: /full name/i }),
+      "Jane Winner",
+    );
+    await user.type(
+      screen.getByRole("textbox", { name: /street address/i }),
+      "123 Main St",
+    );
+    await user.type(screen.getByRole("textbox", { name: /city/i }), "Austin");
+    await user.type(screen.getByRole("textbox", { name: /state/i }), "TX");
+    await user.type(screen.getByRole("textbox", { name: /zip/i }), "78701");
+    await user.type(screen.getByRole("textbox", { name: /country/i }), "US");
+
+    await user.click(screen.getByRole("button", { name: /submit claim/i }));
+
+    expect(await screen.findByText(/claim submitted/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/claimed/i)[0]).toBeInTheDocument();
+  });
+
+  it("does not allow claiming when already claimed", async () => {
+    mockedWinsApi.get.mockResolvedValue({
+      ...pendingDetail,
+      fulfillmentStatus: "claimed",
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/account/wins/321"]}>
+        <Routes>
+          <Route path="/account/wins/:auction_id" element={<WinDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: /dji drone/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /claim prize/i }),
+    ).not.toBeInTheDocument();
   });
 });

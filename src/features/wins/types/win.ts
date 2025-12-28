@@ -1,4 +1,5 @@
 export type WinFulfillmentStatus =
+  | "pending"
   | "unclaimed"
   | "claimed"
   | "processing"
@@ -8,6 +9,15 @@ export type WinFulfillmentStatus =
   | "cancelled"
   | "canceled"
   | "unknown";
+
+export type WinClaimAddress = {
+  name: string;
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+};
 
 export type WinSummary = {
   auctionId: number;

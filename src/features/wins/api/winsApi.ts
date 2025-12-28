@@ -1,6 +1,11 @@
 import client from "@api/client";
 import { reportUnexpectedResponse } from "@services/unexpectedResponse";
-import type { WinDetail, WinFulfillmentStatus, WinSummary } from "../types/win";
+import type {
+  WinClaimAddress,
+  WinDetail,
+  WinFulfillmentStatus,
+  WinSummary,
+} from "../types/win";
 
 const toNumber = (value: unknown): number | null => {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -14,7 +19,13 @@ const toNumber = (value: unknown): number | null => {
 const normalizeStatus = (value: unknown): WinFulfillmentStatus => {
   const status = typeof value === "string" ? value.toLowerCase() : "";
   if (!status) return "unknown";
-  if (status === "unclaimed" || status === "pending_claim") return "unclaimed";
+  if (
+    status === "pending" ||
+    status === "unclaimed" ||
+    status === "pending_claim" ||
+    status === "awaiting_claim"
+  )
+    return "pending";
   if (status === "claimed") return "claimed";
   if (status === "processing" || status === "packing") return "processing";
   if (status === "shipped" || status === "in_transit") return "shipped";
@@ -182,4 +193,17 @@ const get = async (auctionId: number | string): Promise<WinDetail> => {
 export const winsApi = {
   list,
   get,
+  claim: async (
+    auctionId: number | string,
+    address: WinClaimAddress,
+  ): Promise<WinDetail> => {
+    const response = await client.post(`/api/v1/me/wins/${auctionId}/claim`, {
+      address,
+    });
+    try {
+      return normalizeWin(response.data);
+    } catch {
+      throw reportUnexpectedResponse("wins.claim", response.data);
+    }
+  },
 };

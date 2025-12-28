@@ -31,9 +31,9 @@ const formatMoney = (amount: number, currency: string | null) => {
 };
 
 const statusMeta = (status: WinFulfillmentStatus) => {
-  if (status === "unclaimed") {
+  if (status === "pending" || status === "unclaimed") {
     return {
-      label: "Unclaimed",
+      label: "Pending",
       styles: "bg-amber-900 text-amber-100 border border-amber-300/40",
     };
   }
@@ -91,7 +91,9 @@ const StatusBadge = ({ status }: { status: WinFulfillmentStatus }) => {
 };
 
 const primaryActionLabel = (status: WinFulfillmentStatus) =>
-  status === "unclaimed" ? "Claim prize" : "View details";
+  status === "pending" || status === "unclaimed"
+    ? "Claim prize"
+    : "View details";
 
 const TableSkeleton = () => (
   <tbody className="divide-y divide-white/10">
