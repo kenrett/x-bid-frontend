@@ -118,10 +118,11 @@ export const WinDetailPage = () => {
   >({});
   const [claimAddress, setClaimAddress] = useState<WinClaimAddress>({
     name: "",
-    street: "",
+    line1: "",
+    line2: "",
     city: "",
     state: "",
-    zip: "",
+    postal_code: "",
     country: "",
   });
 
@@ -167,10 +168,10 @@ export const WinDetailPage = () => {
     const next: Partial<Record<keyof WinClaimAddress, string>> = {};
     const required: (keyof WinClaimAddress)[] = [
       "name",
-      "street",
+      "line1",
       "city",
       "state",
-      "zip",
+      "postal_code",
       "country",
     ];
     for (const key of required) {
@@ -200,14 +201,21 @@ export const WinDetailPage = () => {
       return { fields: {}, message: parseApiError(err).message };
     }
 
-    const errorMap = errors as Record<string, unknown>;
+    const errorMapRoot = errors as Record<string, unknown>;
+    const maybeShipping =
+      errorMapRoot.shipping_address &&
+      typeof errorMapRoot.shipping_address === "object"
+        ? (errorMapRoot.shipping_address as Record<string, unknown>)
+        : null;
+    const errorMap = maybeShipping ?? errorMapRoot;
     const fields: Partial<Record<keyof WinClaimAddress, string>> = {};
     const keys: (keyof WinClaimAddress)[] = [
       "name",
-      "street",
+      "line1",
+      "line2",
       "city",
       "state",
-      "zip",
+      "postal_code",
       "country",
     ];
 
@@ -459,10 +467,11 @@ export const WinDetailPage = () => {
                   {(
                     [
                       ["name", "Full name", "Jane Winner"],
-                      ["street", "Street address", "123 Main St"],
+                      ["line1", "Address line 1", "123 Main St"],
+                      ["line2", "Address line 2 (optional)", "Apt 4"],
                       ["city", "City", "Austin"],
                       ["state", "State", "TX"],
-                      ["zip", "ZIP", "78701"],
+                      ["postal_code", "Postal code", "78701"],
                       ["country", "Country", "US"],
                     ] as const
                   ).map(([key, label, placeholder]) => (

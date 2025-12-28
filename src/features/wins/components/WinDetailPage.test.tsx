@@ -107,6 +107,9 @@ describe("WinDetailPage", () => {
       screen.getByRole("textbox", { name: /full name/i }),
     ).toBeInTheDocument();
     expect(
+      screen.getByRole("textbox", { name: /address line 1/i }),
+    ).toBeInTheDocument();
+    expect(
       screen.getByRole("button", { name: /submit claim/i }),
     ).toBeInTheDocument();
   });
@@ -138,12 +141,19 @@ describe("WinDetailPage", () => {
       "Jane Winner",
     );
     await user.type(
-      screen.getByRole("textbox", { name: /street address/i }),
+      screen.getByRole("textbox", { name: /address line 1/i }),
       "123 Main St",
+    );
+    await user.type(
+      screen.getByRole("textbox", { name: /address line 2/i }),
+      "Apt 4",
     );
     await user.type(screen.getByRole("textbox", { name: /city/i }), "Austin");
     await user.type(screen.getByRole("textbox", { name: /state/i }), "TX");
-    await user.type(screen.getByRole("textbox", { name: /zip/i }), "78701");
+    await user.type(
+      screen.getByRole("textbox", { name: /postal code/i }),
+      "78701",
+    );
     await user.type(screen.getByRole("textbox", { name: /country/i }), "US");
 
     await user.click(screen.getByRole("button", { name: /submit claim/i }));

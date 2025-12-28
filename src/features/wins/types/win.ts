@@ -12,10 +12,11 @@ export type WinFulfillmentStatus =
 
 export type WinClaimAddress = {
   name: string;
-  street: string;
+  line1: string;
+  line2?: string;
   city: string;
   state: string;
-  zip: string;
+  postal_code: string;
   country: string;
 };
 

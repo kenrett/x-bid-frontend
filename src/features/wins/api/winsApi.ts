@@ -291,9 +291,17 @@ export const winsApi = {
     auctionId: number | string,
     address: WinClaimAddress,
   ): Promise<WinDetail> => {
-    const response = await client.post(`/api/v1/me/wins/${auctionId}/claim`, {
-      address,
-    });
+    const response = await client.post(
+      `/api/v1/me/wins/${auctionId}/claim`,
+      {
+        shipping_address: address,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
     try {
       return normalizeWin(response.data);
     } catch {
