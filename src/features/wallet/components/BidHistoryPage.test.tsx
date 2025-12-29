@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { BidHistoryPage } from "./BidHistoryPage";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { walletApi } from "../api/walletApi";
@@ -92,6 +92,9 @@ describe("BidHistoryPage", () => {
 
     expect(await screen.findByText(/credits balance/i)).toBeInTheDocument();
     expect(screen.getByText(/120(\.00)? credits/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /purchases/i }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/top-up/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /load more/i })).toBeEnabled();
 
@@ -149,5 +152,34 @@ describe("BidHistoryPage", () => {
     expect(mockedWalletApi.getWallet.mock.calls.length).toBeGreaterThan(
       callCountBeforeRetry,
     );
+  });
+
+  it("navigates to purchases from wallet link", async () => {
+    mockedWalletApi.listTransactions.mockResolvedValue({
+      transactions: baseTransactions,
+      page: 1,
+      perPage: 25,
+      totalCount: 1,
+      hasMore: false,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/account/wallet"]}>
+        <Routes>
+          <Route path="/account/wallet" element={<BidHistoryPage />} />
+          <Route
+            path="/account/purchases"
+            element={<div>Purchases page</div>}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/credits balance/i)).toBeInTheDocument();
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("link", { name: /purchases/i }));
+
+    expect(await screen.findByText(/purchases page/i)).toBeInTheDocument();
   });
 });

@@ -24,11 +24,15 @@ describe("purchasesApi", () => {
         currency: "usd",
         status: "paid",
         receipt_url: "https://stripe.com/receipt/123",
+        stripe_charge_id: "ch_123",
+        stripe_event_id: "evt_123",
       },
     });
 
     const purchase = await purchasesApi.get(123);
     expect(purchase.receiptUrl).toBe("https://stripe.com/receipt/123");
+    expect(purchase.stripeChargeId).toBe("ch_123");
+    expect(purchase.stripeEventId).toBe("evt_123");
   });
 
   it("does not emit a receiptUrl when receipt_url is missing/blank", async () => {

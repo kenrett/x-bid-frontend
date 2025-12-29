@@ -162,10 +162,22 @@ const normalizePurchase = (raw: unknown): PurchaseDetail => {
       ? (data as { stripe_payment_intent_id: string }).stripe_payment_intent_id
       : null;
 
-  const stripeChargeId = null;
+  const stripeChargeId =
+    typeof (data as { stripe_charge_id?: unknown }).stripe_charge_id ===
+    "string"
+      ? (data as { stripe_charge_id: string }).stripe_charge_id
+      : typeof (data as { stripeChargeId?: unknown }).stripeChargeId ===
+          "string"
+        ? (data as { stripeChargeId: string }).stripeChargeId
+        : null;
   const stripeCustomerId = null;
   const stripeInvoiceId = null;
-  const stripeEventId = null;
+  const stripeEventId =
+    typeof (data as { stripe_event_id?: unknown }).stripe_event_id === "string"
+      ? (data as { stripe_event_id: string }).stripe_event_id
+      : typeof (data as { stripeEventId?: unknown }).stripeEventId === "string"
+        ? (data as { stripeEventId: string }).stripeEventId
+        : null;
 
   return {
     id,

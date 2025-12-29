@@ -238,12 +238,25 @@ export const BidHistoryPage = () => {
           <p className="text-xs uppercase tracking-[0.2em] text-pink-400">
             Account
           </p>
-          <h1 className="font-serif text-4xl font-bold text-white">
-            Bid History
-          </h1>
-          <p className="text-gray-400">
-            Track your credits balance and the activity behind every change.
-          </p>
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="space-y-2">
+              <h1 className="font-serif text-4xl font-bold text-white">
+                Bid History
+              </h1>
+              <p className="text-gray-400">
+                Track your credits balance and the activity behind every change.
+              </p>
+            </div>
+            <div className="flex gap-3 flex-wrap">
+              <Link
+                to="/account/purchases"
+                data-testid="wallet-purchases-link"
+                className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-white transition-colors"
+              >
+                Purchases
+              </Link>
+            </div>
+          </div>
         </div>
 
         {error && !isLoading && (
