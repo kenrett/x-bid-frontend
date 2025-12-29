@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { showToast } from "@services/toast";
 import { logAdminAction } from "@features/admin/api/adminAudit";
@@ -24,6 +25,7 @@ export const AdminUsersPage = () => {
   }, [users, userSearch]);
 
   useEffect(() => {
+    if (!isSuperAdmin) return;
     let mounted = true;
 
     const fetchUsers = async () => {
@@ -40,7 +42,7 @@ export const AdminUsersPage = () => {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [isSuperAdmin]);
 
   const requireSuper = (action: () => void) => {
     if (!isSuperAdmin) {
@@ -112,6 +114,34 @@ export const AdminUsersPage = () => {
         "Superadmin access removed",
       );
     });
+
+  if (!isSuperAdmin) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <p className="text-xs uppercase tracking-wide text-gray-500">Users</p>
+          <h2 className="text-3xl font-serif font-bold text-white">
+            Admin accounts
+          </h2>
+          <p className="text-sm text-gray-400 mt-1">Superadmin-only page.</p>
+        </div>
+        <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-gray-200">
+          <p className="font-semibold text-white">Access denied</p>
+          <p className="text-sm text-gray-400 mt-1">
+            You don&apos;t have permission to view admin user management.
+          </p>
+          <div className="mt-4 flex gap-3">
+            <Link
+              to="/admin"
+              className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-white transition-colors"
+            >
+              Back to admin
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -3,16 +3,19 @@ import { useAuth } from "@features/auth/hooks/useAuth";
 import { Page } from "@components/Page";
 import { ADMIN_PATHS } from "./adminPaths";
 
-const NAV_ITEMS = [
-  { label: "Auctions", to: `/admin/${ADMIN_PATHS.auctions}` },
-  { label: "Bid Packs", to: `/admin/${ADMIN_PATHS.bidPacks}` },
-  { label: "Users", to: `/admin/${ADMIN_PATHS.users}` },
-  { label: "Payments", to: `/admin/${ADMIN_PATHS.payments}` },
-  { label: "Settings", to: `/admin/${ADMIN_PATHS.settings}` },
-];
-
 export const AdminLayout = () => {
   const { user, logout } = useAuth();
+  const isSuperuser = Boolean(user?.is_superuser);
+
+  const navItems = [
+    { label: "Auctions", to: `/admin/${ADMIN_PATHS.auctions}` },
+    { label: "Bid Packs", to: `/admin/${ADMIN_PATHS.bidPacks}` },
+    ...(isSuperuser
+      ? [{ label: "Users", to: `/admin/${ADMIN_PATHS.users}` }]
+      : []),
+    { label: "Payments", to: `/admin/${ADMIN_PATHS.payments}` },
+    { label: "Settings", to: `/admin/${ADMIN_PATHS.settings}` },
+  ];
 
   return (
     <Page>
@@ -31,7 +34,7 @@ export const AdminLayout = () => {
               </div>
             </div>
             <nav className="flex flex-col gap-2" aria-label="Admin navigation">
-              {NAV_ITEMS.map((item) => (
+              {navItems.map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}

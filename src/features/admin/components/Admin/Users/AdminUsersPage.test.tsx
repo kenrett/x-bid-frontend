@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AdminUsersPage } from "./AdminUsersPage";
+import { MemoryRouter } from "react-router-dom";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { showToast } from "@services/toast";
 import { adminUsersApi } from "@features/admin/api/adminUsersApi";
@@ -75,7 +76,11 @@ describe("AdminUsersPage", () => {
   });
 
   it("fetches and renders users on load", async () => {
-    render(<AdminUsersPage />);
+    render(
+      <MemoryRouter>
+        <AdminUsersPage />
+      </MemoryRouter>,
+    );
 
     expect(screen.getByText(/admin accounts/i)).toBeInTheDocument();
     expect(mockedAdminUsersApi.getUsers).toHaveBeenCalled();
@@ -85,7 +90,11 @@ describe("AdminUsersPage", () => {
   });
 
   it("calls the ban user API when a superadmin bans a user", async () => {
-    render(<AdminUsersPage />);
+    render(
+      <MemoryRouter>
+        <AdminUsersPage />
+      </MemoryRouter>,
+    );
     const user = userEvent.setup();
 
     const banButton = (await screen.findAllByText(/ban user/i))[0];
@@ -97,7 +106,11 @@ describe("AdminUsersPage", () => {
   });
 
   it("calls the revoke admin API when a superadmin demotes an admin", async () => {
-    render(<AdminUsersPage />);
+    render(
+      <MemoryRouter>
+        <AdminUsersPage />
+      </MemoryRouter>,
+    );
     const user = userEvent.setup();
 
     const demoteButton = await screen.findByText(/remove admin/i);
@@ -112,7 +125,11 @@ describe("AdminUsersPage", () => {
   it("promotes a standard user when requested", async () => {
     const promoteTarget = { ...mockUsers[0], id: 9, role: "user" as const };
     mockedAdminUsersApi.getUsers.mockResolvedValue([promoteTarget]);
-    render(<AdminUsersPage />);
+    render(
+      <MemoryRouter>
+        <AdminUsersPage />
+      </MemoryRouter>,
+    );
     const user = userEvent.setup();
 
     const grantButton = await screen.findByText(/grant admin/i);
@@ -126,7 +143,11 @@ describe("AdminUsersPage", () => {
 
   it("removes superadmin access", async () => {
     mockedAdminUsersApi.getUsers.mockResolvedValue(mockUsers);
-    render(<AdminUsersPage />);
+    render(
+      <MemoryRouter>
+        <AdminUsersPage />
+      </MemoryRouter>,
+    );
     const user = userEvent.setup();
 
     const removeSuperButton = await screen.findByText(/remove superadmin/i);
@@ -143,7 +164,11 @@ describe("AdminUsersPage", () => {
 
   it("surfaces load errors", async () => {
     mockedAdminUsersApi.getUsers.mockRejectedValue(new Error("nope"));
-    render(<AdminUsersPage />);
+    render(
+      <MemoryRouter>
+        <AdminUsersPage />
+      </MemoryRouter>,
+    );
 
     await screen.findByText(/admin accounts/i);
     expect(showToast).toHaveBeenCalledWith(
@@ -157,10 +182,17 @@ describe("AdminUsersPage", () => {
       user: { id: 2, email: "admin@example.com", is_superuser: false },
       logout: vi.fn(),
     } as unknown as ReturnType<typeof useAuth>);
-    render(<AdminUsersPage />);
+    render(
+      <MemoryRouter>
+        <AdminUsersPage />
+      </MemoryRouter>,
+    );
 
-    await screen.findByText("Admin User");
-    expect(screen.queryByText(/ban user/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/remove admin/i)).not.toBeInTheDocument();
+    expect(
+      await screen.findByText(/superadmin-only page/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/access denied/i)).toBeInTheDocument();
+    expect(mockedAdminUsersApi.getUsers).not.toHaveBeenCalled();
+    expect(screen.queryByText("Admin User")).not.toBeInTheDocument();
   });
 });

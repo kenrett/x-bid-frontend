@@ -37,7 +37,23 @@ describe("AdminLayout", () => {
     expect(screen.getByText("admin@example.com")).toBeInTheDocument();
     expect(screen.getByLabelText("Admin navigation")).toBeInTheDocument();
     expect(screen.getByText("Auctions")).toBeInTheDocument();
+    expect(screen.queryByText("Users")).not.toBeInTheDocument();
     expect(screen.getByText("child content")).toBeInTheDocument();
+  });
+
+  it("shows Users nav only for superadmins", () => {
+    mockUseAuth.mockReturnValue({
+      user: {
+        name: "Super Admin",
+        email: "superadmin@example.com",
+        is_superuser: true,
+      },
+      logout: mockLogout,
+    });
+
+    renderAdminLayout();
+
+    expect(screen.getByText("Users")).toBeInTheDocument();
   });
 
   it("calls logout when button is clicked", () => {
