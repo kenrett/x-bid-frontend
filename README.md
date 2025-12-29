@@ -36,7 +36,7 @@ This is the frontend for XBid, a penny auction web application built with React.
 Make sure you have a running instance of the corresponding [XBid backend API](https://github.com/kenrettberg/x-bid-backend).
 
 - [Node.js](https://nodejs.org/) (v18 or later recommended)
-- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- [npm](https://www.npmjs.com/) (this repo uses `package-lock.json`)
 
 ### Installation & Setup
 
