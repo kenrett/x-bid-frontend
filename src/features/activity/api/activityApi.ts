@@ -17,6 +17,12 @@ const toNumber = (value: unknown): number | null => {
 };
 
 const normalizeKind = (value: unknown): ActivityKind => {
+  // Backend -> frontend "My Activity" mapping (current contract):
+  // - "bid_placed"      => kind "bid"
+  // - "auction_watched" => kind "watch"
+  // - "auction_won"     => kind "outcome" (outcome: "won")
+  // - "auction_lost"    => kind "outcome" (outcome: "lost")
+  // Any other/unknown type string falls back to kind "unknown".
   const lower = typeof value === "string" ? value.toLowerCase() : "";
   if (lower === "bid_placed") return "bid";
   if (lower === "auction_watched") return "watch";

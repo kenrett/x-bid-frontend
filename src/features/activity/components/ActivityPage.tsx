@@ -31,6 +31,7 @@ const kindIcon = (kind: ActivityKind, outcome?: "won" | "lost") => {
   if (kind === "watch") return "👀";
   if (outcome === "won") return "🏆";
   if (outcome === "lost") return "❌";
+  // Fallback for ActivityKind "unknown" (or any non-outcome item without a match).
   return "📜";
 };
 
@@ -67,6 +68,7 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
         ? `Winning bid: ${item.finalBid ?? "—"}`
         : "Auction ended";
     }
+    // Note: any non-bid/outcome item currently renders as "Watching" (including kind "unknown").
     return "Watching";
   })();
 
@@ -79,7 +81,8 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
           ? item.outcome === "won"
             ? "Won"
             : "Lost"
-          : "Activity";
+          : // Fallback label for kind "unknown".
+            "Activity";
 
   const icon = kindIcon(
     item.kind,
