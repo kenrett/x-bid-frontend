@@ -6,9 +6,12 @@ export type PurchaseSummary = {
   bidPackId?: number | null;
   bidPackName: string | null;
   credits: number | null;
+  creditsAdded?: number | null;
   amount: number;
   currency: string | null;
   status: PurchaseStatus;
+  paymentStatus?: string | null;
+  ledgerGrantEntryId?: number | null;
   receiptUrl?: string | null;
 };
 

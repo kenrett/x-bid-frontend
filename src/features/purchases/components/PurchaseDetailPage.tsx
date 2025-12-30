@@ -70,6 +70,47 @@ const DetailRow = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
+const formatPaymentStatus = (value: string | null | undefined) => {
+  if (!value) return "—";
+  const trimmed = value.trim();
+  if (!trimmed) return "—";
+  return trimmed.replace(/_/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase());
+};
+
+const CopyButton = ({
+  value,
+  label,
+}: {
+  value: string | null | undefined;
+  label: string;
+}) => {
+  const [copied, setCopied] = useState(false);
+  const isDisabled = !value;
+
+  const handleCopy = async () => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1200);
+    } catch {
+      // no-op (clipboard may be blocked)
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={() => void handleCopy()}
+      disabled={isDisabled}
+      aria-label={label}
+      className="text-xs font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-2 py-1 text-white transition-colors disabled:opacity-50 disabled:hover:bg-white/10"
+    >
+      {copied ? "Copied" : "Copy"}
+    </button>
+  );
+};
+
 const SummaryItem = ({ label, value }: { label: string; value: ReactNode }) => (
   <div className="bg-white/5 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/10 space-y-1">
     <p className="text-xs uppercase tracking-wide text-gray-400">{label}</p>
@@ -178,6 +219,7 @@ export const PurchaseDetailPage = () => {
   if (!purchase) return null;
 
   const statusBadge = <StatusBadge status={purchase.status} />;
+  const creditsAdded = purchase.creditsAdded ?? purchase.credits ?? null;
 
   return (
     <Page>
@@ -217,87 +259,146 @@ export const PurchaseDetailPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SummaryItem
-            label="Amount"
-            value={formatMoney(purchase.amount, purchase.currency)}
-          />
-          <SummaryItem label="Status" value={statusBadge} />
-          <SummaryItem
-            label="Bid pack"
-            value={
-              purchase.bidPackName ? (
-                <span className="text-white">
-                  {purchase.bidPackName}
-                  {purchase.bidPackId ? (
-                    <span className="text-gray-400">{` (#${purchase.bidPackId})`}</span>
-                  ) : null}
-                </span>
-              ) : (
-                <span className="text-gray-400">Unknown</span>
-              )
-            }
-          />
-          <SummaryItem
-            label="Credits"
-            value={
-              purchase.credits !== null && purchase.credits !== undefined ? (
-                `${purchase.credits.toLocaleString()} credits`
-              ) : (
-                <span className="text-gray-400">—</span>
-              )
-            }
-          />
-          <SummaryItem
-            label="Created at"
-            value={formatDate(purchase.createdAt)}
-          />
-        </div>
+        <section className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg shadow-black/10 space-y-4">
+          <h2 className="text-lg font-semibold text-white">Purchase details</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <SummaryItem
+              label="Pack"
+              value={
+                purchase.bidPackName ? (
+                  <span className="text-white">
+                    {purchase.bidPackName}
+                    {purchase.bidPackId ? (
+                      <span className="text-gray-400">{` (#${purchase.bidPackId})`}</span>
+                    ) : null}
+                  </span>
+                ) : (
+                  <span className="text-gray-400">Unknown</span>
+                )
+              }
+            />
+            <SummaryItem
+              label="Credits added"
+              value={
+                creditsAdded !== null && creditsAdded !== undefined ? (
+                  `${creditsAdded.toLocaleString()} credits`
+                ) : (
+                  <span className="text-gray-400">—</span>
+                )
+              }
+            />
+            <SummaryItem
+              label="Stripe / payment status"
+              value={formatPaymentStatus(purchase.paymentStatus)}
+            />
+            <SummaryItem
+              label="Amount"
+              value={formatMoney(purchase.amount, purchase.currency)}
+            />
+            <SummaryItem label="Status" value={statusBadge} />
+            <SummaryItem
+              label="Created at"
+              value={formatDate(purchase.createdAt)}
+            />
+            <SummaryItem
+              label="Receipt"
+              value={
+                purchase.receiptUrl ? (
+                  <a
+                    href={purchase.receiptUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-pink-200 hover:text-pink-100 underline underline-offset-2"
+                  >
+                    View receipt
+                  </a>
+                ) : (
+                  <span className="text-gray-400">—</span>
+                )
+              }
+            />
+          </div>
+        </section>
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg shadow-black/10 space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-white">
-              Technical details
-            </h3>
-            <button
-              onClick={() => setShowTechnical((prev) => !prev)}
-              className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors"
-            >
-              {showTechnical ? "Hide" : "Show"}
-            </button>
-          </div>
-          {showTechnical ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <DetailRow
-                label="Stripe checkout session"
-                value={purchase.stripeCheckoutSessionId || "—"}
-              />
-              <DetailRow
-                label="Stripe payment intent"
-                value={purchase.stripePaymentIntentId || "—"}
-              />
-              <DetailRow
-                label="Stripe charge"
-                value={purchase.stripeChargeId || "—"}
-              />
-              <DetailRow
-                label="Stripe invoice"
-                value={purchase.stripeInvoiceId || "—"}
-              />
-              <DetailRow
-                label="Stripe customer"
-                value={purchase.stripeCustomerId || "—"}
-              />
-              <DetailRow
-                label="Stripe event"
-                value={purchase.stripeEventId || "—"}
-              />
+          <details
+            open={showTechnical}
+            onToggle={(event) =>
+              setShowTechnical((event.target as HTMLDetailsElement).open)
+            }
+            className="group"
+          >
+            <summary className="flex items-center justify-between cursor-pointer list-none">
+              <h3 className="text-lg font-semibold text-white">
+                Support / Debug
+              </h3>
+              <span className="text-sm font-semibold bg-white/10 group-open:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors">
+                {showTechnical ? "Hide" : "Show"}
+              </span>
+            </summary>
+            <div className="mt-4 space-y-4">
+              <p className="text-sm text-gray-400">
+                Share these ids with support if something looks off.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center justify-between gap-3 text-sm text-white">
+                  <span className="text-gray-300">Purchase id</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold break-all text-right">
+                      {purchase.id}
+                    </span>
+                    <CopyButton
+                      value={String(purchase.id)}
+                      label="Copy purchase id"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-3 text-sm text-white">
+                  <span className="text-gray-300">Ledger grant entry id</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold break-all text-right">
+                      {purchase.ledgerGrantEntryId ?? "—"}
+                    </span>
+                    <CopyButton
+                      value={
+                        purchase.ledgerGrantEntryId !== null &&
+                        purchase.ledgerGrantEntryId !== undefined
+                          ? String(purchase.ledgerGrantEntryId)
+                          : null
+                      }
+                      label="Copy ledger grant entry id"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <DetailRow
+                  label="Stripe checkout session"
+                  value={purchase.stripeCheckoutSessionId || "—"}
+                />
+                <DetailRow
+                  label="Stripe payment intent"
+                  value={purchase.stripePaymentIntentId || "—"}
+                />
+                <DetailRow
+                  label="Stripe charge"
+                  value={purchase.stripeChargeId || "—"}
+                />
+                <DetailRow
+                  label="Stripe invoice"
+                  value={purchase.stripeInvoiceId || "—"}
+                />
+                <DetailRow
+                  label="Stripe customer"
+                  value={purchase.stripeCustomerId || "—"}
+                />
+                <DetailRow
+                  label="Stripe event"
+                  value={purchase.stripeEventId || "—"}
+                />
+              </div>
             </div>
-          ) : (
-            <p className="text-sm text-gray-400">
-              Stripe ids and billing details are available here when needed.
-            </p>
-          )}
+          </details>
         </div>
       </div>
     </Page>

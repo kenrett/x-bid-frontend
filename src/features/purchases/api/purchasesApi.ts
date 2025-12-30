@@ -92,13 +92,18 @@ const normalizePurchase = (raw: unknown): PurchaseDetail => {
       ? Number(amountCents) / 100
       : (amountSource ?? 0);
 
-  const credits =
-    toNumber((data as { credits?: unknown }).credits) ??
+  const creditsAdded =
+    toNumber((data as { credits_added?: unknown }).credits_added) ??
+    toNumber((data as { creditsAdded?: unknown }).creditsAdded) ??
     toNumber((data as { credit_amount?: unknown }).credit_amount) ??
     toNumber((data as { bid_credits?: unknown }).bid_credits) ??
+    toNumber((data as { credits?: unknown }).credits) ??
     toNumber((bidPack as { credits?: unknown })?.credits) ??
     toNumber((bidPack as { bid_credits?: unknown })?.bid_credits) ??
     null;
+
+  // Back-compat: many UIs currently read `credits` (treat as credits added).
+  const credits = creditsAdded;
 
   const createdAt =
     typeof data.created_at === "string"
@@ -116,11 +121,32 @@ const normalizePurchase = (raw: unknown): PurchaseDetail => {
           ? (data as { currencyCode: string }).currencyCode
           : null;
 
-  const status = normalizeStatus(
-    data.status ??
-      (data as { payment_status?: unknown }).payment_status ??
-      (data as { state?: unknown }).state,
-  );
+  const paymentStatusRaw =
+    typeof (data as { payment_status?: unknown }).payment_status === "string"
+      ? (data as { payment_status: string }).payment_status
+      : typeof (data as { paymentStatus?: unknown }).paymentStatus === "string"
+        ? (data as { paymentStatus: string }).paymentStatus
+        : typeof data.status === "string"
+          ? data.status
+          : typeof (data as { state?: unknown }).state === "string"
+            ? (data as { state: string }).state
+            : null;
+
+  const paymentStatus =
+    paymentStatusRaw && paymentStatusRaw.trim() !== ""
+      ? paymentStatusRaw
+      : null;
+
+  const status = normalizeStatus(paymentStatusRaw);
+
+  const ledgerGrantEntryId =
+    toNumber(
+      (data as { ledger_grant_entry_id?: unknown }).ledger_grant_entry_id,
+    ) ??
+    toNumber((data as { ledgerGrantEntryId?: unknown }).ledgerGrantEntryId) ??
+    toNumber((data as { ledger_entry_id?: unknown }).ledger_entry_id) ??
+    toNumber((data as { ledgerEntryId?: unknown }).ledgerEntryId) ??
+    null;
 
   const bidPackId =
     toNumber((bidPack as { id?: unknown })?.id) ??
@@ -185,9 +211,12 @@ const normalizePurchase = (raw: unknown): PurchaseDetail => {
     bidPackId,
     bidPackName,
     credits,
+    creditsAdded,
     amount: Number.isFinite(amount) ? amount : 0,
     currency,
     status,
+    paymentStatus,
+    ledgerGrantEntryId,
     receiptUrl,
     stripeCheckoutSessionId,
     stripePaymentIntentId,
@@ -204,9 +233,12 @@ const toSummary = (purchase: PurchaseDetail): PurchaseSummary => ({
   bidPackId: purchase.bidPackId ?? null,
   bidPackName: purchase.bidPackName,
   credits: purchase.credits,
+  creditsAdded: purchase.creditsAdded ?? purchase.credits ?? null,
   amount: purchase.amount,
   currency: purchase.currency,
   status: purchase.status,
+  paymentStatus: purchase.paymentStatus ?? null,
+  ledgerGrantEntryId: purchase.ledgerGrantEntryId ?? null,
   receiptUrl: purchase.receiptUrl ?? null,
 });
 

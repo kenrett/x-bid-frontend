@@ -83,10 +83,9 @@ describe("PurchaseDetailPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/\$55\.00/)).toBeInTheDocument();
     expect(screen.getAllByText(/succeeded/i)[0]).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /view receipt/i })).toHaveAttribute(
-      "href",
-      baseDetail.receiptUrl,
-    );
+    const receiptLinks = screen.getAllByRole("link", { name: /view receipt/i });
+    expect(receiptLinks.length).toBeGreaterThan(0);
+    expect(receiptLinks[0]).toHaveAttribute("href", baseDetail.receiptUrl);
   });
 
   it("does not render a receipt link when receiptUrl is missing", async () => {
