@@ -200,6 +200,49 @@ describe("SignUpForm Component", () => {
     consoleSpy.mockRestore();
   });
 
+  it("shows an unexpected server response error when auth fields are missing", async () => {
+    const user = userEvent.setup();
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    mockedClient.post.mockResolvedValue({
+      data: {
+        token: "fake-token",
+        // refresh_token intentionally missing
+        session_token_id: "session-token",
+        user: {
+          id: 1,
+          name: "Test User",
+          email: "test@example.com",
+          bidCredits: 0,
+          is_admin: false,
+          is_superuser: false,
+        },
+      },
+    });
+
+    renderComponent();
+
+    await user.type(screen.getByLabelText(/name/i), "Test User");
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "test@example.com",
+    );
+    await user.type(screen.getByLabelText(/^password/i), "password123");
+    await user.type(screen.getByLabelText(/confirm password/i), "password123");
+
+    await user.click(screen.getByRole("button", { name: /create account/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Unexpected server response. Please try again.",
+    );
+    expect(mockLogin).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("button", { name: /create account/i }),
+    ).toBeEnabled();
+
+    consoleSpy.mockRestore();
+  });
+
   it("prevents double submit while a request is in flight", async () => {
     const user = userEvent.setup();
     mockedClient.post.mockReturnValue(new Promise(() => {})); // never resolves

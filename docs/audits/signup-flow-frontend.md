@@ -143,11 +143,15 @@ Notes:
 
 ## Potential contract mismatch to verify
 
-The frontend **calls** `POST /api/v1/signup` (`src/features/auth/components/SignUpForm/SignUpForm.tsx:29`), but the OpenAPI overrides in this repo define a signup-like response under `POST /api/v1/users`:
+The frontend **calls** `POST /api/v1/signup` (`src/features/auth/components/SignUpForm/SignUpForm.tsx:29`), and the FE type layer now models signup as the same auth-session response contract as login.
 
-`src/api/openapi-helpers.ts:125-134` (response fields include `token`, `refresh_token`, `session_token_id`, `user`, `is_admin?`, `is_superuser?`).
+To keep signup/login aligned, `ApiJsonResponse<"/api/v1/signup","post">` is overridden to return the auth-session fields:
+`token`, `refresh_token`, `session_token_id`, `user`, and optional `is_admin`/`is_superuser`.
 
-If the backend only exposes `POST /api/v1/users` (and not `/api/v1/signup`), signup will fail at runtime despite the FE expectations.
+### Notes on OpenAPI generation
+
+- The generated OpenAPI types in `src/api/openapi-types.ts` may not include `/api/v1/signup` yet. The FE adds a local module-augmentation shim in `src/api/openapi-signup.d.ts` so `/api/v1/signup` is a valid `paths` key for `ApiJsonResponse`.
+- When the backend OpenAPI spec exposes `/api/v1/signup`, regenerate with `npm run gen:api-types` and the shim can be deleted.
 
 ## Common drift points (what must stay consistent)
 
