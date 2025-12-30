@@ -1,11 +1,42 @@
 import type { LoginPayload } from "../types/auth";
-import type { User } from "../types/user";
 import { normalizeUser } from "./user";
 
 type AuthApiResponse = Record<string, unknown>;
 
 const readString = (value: unknown): string | null =>
   typeof value === "string" && value.trim() !== "" ? value : null;
+
+function requireAuthFields(fields: {
+  token: string | null;
+  refreshToken: string | null;
+  sessionTokenId: string | null;
+  userRecord: Record<string, unknown> | null;
+}): {
+  token: string;
+  refreshToken: string;
+  sessionTokenId: string;
+  userRecord: Record<string, unknown>;
+} {
+  const missing: string[] = [];
+  if (!fields.token) missing.push("token");
+  if (!fields.refreshToken) missing.push("refresh_token (or refreshToken)");
+  if (!fields.sessionTokenId)
+    missing.push("session_token_id (or sessionTokenId)");
+  if (!fields.userRecord) missing.push("user");
+
+  if (missing.length) {
+    throw new Error(
+      `Unexpected auth response: missing required field(s): ${missing.join(", ")}`,
+    );
+  }
+
+  return {
+    token: fields.token!,
+    refreshToken: fields.refreshToken!,
+    sessionTokenId: fields.sessionTokenId!,
+    userRecord: fields.userRecord!,
+  };
+}
 
 export const normalizeAuthResponse = (raw: unknown): LoginPayload => {
   const record = (raw ?? {}) as AuthApiResponse;
@@ -20,26 +51,34 @@ export const normalizeAuthResponse = (raw: unknown): LoginPayload => {
     record.session_token_id ?? record.sessionTokenId,
   );
 
-  if (!token || !refreshToken || !sessionTokenId) {
-    throw new Error("Unexpected auth response: missing token fields");
-  }
-  if (!userRecord) {
-    throw new Error("Unexpected auth response: missing user");
-  }
-
-  // Prefer role flags on `user`, but tolerate them at the top-level and merge in.
-  const mergedUserRecord = {
-    ...userRecord,
-    is_admin: userRecord.is_admin ?? record.is_admin,
-    is_superuser: userRecord.is_superuser ?? record.is_superuser,
-  };
-
-  const user = normalizeUser(mergedUserRecord as unknown as User);
-
-  return {
+  const required = requireAuthFields({
     token,
     refreshToken,
     sessionTokenId,
+    userRecord,
+  });
+
+  // Prefer role flags on `user`, but tolerate them at the top-level and merge in.
+  const mergedUserRecord = {
+    ...required.userRecord,
+    is_admin:
+      required.userRecord.is_admin ??
+      required.userRecord.isAdmin ??
+      record.is_admin ??
+      record.isAdmin,
+    is_superuser:
+      required.userRecord.is_superuser ??
+      required.userRecord.isSuperuser ??
+      record.is_superuser ??
+      record.isSuperuser,
+  };
+
+  const user = normalizeUser(mergedUserRecord);
+
+  return {
+    token: required.token,
+    refreshToken: required.refreshToken,
+    sessionTokenId: required.sessionTokenId,
     user,
   };
 };

@@ -61,8 +61,6 @@ export type LoginPayload = {
   refreshToken: string;
   sessionTokenId: string;
   user: User;
-  is_admin?: boolean;
-  is_superuser?: boolean;
 };
 ```
 

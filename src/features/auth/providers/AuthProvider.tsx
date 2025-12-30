@@ -85,14 +85,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       refreshToken: refresh,
       sessionTokenId: sessionId,
       user,
-      is_admin,
-      is_superuser,
     }: LoginPayload) => {
-      const normalizedUser = normalizeAuthUser({
-        ...user,
-        is_admin: user?.is_admin ?? is_admin,
-        is_superuser: user?.is_superuser ?? is_superuser,
-      } as User);
+      const normalizedUser = normalizeAuthUser(user as User);
       setUser(normalizedUser);
       setToken(jwt);
       setRefreshToken(refresh);

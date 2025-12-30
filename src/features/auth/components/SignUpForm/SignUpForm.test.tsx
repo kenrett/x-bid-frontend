@@ -125,6 +125,53 @@ describe("SignUpForm Component", () => {
     });
   });
 
+  it("accepts camelCase token keys and normalizes user shape", async () => {
+    const user = userEvent.setup();
+    const apiUser = {
+      id: 2,
+      name: "Casey",
+      emailAddress: "casey@example.com",
+      bid_credits: 10,
+      isAdmin: false,
+    };
+
+    mockedClient.post.mockResolvedValue({
+      data: {
+        token: "token-2",
+        refreshToken: "refresh-2",
+        sessionTokenId: "sid-2",
+        user: apiUser,
+      },
+    });
+
+    renderComponent();
+
+    await user.type(screen.getByLabelText(/name/i), "Casey");
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "casey@example.com",
+    );
+    await user.type(screen.getByLabelText(/^password/i), "password123");
+    await user.type(screen.getByLabelText(/confirm password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /create account/i }));
+
+    await waitFor(() => {
+      expect(mockLogin).toHaveBeenCalledWith({
+        token: "token-2",
+        refreshToken: "refresh-2",
+        sessionTokenId: "sid-2",
+        user: {
+          id: 2,
+          name: "Casey",
+          email: "casey@example.com",
+          bidCredits: 10,
+          is_admin: false,
+          is_superuser: false,
+        },
+      } satisfies LoginPayload);
+    });
+  });
+
   it("shows an error and re-enables the button on failed submit", async () => {
     const user = userEvent.setup();
     const testError = new Error("boom");
