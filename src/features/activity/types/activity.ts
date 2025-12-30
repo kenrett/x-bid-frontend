@@ -24,6 +24,7 @@ export type BidActivity = ActivityItemBase & {
 
 export type WatchActivity = ActivityItemBase & {
   kind: "watch";
+  action?: "added" | "removed";
 };
 
 export type OutcomeActivity = ActivityItemBase & {

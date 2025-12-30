@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { activityApi } from "../api/activityApi";
 import type {
@@ -54,7 +54,7 @@ const EmptyState = () => (
 );
 
 const ActivityRow = ({ item }: { item: ActivityItem }) => {
-  const detail = (() => {
+  const detail: ReactNode = (() => {
     if (item.kind === "bid") {
       const delta = item.balanceDelta;
       const sign = delta <= 0 ? "-" : "+";
@@ -66,7 +66,7 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
       return `Bid: ${sign}${formatted} credit${abs === 1 ? "" : "s"}`;
     }
     if (item.kind === "watch") {
-      return "Watching";
+      return null;
     }
     if (item.kind === "outcome") {
       return item.outcome === "won"
@@ -88,7 +88,9 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
     item.kind === "bid"
       ? "Bid placed"
       : item.kind === "watch"
-        ? "Watching"
+        ? item.action === "removed"
+          ? "Stopped watching"
+          : "Watching"
         : item.kind === "outcome"
           ? item.outcome === "won"
             ? "Won"
@@ -98,10 +100,10 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
             : // Fallback label for kind "unknown".
               "Activity";
 
-  const icon = kindIcon(
-    item.kind,
-    item.kind === "outcome" ? item.outcome : undefined,
-  );
+  const icon =
+    item.kind === "watch" && item.action === "removed"
+      ? "🙈"
+      : kindIcon(item.kind, item.kind === "outcome" ? item.outcome : undefined);
 
   const primaryLinkTo =
     item.kind === "fulfillment"
@@ -133,22 +135,33 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
           ) : (
             <span className="text-sm text-gray-200">{item.auctionTitle}</span>
           )}
-          <span className="text-xs text-gray-300">
-            {detail}
-            {item.kind === "fulfillment" && item.trackingUrl ? (
-              <>
-                {" "}
-                <a
-                  href={item.trackingUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-pink-200 hover:text-pink-100 underline underline-offset-2"
-                >
-                  Tracking
-                </a>
-              </>
-            ) : null}
-          </span>
+          {detail ? (
+            <span className="text-xs text-gray-300">
+              {detail}
+              {item.kind === "fulfillment" && item.trackingUrl ? (
+                <>
+                  {" "}
+                  <a
+                    href={item.trackingUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-pink-200 hover:text-pink-100 underline underline-offset-2"
+                  >
+                    Tracking
+                  </a>
+                </>
+              ) : null}
+            </span>
+          ) : item.kind === "fulfillment" && item.trackingUrl ? (
+            <a
+              href={item.trackingUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs text-pink-200 hover:text-pink-100 underline underline-offset-2"
+            >
+              Tracking
+            </a>
+          ) : null}
         </div>
       </div>
     </li>

@@ -19,7 +19,8 @@ const toNumber = (value: unknown): number | null => {
 const normalizeKind = (value: unknown): ActivityKind => {
   // Backend -> frontend "My Activity" mapping (current contract):
   // - "bid_placed"      => kind "bid"
-  // - "auction_watched" => kind "watch"
+  // - "auction_watched" => kind "watch" (action: "added")
+  // - "auction_unwatched" (or other watch-removal type) => kind "watch" (action: "removed")
   // - "auction_won"     => kind "outcome" (outcome: "won")
   // - "auction_lost"    => kind "outcome" (outcome: "lost")
   // - "fulfillment_status_changed" (or "fulfillment_shipped") => kind "fulfillment"
@@ -27,6 +28,13 @@ const normalizeKind = (value: unknown): ActivityKind => {
   const lower = typeof value === "string" ? value.toLowerCase() : "";
   if (lower === "bid_placed") return "bid";
   if (lower === "auction_watched") return "watch";
+  if (
+    lower === "auction_unwatched" ||
+    lower === "auction_unwatch" ||
+    lower === "auction_watch_removed" ||
+    lower === "watch_removed"
+  )
+    return "watch";
   if (lower === "auction_won") return "outcome";
   if (lower === "auction_lost") return "outcome";
   if (lower === "fulfillment_status_changed") return "fulfillment";
@@ -133,6 +141,10 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
   }
 
   if (kind === "watch") {
+    const lowerType = typeof type === "string" ? type.toLowerCase() : "";
+    const action: "added" | "removed" =
+      lowerType === "auction_watched" ? "added" : "removed";
+
     const watchId =
       toNumber((typedData as { watch_id?: unknown }).watch_id) ??
       toNumber((typedData as { watchId?: unknown }).watchId);
@@ -150,6 +162,7 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
       auctionEndsAt,
       auctionCurrentPrice,
       kind: "watch",
+      action,
     };
   }
 

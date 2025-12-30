@@ -64,6 +64,15 @@ describe("ActivityPage", () => {
         auctionId: 11,
         auctionTitle: "Laptop",
         kind: "watch",
+        action: "added",
+      },
+      {
+        id: "a2b",
+        occurredAt: "2024-05-02T11:00:00Z",
+        auctionId: 15,
+        auctionTitle: "Phone",
+        kind: "watch",
+        action: "removed",
       },
       {
         id: "a3",
@@ -103,7 +112,9 @@ describe("ActivityPage", () => {
 
     expect(await screen.findByText(/my activity/i)).toBeInTheDocument();
     expect(screen.getByText(/bid placed/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/watching/i)[0]).toBeInTheDocument();
+    expect(screen.getByText(/^watching$/i)).toBeInTheDocument();
+    expect(screen.getByText(/stopped watching/i)).toBeInTheDocument();
+    expect(screen.getByText("🙈")).toBeInTheDocument();
     expect(screen.getByText(/won/i)).toBeInTheDocument();
     expect(screen.getByText(/fulfillment update/i)).toBeInTheDocument();
     expect(
