@@ -6,6 +6,11 @@ type AuthApiResponse = Record<string, unknown>;
 const readString = (value: unknown): string | null =>
   typeof value === "string" && value.trim() !== "" ? value : null;
 
+const asRecord = (value: unknown): Record<string, unknown> | null =>
+  value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : null;
+
 function requireAuthFields(fields: {
   token: string | null;
   refreshToken: string | null;
@@ -39,16 +44,39 @@ function requireAuthFields(fields: {
 }
 
 export const normalizeAuthResponse = (raw: unknown): LoginPayload => {
-  const record = (raw ?? {}) as AuthApiResponse;
-  const userRecord =
-    record.user && typeof record.user === "object"
-      ? (record.user as Record<string, unknown>)
-      : null;
+  const record = (asRecord(raw) ?? {}) as AuthApiResponse;
+  const sessionRecord = asRecord(record.session);
+  const authRecord = asRecord(record.auth);
 
-  const token = readString(record.token);
-  const refreshToken = readString(record.refresh_token ?? record.refreshToken);
+  const candidates: AuthApiResponse[] = [
+    record,
+    sessionRecord ?? {},
+    authRecord ?? {},
+  ];
+
+  const pick = (key: string): unknown => {
+    for (const candidate of candidates) {
+      if (key in candidate) return candidate[key];
+    }
+    return undefined;
+  };
+
+  const userRecord = (() => {
+    for (const candidate of candidates) {
+      const user = candidate.user;
+      if (user && typeof user === "object") {
+        return user as Record<string, unknown>;
+      }
+    }
+    return null;
+  })();
+
+  const token = readString(pick("token"));
+  const refreshToken = readString(
+    pick("refresh_token") ?? pick("refreshToken"),
+  );
   const sessionTokenId = readString(
-    record.session_token_id ?? record.sessionTokenId,
+    pick("session_token_id") ?? pick("sessionTokenId"),
   );
 
   const required = requireAuthFields({
@@ -64,13 +92,13 @@ export const normalizeAuthResponse = (raw: unknown): LoginPayload => {
     is_admin:
       required.userRecord.is_admin ??
       required.userRecord.isAdmin ??
-      record.is_admin ??
-      record.isAdmin,
+      pick("is_admin") ??
+      pick("isAdmin"),
     is_superuser:
       required.userRecord.is_superuser ??
       required.userRecord.isSuperuser ??
-      record.is_superuser ??
-      record.isSuperuser,
+      pick("is_superuser") ??
+      pick("isSuperuser"),
   };
 
   const user = normalizeUser(mergedUserRecord);
