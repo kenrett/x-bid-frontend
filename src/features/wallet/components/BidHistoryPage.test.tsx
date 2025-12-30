@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { BidHistoryPage } from "./BidHistoryPage";
@@ -62,6 +62,10 @@ describe("BidHistoryPage", () => {
       asOf: "2024-05-01T10:00:00Z",
       currency: "credits",
     });
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   it("renders human-friendly kind labels and signs amounts from kind (not amount sign)", async () => {
@@ -165,7 +169,9 @@ describe("BidHistoryPage", () => {
 
     renderComponent();
 
-    expect(await screen.findByText(/no transactions yet/i)).toBeInTheDocument();
+    expect(
+      await screen.findByRole("cell", { name: /no transactions yet/i }),
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /load more/i }),
     ).not.toBeInTheDocument();
