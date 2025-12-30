@@ -54,6 +54,8 @@ const EmptyState = () => (
 );
 
 const ActivityRow = ({ item }: { item: ActivityItem }) => {
+  const displayTitle = item.title ?? item.auctionTitle;
+
   const detail: ReactNode = (() => {
     if (item.kind === "bid") {
       const delta = item.balanceDelta;
@@ -80,6 +82,11 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
       if (item.toStatus) return `Fulfillment: ${item.toStatus}`;
       if (item.status) return `Fulfillment: ${item.status}`;
       return "Fulfillment update";
+    }
+    if (item.kind === "unknown") {
+      if (item.message) return item.message;
+      if (displayTitle && displayTitle !== "Auction") return displayTitle;
+      return "Activity recorded";
     }
     return "Activity update";
   })();
@@ -130,10 +137,10 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
               to={primaryLinkTo}
               className="text-sm text-pink-200 hover:text-pink-100 underline underline-offset-2"
             >
-              {item.auctionTitle}
+              {displayTitle}
             </Link>
           ) : (
-            <span className="text-sm text-gray-200">{item.auctionTitle}</span>
+            <span className="text-sm text-gray-200">{displayTitle}</span>
           )}
           {detail ? (
             <span className="text-xs text-gray-300">

@@ -99,6 +99,15 @@ describe("ActivityPage", () => {
         auctionId: 14,
         auctionTitle: "Mystery",
         kind: "unknown",
+        title: "Odd event",
+      },
+      {
+        id: "a6",
+        occurredAt: "2024-05-05T11:00:00Z",
+        auctionId: 16,
+        auctionTitle: "Another",
+        kind: "unknown",
+        message: "Backend says hello",
       },
     ];
     mockedActivityApi.list.mockResolvedValue({
@@ -130,8 +139,13 @@ describe("ActivityPage", () => {
       "https://carrier.example/track/123",
     );
 
-    expect(screen.getByText(/^activity$/i)).toBeInTheDocument();
-    expect(screen.getByText(/activity update/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/^activity$/i)[0]).toBeInTheDocument();
+
+    const oddLink = screen.getByRole("link", { name: /odd event/i });
+    expect(oddLink).toHaveAttribute("href", "/auctions/14");
+    expect(screen.getAllByText(/^odd event$/i).length).toBeGreaterThan(0);
+
+    expect(screen.getByText(/backend says hello/i)).toBeInTheDocument();
   });
 
   it("shows empty state", async () => {

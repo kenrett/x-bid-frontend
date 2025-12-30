@@ -65,6 +65,26 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
       ? (data.data as Record<string, unknown>)
       : {};
 
+  const titleRaw =
+    typeof data.title === "string"
+      ? data.title
+      : typeof (typedData as { title?: unknown }).title === "string"
+        ? (typedData as { title: string }).title
+        : null;
+  const title = titleRaw && titleRaw.trim() !== "" ? titleRaw : null;
+
+  const messageRaw =
+    typeof (typedData as { summary?: unknown }).summary === "string"
+      ? (typedData as { summary: string }).summary
+      : typeof (typedData as { message?: unknown }).message === "string"
+        ? (typedData as { message: string }).message
+        : typeof (data as { summary?: unknown }).summary === "string"
+          ? (data as { summary: string }).summary
+          : typeof (data as { message?: unknown }).message === "string"
+            ? (data as { message: string }).message
+            : null;
+  const message = messageRaw && messageRaw.trim() !== "" ? messageRaw : null;
+
   const auction =
     data.auction && typeof data.auction === "object"
       ? (data.auction as Record<string, unknown>)
@@ -131,6 +151,8 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
       occurredAt,
       auctionId,
       auctionTitle,
+      title: title ?? auctionTitle,
+      message,
       auctionStatus,
       auctionEndsAt,
       auctionCurrentPrice,
@@ -158,6 +180,8 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
       occurredAt,
       auctionId,
       auctionTitle,
+      title: title ?? auctionTitle,
+      message,
       auctionStatus,
       auctionEndsAt,
       auctionCurrentPrice,
@@ -184,6 +208,8 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
       occurredAt,
       auctionId,
       auctionTitle,
+      title: title ?? auctionTitle,
+      message,
       auctionStatus,
       auctionEndsAt,
       auctionCurrentPrice,
@@ -242,6 +268,8 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
       occurredAt,
       auctionId,
       auctionTitle,
+      title: title ?? auctionTitle,
+      message,
       auctionStatus,
       auctionEndsAt,
       auctionCurrentPrice,
@@ -260,6 +288,8 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
     occurredAt,
     auctionId,
     auctionTitle,
+    title: title ?? auctionTitle,
+    message,
     auctionStatus,
     auctionEndsAt,
     auctionCurrentPrice,

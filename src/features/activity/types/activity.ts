@@ -10,6 +10,8 @@ export type ActivityItemBase = {
   occurredAt: string;
   auctionId: number;
   auctionTitle: string;
+  title?: string | null;
+  message?: string | null;
   auctionStatus?: string | null;
   auctionEndsAt?: string | null;
   auctionCurrentPrice?: number | null;
