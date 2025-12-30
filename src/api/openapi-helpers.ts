@@ -1,4 +1,4 @@
-import type { paths } from "./openapi-types";
+import type { paths } from "@api/openapi-types";
 import type {
   AuctionDetail,
   AuctionSummary,
@@ -122,7 +122,7 @@ type OverrideResponses = {
       is_superuser?: boolean;
     };
   };
-  "/api/v1/users": {
+  "/api/v1/signup": {
     post: {
       token: string;
       refresh_token: string;

@@ -10,7 +10,7 @@ const coerceAdminFlag = (value: unknown): boolean => {
 };
 
 type LoginResponse = ApiJsonResponse<"/api/v1/login", "post">;
-type SignupResponse = ApiJsonResponse<"/api/v1/users", "post">;
+type SignupResponse = ApiJsonResponse<"/api/v1/signup", "post">;
 type UserPayload =
   | LoginResponse
   | SignupResponse
