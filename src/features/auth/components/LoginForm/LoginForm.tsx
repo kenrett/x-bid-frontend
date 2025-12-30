@@ -3,6 +3,7 @@ import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import client from "@api/client";
 import { parseApiError } from "@utils/apiError";
+import { normalizeAuthResponse } from "@features/auth/api/authResponse";
 
 export const LoginForm = () => {
   const [email_address, setEmailAddress] = useState("");
@@ -23,22 +24,7 @@ export const LoginForm = () => {
         email_address,
         password,
       });
-      const {
-        token,
-        refresh_token,
-        session_token_id,
-        user,
-        is_admin,
-        is_superuser,
-      } = response.data;
-      login({
-        token,
-        refreshToken: refresh_token,
-        sessionTokenId: session_token_id,
-        user,
-        is_admin,
-        is_superuser,
-      });
+      login(normalizeAuthResponse(response.data));
       const redirectTo = searchParams.get("redirect") || "/auctions";
       navigate(redirectTo); // Redirect on successful login
     } catch (err) {

@@ -82,6 +82,7 @@ describe("SignUpForm Component", () => {
       email: "test@example.com",
       bidCredits: 0,
       is_admin: false,
+      is_superuser: false,
     };
     const mockToken = "fake-token";
     const mockRefreshToken = "refresh-token";

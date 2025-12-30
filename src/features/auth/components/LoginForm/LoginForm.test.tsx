@@ -37,6 +37,7 @@ const mockUser: User = {
   email: "test@example.com",
   bidCredits: 0,
   is_admin: false,
+  is_superuser: false,
 };
 const mockToken = "fake-jwt-token";
 const mockRefreshToken = "fake-refresh-token";

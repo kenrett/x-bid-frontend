@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import client from "@api/client";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { parseApiError } from "@utils/apiError";
+import { normalizeAuthResponse } from "@features/auth/api/authResponse";
 
 export const SignUpForm = () => {
   const [name, setName] = useState("");
@@ -31,22 +32,7 @@ export const SignUpForm = () => {
         email_address,
         password,
       });
-      const {
-        token,
-        refresh_token,
-        session_token_id,
-        user,
-        is_admin,
-        is_superuser,
-      } = response.data;
-      login({
-        token,
-        refreshToken: refresh_token,
-        sessionTokenId: session_token_id,
-        user,
-        is_admin,
-        is_superuser,
-      });
+      login(normalizeAuthResponse(response.data));
       navigate("/auctions");
     } catch (err) {
       const parsed = parseApiError(err);
