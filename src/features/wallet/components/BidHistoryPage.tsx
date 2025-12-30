@@ -26,6 +26,45 @@ const formatAmount = (amount: number) => {
   return `${sign}${Math.abs(amount).toFixed(2)} credits`;
 };
 
+type TxDirection = "credit" | "debit" | "unknown";
+
+const normalizeKindKey = (kind: string | null | undefined) =>
+  (kind ?? "").trim().toLowerCase();
+
+const kindPresentation = (
+  kind: string | null | undefined,
+): { label: string; direction: TxDirection } => {
+  const key = normalizeKindKey(kind);
+  if (!key) return { label: "Transaction", direction: "unknown" };
+
+  const known: Record<string, { label: string; direction: TxDirection }> = {
+    bid_placed: { label: "Bid placed", direction: "debit" },
+    bid_spent: { label: "Bid placed", direction: "debit" },
+    debit: { label: "Debit", direction: "debit" },
+    bid_pack_purchase: { label: "Bid pack purchase", direction: "credit" },
+    bid_pack_purchased: { label: "Bid pack purchase", direction: "credit" },
+    credit: { label: "Credit", direction: "credit" },
+    admin_adjustment: { label: "Admin adjustment", direction: "unknown" },
+    admin_adjustment_credit: { label: "Admin adjustment", direction: "credit" },
+    admin_adjustment_debit: { label: "Admin adjustment", direction: "debit" },
+  };
+
+  const hit = known[key];
+  if (hit) return hit;
+
+  const fallbackLabel = key
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (ch) => ch.toUpperCase());
+  return { label: fallbackLabel, direction: "unknown" };
+};
+
+const signedAmountForKind = (amount: number, direction: TxDirection) => {
+  if (!Number.isFinite(amount)) return 0;
+  if (direction === "credit") return Math.abs(amount);
+  if (direction === "debit") return -Math.abs(amount);
+  return amount;
+};
+
 const SummarySkeleton = () => (
   <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl animate-pulse">
     <div className="h-4 w-32 bg-white/10 rounded mb-3" />
@@ -331,26 +370,39 @@ export const BidHistoryPage = () => {
                 <tbody className="divide-y divide-white/10">
                   {transactions.map((tx) => (
                     <tr key={tx.id} className="hover:bg-white/[0.04]">
-                      <td className="px-4 py-3 text-gray-200">
-                        {formatDate(tx.occurredAt)}
-                      </td>
-                      <td className="px-4 py-3 capitalize">{tx.kind}</td>
-                      <td
-                        className={`px-4 py-3 font-semibold ${
-                          tx.amount >= 0 ? "text-green-300" : "text-red-300"
-                        }`}
-                      >
-                        {formatAmount(tx.amount)}
-                      </td>
-                      <td className="px-4 py-3 text-gray-200">
-                        {tx.reason ?? "—"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <LinksCell
-                          purchaseUrl={tx.purchaseUrl}
-                          auctionUrl={tx.auctionUrl}
-                        />
-                      </td>
+                      {(() => {
+                        const { label, direction } = kindPresentation(tx.kind);
+                        const signedAmount = signedAmountForKind(
+                          tx.amount,
+                          direction,
+                        );
+                        return (
+                          <>
+                            <td className="px-4 py-3 text-gray-200">
+                              {formatDate(tx.occurredAt)}
+                            </td>
+                            <td className="px-4 py-3">{label}</td>
+                            <td
+                              className={`px-4 py-3 font-semibold ${
+                                signedAmount >= 0
+                                  ? "text-green-300"
+                                  : "text-red-300"
+                              }`}
+                            >
+                              {formatAmount(signedAmount)}
+                            </td>
+                            <td className="px-4 py-3 text-gray-200">
+                              {tx.reason ?? "—"}
+                            </td>
+                            <td className="px-4 py-3">
+                              <LinksCell
+                                purchaseUrl={tx.purchaseUrl}
+                                auctionUrl={tx.auctionUrl}
+                              />
+                            </td>
+                          </>
+                        );
+                      })()}
                     </tr>
                   ))}
                 </tbody>

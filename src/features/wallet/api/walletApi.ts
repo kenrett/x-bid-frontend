@@ -111,6 +111,10 @@ const coerceString = (value: unknown): string | null =>
 
 const normalizeTransaction = (raw: unknown): WalletTransaction => {
   const data = (raw ?? {}) as Record<string, unknown>;
+  const ledger =
+    data.ledger && typeof data.ledger === "object"
+      ? (data.ledger as Record<string, unknown>)
+      : null;
 
   const idValue =
     coerceString(data.id) ??
@@ -129,6 +133,7 @@ const normalizeTransaction = (raw: unknown): WalletTransaction => {
 
   const amountSource =
     toNumber(data.amount) ??
+    toNumber(ledger?.amount) ??
     toNumber((data as { credits?: unknown }).credits) ??
     toNumber((data as { credit_delta?: unknown }).credit_delta) ??
     toNumber((data as { creditDelta?: unknown }).creditDelta);
@@ -165,11 +170,17 @@ const normalizeTransaction = (raw: unknown): WalletTransaction => {
     occurredAt,
     kind:
       coerceString(data.kind) ??
+      coerceString(ledger?.kind) ??
+      coerceString((data as { ledger_kind?: unknown }).ledger_kind) ??
+      coerceString((data as { ledgerKind?: unknown }).ledgerKind) ??
       coerceString((data as { type?: unknown }).type) ??
       "unknown",
     amount: Number.isFinite(amount) ? amount : 0,
     reason:
       coerceString(data.reason) ??
+      coerceString(ledger?.reason) ??
+      coerceString((data as { ledger_reason?: unknown }).ledger_reason) ??
+      coerceString((data as { ledgerReason?: unknown }).ledgerReason) ??
       coerceString((data as { description?: unknown }).description) ??
       coerceString((data as { memo?: unknown }).memo) ??
       null,

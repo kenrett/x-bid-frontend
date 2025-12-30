@@ -55,12 +55,61 @@ const baseTransactions: WalletTransaction[] = [
 
 describe("BidHistoryPage", () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     mockedUseAuth.mockReturnValue(createAuthReturn());
     mockedWalletApi.getWallet.mockResolvedValue({
       creditsBalance: 120,
       asOf: "2024-05-01T10:00:00Z",
       currency: "credits",
     });
+  });
+
+  it("renders human-friendly kind labels and signs amounts from kind (not amount sign)", async () => {
+    const transactions: WalletTransaction[] = [
+      {
+        id: "k1",
+        occurredAt: "2024-05-01T10:00:00Z",
+        kind: "bid_placed",
+        amount: 3,
+        reason: null,
+      },
+      {
+        id: "k2",
+        occurredAt: "2024-05-01T11:00:00Z",
+        kind: "bid_pack_purchase",
+        amount: -200,
+        reason: "Starter Pack",
+      },
+      {
+        id: "k3",
+        occurredAt: "2024-05-01T12:00:00Z",
+        kind: "admin_adjustment_credit",
+        amount: 50,
+        reason: "Manual fix",
+      },
+    ];
+    mockedWalletApi.listTransactions.mockResolvedValue({
+      transactions,
+      page: 1,
+      perPage: 25,
+      totalCount: 3,
+      hasMore: false,
+    });
+
+    renderComponent();
+
+    expect(await screen.findByText(/transaction history/i)).toBeInTheDocument();
+
+    expect(screen.getByText("Bid placed")).toBeInTheDocument();
+    expect(screen.getByText("-3.00 credits")).toBeInTheDocument();
+
+    expect(screen.getByText("Bid pack purchase")).toBeInTheDocument();
+    expect(screen.getByText("+200.00 credits")).toBeInTheDocument();
+    expect(screen.getByText("Starter Pack")).toBeInTheDocument();
+
+    expect(screen.getByText("Admin adjustment")).toBeInTheDocument();
+    expect(screen.getByText("+50.00 credits")).toBeInTheDocument();
+    expect(screen.getByText("Manual fix")).toBeInTheDocument();
   });
 
   it("renders wallet details and loads more transactions when requested", async () => {
