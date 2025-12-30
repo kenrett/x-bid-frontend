@@ -1,4 +1,9 @@
-export type ActivityKind = "bid" | "watch" | "outcome" | "unknown";
+export type ActivityKind =
+  | "bid"
+  | "watch"
+  | "outcome"
+  | "fulfillment"
+  | "unknown";
 
 export type ActivityItemBase = {
   id: string;
@@ -27,6 +32,15 @@ export type OutcomeActivity = ActivityItemBase & {
   finalBid?: number | null;
 };
 
+export type FulfillmentActivity = ActivityItemBase & {
+  kind: "fulfillment";
+  fromStatus?: string | null;
+  toStatus?: string | null;
+  status?: string | null;
+  settlementId?: number | null;
+  trackingUrl?: string | null;
+};
+
 export type UnknownActivity = ActivityItemBase & {
   kind: "unknown";
 };
@@ -35,9 +49,15 @@ export type ActivityItem =
   | BidActivity
   | WatchActivity
   | OutcomeActivity
+  | FulfillmentActivity
   | UnknownActivity;
 
-export type ActivityFilter = "all" | "bid" | "watch" | "outcome";
+export type ActivityFilter =
+  | "all"
+  | "bid"
+  | "watch"
+  | "outcome"
+  | "fulfillment";
 
 export type ActivityListParams = {
   page?: number;

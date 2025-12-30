@@ -15,6 +15,7 @@ const FILTERS: { label: string; value: ActivityFilter }[] = [
   { label: "Bids", value: "bid" },
   { label: "Watches", value: "watch" },
   { label: "Outcomes", value: "outcome" },
+  { label: "Fulfillment", value: "fulfillment" },
 ];
 
 const formatDate = (value: string) => {
@@ -29,6 +30,7 @@ const formatDate = (value: string) => {
 const kindIcon = (kind: ActivityKind, outcome?: "won" | "lost") => {
   if (kind === "bid") return "🎯";
   if (kind === "watch") return "👀";
+  if (kind === "fulfillment") return "📦";
   if (outcome === "won") return "🏆";
   if (outcome === "lost") return "❌";
   // Fallback for ActivityKind "unknown" (or any non-outcome item without a match).
@@ -63,13 +65,23 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
       });
       return `Bid: ${sign}${formatted} credit${abs === 1 ? "" : "s"}`;
     }
+    if (item.kind === "watch") {
+      return "Watching";
+    }
     if (item.kind === "outcome") {
       return item.outcome === "won"
         ? `Winning bid: ${item.finalBid ?? "—"}`
         : "Auction ended";
     }
-    // Note: any non-bid/outcome item currently renders as "Watching" (including kind "unknown").
-    return "Watching";
+    if (item.kind === "fulfillment") {
+      if (item.fromStatus && item.toStatus) {
+        return `Fulfillment: ${item.fromStatus} → ${item.toStatus}`;
+      }
+      if (item.toStatus) return `Fulfillment: ${item.toStatus}`;
+      if (item.status) return `Fulfillment: ${item.status}`;
+      return "Fulfillment update";
+    }
+    return "Activity update";
   })();
 
   const label =
@@ -81,13 +93,20 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
           ? item.outcome === "won"
             ? "Won"
             : "Lost"
-          : // Fallback label for kind "unknown".
-            "Activity";
+          : item.kind === "fulfillment"
+            ? "Fulfillment update"
+            : // Fallback label for kind "unknown".
+              "Activity";
 
   const icon = kindIcon(
     item.kind,
     item.kind === "outcome" ? item.outcome : undefined,
   );
+
+  const primaryLinkTo =
+    item.kind === "fulfillment"
+      ? `/account/wins/${item.auctionId}`
+      : `/auctions/${item.auctionId}`;
 
   return (
     <li className="flex items-start gap-3 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors">
@@ -104,13 +123,32 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
           </span>
         </div>
         <div className="flex items-center justify-between gap-3">
-          <Link
-            to={`/auctions/${item.auctionId}`}
-            className="text-sm text-pink-200 hover:text-pink-100 underline underline-offset-2"
-          >
-            {item.auctionTitle}
-          </Link>
-          <span className="text-xs text-gray-300">{detail}</span>
+          {item.auctionId > 0 ? (
+            <Link
+              to={primaryLinkTo}
+              className="text-sm text-pink-200 hover:text-pink-100 underline underline-offset-2"
+            >
+              {item.auctionTitle}
+            </Link>
+          ) : (
+            <span className="text-sm text-gray-200">{item.auctionTitle}</span>
+          )}
+          <span className="text-xs text-gray-300">
+            {detail}
+            {item.kind === "fulfillment" && item.trackingUrl ? (
+              <>
+                {" "}
+                <a
+                  href={item.trackingUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-pink-200 hover:text-pink-100 underline underline-offset-2"
+                >
+                  Tracking
+                </a>
+              </>
+            ) : null}
+          </span>
         </div>
       </div>
     </li>

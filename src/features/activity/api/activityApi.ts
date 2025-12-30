@@ -22,12 +22,15 @@ const normalizeKind = (value: unknown): ActivityKind => {
   // - "auction_watched" => kind "watch"
   // - "auction_won"     => kind "outcome" (outcome: "won")
   // - "auction_lost"    => kind "outcome" (outcome: "lost")
+  // - "fulfillment_status_changed" (or "fulfillment_shipped") => kind "fulfillment"
   // Any other/unknown type string falls back to kind "unknown".
   const lower = typeof value === "string" ? value.toLowerCase() : "";
   if (lower === "bid_placed") return "bid";
   if (lower === "auction_watched") return "watch";
   if (lower === "auction_won") return "outcome";
   if (lower === "auction_lost") return "outcome";
+  if (lower === "fulfillment_status_changed") return "fulfillment";
+  if (lower === "fulfillment_shipped") return "fulfillment";
   return "unknown";
 };
 
@@ -49,6 +52,11 @@ const extractItemsArray = (payload: unknown): unknown[] | null => {
 
 const normalizeActivity = (raw: unknown): ActivityItem => {
   const data = (raw ?? {}) as Record<string, unknown>;
+  const typedData =
+    data.data && typeof data.data === "object"
+      ? (data.data as Record<string, unknown>)
+      : {};
+
   const auction =
     data.auction && typeof data.auction === "object"
       ? (data.auction as Record<string, unknown>)
@@ -56,7 +64,9 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
 
   const auctionIdRaw =
     toNumber((auction as { id?: unknown })?.id) ??
-    toNumber((data as { auction_id?: unknown }).auction_id);
+    toNumber((data as { auction_id?: unknown }).auction_id) ??
+    toNumber((typedData as { auction_id?: unknown }).auction_id) ??
+    toNumber((typedData as { auctionId?: unknown }).auctionId);
   const auctionId = auctionIdRaw ?? 0;
 
   const auctionTitle =
@@ -91,11 +101,6 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
         ? (data as { kind: string }).kind
         : null;
   const kind = normalizeKind(type);
-
-  const typedData =
-    data.data && typeof data.data === "object"
-      ? (data.data as Record<string, unknown>)
-      : {};
 
   if (kind === "bid") {
     const bidAmount = toNumber((typedData as { amount?: unknown }).amount) ?? 0;
@@ -149,7 +154,9 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
   }
 
   if (kind === "outcome") {
-    const outcome: "won" | "lost" = type === "auction_won" ? "won" : "lost";
+    const lowerType = typeof type === "string" ? type.toLowerCase() : "";
+    const outcome: "won" | "lost" =
+      lowerType === "auction_won" ? "won" : "lost";
 
     const finalBid =
       toNumber((typedData as { winning_bid?: unknown }).winning_bid) ??
@@ -170,6 +177,67 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
       kind: "outcome",
       outcome,
       finalBid,
+    };
+  }
+
+  if (kind === "fulfillment") {
+    const settlementId =
+      toNumber((typedData as { settlement_id?: unknown }).settlement_id) ??
+      toNumber((typedData as { settlementId?: unknown }).settlementId) ??
+      toNumber((typedData as { win_id?: unknown }).win_id) ??
+      toNumber((typedData as { winId?: unknown }).winId) ??
+      null;
+
+    const trackingUrl =
+      typeof (typedData as { tracking_url?: unknown }).tracking_url === "string"
+        ? (typedData as { tracking_url: string }).tracking_url
+        : typeof (typedData as { trackingUrl?: unknown }).trackingUrl ===
+            "string"
+          ? (typedData as { trackingUrl: string }).trackingUrl
+          : null;
+
+    const fromStatus =
+      typeof (typedData as { from_status?: unknown }).from_status === "string"
+        ? (typedData as { from_status: string }).from_status
+        : typeof (typedData as { previous_status?: unknown })
+              .previous_status === "string"
+          ? (typedData as { previous_status: string }).previous_status
+          : typeof (typedData as { old_status?: unknown }).old_status ===
+              "string"
+            ? (typedData as { old_status: string }).old_status
+            : null;
+
+    const toStatus =
+      typeof (typedData as { to_status?: unknown }).to_status === "string"
+        ? (typedData as { to_status: string }).to_status
+        : typeof (typedData as { new_status?: unknown }).new_status === "string"
+          ? (typedData as { new_status: string }).new_status
+          : typeof (typedData as { status?: unknown }).status === "string"
+            ? (typedData as { status: string }).status
+            : null;
+
+    const status =
+      typeof (typedData as { status?: unknown }).status === "string"
+        ? (typedData as { status: string }).status
+        : toStatus;
+
+    const subjectId = settlementId ?? (auctionId ? auctionId : null);
+    const id = `${type ?? "fulfillment"}:${subjectId ?? "unknown"}:${occurredAt || "unknown"}`;
+
+    return {
+      id,
+      occurredAt,
+      auctionId,
+      auctionTitle,
+      auctionStatus,
+      auctionEndsAt,
+      auctionCurrentPrice,
+      kind: "fulfillment",
+      fromStatus,
+      toStatus,
+      status,
+      settlementId,
+      trackingUrl,
     };
   }
 

@@ -74,6 +74,23 @@ describe("ActivityPage", () => {
         outcome: "won",
         finalBid: 42,
       },
+      {
+        id: "a4",
+        occurredAt: "2024-05-04T10:00:00Z",
+        auctionId: 13,
+        auctionTitle: "Prize",
+        kind: "fulfillment",
+        fromStatus: "pending",
+        toStatus: "shipped",
+        trackingUrl: "https://carrier.example/track/123",
+      },
+      {
+        id: "a5",
+        occurredAt: "2024-05-05T10:00:00Z",
+        auctionId: 14,
+        auctionTitle: "Mystery",
+        kind: "unknown",
+      },
     ];
     mockedActivityApi.list.mockResolvedValue({
       items,
@@ -88,6 +105,22 @@ describe("ActivityPage", () => {
     expect(screen.getByText(/bid placed/i)).toBeInTheDocument();
     expect(screen.getAllByText(/watching/i)[0]).toBeInTheDocument();
     expect(screen.getByText(/won/i)).toBeInTheDocument();
+    expect(screen.getByText(/fulfillment update/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/fulfillment:\s*pending\s*→\s*shipped/i),
+    ).toBeInTheDocument();
+
+    const winLink = screen.getByRole("link", { name: "Prize" });
+    expect(winLink).toHaveAttribute("href", "/account/wins/13");
+
+    const trackingLink = screen.getByRole("link", { name: /tracking/i });
+    expect(trackingLink).toHaveAttribute(
+      "href",
+      "https://carrier.example/track/123",
+    );
+
+    expect(screen.getByText(/^activity$/i)).toBeInTheDocument();
+    expect(screen.getByText(/activity update/i)).toBeInTheDocument();
   });
 
   it("shows empty state", async () => {
