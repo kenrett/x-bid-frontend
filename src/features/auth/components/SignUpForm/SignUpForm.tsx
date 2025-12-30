@@ -5,6 +5,9 @@ import { useAuth } from "@features/auth/hooks/useAuth";
 import { parseApiError } from "@utils/apiError";
 import { normalizeAuthResponse } from "@features/auth/api/authResponse";
 
+const isUnexpectedAuthResponseError = (err: unknown) =>
+  err instanceof Error && err.message.startsWith("Unexpected auth response:");
+
 export const SignUpForm = () => {
   const [name, setName] = useState("");
   const [email_address, setEmailAddress] = useState("");
@@ -35,9 +38,18 @@ export const SignUpForm = () => {
       login(normalizeAuthResponse(response.data));
       navigate("/auctions");
     } catch (err) {
+      if (isUnexpectedAuthResponseError(err)) {
+        setError("Unexpected server response. Please try again.");
+        if (import.meta.env.MODE !== "production") {
+          console.error(err);
+        }
+        return;
+      }
       const parsed = parseApiError(err);
       setError(parsed.message || "Failed to create account. Please try again.");
-      console.error(err);
+      if (import.meta.env.MODE !== "production") {
+        console.error(err);
+      }
     } finally {
       setLoading(false);
     }

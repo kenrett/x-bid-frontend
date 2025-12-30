@@ -157,6 +157,30 @@ describe("LoginForm Component", () => {
     });
   });
 
+  it("shows a friendly error when the server returns an unexpected auth payload", async () => {
+    mockedClient.post.mockResolvedValue({
+      data: {
+        // missing token/refresh/session/user shape
+        refresh_token: "refresh",
+      },
+    });
+    const user = userEvent.setup();
+
+    renderComponent();
+
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "test@example.com",
+    );
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
+
+    expect(
+      await screen.findByText(/unexpected server response/i),
+    ).toBeInTheDocument();
+    expect(mockLogin).not.toHaveBeenCalled();
+  });
+
   describe("on failed login", () => {
     it("should display an error message and not call login or navigate", async () => {
       const testError = new Error("Invalid credentials");

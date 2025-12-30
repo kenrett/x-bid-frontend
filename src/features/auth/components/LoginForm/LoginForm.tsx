@@ -5,6 +5,9 @@ import client from "@api/client";
 import { parseApiError } from "@utils/apiError";
 import { normalizeAuthResponse } from "@features/auth/api/authResponse";
 
+const isUnexpectedAuthResponseError = (err: unknown) =>
+  err instanceof Error && err.message.startsWith("Unexpected auth response:");
+
 export const LoginForm = () => {
   const [email_address, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -28,11 +31,20 @@ export const LoginForm = () => {
       const redirectTo = searchParams.get("redirect") || "/auctions";
       navigate(redirectTo); // Redirect on successful login
     } catch (err) {
+      if (isUnexpectedAuthResponseError(err)) {
+        setError("Unexpected server response. Please try again.");
+        if (import.meta.env.MODE !== "production") {
+          console.error(err);
+        }
+        return;
+      }
       const parsed = parseApiError(err);
       setError(
         parsed.message || "Invalid email or password. Please try again.",
       );
-      console.error(err);
+      if (import.meta.env.MODE !== "production") {
+        console.error(err);
+      }
     } finally {
       setLoading(false);
     }
