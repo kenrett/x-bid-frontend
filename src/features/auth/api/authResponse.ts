@@ -6,6 +6,12 @@ type AuthApiResponse = Record<string, unknown>;
 const readString = (value: unknown): string | null =>
   typeof value === "string" && value.trim() !== "" ? value : null;
 
+const readSessionTokenId = (value: unknown): string | null => {
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  if (typeof value === "bigint") return String(value);
+  return readString(value);
+};
+
 const asRecord = (value: unknown): Record<string, unknown> | null =>
   value && typeof value === "object"
     ? (value as Record<string, unknown>)
@@ -75,7 +81,7 @@ export const normalizeAuthResponse = (raw: unknown): LoginPayload => {
   const refreshToken = readString(
     pick("refresh_token") ?? pick("refreshToken"),
   );
-  const sessionTokenId = readString(
+  const sessionTokenId = readSessionTokenId(
     pick("session_token_id") ?? pick("sessionTokenId"),
   );
 
