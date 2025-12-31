@@ -35,13 +35,46 @@ const readBoolean = (value: unknown): boolean | undefined =>
 
 const normalizeProfile = (payload: unknown): AccountProfile => {
   const record = asRecord(payload) ?? {};
-  const userRecord = asRecord(record.user) ?? record;
 
-  const name = readString(userRecord.name) ?? "";
+  const containers = [
+    record,
+    asRecord(record.profile),
+    asRecord(record.account),
+    asRecord(record.me),
+    asRecord(record.data),
+  ].filter(Boolean) as Record<string, unknown>[];
+
+  const userCandidates = [
+    ...containers.map((container) => asRecord(container.user)),
+    ...containers,
+  ].filter(Boolean) as Record<string, unknown>[];
+
+  const readFromCandidates = (
+    accessor: (candidate: Record<string, unknown>) => string | undefined,
+  ) => {
+    for (const candidate of userCandidates) {
+      const value = accessor(candidate);
+      if (value) return value;
+    }
+    return undefined;
+  };
+
+  const readBoolFromCandidates = (
+    accessor: (candidate: Record<string, unknown>) => boolean | undefined,
+  ) => {
+    for (const candidate of userCandidates) {
+      const value = accessor(candidate);
+      if (typeof value === "boolean") return value;
+    }
+    return undefined;
+  };
+
+  const name =
+    readFromCandidates((candidate) => readString(candidate.name)) ?? "";
   const email =
-    readString(userRecord.email) ??
-    readString(userRecord.email_address) ??
-    readString(userRecord.emailAddress) ??
+    readFromCandidates((candidate) => readString(candidate.email)) ??
+    readFromCandidates((candidate) => readString(candidate.email_address)) ??
+    readFromCandidates((candidate) => readString(candidate.emailAddress)) ??
     "";
 
   if (!email) {
@@ -51,20 +84,25 @@ const normalizeProfile = (payload: unknown): AccountProfile => {
   const createdAt =
     readString(record.created_at) ??
     readString(record.createdAt) ??
-    readString(userRecord.created_at) ??
-    readString(userRecord.createdAt);
+    readFromCandidates((candidate) => readString(candidate.created_at)) ??
+    readFromCandidates((candidate) => readString(candidate.createdAt));
 
   const emailVerified =
     readBoolean(record.email_verified) ??
     readBoolean(record.emailVerified) ??
-    readBoolean(userRecord.email_verified) ??
-    readBoolean(userRecord.emailVerified);
+    readBoolFromCandidates(
+      (candidate) =>
+        readBoolean(candidate.email_verified) ??
+        readBoolean(candidate.emailVerified),
+    );
 
   const emailVerifiedAt =
     readString(record.email_verified_at) ??
     readString(record.emailVerifiedAt) ??
-    readString(userRecord.email_verified_at) ??
-    readString(userRecord.emailVerifiedAt) ??
+    readFromCandidates((candidate) =>
+      readString(candidate.email_verified_at),
+    ) ??
+    readFromCandidates((candidate) => readString(candidate.emailVerifiedAt)) ??
     null;
 
   return {
