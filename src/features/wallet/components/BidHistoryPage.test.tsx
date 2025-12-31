@@ -55,12 +55,19 @@ const baseTransactions: WalletTransaction[] = [
 
 describe("BidHistoryPage", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     mockedUseAuth.mockReturnValue(createAuthReturn());
     mockedWalletApi.getWallet.mockResolvedValue({
       creditsBalance: 120,
       asOf: "2024-05-01T10:00:00Z",
       currency: "credits",
+    });
+    mockedWalletApi.listTransactions.mockResolvedValue({
+      transactions: baseTransactions,
+      page: 1,
+      perPage: 25,
+      totalCount: 1,
+      hasMore: false,
     });
   });
 
@@ -143,12 +150,12 @@ describe("BidHistoryPage", () => {
 
     renderComponent();
 
-    expect(await screen.findByText(/credits balance/i)).toBeInTheDocument();
-    expect(screen.getByText(/120(\.00)? credits/i)).toBeInTheDocument();
+    expect(await screen.findByText(/^credits balance$/i)).toBeInTheDocument();
+    expect(await screen.findByText(/120(\.00)? credits/i)).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /purchases/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/top-up/i)).toBeInTheDocument();
+    expect(await screen.findByText(/top-up/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /load more/i })).toBeEnabled();
 
     const user = userEvent.setup();
@@ -210,14 +217,6 @@ describe("BidHistoryPage", () => {
   });
 
   it("navigates to purchases from wallet link", async () => {
-    mockedWalletApi.listTransactions.mockResolvedValue({
-      transactions: baseTransactions,
-      page: 1,
-      perPage: 25,
-      totalCount: 1,
-      hasMore: false,
-    });
-
     render(
       <MemoryRouter initialEntries={["/account/wallet"]}>
         <Routes>
@@ -230,7 +229,7 @@ describe("BidHistoryPage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText(/credits balance/i)).toBeInTheDocument();
+    expect(await screen.findByText(/^credits balance$/i)).toBeInTheDocument();
 
     const user = userEvent.setup();
     await user.click(screen.getByRole("link", { name: /purchases/i }));
