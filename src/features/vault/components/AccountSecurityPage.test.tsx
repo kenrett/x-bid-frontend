@@ -1,0 +1,75 @@
+import { render, screen, waitFor } from "@testing-library/react";
+import { describe, expect, it, vi, beforeEach } from "vitest";
+import { MemoryRouter } from "react-router-dom";
+import userEvent from "@testing-library/user-event";
+import client from "@api/client";
+import { AccountSecurityPage } from "./AccountSecurityPage";
+
+vi.mock("@api/client");
+
+const mockedClient = vi.mocked(client, true);
+
+const renderPage = () =>
+  render(
+    <MemoryRouter>
+      <AccountSecurityPage />
+    </MemoryRouter>,
+  );
+
+describe("AccountSecurityPage", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("renders a loading state", () => {
+    mockedClient.get.mockReturnValue(new Promise(() => {}));
+    renderPage();
+    expect(screen.getByText(/loading security/i)).toBeInTheDocument();
+  });
+
+  it("renders server error if status fetch fails", async () => {
+    mockedClient.get.mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 500, data: { message: "boom" } },
+    });
+
+    renderPage();
+    expect(await screen.findByRole("alert")).toHaveTextContent("boom");
+  });
+
+  it("submits password change on happy path", async () => {
+    const user = userEvent.setup();
+    mockedClient.get.mockResolvedValue({
+      data: { email_verified: false, email_verified_at: null },
+    });
+    mockedClient.post.mockResolvedValue({});
+
+    renderPage();
+
+    await user.type(
+      await screen.findByLabelText(/current password/i),
+      "old-password",
+    );
+    await user.type(
+      screen.getByLabelText(/^new password/i),
+      "new-password-1234",
+    );
+    await user.type(
+      screen.getByLabelText(/confirm new password/i),
+      "new-password-1234",
+    );
+
+    await user.click(screen.getByRole("button", { name: /update password/i }));
+
+    await waitFor(() => {
+      expect(mockedClient.post).toHaveBeenCalledWith(
+        "/api/v1/me/account/password",
+        {
+          current_password: "old-password",
+          new_password: "new-password-1234",
+        },
+      );
+      expect(screen.getByText(/password updated/i)).toBeInTheDocument();
+    });
+  });
+});

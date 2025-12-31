@@ -17,7 +17,9 @@ test("vault navigation updates the browser URL", async ({ page }) => {
   await page.goto("/account");
   await expect(page).toHaveURL(/\/account$/);
 
-  const vaultNav = page.getByRole("navigation", { name: "Vault navigation" });
+  const vaultNav = page.getByRole("navigation", {
+    name: /^(Vault|Account) navigation$/,
+  });
 
   await vaultNav.getByRole("link", { name: "Profile", exact: true }).click();
   await expect(page).toHaveURL(/\/account\/profile$/);
