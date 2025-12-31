@@ -16,5 +16,6 @@ export type AuthContextType = {
   isReady: boolean;
   login: (payload: LoginPayload) => void;
   logout: () => void;
+  updateUser: (updater: (current: User) => User) => void;
   updateUserBalance: (newBalance: number) => void;
 };

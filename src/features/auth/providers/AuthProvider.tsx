@@ -160,6 +160,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     },
     [normalizeAuthUser],
   );
+
+  const updateUser = useCallback(
+    (updater: (current: User) => User) => {
+      setUser((currentUser) => {
+        if (!currentUser) return null;
+        const updated = normalizeAuthUser(updater(currentUser));
+        localStorage.setItem("user", JSON.stringify(updated));
+        setSentryUser(updated);
+        return updated;
+      });
+    },
+    [normalizeAuthUser],
+  );
   useEffect(() => {
     if (!token || !sessionTokenId) {
       setSessionRemainingSeconds(null);
@@ -336,6 +349,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         isReady,
         login,
         logout,
+        updateUser,
         updateUserBalance,
       }}
     >
