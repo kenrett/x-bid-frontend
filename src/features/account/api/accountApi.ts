@@ -1,4 +1,5 @@
 import client from "@api/client";
+import axios from "axios";
 import { reportUnexpectedResponse } from "@services/unexpectedResponse";
 import type {
   AccountProfile,
@@ -9,8 +10,10 @@ import type {
 } from "../types/account";
 
 export const ACCOUNT_ENDPOINTS = {
-  profile: "/api/v1/me/account/profile",
-  profileName: "/api/v1/me/account/profile",
+  profile: "/api/v1/account",
+  profileLegacy: "/api/v1/me/account/profile",
+  profileName: "/api/v1/account",
+  profileNameLegacy: "/api/v1/me/account/profile",
   emailChange: "/api/v1/me/account/email-change",
   security: "/api/v1/me/account/security",
   password: "/api/v1/me/account/password",
@@ -225,15 +228,33 @@ const normalizeExportStatus = (payload: unknown): DataExportStatus => {
 
 export const accountApi = {
   async getProfile(): Promise<AccountProfile> {
-    const response = await client.get(ACCOUNT_ENDPOINTS.profile);
-    return normalizeProfile(response.data);
+    try {
+      const response = await client.get(ACCOUNT_ENDPOINTS.profile);
+      return normalizeProfile(response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        const legacy = await client.get(ACCOUNT_ENDPOINTS.profileLegacy);
+        return normalizeProfile(legacy.data);
+      }
+      throw error;
+    }
   },
 
   async updateName(name: string): Promise<AccountProfile> {
-    const response = await client.patch(ACCOUNT_ENDPOINTS.profileName, {
-      name,
-    });
-    return normalizeProfile(response.data);
+    try {
+      const response = await client.patch(ACCOUNT_ENDPOINTS.profileName, {
+        name,
+      });
+      return normalizeProfile(response.data);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        const legacy = await client.patch(ACCOUNT_ENDPOINTS.profileNameLegacy, {
+          name,
+        });
+        return normalizeProfile(legacy.data);
+      }
+      throw error;
+    }
   },
 
   async requestEmailChange(payload: {

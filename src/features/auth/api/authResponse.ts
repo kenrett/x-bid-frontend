@@ -50,6 +50,18 @@ function requireAuthFields(fields: {
 }
 
 export const normalizeAuthResponse = (raw: unknown): LoginPayload => {
+  if (!raw || typeof raw !== "object") {
+    const snippet =
+      typeof raw === "string"
+        ? raw.slice(0, 180)
+        : raw === null
+          ? "null"
+          : String(raw);
+    throw new Error(
+      `Unexpected auth response: expected JSON object but received ${typeof raw}: ${snippet}`,
+    );
+  }
+
   const record = (asRecord(raw) ?? {}) as AuthApiResponse;
   const sessionRecord = asRecord(record.session);
   const authRecord = asRecord(record.auth);

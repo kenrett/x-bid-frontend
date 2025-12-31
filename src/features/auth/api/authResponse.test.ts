@@ -55,4 +55,10 @@ describe("normalizeAuthResponse", () => {
       user: { email: "casey@example.com" },
     });
   });
+
+  it("does not report missing session_token_id for non-JSON payloads", () => {
+    expect(() => normalizeAuthResponse("<html>not found</html>")).toThrow(
+      /expected JSON object/i,
+    );
+  });
 });

@@ -82,10 +82,9 @@ describe("AccountProfilePage", () => {
     await user.click(screen.getByRole("button", { name: /save name/i }));
 
     await waitFor(() => {
-      expect(mockedClient.patch).toHaveBeenCalledWith(
-        "/api/v1/me/account/profile",
-        { name: "New Name" },
-      );
+      expect(mockedClient.patch).toHaveBeenCalledWith("/api/v1/account", {
+        name: "New Name",
+      });
       expect(updateUser).toHaveBeenCalled();
       expect(screen.getByText(/profile updated/i)).toBeInTheDocument();
     });
