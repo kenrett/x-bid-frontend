@@ -15,7 +15,10 @@ export default defineConfig({
   webServer: {
     command: "npm run dev -- --host 127.0.0.1 --port 4173",
     url: "http://127.0.0.1:4173",
-    reuseExistingServer: !process.env.CI,
+    // Default to a clean server so Playwright-controlled env vars (Stripe key, E2E flags)
+    // are always applied. Opt into reuse via PLAYWRIGHT_REUSE_SERVER=true.
+    reuseExistingServer:
+      process.env.PLAYWRIGHT_REUSE_SERVER === "true" && !process.env.CI,
     timeout: 120_000,
     env: {
       ...process.env,
