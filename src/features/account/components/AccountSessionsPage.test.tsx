@@ -77,7 +77,7 @@ describe("AccountSessionsPage", () => {
 
     await waitFor(() => {
       expect(mockedClient.delete).toHaveBeenCalledWith(
-        "/api/v1/me/account/sessions/other",
+        "/api/v1/account/sessions/other",
       );
     });
   });

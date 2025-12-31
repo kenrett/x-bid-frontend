@@ -66,7 +66,7 @@ describe("AccountNotificationsPage", () => {
 
     await waitFor(() => {
       expect(mockedClient.put).toHaveBeenCalledWith(
-        "/api/v1/me/account/notifications",
+        "/api/v1/account/notifications",
         expect.objectContaining({ marketing_emails: true }),
       );
       expect(screen.getByText(/preferences saved/i)).toBeInTheDocument();

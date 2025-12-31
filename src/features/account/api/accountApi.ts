@@ -1,5 +1,4 @@
 import client from "@api/client";
-import axios from "axios";
 import { reportUnexpectedResponse } from "@services/unexpectedResponse";
 import type {
   AccountProfile,
@@ -11,18 +10,16 @@ import type {
 
 export const ACCOUNT_ENDPOINTS = {
   profile: "/api/v1/account",
-  profileLegacy: "/api/v1/me/account/profile",
   profileName: "/api/v1/account",
-  profileNameLegacy: "/api/v1/me/account/profile",
-  emailChange: "/api/v1/me/account/email-change",
-  security: "/api/v1/me/account/security",
-  password: "/api/v1/me/account/password",
-  resendVerification: "/api/v1/me/account/email/verification/resend",
-  sessions: "/api/v1/me/account/sessions",
-  revokeOtherSessions: "/api/v1/me/account/sessions/revoke-others",
-  notifications: "/api/v1/me/account/notifications",
-  dataExport: "/api/v1/me/account/data/export",
-  account: "/api/v1/me/account",
+  emailChange: "/api/v1/account/email-change",
+  security: "/api/v1/account/security",
+  password: "/api/v1/account/password",
+  resendVerification: "/api/v1/account/email/verification/resend",
+  sessions: "/api/v1/account/sessions",
+  revokeOtherSessions: "/api/v1/account/sessions/revoke-others",
+  notifications: "/api/v1/account/notifications",
+  dataExport: "/api/v1/account/data/export",
+  account: "/api/v1/account",
 } as const;
 
 const asRecord = (value: unknown): Record<string, unknown> | null =>
@@ -228,33 +225,15 @@ const normalizeExportStatus = (payload: unknown): DataExportStatus => {
 
 export const accountApi = {
   async getProfile(): Promise<AccountProfile> {
-    try {
-      const response = await client.get(ACCOUNT_ENDPOINTS.profile);
-      return normalizeProfile(response.data);
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        const legacy = await client.get(ACCOUNT_ENDPOINTS.profileLegacy);
-        return normalizeProfile(legacy.data);
-      }
-      throw error;
-    }
+    const response = await client.get(ACCOUNT_ENDPOINTS.profile);
+    return normalizeProfile(response.data);
   },
 
   async updateName(name: string): Promise<AccountProfile> {
-    try {
-      const response = await client.patch(ACCOUNT_ENDPOINTS.profileName, {
-        name,
-      });
-      return normalizeProfile(response.data);
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        const legacy = await client.patch(ACCOUNT_ENDPOINTS.profileNameLegacy, {
-          name,
-        });
-        return normalizeProfile(legacy.data);
-      }
-      throw error;
-    }
+    const response = await client.patch(ACCOUNT_ENDPOINTS.profileName, {
+      name,
+    });
+    return normalizeProfile(response.data);
   },
 
   async requestEmailChange(payload: {

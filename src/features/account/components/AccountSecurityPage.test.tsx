@@ -63,7 +63,7 @@ describe("AccountSecurityPage", () => {
 
     await waitFor(() => {
       expect(mockedClient.post).toHaveBeenCalledWith(
-        "/api/v1/me/account/password",
+        "/api/v1/account/password",
         {
           current_password: "old-password",
           new_password: "new-password-1234",

@@ -76,7 +76,7 @@ describe("AccountDataPage", () => {
 
     await waitFor(() => {
       expect(mockedClient.post).toHaveBeenCalledWith(
-        "/api/v1/me/account/data/export",
+        "/api/v1/account/data/export",
         {},
       );
     });
@@ -96,7 +96,7 @@ describe("AccountDataPage", () => {
     await user.click(screen.getByRole("button", { name: /delete account/i }));
 
     await waitFor(() => {
-      expect(mockedClient.delete).toHaveBeenCalledWith("/api/v1/me/account", {
+      expect(mockedClient.delete).toHaveBeenCalledWith("/api/v1/account", {
         data: { confirmation: "DELETE" },
       });
       expect(logout).toHaveBeenCalled();
