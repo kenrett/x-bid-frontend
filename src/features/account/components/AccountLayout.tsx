@@ -7,7 +7,7 @@ const NAV_GROUPS: Array<{
   items: Array<{ label: string; to: string; end?: boolean }>;
 }> = [
   {
-    title: "Vault",
+    title: "History",
     items: [
       { label: "Overview", to: "/account", end: true },
       { label: "Bid History", to: "/account/wallet" },

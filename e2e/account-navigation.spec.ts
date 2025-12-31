@@ -6,7 +6,7 @@ import {
   seedAuthState,
 } from "./fixtures/mocks";
 
-test("vault navigation updates the browser URL", async ({ page }) => {
+test("account navigation updates the browser URL", async ({ page }) => {
   await seedAuthState(page);
   await mockSessionRemaining(page);
 
@@ -17,13 +17,13 @@ test("vault navigation updates the browser URL", async ({ page }) => {
   await page.goto("/account");
   await expect(page).toHaveURL(/\/account$/);
 
-  const vaultNav = page.getByRole("navigation", {
-    name: /^(Vault|Account) navigation$/,
+  const accountNav = page.getByRole("navigation", {
+    name: "Account navigation",
   });
 
-  await vaultNav.getByRole("link", { name: "Profile", exact: true }).click();
+  await accountNav.getByRole("link", { name: "Profile", exact: true }).click();
   await expect(page).toHaveURL(/\/account\/profile$/);
 
-  await vaultNav.getByRole("link", { name: "Overview", exact: true }).click();
+  await accountNav.getByRole("link", { name: "Overview", exact: true }).click();
   await expect(page).toHaveURL(/\/account$/);
 });

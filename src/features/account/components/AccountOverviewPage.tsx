@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 const CARD_CLASSES =
   "rounded-xl border border-white/10 bg-white/5 p-4 flex flex-col gap-2 hover:bg-white/10 transition-colors shadow-lg shadow-black/5";
 
-export const VaultOverviewPage = () => (
+export const AccountOverviewPage = () => (
   <div className="space-y-6">
     <div className="space-y-2">
       <p className="text-sm text-gray-400">

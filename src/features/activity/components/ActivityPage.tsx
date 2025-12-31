@@ -224,7 +224,7 @@ export const ActivityPage = () => {
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-wide text-gray-500">
-              Vault
+              Account
             </p>
             <h1 className="text-3xl font-serif font-bold text-white">
               My Activity

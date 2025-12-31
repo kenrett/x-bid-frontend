@@ -32,14 +32,14 @@ import { MaintenanceMode } from "./components/MaintenanceMode";
 import { BidHistoryPage } from "@features/wallet/components/BidHistoryPage";
 import { PurchasesListPage } from "@features/purchases/components/PurchasesListPage";
 import { PurchaseDetailPage } from "@features/purchases/components/PurchaseDetailPage";
-import { AccountRoute } from "@features/vault/components/AccountRoute";
-import { AccountLayout } from "@features/vault/components/AccountLayout";
-import { VaultOverviewPage } from "@features/vault/components/VaultOverviewPage";
-import { AccountProfilePage } from "@features/vault/components/AccountProfilePage";
-import { AccountSecurityPage } from "@features/vault/components/AccountSecurityPage";
-import { AccountSessionsPage } from "@features/vault/components/AccountSessionsPage";
-import { AccountNotificationsPage } from "@features/vault/components/AccountNotificationsPage";
-import { AccountDataPage } from "@features/vault/components/AccountDataPage";
+import { AccountRoute } from "@features/account/components/AccountRoute";
+import { AccountLayout } from "@features/account/components/AccountLayout";
+import { AccountOverviewPage } from "@features/account/components/AccountOverviewPage";
+import { AccountProfilePage } from "@features/account/components/AccountProfilePage";
+import { AccountSecurityPage } from "@features/account/components/AccountSecurityPage";
+import { AccountSessionsPage } from "@features/account/components/AccountSessionsPage";
+import { AccountNotificationsPage } from "@features/account/components/AccountNotificationsPage";
+import { AccountDataPage } from "@features/account/components/AccountDataPage";
 import { ActivityPage } from "@features/activity/components/ActivityPage";
 import { WinsListPage } from "@features/wins/components/WinsListPage";
 import { WinDetailPage } from "@features/wins/components/WinDetailPage";
@@ -67,7 +67,7 @@ export const router = createBrowserRouter([
           {
             element: <AccountLayout />,
             children: [
-              { index: true, element: <VaultOverviewPage /> },
+              { index: true, element: <AccountOverviewPage /> },
               { path: "wallet", element: <BidHistoryPage /> },
               { path: "purchases", element: <PurchasesListPage /> },
               { path: "purchases/:id", element: <PurchaseDetailPage /> },
