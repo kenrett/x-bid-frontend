@@ -33,6 +33,11 @@ describe("router configuration", () => {
     expect(hasPath(accountChildren, "purchases")).toBe(true);
     expect(hasPath(accountChildren, "wins")).toBe(true);
     expect(hasPath(accountChildren, "activity")).toBe(true);
+    expect(hasPath(accountChildren, "profile")).toBe(true);
+    expect(hasPath(accountChildren, "security")).toBe(true);
+    expect(hasPath(accountChildren, "sessions")).toBe(true);
+    expect(hasPath(accountChildren, "notifications")).toBe(true);
+    expect(hasPath(accountChildren, "data")).toBe(true);
     expect(hasPath(children, "/maintenance")).toBe(true);
     expect(hasPath(children, "/admin")).toBe(true);
     expect(root.errorElement).toBeTruthy();

@@ -32,10 +32,14 @@ import { MaintenanceMode } from "./components/MaintenanceMode";
 import { BidHistoryPage } from "@features/wallet/components/BidHistoryPage";
 import { PurchasesListPage } from "@features/purchases/components/PurchasesListPage";
 import { PurchaseDetailPage } from "@features/purchases/components/PurchaseDetailPage";
-import { VaultRoute } from "@features/vault/components/VaultRoute";
-import { VaultLayout } from "@features/vault/components/VaultLayout";
+import { AccountRoute } from "@features/vault/components/AccountRoute";
+import { AccountLayout } from "@features/vault/components/AccountLayout";
 import { VaultOverviewPage } from "@features/vault/components/VaultOverviewPage";
-import { VaultProfilePage } from "@features/vault/components/VaultProfilePage";
+import { AccountProfilePage } from "@features/vault/components/AccountProfilePage";
+import { AccountSecurityPage } from "@features/vault/components/AccountSecurityPage";
+import { AccountSessionsPage } from "@features/vault/components/AccountSessionsPage";
+import { AccountNotificationsPage } from "@features/vault/components/AccountNotificationsPage";
+import { AccountDataPage } from "@features/vault/components/AccountDataPage";
 import { ActivityPage } from "@features/activity/components/ActivityPage";
 import { WinsListPage } from "@features/wins/components/WinsListPage";
 import { WinDetailPage } from "@features/wins/components/WinDetailPage";
@@ -58,10 +62,10 @@ export const router = createBrowserRouter([
       { path: "/purchase-status", element: <PurchaseStatus /> },
       {
         path: "/account",
-        element: <VaultRoute />,
+        element: <AccountRoute />,
         children: [
           {
-            element: <VaultLayout />,
+            element: <AccountLayout />,
             children: [
               { index: true, element: <VaultOverviewPage /> },
               { path: "wallet", element: <BidHistoryPage /> },
@@ -70,7 +74,11 @@ export const router = createBrowserRouter([
               { path: "wins", element: <WinsListPage /> },
               { path: "wins/:auction_id", element: <WinDetailPage /> },
               { path: "activity", element: <ActivityPage /> },
-              { path: "profile", element: <VaultProfilePage /> },
+              { path: "profile", element: <AccountProfilePage /> },
+              { path: "security", element: <AccountSecurityPage /> },
+              { path: "sessions", element: <AccountSessionsPage /> },
+              { path: "notifications", element: <AccountNotificationsPage /> },
+              { path: "data", element: <AccountDataPage /> },
             ],
           },
         ],
