@@ -22,3 +22,12 @@ describe("accountApi.getProfile", () => {
     expect(result.email).toBe("user@example.com");
   });
 });
+
+describe("ACCOUNT_ENDPOINTS", () => {
+  it("does not include legacy /api/v1/me/account paths", async () => {
+    const { ACCOUNT_ENDPOINTS } = await import("./accountApi");
+    expect(Object.values(ACCOUNT_ENDPOINTS).join("\n")).not.toMatch(
+      /\/api\/v1\/me\/account/i,
+    );
+  });
+});

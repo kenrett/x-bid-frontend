@@ -28,9 +28,13 @@ export const AccountDataPage = () => {
 
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
   const [phrase, setPhrase] = useState("");
 
-  const canDelete = useMemo(() => phrase.trim() === CONFIRM_PHRASE, [phrase]);
+  const canDelete = useMemo(
+    () => phrase.trim() === CONFIRM_PHRASE && currentPassword.trim() !== "",
+    [phrase, currentPassword],
+  );
 
   const load = async () => {
     setLoading(true);
@@ -74,7 +78,10 @@ export const AccountDataPage = () => {
 
     setDeleting(true);
     try {
-      await accountApi.deleteAccount({ confirmation: phrase.trim() });
+      await accountApi.deleteAccount({
+        current_password: currentPassword,
+        confirmation: phrase.trim(),
+      });
       showToast("Account deleted.", "success");
       logout();
       navigate("/", { replace: true });
@@ -174,20 +181,39 @@ export const AccountDataPage = () => {
           </div>
         )}
 
-        <div className="space-y-2">
-          <label
-            htmlFor="delete-phrase"
-            className="block text-sm font-semibold"
-          >
-            Type {CONFIRM_PHRASE} to confirm
-          </label>
-          <input
-            id="delete-phrase"
-            value={phrase}
-            onChange={(e) => setPhrase(e.target.value)}
-            className="w-full rounded-xl border border-red-400/30 bg-black/20 px-4 py-3 text-white placeholder:text-gray-500 outline-none transition focus:ring-2 focus:ring-red-500/40"
-            placeholder={CONFIRM_PHRASE}
-          />
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <label
+              htmlFor="delete-current-password"
+              className="block text-sm font-semibold"
+            >
+              Current password
+            </label>
+            <input
+              id="delete-current-password"
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full rounded-xl border border-red-400/30 bg-black/20 px-4 py-3 text-white placeholder:text-gray-500 outline-none transition focus:ring-2 focus:ring-red-500/40"
+              autoComplete="current-password"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="delete-phrase"
+              className="block text-sm font-semibold"
+            >
+              Type {CONFIRM_PHRASE} to confirm
+            </label>
+            <input
+              id="delete-phrase"
+              value={phrase}
+              onChange={(e) => setPhrase(e.target.value)}
+              className="w-full rounded-xl border border-red-400/30 bg-black/20 px-4 py-3 text-white placeholder:text-gray-500 outline-none transition focus:ring-2 focus:ring-red-500/40"
+              placeholder={CONFIRM_PHRASE}
+            />
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-3">

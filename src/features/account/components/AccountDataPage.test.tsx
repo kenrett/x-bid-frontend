@@ -89,6 +89,7 @@ describe("AccountDataPage", () => {
 
     renderPage(authValue({ logout }));
 
+    await user.type(await screen.findByLabelText(/current password/i), "pw");
     await user.type(
       await screen.findByLabelText(/type delete to confirm/i),
       "DELETE",
@@ -97,7 +98,7 @@ describe("AccountDataPage", () => {
 
     await waitFor(() => {
       expect(mockedClient.delete).toHaveBeenCalledWith("/api/v1/account", {
-        data: { confirmation: "DELETE" },
+        data: { current_password: "pw", confirmation: "DELETE" },
       });
       expect(logout).toHaveBeenCalled();
       expect(mockNavigate).toHaveBeenCalledWith("/", { replace: true });

@@ -83,7 +83,7 @@ describe("AccountProfilePage", () => {
 
     await waitFor(() => {
       expect(mockedClient.patch).toHaveBeenCalledWith("/api/v1/account", {
-        name: "New Name",
+        account: { name: "New Name" },
       });
       expect(updateUser).toHaveBeenCalled();
       expect(screen.getByText(/profile updated/i)).toBeInTheDocument();

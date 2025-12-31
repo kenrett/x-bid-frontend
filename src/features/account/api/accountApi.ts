@@ -1,4 +1,5 @@
 import client from "@api/client";
+import axios from "axios";
 import { reportUnexpectedResponse } from "@services/unexpectedResponse";
 import type {
   AccountProfile,
@@ -16,11 +17,52 @@ export const ACCOUNT_ENDPOINTS = {
   password: "/api/v1/account/password",
   resendVerification: "/api/v1/account/email/verification/resend",
   sessions: "/api/v1/account/sessions",
-  revokeOtherSessions: "/api/v1/account/sessions/revoke-others",
+  revokeOtherSessions: "/api/v1/account/sessions/revoke_others",
   notifications: "/api/v1/account/notifications",
   dataExport: "/api/v1/account/data/export",
   account: "/api/v1/account",
 } as const;
+
+const isJsonContentType = (value: unknown): boolean => {
+  if (typeof value !== "string") return false;
+  return value.toLowerCase().includes("application/json");
+};
+
+const toSnippet = (value: unknown): string => {
+  if (typeof value === "string")
+    return value.replace(/\s+/g, " ").slice(0, 180);
+  try {
+    return JSON.stringify(value).slice(0, 180);
+  } catch {
+    return String(value).slice(0, 180);
+  }
+};
+
+const requestAccountApi = async <T>(
+  method: string,
+  path: string,
+  run: () => Promise<T>,
+): Promise<T> => {
+  try {
+    return await run();
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const status = error.response.status;
+      const headers = error.response.headers as
+        | Record<string, unknown>
+        | undefined;
+      const contentType =
+        headers?.["content-type"] ?? headers?.["Content-Type"];
+      if (!isJsonContentType(contentType)) {
+        const snippet = toSnippet(error.response.data);
+        throw new Error(
+          `[Account API] ${method.toUpperCase()} ${path} failed (${status}): ${snippet}`,
+        );
+      }
+    }
+    throw error;
+  }
+};
 
 const asRecord = (value: unknown): Record<string, unknown> | null =>
   value && typeof value === "object"
@@ -225,22 +267,35 @@ const normalizeExportStatus = (payload: unknown): DataExportStatus => {
 
 export const accountApi = {
   async getProfile(): Promise<AccountProfile> {
-    const response = await client.get(ACCOUNT_ENDPOINTS.profile);
+    const response = await requestAccountApi(
+      "GET",
+      ACCOUNT_ENDPOINTS.profile,
+      () => client.get(ACCOUNT_ENDPOINTS.profile),
+    );
     return normalizeProfile(response.data);
   },
 
   async updateName(name: string): Promise<AccountProfile> {
-    const response = await client.patch(ACCOUNT_ENDPOINTS.profileName, {
-      name,
-    });
+    const response = await requestAccountApi(
+      "PATCH",
+      ACCOUNT_ENDPOINTS.profileName,
+      () =>
+        client.patch(ACCOUNT_ENDPOINTS.profileName, {
+          account: { name },
+        }),
+    );
     return normalizeProfile(response.data);
   },
 
   async requestEmailChange(payload: {
-    email: string;
+    new_email_address: string;
     current_password?: string;
   }): Promise<{ status: "verification_sent" }> {
-    const response = await client.post(ACCOUNT_ENDPOINTS.emailChange, payload);
+    const response = await requestAccountApi(
+      "POST",
+      ACCOUNT_ENDPOINTS.emailChange,
+      () => client.post(ACCOUNT_ENDPOINTS.emailChange, payload),
+    );
     const record = asRecord(response.data) ?? {};
     const status =
       readString(record.status) ??
@@ -252,7 +307,11 @@ export const accountApi = {
   },
 
   async getSecurity(): Promise<AccountSecurityStatus> {
-    const response = await client.get(ACCOUNT_ENDPOINTS.security);
+    const response = await requestAccountApi(
+      "GET",
+      ACCOUNT_ENDPOINTS.security,
+      () => client.get(ACCOUNT_ENDPOINTS.security),
+    );
     return normalizeSecurity(response.data);
   },
 
@@ -260,51 +319,84 @@ export const accountApi = {
     current_password: string;
     new_password: string;
   }): Promise<void> {
-    await client.post(ACCOUNT_ENDPOINTS.password, payload);
+    await requestAccountApi("POST", ACCOUNT_ENDPOINTS.password, () =>
+      client.post(ACCOUNT_ENDPOINTS.password, payload),
+    );
   },
 
   async resendVerificationEmail(): Promise<void> {
-    await client.post(ACCOUNT_ENDPOINTS.resendVerification, {});
+    await requestAccountApi("POST", ACCOUNT_ENDPOINTS.resendVerification, () =>
+      client.post(ACCOUNT_ENDPOINTS.resendVerification, {}),
+    );
   },
 
   async listSessions(): Promise<AccountSession[]> {
-    const response = await client.get(ACCOUNT_ENDPOINTS.sessions);
+    const response = await requestAccountApi(
+      "GET",
+      ACCOUNT_ENDPOINTS.sessions,
+      () => client.get(ACCOUNT_ENDPOINTS.sessions),
+    );
     return normalizeSessions(response.data);
   },
 
   async revokeSession(sessionId: string): Promise<void> {
-    await client.delete(
-      `${ACCOUNT_ENDPOINTS.sessions}/${encodeURIComponent(sessionId)}`,
-    );
+    const path = `${ACCOUNT_ENDPOINTS.sessions}/${encodeURIComponent(sessionId)}`;
+    await requestAccountApi("DELETE", path, () => client.delete(path));
   },
 
   async revokeOtherSessions(): Promise<void> {
-    await client.post(ACCOUNT_ENDPOINTS.revokeOtherSessions, {});
+    await requestAccountApi("POST", ACCOUNT_ENDPOINTS.revokeOtherSessions, () =>
+      client.post(ACCOUNT_ENDPOINTS.revokeOtherSessions, {}),
+    );
   },
 
   async getNotificationPreferences(): Promise<NotificationPreferences> {
-    const response = await client.get(ACCOUNT_ENDPOINTS.notifications);
+    const response = await requestAccountApi(
+      "GET",
+      ACCOUNT_ENDPOINTS.notifications,
+      () => client.get(ACCOUNT_ENDPOINTS.notifications),
+    );
     return normalizeNotifications(response.data);
   },
 
   async updateNotificationPreferences(
     prefs: NotificationPreferences,
   ): Promise<NotificationPreferences> {
-    const response = await client.put(ACCOUNT_ENDPOINTS.notifications, prefs);
+    const response = await requestAccountApi(
+      "PUT",
+      ACCOUNT_ENDPOINTS.notifications,
+      () =>
+        client.put(ACCOUNT_ENDPOINTS.notifications, {
+          account: { notification_preferences: prefs },
+        }),
+    );
     return normalizeNotifications(response.data);
   },
 
   async getExportStatus(): Promise<DataExportStatus> {
-    const response = await client.get(ACCOUNT_ENDPOINTS.dataExport);
+    const response = await requestAccountApi(
+      "GET",
+      ACCOUNT_ENDPOINTS.dataExport,
+      () => client.get(ACCOUNT_ENDPOINTS.dataExport),
+    );
     return normalizeExportStatus(response.data);
   },
 
   async requestExport(): Promise<DataExportStatus> {
-    const response = await client.post(ACCOUNT_ENDPOINTS.dataExport, {});
+    const response = await requestAccountApi(
+      "POST",
+      ACCOUNT_ENDPOINTS.dataExport,
+      () => client.post(ACCOUNT_ENDPOINTS.dataExport, {}),
+    );
     return normalizeExportStatus(response.data);
   },
 
-  async deleteAccount(payload: { confirmation: string }): Promise<void> {
-    await client.delete(ACCOUNT_ENDPOINTS.account, { data: payload });
+  async deleteAccount(payload: {
+    current_password: string;
+    confirmation: string;
+  }): Promise<void> {
+    await requestAccountApi("DELETE", ACCOUNT_ENDPOINTS.account, () =>
+      client.delete(ACCOUNT_ENDPOINTS.account, { data: payload }),
+    );
   },
 };

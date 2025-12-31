@@ -117,7 +117,7 @@ export const AccountProfilePage = () => {
     setRequestingEmailChange(true);
     try {
       await accountApi.requestEmailChange({
-        email: emailTrimmed,
+        new_email_address: emailTrimmed,
         current_password: currentPassword || undefined,
       });
       setEmailChangeStatus("sent");
