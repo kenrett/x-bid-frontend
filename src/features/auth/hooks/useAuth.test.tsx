@@ -27,6 +27,7 @@ describe("useAuth", () => {
       isReady: true,
       login: vi.fn(),
       logout: vi.fn(),
+      updateUser: vi.fn(),
       updateUserBalance: vi.fn(),
     };
 

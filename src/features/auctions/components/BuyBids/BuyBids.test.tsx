@@ -82,6 +82,7 @@ const createMockAuthReturn = (
   user,
   login: vi.fn() as UseAuthReturn["login"],
   logout: vi.fn(),
+  updateUser: vi.fn(),
   token: user ? "fake-token" : null,
   refreshToken: user ? "refresh-token" : null,
   sessionTokenId: user ? "session-token-id" : null,

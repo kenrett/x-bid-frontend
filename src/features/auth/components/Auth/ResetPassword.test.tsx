@@ -31,6 +31,7 @@ describe("ResetPassword", () => {
       login: vi.fn(),
       logout: vi.fn(),
       isReady: true,
+      updateUser: vi.fn(),
       updateUserBalance: vi.fn(),
     });
     mockedClient.post.mockResolvedValue({
