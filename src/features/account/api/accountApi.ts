@@ -72,6 +72,13 @@ const asRecord = (value: unknown): Record<string, unknown> | null =>
 const readString = (value: unknown): string | undefined =>
   typeof value === "string" && value.trim() !== "" ? value : undefined;
 
+const readIdString = (value: unknown): string | undefined => {
+  if (typeof value === "string") return readString(value) ?? undefined;
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  if (typeof value === "bigint") return String(value);
+  return undefined;
+};
+
 const readBoolean = (value: unknown): boolean | undefined =>
   typeof value === "boolean" ? value : undefined;
 
@@ -192,7 +199,7 @@ const normalizeSessions = (payload: unknown): AccountSession[] => {
 
   return list.map((item) => {
     const s = asRecord(item) ?? {};
-    const id = readString(s.id) ?? readString(s.session_id) ?? "";
+    const id = readIdString(s.id) ?? readIdString(s.session_id) ?? "";
     if (!id) throw reportUnexpectedResponse("account.sessions.id", item);
 
     const deviceLabel =
@@ -349,6 +356,18 @@ export const accountApi = {
       ACCOUNT_ENDPOINTS.sessions,
       () => client.get(ACCOUNT_ENDPOINTS.sessions),
     );
+    const headers = response.headers as Record<string, unknown> | undefined;
+    const contentType = headers?.["content-type"] ?? headers?.["Content-Type"];
+    if (typeof contentType === "string" && !isJsonContentType(contentType)) {
+      throw new Error(
+        `[Account API] GET ${ACCOUNT_ENDPOINTS.sessions} returned non-JSON response: ${toSnippet(response.data)}`,
+      );
+    }
+    if (typeof contentType !== "string" && typeof response.data === "string") {
+      throw new Error(
+        `[Account API] GET ${ACCOUNT_ENDPOINTS.sessions} returned non-JSON response: ${toSnippet(response.data)}`,
+      );
+    }
     return normalizeSessions(response.data);
   },
 

@@ -41,28 +41,41 @@ describe("AccountSessionsPage", () => {
     const user = userEvent.setup();
     mockedClient.get
       .mockResolvedValueOnce({
+        status: 200,
+        headers: { "content-type": "application/json" },
         data: {
           sessions: [
             {
-              id: "current",
-              device_label: "Current device",
-              current_session: true,
+              id: 35,
+              created_at: "2025-01-01T00:00:00Z",
+              last_seen_at: null,
+              user_agent: "Current device",
+              ip_address: "127.0.0.1",
+              current: true,
             },
             {
-              id: "other",
-              device_label: "Other device",
-              current_session: false,
+              id: 36,
+              created_at: "2025-01-01T00:00:00Z",
+              last_seen_at: null,
+              user_agent: "Other device",
+              ip_address: "127.0.0.2",
+              current: false,
             },
           ],
         },
       })
       .mockResolvedValueOnce({
+        status: 200,
+        headers: { "content-type": "application/json" },
         data: {
           sessions: [
             {
-              id: "current",
-              device_label: "Current device",
-              current_session: true,
+              id: 35,
+              created_at: "2025-01-01T00:00:00Z",
+              last_seen_at: null,
+              user_agent: "Current device",
+              ip_address: "127.0.0.1",
+              current: true,
             },
           ],
         },
@@ -72,12 +85,13 @@ describe("AccountSessionsPage", () => {
     renderPage();
 
     expect(await screen.findByText(/^other device$/i)).toBeInTheDocument();
+    expect(mockedClient.get).toHaveBeenCalledWith("/api/v1/account/sessions");
     const revokeButtons = screen.getAllByRole("button", { name: /revoke/i });
     await user.click(revokeButtons[revokeButtons.length - 1]!);
 
     await waitFor(() => {
       expect(mockedClient.delete).toHaveBeenCalledWith(
-        "/api/v1/account/sessions/other",
+        "/api/v1/account/sessions/36",
       );
     });
   });

@@ -23,6 +23,45 @@ describe("accountApi.getProfile", () => {
   });
 });
 
+describe("accountApi.listSessions", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("accepts canonical sessions payload (snake_case + numeric id)", async () => {
+    mockedClient.get.mockResolvedValue({
+      status: 200,
+      headers: { "content-type": "application/json" },
+      data: {
+        sessions: [
+          {
+            id: 35,
+            created_at: "2025-01-01T00:00:00Z",
+            last_seen_at: null,
+            user_agent: "Safari",
+            ip_address: "127.0.0.1",
+            current: true,
+          },
+        ],
+      },
+    });
+
+    const result = await accountApi.listSessions();
+
+    expect(mockedClient.get).toHaveBeenCalledWith("/api/v1/account/sessions");
+    expect(result).toEqual([
+      {
+        id: "35",
+        deviceLabel: "Safari",
+        ip: "127.0.0.1",
+        createdAt: "2025-01-01T00:00:00Z",
+        lastSeenAt: undefined,
+        isCurrent: true,
+      },
+    ]);
+  });
+});
+
 describe("ACCOUNT_ENDPOINTS", () => {
   it("does not include legacy /api/v1/me/account paths", async () => {
     const { ACCOUNT_ENDPOINTS } = await import("./accountApi");
