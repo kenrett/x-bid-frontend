@@ -57,13 +57,13 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
 
     Copy the example environment file and fill in the required values. You will need a Stripe publishable key for development.
 
-    ```env
+    ```sh
     cp .env.example .env.development
     ```
 
-    - `VITE_API_URL`: Base URL for the XBid backend API (e.g., `http://localhost:3000/api/v1`).
+    - `VITE_API_URL`: Base URL for the XBid backend API origin (e.g., `http://localhost:3000`). (Frontend requests include `/api/v1/...` in their paths.)
     - `VITE_STRIPE_PUBLISHABLE_KEY`: Stripe publishable key used for embedded checkout.
-    - `VITE_CABLE_URL` (optional): Action Cable WebSocket endpoint; defaults to `ws://localhost:3000/cable`. The cable handshake must include `Authorization: Bearer <token>`; query params are rejected.
+    - `VITE_CABLE_URL` (optional): Action Cable WebSocket endpoint; defaults to `ws://localhost:3000/cable`. The app includes the session token as a `?token=...` query param (and adds an `Authorization` header in Node/WebSocket test environments when supported).
 
 4.  **Run the development server:**
     ```sh
@@ -94,7 +94,7 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
 
 ### Authentication & API Contracts
 
-- CORS is non-credentialed; clients should keep `withCredentials=false` and send `Authorization: Bearer <token>` on HTTP and cable connections.
+- CORS is non-credentialed; clients should keep `withCredentials=false` and send `Authorization: Bearer <token>` on HTTP. ActionCable/WebSocket auth uses `?token=...` (browsers can’t set custom headers in the WebSocket handshake).
 - Login (example): `POST /api/v1/login` with `{ "session": { "email_address": "...", "password": "..." } }` returns `token`, `refresh_token`, `session` (`session_token_id`, `session_expires_at`, `seconds_remaining`), `is_admin`, `is_superuser`, optional `redirect_path`, and `user`.
 - Error shapes tolerated: `{error_code, message, details?}` (preferred), `{error: "text"}`, or `{error: {code, message}}` (rack-attack/throttling). Use `message` for user feedback when present.
 

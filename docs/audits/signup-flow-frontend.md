@@ -4,8 +4,8 @@ Goal: document the **actual signup request path** used by the frontend and the *
 
 ## Where signup is called (URL + method)
 
-- Signup page route: `src/router.tsx:52` → `"/signup"` renders `SignUpForm`.
-- Signup API call site: `src/features/auth/components/SignUpForm/SignUpForm.tsx:29`
+- Signup page route: `src/router.tsx` → `"/signup"` renders `SignUpForm`.
+- Signup API call site: `src/features/auth/components/SignUpForm/SignUpForm.tsx`
   - Method: `POST`
   - URL path: `"/api/v1/signup"`
 
@@ -13,7 +13,7 @@ There is **no RTK Query / createApi slice** for signup in this repo (signup uses
 
 ## Request body shape (fields + names)
 
-`src/features/auth/components/SignUpForm/SignUpForm.tsx:29-33`
+`src/features/auth/components/SignUpForm/SignUpForm.tsx`
 
 ```ts
 await client.post("/api/v1/signup", {
@@ -37,23 +37,22 @@ So the FE sends:
 
 ### Runtime parsing (what the component reads)
 
-`src/features/auth/components/SignUpForm/SignUpForm.tsx:34-49`
+`src/features/auth/components/SignUpForm/SignUpForm.tsx`
 
-The signup handler destructures these fields from `response.data` and forwards them into `useAuth().login(...)`:
+The signup handler passes `response.data` through `normalizeAuthResponse(...)` and forwards the normalized payload into `useAuth().login(...)`:
 
 - `token`
 - `refresh_token`
 - `session_token_id`
 - `user`
-- `is_admin`
-- `is_superuser`
+- optional role flags (if present in the response at top-level or on `user`) are merged into the normalized `user`
 
 ### TypeScript types involved (copied)
 
 The signup response itself is **not explicitly typed** at the callsite (`response.data` is treated as `any` from Axios).
 The typed contract the FE _does_ enforce is what it passes into `login(...)`.
 
-`src/features/auth/types/auth.ts:3-10`
+`src/features/auth/types/auth.ts`
 
 ```ts
 export type LoginPayload = {
@@ -64,7 +63,7 @@ export type LoginPayload = {
 };
 ```
 
-`src/features/auth/types/user.ts:1-8`
+`src/features/auth/types/user.ts`
 
 ```ts
 export interface User {
@@ -79,14 +78,14 @@ export interface User {
 
 ### Evidence from tests (expected post + login payload)
 
-`src/features/auth/components/SignUpForm/SignUpForm.test.tsx:111-123`
+`src/features/auth/components/SignUpForm/SignUpForm.test.tsx`
 
 - Confirms the FE calls `POST /api/v1/signup` with `{ name, email_address, password }`.
-- Confirms the FE calls `login(...)` with `{ token, refreshToken, sessionTokenId, user }` (and the component also passes `is_admin`/`is_superuser` when present).
+- Confirms the FE calls `login(...)` with a normalized `{ token, refreshToken, sessionTokenId, user }` payload.
 
 ## Expected JSON response (what the FE expects at runtime)
 
-Based on `src/features/auth/components/SignUpForm/SignUpForm.tsx:34-49`, the FE expects a JSON object like:
+Based on `src/features/auth/components/SignUpForm/SignUpForm.tsx` + `src/features/auth/api/authResponse.ts`, the FE expects a JSON object like:
 
 ```json
 {
@@ -108,14 +107,14 @@ Based on `src/features/auth/components/SignUpForm/SignUpForm.tsx:34-49`, the FE 
 
 Notes:
 
-- `is_admin` / `is_superuser` are treated as optional (the signup test does not include them).
-- The `User` object is later normalized/merged with role flags in `AuthProvider.login(...)` (`src/features/auth/providers/AuthProvider.tsx:82-108`).
+- `is_admin` / `is_superuser` are treated as optional; they may arrive either at the top-level or within `user`.
+- `normalizeAuthResponse(...)` merges role flags and normalizes key naming + user shape before calling `AuthProvider.login(...)`.
 
 ## Storage & hydration behavior (runtime assumptions)
 
 ### Where tokens and user are stored
 
-`src/features/auth/providers/AuthProvider.tsx:52-71` + `src/features/auth/providers/AuthProvider.tsx:82-108`
+`src/features/auth/providers/AuthProvider.tsx`
 
 - On app boot, AuthProvider reads from `localStorage`:
   - `token`
@@ -130,20 +129,20 @@ Notes:
 
 ### How auth is attached to API calls
 
-`src/api/client.ts:56-65`
+`src/api/client.ts`
 
 - Every Axios request reads `localStorage["token"]` and sets `Authorization: Bearer <token>` when present.
 
 ### How session_token_id is used
 
-`src/features/auth/providers/AuthProvider.tsx:261-273` + `src/features/auth/providers/AuthProvider.tsx:314-332`
+`src/features/auth/providers/AuthProvider.tsx`
 
 - AuthProvider polls `GET /api/v1/session/remaining` with `params: { session_token_id }`.
 - AuthProvider also subscribes to `SessionChannel` via ActionCable with `{ token, session_token_id }`.
 
 ## Potential contract mismatch to verify
 
-The frontend **calls** `POST /api/v1/signup` (`src/features/auth/components/SignUpForm/SignUpForm.tsx:29`), and the FE type layer now models signup as the same auth-session response contract as login.
+The frontend **calls** `POST /api/v1/signup` (`src/features/auth/components/SignUpForm/SignUpForm.tsx`), and the FE type layer models signup as the same auth-session response contract as login.
 
 To keep signup/login aligned, `ApiJsonResponse<"/api/v1/signup","post">` is overridden to return the auth-session fields:
 `token`, `refresh_token`, `session_token_id`, `user`, and optional `is_admin`/`is_superuser`.
@@ -166,19 +165,19 @@ To keep signup/login aligned, `ApiJsonResponse<"/api/v1/signup","post">` is over
 
 This currently works because the frontend normalizes responses (snake_case or camelCase) into a consistent `LoginPayload` shape before calling `login(...)`:
 
-- Normalizer: `src/features/auth/api/authResponse.ts:1`
-- Used by login: `src/features/auth/components/LoginForm/LoginForm.tsx:1`
-- Used by signup: `src/features/auth/components/SignUpForm/SignUpForm.tsx:1`
+- Normalizer: `src/features/auth/api/authResponse.ts`
+- Used by login: `src/features/auth/components/LoginForm/LoginForm.tsx`
+- Used by signup: `src/features/auth/components/SignUpForm/SignUpForm.tsx`
 
 If the backend ever switches to camelCase (or mixes styles), the FE should still work as long as it continues to call the normalizer and the backend still returns all required fields.
 
 ### User email shape mismatch
 
-The FE `User` type uses `email` (`src/features/auth/types/user.ts:1-8`), but the backend may send `email_address` / `emailAddress`.
+The FE `User` type uses `email` (`src/features/auth/types/user.ts`), but the backend may send `email_address` / `emailAddress`.
 
 The FE currently tolerates this via normalization:
 
-- `normalizeUser(...)` accepts `email`, `email_address`, or `emailAddress` (`src/features/auth/api/user.ts:21-25`).
+- `normalizeUser(...)` accepts `email`, `email_address`, or `emailAddress` (`src/features/auth/api/user.ts`).
 
 Signup should return `user` in the same shape as login does today (or at least within what `normalizeUser(...)` already tolerates), otherwise the header/account UI may show blank email.
 
@@ -186,7 +185,7 @@ Signup should return `user` in the same shape as login does today (or at least w
 
 The FE accepts role flags in either place and normalizes them onto `user`:
 
-- Response normalization merges top-level flags into `user` when needed (`src/features/auth/api/authResponse.ts:1`).
-- `normalizeUser(...)` tolerates multiple variants (`is_admin`, `isAdmin`, role/roles arrays, etc.) (`src/features/auth/api/user.ts:26-63`).
+- Response normalization merges top-level flags into `user` when needed (`src/features/auth/api/authResponse.ts`).
+- `normalizeUser(...)` tolerates multiple variants (`is_admin`, `isAdmin`, role/roles arrays, etc.) (`src/features/auth/api/user.ts`).
 
 Recommendation for backend consistency: put role flags on `user` (`user.is_admin`, `user.is_superuser`) and optionally mirror them at the top-level for convenience; the FE already handles both.

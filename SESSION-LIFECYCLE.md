@@ -14,7 +14,7 @@ This app treats a “session” as the combination of `token`, `refresh_token`, 
 
 ## Refresh / Remaining Time
 
-- Every 60s, AuthProvider calls `GET /session/remaining?session_token_id=...`.
+- Every 60s, AuthProvider calls `GET /api/v1/session/remaining?session_token_id=...`.
 - If `remaining_seconds` is returned and <= 0 → logout.
 - If `token`/`refresh_token`/`session_token_id` are returned → replace stored values.
 - If a `user` or role flags are returned → merge/normalize and persist.
@@ -22,8 +22,8 @@ This app treats a “session” as the combination of `token`, `refresh_token`, 
 
 ## Invalidations
 
-- If `/session/remaining` returns 401 → logout.
-- A WebSocket subscription to `SessionChannel` (authorized via `Authorization: Bearer <token>` header) listens for `session_invalidated` and logs out.
+- If `/api/v1/session/remaining` returns 401 → logout.
+- A WebSocket subscription to `SessionChannel` (token passed as `?token=...` for browser ActionCable; Node/WebSocket environments may also attach an `Authorization` header) listens for `session_invalidated` and logs out.
 - Logout clears user, tokens, session id, countdown, and `localStorage` entries.
 
 ## Storage Keys
