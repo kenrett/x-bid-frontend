@@ -50,11 +50,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   >(null);
   const [isReady, setIsReady] = useState(false);
 
+  const applyAuthPayload = useCallback(
+    (payload: LoginPayload) => {
+      const normalizedUser = normalizeAuthUser(payload.user as User);
+      setUser(normalizedUser);
+      setToken(payload.token);
+      setRefreshToken(payload.refreshToken);
+      setSessionTokenId(payload.sessionTokenId);
+      setSessionRemainingSeconds(null);
+
+      authTokenStore.setToken(payload.token);
+      setSentryUser(normalizedUser);
+      resetCable();
+
+      if (import.meta.env.VITE_E2E_TESTS === "true") {
+        (window as { __lastSessionState?: unknown }).__lastSessionState = {
+          token: payload.token,
+          refreshToken: payload.refreshToken,
+          sessionTokenId: payload.sessionTokenId,
+          user: normalizedUser,
+        };
+      }
+    },
+    [normalizeAuthUser],
+  );
+
   useEffect(() => {
     // Intentionally do not hydrate tokens from localStorage; keeping auth
     // artifacts out of persistent storage limits blast radius of XSS.
+    if (import.meta.env.VITE_E2E_TESTS === "true") {
+      const bootstrap = (
+        window as unknown as { __e2eAuthBootstrap?: LoginPayload }
+      ).__e2eAuthBootstrap;
+      if (bootstrap) {
+        applyAuthPayload(bootstrap);
+        delete (window as unknown as { __e2eAuthBootstrap?: LoginPayload })
+          .__e2eAuthBootstrap;
+      }
+    }
     setIsReady(true);
-  }, []);
+  }, [applyAuthPayload]);
 
   const login = useCallback(
     ({
@@ -63,18 +98,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       sessionTokenId: sessionId,
       user,
     }: LoginPayload) => {
-      const normalizedUser = normalizeAuthUser(user as User);
-      setUser(normalizedUser);
-      setToken(jwt);
-      setRefreshToken(refresh);
-      setSessionTokenId(sessionId);
-      setSessionRemainingSeconds(null);
-
-      authTokenStore.setToken(jwt);
-      setSentryUser(normalizedUser);
-      resetCable();
+      applyAuthPayload({
+        token: jwt,
+        refreshToken: refresh,
+        sessionTokenId: sessionId,
+        user,
+      });
     },
-    [normalizeAuthUser],
+    [applyAuthPayload],
   );
 
   const logout = useCallback(() => {
@@ -284,22 +315,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const onRefreshed = (event: Event) => {
       const { detail } = event as CustomEvent<LoginPayload>;
       if (!detail) return;
-
-      const normalizedUser = normalizeAuthUser(detail.user as User);
-      setUser(normalizedUser);
-      setToken(detail.token);
-      setRefreshToken(detail.refreshToken);
-      setSessionTokenId(detail.sessionTokenId);
-      setSessionRemainingSeconds(null);
-
-      authTokenStore.setToken(detail.token);
-      setSentryUser(normalizedUser);
-      resetCable();
+      applyAuthPayload(detail);
     };
 
     window.addEventListener("app:auth:refreshed", onRefreshed);
     return () => window.removeEventListener("app:auth:refreshed", onRefreshed);
-  }, [normalizeAuthUser]);
+  }, [applyAuthPayload]);
 
   useEffect(() => {
     if (!token || !sessionTokenId) return;

@@ -160,10 +160,13 @@ export const isDocumentRequest = (route: Route) =>
 export const seedAuthState = async (page: Page, user = authedUser) => {
   await page.addInitScript(
     (auth) => {
-      localStorage.setItem("user", JSON.stringify(auth.user));
-      localStorage.setItem("token", auth.token);
-      localStorage.setItem("refreshToken", auth.refreshToken);
-      localStorage.setItem("sessionTokenId", auth.sessionTokenId);
+      // Auth tokens are in-memory only; seed a bootstrap payload consumed by AuthProvider
+      // when `VITE_E2E_TESTS=true`.
+      (
+        window as unknown as {
+          __e2eAuthBootstrap?: typeof auth;
+        }
+      ).__e2eAuthBootstrap = auth;
     },
     {
       user,
