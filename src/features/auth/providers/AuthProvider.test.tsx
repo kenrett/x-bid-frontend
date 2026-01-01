@@ -4,6 +4,16 @@ import { render, screen, waitFor, act } from "@testing-library/react";
 import type { LoginPayload } from "@features/auth/types/auth";
 import type { User } from "@features/auth/types/user";
 
+const toastMocks = vi.hoisted(() => ({
+  showToast: vi.fn(),
+}));
+
+vi.mock("@services/toast", () => ({
+  showToast: (...args: unknown[]): void => {
+    toastMocks.showToast(...args);
+  },
+}));
+
 const cableMocks = vi.hoisted(() => ({
   connect: vi.fn(),
   disconnect: vi.fn(),
@@ -80,6 +90,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   localStorage.clear();
   authTokenStore.setToken(null);
+  toastMocks.showToast.mockReset();
   mockedClient.get.mockReset();
   mockedClient.get.mockResolvedValue({
     data: { remaining_seconds: 300 },
@@ -163,11 +174,33 @@ describe("AuthProvider", () => {
     expect(mockSubscription.unsubscribe).toHaveBeenCalled();
   });
 
-  it("handles session remaining responses and invalidation", async () => {
+  it("uses remaining_seconds to drive countdown state", async () => {
+    render(
+      <Wrapper>
+        <TestConsumer />
+      </Wrapper>,
+    );
+
+    await act(async () => {
+      await screen.getByText("login").click();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("remaining")).toHaveTextContent("300");
+    });
+  });
+
+  it("logs out immediately when remaining_seconds is <= 0", async () => {
     mockedClient.get.mockResolvedValueOnce({
       data: { remaining_seconds: 0 },
     });
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    // Legacy artifacts should be cleared on logout (defense-in-depth).
+    localStorage.setItem("token", "legacy");
+    localStorage.setItem("refreshToken", "legacy");
+    localStorage.setItem("sessionTokenId", "legacy");
+    localStorage.setItem("user", '{"id":1}');
 
     render(
       <Wrapper>
@@ -180,10 +213,47 @@ describe("AuthProvider", () => {
     });
 
     await waitFor(() => {
-      expect(warnSpy).toHaveBeenCalled();
+      expect(screen.getByTestId("token")).toHaveTextContent("none");
     });
 
+    expect(toastMocks.showToast).toHaveBeenCalledWith(
+      "Session expired. Please log in again.",
+      "error",
+    );
+    expect(localStorage.getItem("token")).toBeNull();
+    expect(localStorage.getItem("refreshToken")).toBeNull();
+    expect(localStorage.getItem("sessionTokenId")).toBeNull();
+    expect(localStorage.getItem("user")).toBeNull();
+    expect(authTokenStore.getSnapshot().token).toBeNull();
+    expect(cableMocks.reset).toHaveBeenCalled();
+
     warnSpy.mockRestore();
+  });
+
+  it("logs out when polling receives 401", async () => {
+    mockedClient.get.mockRejectedValueOnce({
+      isAxiosError: true,
+      response: { status: 401 },
+    });
+
+    render(
+      <Wrapper>
+        <TestConsumer />
+      </Wrapper>,
+    );
+
+    await act(async () => {
+      await screen.getByText("login").click();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("token")).toHaveTextContent("none");
+    });
+
+    expect(toastMocks.showToast).toHaveBeenCalledWith(
+      "Session expired. Please log in again.",
+      "error",
+    );
   });
 
   it("refreshes tokens when session remaining returns new token values", async () => {

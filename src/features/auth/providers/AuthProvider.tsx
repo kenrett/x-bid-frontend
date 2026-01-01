@@ -12,15 +12,18 @@ import { authTokenStore } from "../tokenStore";
 
 type SessionRemainingResponse = {
   remaining_seconds?: number;
+  // Backward-compat for one release: some backends used `seconds_remaining`.
+  seconds_remaining?: number;
   token?: string;
   refresh_token?: string;
-  session_token_id?: string;
+  session_token_id?: string | number;
   user?: User;
   is_admin?: boolean;
   is_superuser?: boolean;
 };
 
 const SESSION_POLL_INTERVAL_MS = 60_000;
+const SESSION_EXPIRED_TOAST = "Session expired. Please log in again.";
 
 const getSessionEventName = (payload: unknown): string | undefined => {
   if (typeof payload === "string") return payload;
@@ -115,6 +118,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setSessionTokenId(null);
     setSessionRemainingSeconds(null);
 
+    // Defense-in-depth: clear any legacy persisted auth artifacts, even though
+    // current versions keep tokens in-memory only.
+    try {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("sessionTokenId");
+    } catch {
+      // ignore (no storage in some environments)
+    }
+
     authTokenStore.setToken(null);
     setSentryUser(null);
     resetCable();
@@ -132,7 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         `[AuthProvider] Session invalidated${reason ? ` (${reason})` : ""}`,
       );
       if (!window.location.pathname.startsWith("/login")) {
-        showToast("Your session expired; please sign in again.", "error");
+        showToast(SESSION_EXPIRED_TOAST, "error");
         const redirectParam = encodeURIComponent(
           window.location.pathname + window.location.search,
         );
@@ -187,6 +201,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const {
         remaining_seconds,
+        seconds_remaining,
         token: nextToken,
         refresh_token: nextRefreshToken,
         session_token_id: nextSessionTokenId,
@@ -195,9 +210,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         is_superuser: refreshedSuperFlag,
       } = data;
 
-      if (typeof remaining_seconds === "number") {
-        setSessionRemainingSeconds(remaining_seconds);
-        if (remaining_seconds <= 0) {
+      const remaining =
+        typeof remaining_seconds === "number"
+          ? remaining_seconds
+          : typeof seconds_remaining === "number"
+            ? seconds_remaining
+            : null;
+
+      if (typeof remaining === "number") {
+        setSessionRemainingSeconds(remaining);
+        if (remaining <= 0) {
           handleSessionInvalidated("expired");
           return;
         }
@@ -209,13 +231,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const tokenChanged = nextToken && nextToken !== token;
       const sessionChanged =
-        nextSessionTokenId && nextSessionTokenId !== sessionTokenId;
+        nextSessionTokenId &&
+        String(nextSessionTokenId) !== String(sessionTokenId);
 
-      if (nextToken && nextRefreshToken && nextSessionTokenId) {
+      const normalizedSessionTokenId =
+        nextSessionTokenId !== undefined && nextSessionTokenId !== null
+          ? String(nextSessionTokenId)
+          : null;
+
+      if (nextToken && nextRefreshToken && normalizedSessionTokenId) {
         setToken(nextToken);
         authTokenStore.setToken(nextToken);
         setRefreshToken(nextRefreshToken);
-        setSessionTokenId(nextSessionTokenId);
+        setSessionTokenId(normalizedSessionTokenId);
 
         if (tokenChanged || sessionChanged) {
           resetCable();
@@ -251,8 +279,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         (window as { __lastSessionState?: unknown }).__lastSessionState = {
           token: nextToken ?? token,
           refreshToken: nextRefreshToken ?? refreshToken,
-          sessionTokenId: nextSessionTokenId ?? sessionTokenId,
-          remaining: remaining_seconds,
+          sessionTokenId: normalizedSessionTokenId ?? sessionTokenId,
+          remaining,
           user: user ?? null,
         };
       }
