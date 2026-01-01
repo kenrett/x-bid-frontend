@@ -6,6 +6,7 @@ This is the frontend for XBid, a penny auction web application built with React.
 
 - [Development runbook](DEV-RUN.md)
 - [Session lifecycle contract](SESSION-LIFECYCLE.md)
+- [Accessibility conventions](docs/A11Y.md)
 
 ## ✨ Features
 
