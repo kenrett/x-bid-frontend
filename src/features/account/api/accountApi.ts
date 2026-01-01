@@ -15,7 +15,7 @@ export const ACCOUNT_ENDPOINTS = {
   emailChange: "/api/v1/account/email-change",
   security: "/api/v1/account/security",
   password: "/api/v1/account/password",
-  resendVerification: "/api/v1/account/email/verification/resend",
+  resendEmailVerification: "/api/v1/email_verifications/resend",
   sessions: "/api/v1/account/sessions",
   revokeOtherSessions: "/api/v1/account/sessions/revoke_others",
   notifications: "/api/v1/account/notifications",
@@ -324,9 +324,11 @@ export const accountApi = {
     );
   },
 
-  async resendVerificationEmail(): Promise<void> {
-    await requestAccountApi("POST", ACCOUNT_ENDPOINTS.resendVerification, () =>
-      client.post(ACCOUNT_ENDPOINTS.resendVerification, {}),
+  async resendEmailVerification(): Promise<void> {
+    await requestAccountApi(
+      "POST",
+      ACCOUNT_ENDPOINTS.resendEmailVerification,
+      () => client.post(ACCOUNT_ENDPOINTS.resendEmailVerification, {}),
     );
   },
 

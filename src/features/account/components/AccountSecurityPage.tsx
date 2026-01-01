@@ -130,7 +130,7 @@ export const AccountSecurityPage = () => {
 
     setResending(true);
     try {
-      await accountApi.resendVerificationEmail();
+      await accountApi.resendEmailVerification();
       setResendSuccess("Verification email sent.");
       showToast("Verification email sent.", "success");
       setResendCooldownUntil(Date.now() + RESEND_COOLDOWN_SECONDS * 1000);

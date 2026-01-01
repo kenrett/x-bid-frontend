@@ -30,4 +30,14 @@ describe("ACCOUNT_ENDPOINTS", () => {
       /\/api\/v1\/me\/account/i,
     );
   });
+
+  it("uses canonical email verification resend endpoint", async () => {
+    const { ACCOUNT_ENDPOINTS } = await import("./accountApi");
+    expect(Object.values(ACCOUNT_ENDPOINTS).join("\n")).toContain(
+      "/api/v1/email_verifications/resend",
+    );
+    expect(Object.values(ACCOUNT_ENDPOINTS).join("\n")).not.toContain(
+      "/api/v1/account/email/verification/resend",
+    );
+  });
 });

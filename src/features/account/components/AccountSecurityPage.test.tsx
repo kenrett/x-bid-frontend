@@ -72,4 +72,29 @@ describe("AccountSecurityPage", () => {
       expect(screen.getByText(/password updated/i)).toBeInTheDocument();
     });
   });
+
+  it("posts email verification resend to the canonical endpoint", async () => {
+    const user = userEvent.setup();
+    mockedClient.get.mockResolvedValue({
+      data: { email_verified: false, email_verified_at: null },
+    });
+    mockedClient.post.mockResolvedValue({});
+
+    renderPage();
+
+    await user.click(
+      await screen.findByRole("button", { name: /resend verification email/i }),
+    );
+
+    await waitFor(() => {
+      expect(mockedClient.post).toHaveBeenCalledWith(
+        "/api/v1/email_verifications/resend",
+        {},
+      );
+      expect(mockedClient.post).not.toHaveBeenCalledWith(
+        "/api/v1/account/email/verification/resend",
+        expect.anything(),
+      );
+    });
+  });
 });
