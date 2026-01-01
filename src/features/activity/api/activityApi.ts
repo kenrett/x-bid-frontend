@@ -46,8 +46,8 @@ const extractItemsArray = (payload: unknown): unknown[] | null => {
   if (Array.isArray(payload)) return payload as unknown[];
   if (!payload || typeof payload !== "object") return null;
   const record = payload as Record<string, unknown>;
-  if (Array.isArray(record.items)) return record.items;
-  if (Array.isArray(record.data)) return record.data;
+  if (Array.isArray(record.items)) return record.items as unknown[];
+  if (Array.isArray(record.data)) return record.data as unknown[];
   if (
     record.items &&
     typeof record.items === "object" &&

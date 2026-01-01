@@ -177,13 +177,14 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
 
 export const ActivityPage = () => {
   const { user, isReady } = useAuth();
+  const userId = user?.id ?? null;
   const [items, setItems] = useState<ActivityItem[]>([]);
   const [filter, setFilter] = useState<ActivityFilter>("all");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isReady || !user) return;
+    if (!isReady || !userId) return;
     const load = async () => {
       setIsLoading(true);
       setError(null);
@@ -198,7 +199,7 @@ export const ActivityPage = () => {
       }
     };
     void load();
-  }, [isReady, user?.id]);
+  }, [isReady, userId]);
 
   const filteredItems = useMemo(() => {
     if (filter === "all") return items;
