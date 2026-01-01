@@ -8,6 +8,7 @@ import { cable, resetCable } from "@services/cable";
 import { normalizeUser } from "../api/user";
 import { setSentryUser } from "@sentryClient";
 import { showToast } from "@services/toast";
+import { authTokenStore } from "../tokenStore";
 
 type SessionRemainingResponse = {
   remaining_seconds?: number;
@@ -50,33 +51,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedRefreshToken = localStorage.getItem("refreshToken");
-    const storedSessionTokenId = localStorage.getItem("sessionTokenId");
-    const storedUser = localStorage.getItem("user");
-
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser) as User;
-        setUser(normalizeAuthUser(parsedUser));
-      } catch (error) {
-        console.error("Failed to parse user from localStorage", error);
-        localStorage.removeItem("user");
-      }
-    }
-
-    if (storedToken) setToken(storedToken);
-    if (storedRefreshToken) setRefreshToken(storedRefreshToken);
-    if (storedSessionTokenId) setSessionTokenId(storedSessionTokenId);
+    // Intentionally do not hydrate tokens from localStorage; keeping auth
+    // artifacts out of persistent storage limits blast radius of XSS.
     setIsReady(true);
-  }, [normalizeAuthUser]);
-
-  const persistValue = useCallback((key: string, value: string | null) => {
-    if (value) {
-      localStorage.setItem(key, value);
-    } else {
-      localStorage.removeItem(key);
-    }
   }, []);
 
   const login = useCallback(
@@ -93,14 +70,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setSessionTokenId(sessionId);
       setSessionRemainingSeconds(null);
 
-      localStorage.setItem("user", JSON.stringify(normalizedUser));
-      persistValue("token", jwt);
-      persistValue("refreshToken", refresh);
-      persistValue("sessionTokenId", sessionId);
+      authTokenStore.setToken(jwt);
       setSentryUser(normalizedUser);
       resetCable();
     },
-    [persistValue, normalizeAuthUser],
+    [normalizeAuthUser],
   );
 
   const logout = useCallback(() => {
@@ -110,10 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setSessionTokenId(null);
     setSessionRemainingSeconds(null);
 
-    localStorage.removeItem("user");
-    persistValue("token", null);
-    persistValue("refreshToken", null);
-    persistValue("sessionTokenId", null);
+    authTokenStore.setToken(null);
     setSentryUser(null);
     resetCable();
 
@@ -122,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         loggedOut: true,
       };
     }
-  }, [persistValue]);
+  }, []);
 
   const handleSessionInvalidated = useCallback(
     (reason?: string) => {
@@ -151,10 +122,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser((currentUser) => {
         if (!currentUser) return null;
         const updatedUser = { ...currentUser, bidCredits: newBalance };
-        localStorage.setItem(
-          "user",
-          JSON.stringify(normalizeAuthUser(updatedUser)),
-        );
         return normalizeAuthUser(updatedUser);
       });
     },
@@ -166,7 +133,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser((currentUser) => {
         if (!currentUser) return null;
         const updated = normalizeAuthUser(updater(currentUser));
-        localStorage.setItem("user", JSON.stringify(updated));
         setSentryUser(updated);
         return updated;
       });
@@ -216,11 +182,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (nextToken && nextRefreshToken && nextSessionTokenId) {
         setToken(nextToken);
-        persistValue("token", nextToken);
+        authTokenStore.setToken(nextToken);
         setRefreshToken(nextRefreshToken);
-        persistValue("refreshToken", nextRefreshToken);
         setSessionTokenId(nextSessionTokenId);
-        persistValue("sessionTokenId", nextSessionTokenId);
 
         if (tokenChanged || sessionChanged) {
           resetCable();
@@ -248,8 +212,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               refreshedSuperFlag ??
               currentUser?.is_superuser,
           } as User);
-
-          localStorage.setItem("user", JSON.stringify(mergedUser));
           return mergedUser;
         });
       }
@@ -310,13 +272,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           .__triggerSessionPoll;
       }
     };
-  }, [token, sessionTokenId, handleSessionInvalidated, persistValue]);
+  }, [token, sessionTokenId, handleSessionInvalidated, refreshToken, user]);
 
   useEffect(() => {
     const onUnauthorized = () => handleSessionInvalidated("unauthorized");
     window.addEventListener("app:unauthorized", onUnauthorized);
     return () => window.removeEventListener("app:unauthorized", onUnauthorized);
   }, [handleSessionInvalidated]);
+
+  useEffect(() => {
+    const onRefreshed = (event: Event) => {
+      const { detail } = event as CustomEvent<LoginPayload>;
+      if (!detail) return;
+
+      const normalizedUser = normalizeAuthUser(detail.user as User);
+      setUser(normalizedUser);
+      setToken(detail.token);
+      setRefreshToken(detail.refreshToken);
+      setSessionTokenId(detail.sessionTokenId);
+      setSessionRemainingSeconds(null);
+
+      authTokenStore.setToken(detail.token);
+      setSentryUser(normalizedUser);
+      resetCable();
+    };
+
+    window.addEventListener("app:auth:refreshed", onRefreshed);
+    return () => window.removeEventListener("app:auth:refreshed", onRefreshed);
+  }, [normalizeAuthUser]);
 
   useEffect(() => {
     if (!token || !sessionTokenId) return;

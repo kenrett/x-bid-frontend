@@ -34,6 +34,7 @@ vi.mock("@services/cable", () => ({
 import { AuthProvider } from "./AuthProvider";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import client from "@api/client";
+import { authTokenStore } from "../tokenStore";
 
 // Minimal consumer to read context values
 const TestConsumer = () => {
@@ -78,6 +79,7 @@ const mockedClient = vi.mocked(client, true);
 beforeEach(() => {
   vi.clearAllMocks();
   localStorage.clear();
+  authTokenStore.setToken(null);
   mockedClient.get.mockReset();
   mockedClient.get.mockResolvedValue({
     data: { remaining_seconds: 300 },
@@ -90,7 +92,8 @@ afterEach(() => {
 });
 
 describe("AuthProvider", () => {
-  it("logs in, persists tokens, and restores from localStorage", async () => {
+  it("logs in without persisting tokens to localStorage", async () => {
+    const setItemSpy = vi.spyOn(Storage.prototype, "setItem");
     const view = render(
       <Wrapper>
         <TestConsumer />
@@ -108,12 +111,22 @@ describe("AuthProvider", () => {
         "user@example.com",
       );
     });
-    expect(localStorage.getItem("token")).toBe("jwt");
-    expect(localStorage.getItem("refreshToken")).toBe("refresh");
-    expect(localStorage.getItem("sessionTokenId")).toBe("sid");
+    expect(localStorage.getItem("token")).toBeNull();
+    expect(localStorage.getItem("refreshToken")).toBeNull();
+    expect(localStorage.getItem("sessionTokenId")).toBeNull();
+    expect(setItemSpy).not.toHaveBeenCalledWith("token", expect.anything());
+    expect(setItemSpy).not.toHaveBeenCalledWith(
+      "refreshToken",
+      expect.anything(),
+    );
+    expect(setItemSpy).not.toHaveBeenCalledWith(
+      "sessionTokenId",
+      expect.anything(),
+    );
     expect(cableMocks.reset).toHaveBeenCalledTimes(1);
+    expect(authTokenStore.getSnapshot().token).toBe("jwt");
 
-    // Remount to ensure values restore from storage
+    // Remount to ensure values are not restored from storage.
     view.unmount();
     render(
       <Wrapper>
@@ -121,12 +134,12 @@ describe("AuthProvider", () => {
       </Wrapper>,
     );
     await waitFor(() => {
-      expect(screen.getByTestId("user")).toHaveTextContent("user@example.com");
-      expect(screen.getByTestId("token")).toHaveTextContent("jwt");
+      expect(screen.getByTestId("user")).toHaveTextContent("none");
+      expect(screen.getByTestId("token")).toHaveTextContent("none");
     });
   });
 
-  it("logs out and clears storage", async () => {
+  it("logs out and clears in-memory auth state", async () => {
     render(
       <Wrapper>
         <TestConsumer />
@@ -145,6 +158,7 @@ describe("AuthProvider", () => {
     expect(localStorage.getItem("token")).toBeNull();
     expect(localStorage.getItem("refreshToken")).toBeNull();
     expect(localStorage.getItem("sessionTokenId")).toBeNull();
+    expect(authTokenStore.getSnapshot().token).toBeNull();
     expect(cableMocks.reset).toHaveBeenCalled();
     expect(mockSubscription.unsubscribe).toHaveBeenCalled();
   });
@@ -202,10 +216,35 @@ describe("AuthProvider", () => {
     });
 
     await waitFor(() => {
-      expect(localStorage.getItem("token")).toBe("next-jwt");
-      expect(localStorage.getItem("refreshToken")).toBe("next-refresh");
-      expect(localStorage.getItem("sessionTokenId")).toBe("next-sid");
+      expect(screen.getByTestId("token")).toHaveTextContent("next-jwt");
+      expect(authTokenStore.getSnapshot().token).toBe("next-jwt");
     });
     expect(cableMocks.reset).toHaveBeenCalledTimes(2);
+  });
+
+  it("logs out on app:unauthorized when refresh is unavailable", async () => {
+    render(
+      <Wrapper>
+        <TestConsumer />
+      </Wrapper>,
+    );
+
+    await act(async () => {
+      await screen.getByText("login").click();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("token")).toHaveTextContent("jwt"),
+    );
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent("app:unauthorized", { detail: { status: 401 } }),
+      );
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("token")).toHaveTextContent("none"),
+    );
   });
 });
