@@ -8,5 +8,12 @@ export type AccountSecurityStatusState = {
   refresh: () => Promise<void>;
 };
 
-export const AccountStatusContext =
-  createContext<AccountSecurityStatusState | null>(null);
+const noopRefresh = async () => {};
+
+export const AccountStatusContext = createContext<AccountSecurityStatusState>({
+  isLoading: false,
+  error: null,
+  emailVerified: null,
+  emailVerifiedAt: null,
+  refresh: noopRefresh,
+});
