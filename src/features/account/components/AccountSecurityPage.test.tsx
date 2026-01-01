@@ -103,4 +103,31 @@ describe("AccountSecurityPage", () => {
       );
     });
   });
+
+  it("focuses the first invalid password field after submit", async () => {
+    const user = userEvent.setup();
+    mockedClient.get.mockResolvedValue({
+      data: { email_verified: false, email_verified_at: null },
+    });
+
+    renderPage();
+
+    await user.type(
+      await screen.findByLabelText(/current password/i),
+      "old-password",
+    );
+    const newPasswordInput = screen.getByLabelText(/^new password/i);
+    await user.type(newPasswordInput, "short");
+    await user.type(screen.getByLabelText(/confirm new password/i), "short");
+
+    await user.click(screen.getByRole("button", { name: /update password/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /at least 12 characters/i,
+    );
+    await waitFor(() => {
+      expect(newPasswordInput).toHaveAttribute("aria-invalid", "true");
+      expect(newPasswordInput).toHaveFocus();
+    });
+  });
 });

@@ -207,6 +207,32 @@ describe("LoginForm Component", () => {
       expect(mockLogin).not.toHaveBeenCalled();
       expect(navigateFn).not.toHaveBeenCalled();
     });
+
+    it("focuses the first invalid field when field errors are returned", async () => {
+      mockedClient.post.mockRejectedValue({
+        isAxiosError: true,
+        response: {
+          status: 422,
+          data: { errors: { email_address: ["Email is required."] } },
+        },
+      });
+      const user = userEvent.setup();
+
+      renderComponent();
+
+      await user.type(screen.getByLabelText(/email address/i), "x@x.com");
+      await user.type(screen.getByLabelText(/password/i), "password123");
+      await user.click(screen.getByRole("button", { name: /sign in/i }));
+
+      const emailInput = screen.getByLabelText(/email address/i);
+      await waitFor(() => {
+        expect(emailInput).toHaveAttribute("aria-invalid", "true");
+        expect(
+          screen.getAllByText("Email is required.").length,
+        ).toBeGreaterThan(0);
+        expect(emailInput).toHaveFocus();
+      });
+    });
   });
 
   it("should show a loading state on the button while submitting", async () => {

@@ -65,9 +65,14 @@ describe("SignUpForm Component", () => {
 
     await user.click(screen.getByRole("button", { name: /create account/i }));
 
+    const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Passwords do not match.",
     );
+    await waitFor(() => {
+      expect(confirmPasswordInput).toHaveAttribute("aria-invalid", "true");
+      expect(confirmPasswordInput).toHaveFocus();
+    });
 
     expect(mockedClient.post).not.toHaveBeenCalled();
     expect(mockLogin).not.toHaveBeenCalled();
