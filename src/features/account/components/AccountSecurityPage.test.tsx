@@ -4,10 +4,13 @@ import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import client from "@api/client";
 import { AccountSecurityPage } from "./AccountSecurityPage";
+import { useAuth } from "@features/auth/hooks/useAuth";
 
 vi.mock("@api/client");
+vi.mock("@features/auth/hooks/useAuth");
 
 const mockedClient = vi.mocked(client, true);
+const mockedUseAuth = vi.mocked(useAuth);
 
 const renderPage = () =>
   render(
@@ -19,6 +22,9 @@ const renderPage = () =>
 describe("AccountSecurityPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockedUseAuth.mockReturnValue({
+      user: null,
+    } as unknown as ReturnType<typeof useAuth>);
   });
 
   it("renders a loading state", () => {

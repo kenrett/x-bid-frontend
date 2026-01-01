@@ -96,4 +96,16 @@ describe("accountApi.getSecurity", () => {
     expect(mockedClient.get).toHaveBeenCalledWith("/api/v1/account/security");
     expect(result.emailVerified).toBe(true);
   });
+
+  it("reads nested security payload shapes", async () => {
+    mockedClient.get.mockResolvedValue({
+      data: {
+        data: { security: { email_verified_at: "2025-01-01T00:00:00Z" } },
+      },
+    });
+
+    const result = await accountApi.getSecurity();
+
+    expect(result.emailVerified).toBe(true);
+  });
 });

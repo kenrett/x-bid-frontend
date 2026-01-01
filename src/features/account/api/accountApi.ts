@@ -176,12 +176,58 @@ const normalizeProfile = (payload: unknown): AccountProfile => {
 
 const normalizeSecurity = (payload: unknown): AccountSecurityStatus => {
   const record = asRecord(payload) ?? {};
+
+  const containers = [
+    record,
+    asRecord(record.security),
+    asRecord(record.account),
+    asRecord(record.user),
+    asRecord(record.me),
+    asRecord(record.data),
+    asRecord(asRecord(record.data)?.security),
+    asRecord(asRecord(record.data)?.account),
+    asRecord(asRecord(record.data)?.user),
+  ].filter(Boolean) as Record<string, unknown>[];
+
+  const readFromCandidates = (
+    accessor: (candidate: Record<string, unknown>) => string | undefined,
+  ) => {
+    for (const candidate of containers) {
+      const value = accessor(candidate);
+      if (value) return value;
+    }
+    return undefined;
+  };
+
+  const readBoolFromCandidates = (
+    accessor: (candidate: Record<string, unknown>) => boolean | undefined,
+  ) => {
+    for (const candidate of containers) {
+      const value = accessor(candidate);
+      if (typeof value === "boolean") return value;
+    }
+    return undefined;
+  };
+
   const emailVerifiedAt =
-    readString(record.email_verified_at) ?? readString(record.emailVerifiedAt);
+    readString(record.email_verified_at) ??
+    readString(record.emailVerifiedAt) ??
+    readFromCandidates((candidate) =>
+      readString(candidate.email_verified_at),
+    ) ??
+    readFromCandidates((candidate) => readString(candidate.emailVerifiedAt)) ??
+    null;
+
   const emailVerified =
     readBooleanLike(record.email_verified) ??
     readBooleanLike(record.emailVerified) ??
+    readBoolFromCandidates(
+      (candidate) =>
+        readBooleanLike(candidate.email_verified) ??
+        readBooleanLike(candidate.emailVerified),
+    ) ??
     Boolean(emailVerifiedAt);
+
   return { emailVerified, emailVerifiedAt: emailVerifiedAt ?? null };
 };
 

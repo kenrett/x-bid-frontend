@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { accountApi } from "../api/accountApi";
 import { parseAccountApiError, type FieldErrors } from "../api/accountErrors";
 import { showToast } from "@services/toast";
+import { useAuth } from "@features/auth/hooks/useAuth";
 
 const INPUT_CLASSES =
   "w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40";
@@ -41,6 +42,7 @@ export const AccountSecurityPage = () => {
   const [resendCooldownUntil, setResendCooldownUntil] = useState<number | null>(
     null,
   );
+  const { user } = useAuth();
 
   const resendCooldownRemaining = useMemo(() => {
     if (!resendCooldownUntil) return 0;
@@ -277,6 +279,24 @@ export const AccountSecurityPage = () => {
           <div className="text-sm text-gray-400">
             Verified at: {formatDateTime(security?.emailVerifiedAt)}
           </div>
+          {import.meta.env.MODE !== "production" && (security || user) ? (
+            <div className="grid gap-2">
+              {security ? (
+                <pre
+                  data-testid="security-debug"
+                  className="text-xs text-gray-400 whitespace-pre-wrap rounded-lg border border-white/10 bg-black/20 p-3"
+                >
+                  {JSON.stringify(security, null, 2)}
+                </pre>
+              ) : null}
+              <pre
+                data-testid="user-debug"
+                className="text-xs text-gray-400 whitespace-pre-wrap rounded-lg border border-white/10 bg-black/20 p-3"
+              >
+                {JSON.stringify(user, null, 2)}
+              </pre>
+            </div>
+          ) : null}
         </div>
 
         {resendError && (
