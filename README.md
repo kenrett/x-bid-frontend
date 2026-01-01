@@ -64,6 +64,7 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
     - `VITE_API_URL`: Base URL for the XBid backend API origin (e.g., `http://localhost:3000`). (Frontend requests include `/api/v1/...` in their paths.)
     - `VITE_STRIPE_PUBLISHABLE_KEY`: Stripe publishable key used for embedded checkout.
     - `VITE_CABLE_URL` (optional): Action Cable WebSocket endpoint; defaults to `ws://localhost:3000/cable`. The app includes the session token as a `?token=...` query param (and adds an `Authorization` header in Node/WebSocket test environments when supported).
+    - `VITE_AUTH_REFRESH_WITH_COOKIE` (optional): Set to `"true"` to enable cookie-based refresh (`POST /api/v1/session/refresh` with `withCredentials: true`) on `401` responses; otherwise a reload (or `401`) requires re-login.
 
 4.  **Run the development server:**
     ```sh
@@ -94,7 +95,8 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
 
 ### Authentication & API Contracts
 
-- CORS is non-credentialed; clients should keep `withCredentials=false` and send `Authorization: Bearer <token>` on HTTP. ActionCable/WebSocket auth uses `?token=...` (browsers can’t set custom headers in the WebSocket handshake).
+- HTTP requests send `Authorization: Bearer <token>` only when an in-memory token exists. ActionCable/WebSocket auth uses `?token=...` (browsers can’t set custom headers in the WebSocket handshake).
+- Optional cookie-based refresh (when enabled) uses `withCredentials: true` only for `POST /api/v1/session/refresh`.
 - Login (example): `POST /api/v1/login` with `{ "session": { "email_address": "...", "password": "..." } }` returns `token`, `refresh_token`, `session` (`session_token_id`, `session_expires_at`, `seconds_remaining`), `is_admin`, `is_superuser`, optional `redirect_path`, and `user`.
 - Error shapes tolerated: `{error_code, message, details?}` (preferred), `{error: "text"}`, or `{error: {code, message}}` (rack-attack/throttling). Use `message` for user feedback when present.
 

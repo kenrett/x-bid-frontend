@@ -116,22 +116,17 @@ Notes:
 
 `src/features/auth/providers/AuthProvider.tsx`
 
-- On app boot, AuthProvider reads from `localStorage`:
-  - `token`
-  - `refreshToken`
-  - `sessionTokenId`
-  - `user` (JSON)
-- On `login(...)`, AuthProvider persists:
-  - `localStorage["user"] = JSON.stringify(normalizedUser)`
-  - `localStorage["token"] = jwt`
-  - `localStorage["refreshToken"] = refresh`
-  - `localStorage["sessionTokenId"] = sessionId`
+- Tokens/session identifiers are kept in-memory only (not persisted) to reduce XSS blast radius.
+- On app boot, AuthProvider treats the user as logged out (unless a safe server-side refresh mechanism exists).
+- On `login(...)`, AuthProvider sets the React context state and updates the in-memory token cache used by non-React modules (Axios, ActionCable).
 
 ### How auth is attached to API calls
 
 `src/api/client.ts`
 
-- Every Axios request reads `localStorage["token"]` and sets `Authorization: Bearer <token>` when present.
+- Every Axios request reads the in-memory token and sets `Authorization: Bearer <token>` when present.
+- Optional: when `VITE_AUTH_REFRESH_WITH_COOKIE === "true"`, the client will attempt `POST /api/v1/session/refresh` with `withCredentials: true` on `401` and retry the failed request.
+- Otherwise, `401/403` triggers centralized logout via `app:unauthorized`.
 
 ### How session_token_id is used
 
