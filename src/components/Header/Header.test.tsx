@@ -3,9 +3,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { Header } from "./Header";
 import { useAuth } from "../../features/auth/hooks/useAuth";
+import { useAccountStatus } from "@features/account/hooks/useAccountStatus";
 
 vi.mock("../../features/auth/hooks/useAuth");
+vi.mock("@features/account/hooks/useAccountStatus");
 const mockedUseAuth = vi.mocked(useAuth);
+const mockedUseAccountStatus = vi.mocked(useAccountStatus);
 
 const mockUser = { id: 1, email: "test@example.com", bidCredits: 100 };
 const mockAdmin = { ...mockUser, is_admin: true };
@@ -23,12 +26,21 @@ const renderComponent = (initialPath = "/") => {
 describe("Header Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockedUseAccountStatus.mockReturnValue({
+      isLoading: false,
+      error: null,
+      emailVerified: true,
+      emailVerifiedAt: null,
+      refresh: vi.fn(),
+    });
   });
 
   it("should render the logo and main navigation links", () => {
     mockedUseAuth.mockReturnValue({
       user: null,
       logout: mockLogout,
+      token: null,
+      isReady: true,
     } as unknown as ReturnType<typeof useAuth>);
     renderComponent();
 
@@ -51,6 +63,8 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: null,
         logout: mockLogout,
+        token: null,
+        isReady: true,
       } as unknown as ReturnType<typeof useAuth>);
     });
 
@@ -82,6 +96,8 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockUser,
         logout: mockLogout,
+        token: "token",
+        isReady: true,
       } as unknown as ReturnType<typeof useAuth>);
     });
 
@@ -112,6 +128,8 @@ describe("Header Component", () => {
     mockedUseAuth.mockReturnValue({
       user: null,
       logout: mockLogout,
+      token: null,
+      isReady: true,
     } as unknown as ReturnType<typeof useAuth>);
     renderComponent();
     const mobileMenuButton = screen.getByRole("button", {
@@ -125,6 +143,8 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockAdmin,
         logout: mockLogout,
+        token: "token",
+        isReady: true,
       } as unknown as ReturnType<typeof useAuth>);
       renderComponent();
 
@@ -138,6 +158,8 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockSuper,
         logout: mockLogout,
+        token: "token",
+        isReady: true,
       } as unknown as ReturnType<typeof useAuth>);
       renderComponent();
 
@@ -152,6 +174,8 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockUser,
         logout: mockLogout,
+        token: "token",
+        isReady: true,
       } as unknown as ReturnType<typeof useAuth>);
       renderComponent();
 
