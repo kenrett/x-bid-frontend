@@ -4,7 +4,9 @@ import { authTokenStore } from "@features/auth/tokenStore";
 
 const showToast = vi.fn();
 vi.mock("@services/toast", () => ({
-  showToast: (...args: unknown[]) => showToast(...args),
+  showToast: (...args: unknown[]): void => {
+    showToast(...args);
+  },
 }));
 
 // Import after mocks so interceptors use the mocked toast
