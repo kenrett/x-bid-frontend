@@ -1,5 +1,7 @@
 import axios, { type AxiosError, type AxiosInstance } from "axios";
 import { showToast } from "@services/toast";
+import { authTokenStore, getAuthToken } from "@features/auth/tokenStore";
+import { normalizeAuthResponse } from "@features/auth/api/authResponse";
 
 const rawBaseURL =
   typeof import.meta.env.VITE_API_URL === "string"
@@ -39,7 +41,7 @@ const client = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: false, // set true if using cookies for auth
+  withCredentials: false, // Auth uses Bearer tokens; refresh may use cookies per-request.
 }) as AxiosInstance;
 
 client.interceptors.request.use(
@@ -55,7 +57,7 @@ client.interceptors.request.use(
 
 client.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -64,9 +66,16 @@ client.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+const shouldAttemptCookieRefresh = () =>
+  import.meta.env.VITE_AUTH_REFRESH_WITH_COOKIE === "true";
+
+const isRefreshRequest = (configUrl: unknown) =>
+  typeof configUrl === "string" &&
+  configUrl.includes("/api/v1/session/refresh");
+
 client.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
     const status = error?.response?.status;
     if (status === 503) {
       const currentPath = window.location.pathname;
@@ -74,6 +83,51 @@ client.interceptors.response.use(
         window.location.assign("/maintenance");
       }
     } else if (status === 401 || status === 403) {
+      const originalRequest = error.config;
+
+      const canRefresh =
+        status === 401 &&
+        shouldAttemptCookieRefresh() &&
+        originalRequest &&
+        !(originalRequest as { __authRetry?: boolean }).__authRetry &&
+        !isRefreshRequest(originalRequest.url);
+
+      if (canRefresh) {
+        try {
+          const refreshResponse = await client.post(
+            "/api/v1/session/refresh",
+            undefined,
+            {
+              withCredentials: true,
+              headers: { Authorization: undefined },
+            },
+          );
+          const next = normalizeAuthResponse(refreshResponse.data);
+          authTokenStore.setToken(next.token);
+          window.dispatchEvent(
+            new CustomEvent("app:auth:refreshed", { detail: next }),
+          );
+
+          (originalRequest as { __authRetry?: boolean }).__authRetry = true;
+          const headers = originalRequest.headers ?? {};
+          if (typeof (headers as { set?: unknown }).set === "function") {
+            (
+              headers as unknown as {
+                set: (key: string, value: string) => void;
+              }
+            ).set("Authorization", `Bearer ${next.token}`);
+          } else {
+            (headers as Record<string, unknown>).Authorization =
+              `Bearer ${next.token}`;
+          }
+          originalRequest.headers = headers;
+          return client.request(originalRequest);
+        } catch (refreshError) {
+          // Fall through to centralized unauthorized handling.
+          console.warn("[api client] Cookie refresh failed", refreshError);
+        }
+      }
+
       // Centralize unauthorized handling via AuthProvider listener.
       window.dispatchEvent(
         new CustomEvent("app:unauthorized", { detail: { status } }),

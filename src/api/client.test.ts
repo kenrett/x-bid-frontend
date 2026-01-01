@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { AxiosError } from "axios";
+import { authTokenStore } from "@features/auth/tokenStore";
 
 const showToast = vi.fn();
 vi.mock("@services/toast", () => ({
@@ -8,6 +9,18 @@ vi.mock("@services/toast", () => ({
 
 // Import after mocks so interceptors use the mocked toast
 import client from "./client";
+
+const applyRequestInterceptors = (config: Record<string, unknown>) => {
+  const handlers = (
+    client.interceptors.request as unknown as {
+      handlers: Array<{ fulfilled?: (value: unknown) => unknown }>;
+    }
+  ).handlers;
+  return handlers.reduce((current, handler) => {
+    if (!handler.fulfilled) return current;
+    return handler.fulfilled(current) as Record<string, unknown>;
+  }, config);
+};
 
 const getRejectedInterceptor = () => {
   const handlers = (
@@ -37,16 +50,30 @@ describe("api client response interceptor", () => {
   const rejected = getRejectedInterceptor();
 
   beforeEach(() => {
-    localStorage.clear();
+    authTokenStore.setToken(null);
     showToast.mockClear();
     vi.restoreAllMocks();
   });
 
+  it("attaches Authorization header only when token is in memory", () => {
+    const getItemSpy = vi.spyOn(Storage.prototype, "getItem");
+    const baseConfig = { url: "/api/v1/example", headers: {} };
+
+    const withoutToken = applyRequestInterceptors({ ...baseConfig });
+    expect(
+      (withoutToken.headers as Record<string, unknown>).Authorization,
+    ).toBe(undefined);
+
+    authTokenStore.setToken("abc");
+    const withToken = applyRequestInterceptors({ ...baseConfig });
+    expect((withToken.headers as Record<string, unknown>).Authorization).toBe(
+      "Bearer abc",
+    );
+
+    expect(getItemSpy).not.toHaveBeenCalled();
+  });
+
   it("handles 401/403 by dispatching unauthorized and toasting", async () => {
-    localStorage.setItem("user", "user");
-    localStorage.setItem("token", "token");
-    localStorage.setItem("refreshToken", "refresh");
-    localStorage.setItem("sessionTokenId", "session");
     setPath("/auctions");
     const dispatchSpy = vi.spyOn(window, "dispatchEvent");
 
@@ -57,8 +84,6 @@ describe("api client response interceptor", () => {
     expect(dispatchSpy).toHaveBeenCalledWith(
       expect.objectContaining({ type: "app:unauthorized" }),
     );
-    expect(localStorage.getItem("user")).toBe("user");
-    expect(localStorage.getItem("token")).toBe("token");
     expect(showToast).toHaveBeenCalledWith(
       "Your session expired; please sign in again.",
       "error",
