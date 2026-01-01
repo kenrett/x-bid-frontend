@@ -122,6 +122,7 @@ export const PurchaseDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const { isReady, user } = useAuth();
+  const userId = user?.id ?? null;
   const [purchase, setPurchase] = useState<PurchaseDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -161,13 +162,13 @@ export const PurchaseDetailPage = () => {
 
   useEffect(() => {
     if (!isReady) return;
-    if (!user) {
+    if (!userId) {
       setPurchase(null);
       setError(null);
       return;
     }
     void handleLoad();
-  }, [handleLoad, isReady, user?.id]);
+  }, [handleLoad, isReady, userId]);
 
   if (!isReady) return <LoadingScreen item="purchase" />;
 

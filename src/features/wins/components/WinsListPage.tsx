@@ -105,6 +105,7 @@ const TableSkeleton = () => (
 
 export const WinsListPage = () => {
   const { isReady, user } = useAuth();
+  const userId = user?.id ?? null;
   const navigate = useNavigate();
   const [wins, setWins] = useState<WinSummary[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -125,21 +126,21 @@ export const WinsListPage = () => {
 
   useEffect(() => {
     if (!isReady) return;
-    if (!user) {
+    if (!userId) {
       setWins([]);
       setError(null);
       return;
     }
     void handleLoad();
-  }, [handleLoad, isReady, user?.id]);
+  }, [handleLoad, isReady, userId]);
 
   useEffect(() => {
-    if (!isReady || !user) return;
+    if (!isReady || !userId) return;
     const intervalId = window.setInterval(() => {
       void handleLoad();
     }, 60_000);
     return () => window.clearInterval(intervalId);
-  }, [handleLoad, isReady, user?.id]);
+  }, [handleLoad, isReady, userId]);
 
   if (!isReady) {
     return (

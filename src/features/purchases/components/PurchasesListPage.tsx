@@ -81,6 +81,7 @@ const TableSkeleton = () => (
 
 export const PurchasesListPage = () => {
   const { isReady, user } = useAuth();
+  const userId = user?.id ?? null;
   const navigate = useNavigate();
   const [purchases, setPurchases] = useState<PurchaseSummary[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -102,13 +103,13 @@ export const PurchasesListPage = () => {
 
   useEffect(() => {
     if (!isReady) return;
-    if (!user) {
+    if (!userId) {
       setPurchases([]);
       setError(null);
       return;
     }
     void handleLoad();
-  }, [handleLoad, isReady, user?.id]);
+  }, [handleLoad, isReady, userId]);
 
   const handleRowClick = (id: number) => {
     navigate(`/account/purchases/${id}`);

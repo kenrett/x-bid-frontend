@@ -107,6 +107,7 @@ export const WinDetailPage = () => {
   const { auction_id } = useParams<{ auction_id: string }>();
   const location = useLocation();
   const { isReady, user } = useAuth();
+  const userId = user?.id ?? null;
   const [win, setWin] = useState<WinDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -278,16 +279,16 @@ export const WinDetailPage = () => {
 
   useEffect(() => {
     if (!isReady) return;
-    if (!user) {
+    if (!userId) {
       setWin(null);
       setError(null);
       return;
     }
     void handleLoad();
-  }, [handleLoad, isReady, user?.id]);
+  }, [handleLoad, isReady, userId]);
 
   useEffect(() => {
-    if (!isReady || !user || !auction_id) return;
+    if (!isReady || !userId || !auction_id) return;
     const intervalId = window.setInterval(() => {
       void winsApi
         .get(auction_id)
@@ -297,7 +298,7 @@ export const WinDetailPage = () => {
         });
     }, 30_000);
     return () => window.clearInterval(intervalId);
-  }, [auction_id, isReady, user?.id]);
+  }, [auction_id, isReady, userId]);
 
   if (!isReady) return <LoadingScreen item="win" />;
 
