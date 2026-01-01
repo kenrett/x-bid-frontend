@@ -151,10 +151,11 @@ const isDocumentRequest = (route: Route) =>
 const seedAuthState = async (page: Page, user = authedUser) => {
   await page.addInitScript(
     (auth) => {
-      localStorage.setItem("user", JSON.stringify(auth.user));
-      localStorage.setItem("token", auth.token);
-      localStorage.setItem("refreshToken", auth.refreshToken);
-      localStorage.setItem("sessionTokenId", auth.sessionTokenId);
+      (
+        window as unknown as {
+          __e2eAuthBootstrap?: typeof auth;
+        }
+      ).__e2eAuthBootstrap = auth;
     },
     {
       user,
@@ -267,16 +268,26 @@ test("user can log in and land on the auctions feed", async ({ page }) => {
   await expect(page.getByText(authedUser.email)).toBeVisible();
   await expect(page.getByText(`${authedUser.bidCredits} Bids`)).toBeVisible();
 
+  const state = await page.evaluate(() => {
+    // @ts-expect-error test-only marker
+    return window.__lastSessionState;
+  });
+  expect(state).toMatchObject({
+    token: loginResponse.token,
+    refreshToken: loginResponse.refresh_token,
+    sessionTokenId: loginResponse.session_token_id,
+  });
+
   const stored = await page.evaluate(() => ({
     token: localStorage.getItem("token"),
     refresh: localStorage.getItem("refreshToken"),
     sessionId: localStorage.getItem("sessionTokenId"),
     user: localStorage.getItem("user"),
   }));
-  expect(stored.token).toBe(loginResponse.token);
-  expect(stored.refresh).toBe(loginResponse.refresh_token);
-  expect(stored.sessionId).toBe(loginResponse.session_token_id);
-  expect(stored.user).toContain(authedUser.email);
+  expect(stored.token).toBeNull();
+  expect(stored.refresh).toBeNull();
+  expect(stored.sessionId).toBeNull();
+  expect(stored.user).toBeNull();
 });
 
 test("authenticated user can place a bid on an active auction", async ({

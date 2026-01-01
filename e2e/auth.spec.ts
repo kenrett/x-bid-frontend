@@ -30,14 +30,24 @@ test("user can log in and land on the auctions feed", async ({ page }) => {
   await expect(page.getByText(authedUser.email)).toBeVisible();
   await expect(page.getByText(`${authedUser.bidCredits} Bids`)).toBeVisible();
 
+  const state = await page.evaluate(() => {
+    // @ts-expect-error test-only marker
+    return window.__lastSessionState;
+  });
+  expect(state).toMatchObject({
+    token: loginResponse.token,
+    refreshToken: loginResponse.refresh_token,
+    sessionTokenId: loginResponse.session_token_id,
+  });
+
   const stored = await page.evaluate(() => ({
     token: localStorage.getItem("token"),
     refresh: localStorage.getItem("refreshToken"),
     sessionId: localStorage.getItem("sessionTokenId"),
     user: localStorage.getItem("user"),
   }));
-  expect(stored.token).toBe(loginResponse.token);
-  expect(stored.refresh).toBe(loginResponse.refresh_token);
-  expect(stored.sessionId).toBe(loginResponse.session_token_id);
-  expect(stored.user).toContain(authedUser.email);
+  expect(stored.token).toBeNull();
+  expect(stored.refresh).toBeNull();
+  expect(stored.sessionId).toBeNull();
+  expect(stored.user).toBeNull();
 });

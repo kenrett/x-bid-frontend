@@ -6,7 +6,7 @@ import {
   seedAuthState,
 } from "./fixtures/mocks";
 
-test("session token refresh updates storage", async ({ page }) => {
+test("session token refresh updates in-memory session", async ({ page }) => {
   await seedAuthState(page);
   await page.route("**/api/v1/auctions", (route) =>
     isDocumentRequest(route) ? route.continue() : fulfillJson(route, []),
@@ -36,6 +36,17 @@ test("session token refresh updates storage", async ({ page }) => {
     refreshToken: "refresh-refreshed",
     sessionTokenId: "session-refreshed",
   });
+
+  const stored = await page.evaluate(() => ({
+    token: localStorage.getItem("token"),
+    refresh: localStorage.getItem("refreshToken"),
+    sessionId: localStorage.getItem("sessionTokenId"),
+    user: localStorage.getItem("user"),
+  }));
+  expect(stored.token).toBeNull();
+  expect(stored.refresh).toBeNull();
+  expect(stored.sessionId).toBeNull();
+  expect(stored.user).toBeNull();
 });
 
 test("session expiration logs out", async ({ page }) => {
