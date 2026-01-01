@@ -105,10 +105,10 @@ describe("adminPaymentsApi", () => {
       id: 4,
       amount: 12.34,
       status: "failed",
-      createdAt: expect.any(String),
       userEmail: "d@example.com",
       stripeCheckoutSessionId: "cs_456",
     });
+    expect(payments[1]?.createdAt).toEqual(expect.any(String));
   });
 
   it("fetches and normalizes payment reconciliation", async () => {

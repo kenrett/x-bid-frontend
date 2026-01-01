@@ -14,8 +14,10 @@ vi.mock("@api/client", () => ({
 
 const axiosIsAxiosError = vi.fn();
 vi.mock("axios", () => ({
-  default: { isAxiosError: (err: unknown) => axiosIsAxiosError(err) },
-  isAxiosError: (err: unknown) => axiosIsAxiosError(err),
+  default: {
+    isAxiosError: (err: unknown): boolean => Boolean(axiosIsAxiosError(err)),
+  },
+  isAxiosError: (err: unknown): boolean => Boolean(axiosIsAxiosError(err)),
 }));
 
 import {

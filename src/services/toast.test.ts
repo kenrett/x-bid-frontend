@@ -14,7 +14,7 @@ describe("toast service", () => {
     showToast("Hello");
 
     expect(listener).toHaveBeenCalledWith({
-      id: expect.stringContaining("1000-"),
+      id: expect.stringContaining("1000-") as unknown as string,
       message: "Hello",
       variant: "info",
     });

@@ -25,7 +25,9 @@ vi.mock("@sentryClient", () => ({
 
 const showToast = vi.hoisted(() => vi.fn());
 vi.mock("./toast", () => ({
-  showToast: (...args: unknown[]) => showToast(...args),
+  showToast: (...args: unknown[]): void => {
+    showToast(...args);
+  },
 }));
 
 import {
