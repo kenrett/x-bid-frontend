@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import client from "@api/client";
 import { useAuth } from "@features/auth/hooks/useAuth";
@@ -16,16 +16,37 @@ export const SignUpForm = () => {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const errorRef = useRef<HTMLParagraphElement | null>(null);
+  const submitAttemptedRef = useRef(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  useEffect(() => {
+    if (!submitAttemptedRef.current) return;
+    if (loading) return;
+
+    const firstInvalid =
+      formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]') ??
+      null;
+    if (firstInvalid) {
+      firstInvalid.focus();
+      return;
+    }
+
+    if (error) {
+      errorRef.current?.focus();
+    }
+  }, [error, fieldErrors, loading]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    submitAttemptedRef.current = true;
     setError(null);
     setFieldErrors({});
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setFieldErrors({ confirm_password: ["Passwords do not match."] });
       return;
     }
 
@@ -109,7 +130,12 @@ export const SignUpForm = () => {
               </span>
             </div>
 
-            <form className="space-y-5" onSubmit={handleSubmit}>
+            <form
+              ref={formRef}
+              className="space-y-5"
+              onSubmit={handleSubmit}
+              aria-busy={loading ? "true" : "false"}
+            >
               <div className="space-y-2">
                 <label
                   htmlFor="name"
@@ -225,14 +251,14 @@ export const SignUpForm = () => {
 
                 <div className="space-y-2">
                   <label
-                    htmlFor="confirm-password"
+                    htmlFor="confirm_password"
                     className="block text-sm font-semibold text-white"
                   >
                     Confirm password
                   </label>
                   <input
-                    id="confirm-password"
-                    name="confirm-password"
+                    id="confirm_password"
+                    name="confirm_password"
                     type="password"
                     placeholder="••••••••"
                     required
@@ -240,12 +266,39 @@ export const SignUpForm = () => {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
                     autoComplete="new-password"
+                    aria-invalid={
+                      fieldErrors.confirm_password?.length ||
+                      fieldErrors.password_confirmation?.length
+                        ? "true"
+                        : "false"
+                    }
+                    aria-describedby={
+                      fieldErrors.confirm_password?.length ||
+                      fieldErrors.password_confirmation?.length
+                        ? "signup-confirm-password-error"
+                        : undefined
+                    }
                   />
+                  {fieldErrors.confirm_password?.length ||
+                  fieldErrors.password_confirmation?.length ? (
+                    <p
+                      id="signup-confirm-password-error"
+                      className="text-sm text-red-200"
+                      role="alert"
+                    >
+                      {
+                        (fieldErrors.confirm_password ??
+                          fieldErrors.password_confirmation)![0]
+                      }
+                    </p>
+                  ) : null}
                 </div>
               </div>
 
               {error && (
                 <p
+                  ref={errorRef}
+                  tabIndex={-1}
                   className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-200"
                   role="alert"
                 >

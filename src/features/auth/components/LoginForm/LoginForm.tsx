@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import client from "@api/client";
@@ -14,12 +14,33 @@ export const LoginForm = () => {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const errorRef = useRef<HTMLParagraphElement | null>(null);
+  const submitAttemptedRef = useRef(false);
   const { login } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!submitAttemptedRef.current) return;
+    if (loading) return;
+
+    const firstInvalid =
+      formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]') ??
+      null;
+    if (firstInvalid) {
+      firstInvalid.focus();
+      return;
+    }
+
+    if (error) {
+      errorRef.current?.focus();
+    }
+  }, [error, fieldErrors, loading]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    submitAttemptedRef.current = true;
     setLoading(true);
     setError(null);
     setFieldErrors({});
@@ -104,7 +125,12 @@ export const LoginForm = () => {
               </span>
             </div>
 
-            <form className="space-y-5" onSubmit={handleSubmit}>
+            <form
+              ref={formRef}
+              className="space-y-5"
+              onSubmit={handleSubmit}
+              aria-busy={loading ? "true" : "false"}
+            >
               <div className="space-y-2">
                 <label
                   htmlFor="email_address"
@@ -194,6 +220,8 @@ export const LoginForm = () => {
 
               {error && (
                 <p
+                  ref={errorRef}
+                  tabIndex={-1}
                   className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-200"
                   role="alert"
                 >

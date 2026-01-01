@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { accountApi } from "../api/accountApi";
 import { normalizeApiError, type FieldErrors } from "@api/normalizeApiError";
 import { showToast } from "@services/toast";
@@ -23,6 +23,7 @@ export const AccountSecurityPage = () => {
     emailVerified: boolean;
     emailVerifiedAt?: string | null;
   } | null>(null);
+  const statusErrorRef = useRef<HTMLDivElement | null>(null);
 
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -30,6 +31,11 @@ export const AccountSecurityPage = () => {
   const [passwordFieldErrors, setPasswordFieldErrors] = useState<FieldErrors>(
     {},
   );
+  const passwordErrorRef = useRef<HTMLDivElement | null>(null);
+  const currentPasswordRef = useRef<HTMLInputElement | null>(null);
+  const newPasswordRef = useRef<HTMLInputElement | null>(null);
+  const confirmNewPasswordRef = useRef<HTMLInputElement | null>(null);
+  const submitAttemptedRef = useRef(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -73,6 +79,32 @@ export const AccountSecurityPage = () => {
   }, []);
 
   useEffect(() => {
+    if (!statusError) return;
+    statusErrorRef.current?.focus();
+  }, [statusError]);
+
+  useEffect(() => {
+    if (!submitAttemptedRef.current) return;
+    if (savingPassword) return;
+
+    if (passwordFieldErrors.current_password?.length) {
+      currentPasswordRef.current?.focus();
+      return;
+    }
+    if (passwordFieldErrors.new_password?.length) {
+      newPasswordRef.current?.focus();
+      return;
+    }
+    if (passwordFieldErrors.confirm_new_password?.length) {
+      confirmNewPasswordRef.current?.focus();
+      return;
+    }
+    if (passwordError) {
+      passwordErrorRef.current?.focus();
+    }
+  }, [passwordError, passwordFieldErrors, savingPassword]);
+
+  useEffect(() => {
     if (!resendCooldownUntil) return;
     if (Date.now() >= resendCooldownUntil) return;
     const id = window.setInterval(() => {
@@ -84,6 +116,7 @@ export const AccountSecurityPage = () => {
   }, [resendCooldownUntil]);
 
   const handleChangePassword = async () => {
+    submitAttemptedRef.current = true;
     setPasswordError(null);
     setPasswordSuccess(null);
     setPasswordFieldErrors({});
@@ -94,12 +127,14 @@ export const AccountSecurityPage = () => {
           `Password must be at least ${MIN_PASSWORD_LEN} characters.`,
         ],
       });
+      newPasswordRef.current?.focus();
       return;
     }
     if (newPassword !== confirmNewPassword) {
       setPasswordFieldErrors({
         confirm_new_password: ["Passwords do not match."],
       });
+      confirmNewPasswordRef.current?.focus();
       return;
     }
 
@@ -158,18 +193,25 @@ export const AccountSecurityPage = () => {
         <div
           role="alert"
           className="rounded-xl border border-red-400/40 bg-red-900/30 px-4 py-3 text-red-100"
+          ref={statusErrorRef}
+          tabIndex={-1}
         >
           {statusError}
         </div>
       )}
 
-      <section className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-5">
+      <section
+        className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-5"
+        aria-busy={savingPassword ? "true" : "false"}
+      >
         <h3 className="text-lg font-semibold text-white">Change password</h3>
 
         {passwordError && (
           <div
             role="alert"
             className="rounded-xl border border-red-400/40 bg-red-900/30 px-4 py-3 text-red-100"
+            ref={passwordErrorRef}
+            tabIndex={-1}
           >
             {passwordError}
           </div>
@@ -193,6 +235,7 @@ export const AccountSecurityPage = () => {
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
+              ref={currentPasswordRef}
               className={INPUT_CLASSES}
               autoComplete="current-password"
               aria-invalid={
@@ -227,6 +270,7 @@ export const AccountSecurityPage = () => {
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
+              ref={newPasswordRef}
               className={INPUT_CLASSES}
               autoComplete="new-password"
               aria-invalid={
@@ -265,6 +309,7 @@ export const AccountSecurityPage = () => {
               type="password"
               value={confirmNewPassword}
               onChange={(e) => setConfirmNewPassword(e.target.value)}
+              ref={confirmNewPasswordRef}
               className={INPUT_CLASSES}
               autoComplete="new-password"
               aria-invalid={
