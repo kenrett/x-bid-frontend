@@ -356,16 +356,23 @@ export const accountApi = {
       ACCOUNT_ENDPOINTS.sessions,
       () => client.get(ACCOUNT_ENDPOINTS.sessions),
     );
+    const status = response.status;
+    if (typeof status === "number" && (status < 200 || status >= 300)) {
+      throw new Error(
+        `[Account API] GET ${ACCOUNT_ENDPOINTS.sessions} failed (${status}): ${toSnippet(response.data)}`,
+      );
+    }
+
     const headers = response.headers as Record<string, unknown> | undefined;
     const contentType = headers?.["content-type"] ?? headers?.["Content-Type"];
     if (typeof contentType === "string" && !isJsonContentType(contentType)) {
       throw new Error(
-        `[Account API] GET ${ACCOUNT_ENDPOINTS.sessions} returned non-JSON response: ${toSnippet(response.data)}`,
+        `[Account API] GET ${ACCOUNT_ENDPOINTS.sessions} returned non-JSON response (${String(status ?? "unknown")}): ${toSnippet(response.data)}`,
       );
     }
     if (typeof contentType !== "string" && typeof response.data === "string") {
       throw new Error(
-        `[Account API] GET ${ACCOUNT_ENDPOINTS.sessions} returned non-JSON response: ${toSnippet(response.data)}`,
+        `[Account API] GET ${ACCOUNT_ENDPOINTS.sessions} returned non-JSON response (${String(status ?? "unknown")}): ${toSnippet(response.data)}`,
       );
     }
     return normalizeSessions(response.data);
