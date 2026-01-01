@@ -83,7 +83,7 @@ const normalizeWallet = (payload: unknown): WalletSummary => {
 };
 
 const extractTransactionsArray = (payload: unknown): unknown[] | null => {
-  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload)) return payload as unknown[];
   if (!payload || typeof payload !== "object") return null;
 
   const record = payload as Record<string, unknown>;
@@ -95,11 +95,12 @@ const extractTransactionsArray = (payload: unknown): unknown[] | null => {
   ];
 
   for (const candidate of candidates) {
-    if (Array.isArray(candidate)) return candidate;
+    if (Array.isArray(candidate)) return candidate as unknown[];
     if (candidate && typeof candidate === "object") {
       const nested = candidate as Record<string, unknown>;
-      if (Array.isArray(nested.data)) return nested.data;
-      if (Array.isArray(nested.transactions)) return nested.transactions;
+      if (Array.isArray(nested.data)) return nested.data as unknown[];
+      if (Array.isArray(nested.transactions))
+        return nested.transactions as unknown[];
     }
   }
 

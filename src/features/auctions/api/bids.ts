@@ -17,7 +17,9 @@ export type PlaceBidResponse = ApiJsonResponse<
 export const placeBid = async (
   auctionId: number,
 ): Promise<PlaceBidResponse> => {
-  const response = await client.post(`/api/v1/auctions/${auctionId}/bids`);
+  const response = await client.post<PlaceBidResponse>(
+    `/api/v1/auctions/${auctionId}/bids`,
+  );
   return response.data;
 };
 
