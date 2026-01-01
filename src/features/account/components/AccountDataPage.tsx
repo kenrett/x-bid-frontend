@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { accountApi } from "../api/accountApi";
-import { parseAccountApiError } from "../api/accountErrors";
+import { normalizeApiError } from "@api/normalizeApiError";
 import { showToast } from "@services/toast";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -43,7 +43,7 @@ export const AccountDataPage = () => {
       const status = await accountApi.getExportStatus();
       setExportStatus(status);
     } catch (err) {
-      setError(parseAccountApiError(err).message);
+      setError(normalizeApiError(err).message);
     } finally {
       setLoading(false);
     }
@@ -61,7 +61,7 @@ export const AccountDataPage = () => {
       setExportStatus(status);
       showToast("Export requested.", "success");
     } catch (err) {
-      setError(parseAccountApiError(err).message);
+      setError(normalizeApiError(err).message);
     } finally {
       setRequestingExport(false);
     }
@@ -86,7 +86,7 @@ export const AccountDataPage = () => {
       logout();
       navigate("/", { replace: true });
     } catch (err) {
-      setDeleteError(parseAccountApiError(err).message);
+      setDeleteError(normalizeApiError(err).message);
     } finally {
       setDeleting(false);
     }

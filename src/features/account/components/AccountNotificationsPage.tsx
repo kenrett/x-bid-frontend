@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { accountApi } from "../api/accountApi";
-import { parseAccountApiError } from "../api/accountErrors";
+import { normalizeApiError } from "@api/normalizeApiError";
 import { showToast } from "@services/toast";
 import type { NotificationPreferences } from "../types/account";
 
@@ -41,7 +41,7 @@ export const AccountNotificationsPage = () => {
       })
       .catch((err) => {
         if (cancelled) return;
-        setError(parseAccountApiError(err).message);
+        setError(normalizeApiError(err).message);
       })
       .finally(() => {
         if (cancelled) return;
@@ -70,7 +70,7 @@ export const AccountNotificationsPage = () => {
       setSuccess("Notification preferences saved.");
       showToast("Preferences saved.", "success");
     } catch (err) {
-      setError(parseAccountApiError(err).message);
+      setError(normalizeApiError(err).message);
     } finally {
       setSaving(false);
     }

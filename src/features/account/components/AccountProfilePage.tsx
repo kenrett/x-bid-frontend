@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { accountApi } from "../api/accountApi";
-import { parseAccountApiError, type FieldErrors } from "../api/accountErrors";
+import { normalizeApiError, type FieldErrors } from "@api/normalizeApiError";
 import { showToast } from "@services/toast";
 import { useAuth } from "@features/auth/hooks/useAuth";
 
@@ -62,7 +62,7 @@ export const AccountProfilePage = () => {
       })
       .catch((err) => {
         if (cancelled) return;
-        setError(parseAccountApiError(err).message);
+        setError(normalizeApiError(err).message);
       })
       .finally(() => {
         if (cancelled) return;
@@ -94,9 +94,9 @@ export const AccountProfilePage = () => {
       setSuccessMessage("Profile updated.");
       showToast("Profile updated.", "success");
     } catch (err) {
-      const parsed = parseAccountApiError(err);
+      const parsed = normalizeApiError(err);
       setError(parsed.message);
-      setFieldErrors(parsed.fieldErrors);
+      setFieldErrors(parsed.fieldErrors ?? {});
     } finally {
       setSavingName(false);
     }
@@ -125,9 +125,9 @@ export const AccountProfilePage = () => {
       showToast("Verification email sent.", "success");
       setCurrentPassword("");
     } catch (err) {
-      const parsed = parseAccountApiError(err);
+      const parsed = normalizeApiError(err);
       setError(parsed.message);
-      setFieldErrors(parsed.fieldErrors);
+      setFieldErrors(parsed.fieldErrors ?? {});
     } finally {
       setRequestingEmailChange(false);
     }
@@ -185,9 +185,15 @@ export const AccountProfilePage = () => {
               onChange={(e) => setNameDraft(e.target.value)}
               className={INPUT_CLASSES}
               autoComplete="name"
+              aria-invalid={fieldErrors.name?.length ? "true" : "false"}
+              aria-describedby={
+                fieldErrors.name?.length ? "name-error" : undefined
+              }
             />
             {fieldErrors.name?.length ? (
-              <p className="text-sm text-red-300">{fieldErrors.name[0]}</p>
+              <p id="name-error" className="text-sm text-red-300" role="alert">
+                {fieldErrors.name[0]}
+              </p>
             ) : null}
           </div>
 
@@ -270,9 +276,19 @@ export const AccountProfilePage = () => {
                 onChange={(e) => setNewEmail(e.target.value)}
                 className={INPUT_CLASSES}
                 autoComplete="email"
+                aria-invalid={fieldErrors.email?.length ? "true" : "false"}
+                aria-describedby={
+                  fieldErrors.email?.length ? "new-email-error" : undefined
+                }
               />
               {fieldErrors.email?.length ? (
-                <p className="text-sm text-red-300">{fieldErrors.email[0]}</p>
+                <p
+                  id="new-email-error"
+                  className="text-sm text-red-300"
+                  role="alert"
+                >
+                  {fieldErrors.email[0]}
+                </p>
               ) : null}
             </div>
 
@@ -290,9 +306,21 @@ export const AccountProfilePage = () => {
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 className={INPUT_CLASSES}
                 autoComplete="current-password"
+                aria-invalid={
+                  fieldErrors.current_password?.length ? "true" : "false"
+                }
+                aria-describedby={
+                  fieldErrors.current_password?.length
+                    ? "current-password-email-error"
+                    : undefined
+                }
               />
               {fieldErrors.current_password?.length ? (
-                <p className="text-sm text-red-300">
+                <p
+                  id="current-password-email-error"
+                  className="text-sm text-red-300"
+                  role="alert"
+                >
                   {fieldErrors.current_password[0]}
                 </p>
               ) : null}

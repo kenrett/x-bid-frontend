@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { accountApi } from "../api/accountApi";
-import { parseAccountApiError, type FieldErrors } from "../api/accountErrors";
+import { normalizeApiError, type FieldErrors } from "@api/normalizeApiError";
 import { showToast } from "@services/toast";
 
 const INPUT_CLASSES =
@@ -60,7 +60,7 @@ export const AccountSecurityPage = () => {
       })
       .catch((err) => {
         if (cancelled) return;
-        setStatusError(parseAccountApiError(err).message);
+        setStatusError(normalizeApiError(err).message);
       })
       .finally(() => {
         if (cancelled) return;
@@ -115,9 +115,9 @@ export const AccountSecurityPage = () => {
       setPasswordSuccess("Password updated.");
       showToast("Password updated.", "success");
     } catch (err) {
-      const parsed = parseAccountApiError(err);
+      const parsed = normalizeApiError(err);
       setPasswordError(parsed.message);
-      setPasswordFieldErrors(parsed.fieldErrors);
+      setPasswordFieldErrors(parsed.fieldErrors ?? {});
     } finally {
       setSavingPassword(false);
     }
@@ -135,7 +135,7 @@ export const AccountSecurityPage = () => {
       showToast("Verification email sent.", "success");
       setResendCooldownUntil(Date.now() + RESEND_COOLDOWN_SECONDS * 1000);
     } catch (err) {
-      setResendError(parseAccountApiError(err).message);
+      setResendError(normalizeApiError(err).message);
     } finally {
       setResending(false);
     }
@@ -195,9 +195,21 @@ export const AccountSecurityPage = () => {
               onChange={(e) => setCurrentPassword(e.target.value)}
               className={INPUT_CLASSES}
               autoComplete="current-password"
+              aria-invalid={
+                passwordFieldErrors.current_password?.length ? "true" : "false"
+              }
+              aria-describedby={
+                passwordFieldErrors.current_password?.length
+                  ? "current-password-error"
+                  : undefined
+              }
             />
             {passwordFieldErrors.current_password?.length ? (
-              <p className="text-sm text-red-300">
+              <p
+                id="current-password-error"
+                className="text-sm text-red-300"
+                role="alert"
+              >
                 {passwordFieldErrors.current_password[0]}
               </p>
             ) : null}
@@ -217,9 +229,21 @@ export const AccountSecurityPage = () => {
               onChange={(e) => setNewPassword(e.target.value)}
               className={INPUT_CLASSES}
               autoComplete="new-password"
+              aria-invalid={
+                passwordFieldErrors.new_password?.length ? "true" : "false"
+              }
+              aria-describedby={
+                passwordFieldErrors.new_password?.length
+                  ? "new-password-error"
+                  : undefined
+              }
             />
             {passwordFieldErrors.new_password?.length ? (
-              <p className="text-sm text-red-300">
+              <p
+                id="new-password-error"
+                className="text-sm text-red-300"
+                role="alert"
+              >
                 {passwordFieldErrors.new_password[0]}
               </p>
             ) : (
@@ -243,9 +267,23 @@ export const AccountSecurityPage = () => {
               onChange={(e) => setConfirmNewPassword(e.target.value)}
               className={INPUT_CLASSES}
               autoComplete="new-password"
+              aria-invalid={
+                passwordFieldErrors.confirm_new_password?.length
+                  ? "true"
+                  : "false"
+              }
+              aria-describedby={
+                passwordFieldErrors.confirm_new_password?.length
+                  ? "confirm-new-password-error"
+                  : undefined
+              }
             />
             {passwordFieldErrors.confirm_new_password?.length ? (
-              <p className="text-sm text-red-300">
+              <p
+                id="confirm-new-password-error"
+                className="text-sm text-red-300"
+                role="alert"
+              >
                 {passwordFieldErrors.confirm_new_password[0]}
               </p>
             ) : null}

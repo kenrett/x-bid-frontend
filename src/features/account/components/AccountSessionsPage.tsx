@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { accountApi } from "../api/accountApi";
-import { parseAccountApiError } from "../api/accountErrors";
+import { normalizeApiError } from "@api/normalizeApiError";
 import { showToast } from "@services/toast";
 import type { AccountSession } from "../types/account";
 
@@ -30,7 +30,7 @@ export const AccountSessionsPage = () => {
       const list = await accountApi.listSessions();
       setSessions(list);
     } catch (err) {
-      setError(parseAccountApiError(err).message);
+      setError(normalizeApiError(err).message);
     } finally {
       setLoading(false);
     }
@@ -54,7 +54,7 @@ export const AccountSessionsPage = () => {
       showToast("Session revoked.", "success");
       await load();
     } catch (err) {
-      setError(parseAccountApiError(err).message);
+      setError(normalizeApiError(err).message);
     } finally {
       setBusyId(null);
     }
@@ -73,7 +73,7 @@ export const AccountSessionsPage = () => {
       showToast("Signed out other devices.", "success");
       await load();
     } catch (err) {
-      setError(parseAccountApiError(err).message);
+      setError(normalizeApiError(err).message);
     } finally {
       setRevokingOthers(false);
     }
