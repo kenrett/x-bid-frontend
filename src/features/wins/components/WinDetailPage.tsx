@@ -9,7 +9,7 @@ import type {
   WinDetail,
   WinFulfillmentStatus,
 } from "../types/win";
-import { parseApiError } from "@utils/apiError";
+import { normalizeApiError } from "@api/normalizeApiError";
 import axios from "axios";
 import { showToast } from "@services/toast";
 
@@ -150,10 +150,10 @@ export const WinDetailPage = () => {
       const data = await winsApi.get(auction_id);
       setWin(data);
     } catch (err) {
-      const parsed = parseApiError(err);
-      if (parsed.type === "not_found") {
+      const parsed = normalizeApiError(err);
+      if (parsed.status === 404) {
         setError("Win not found.");
-      } else if (parsed.type === "forbidden") {
+      } else if (parsed.status === 403) {
         setError("You do not have access to this win.");
       } else {
         setError(parsed.message);
@@ -188,18 +188,18 @@ export const WinDetailPage = () => {
     message: string | null;
   } => {
     if (!axios.isAxiosError(err)) {
-      return { fields: {}, message: parseApiError(err).message };
+      return { fields: {}, message: normalizeApiError(err).message };
     }
 
     const data = err.response?.data as unknown;
     if (!data || typeof data !== "object") {
-      return { fields: {}, message: parseApiError(err).message };
+      return { fields: {}, message: normalizeApiError(err).message };
     }
 
     const record = data as Record<string, unknown>;
     const errors = record.errors;
     if (!errors || typeof errors !== "object") {
-      return { fields: {}, message: parseApiError(err).message };
+      return { fields: {}, message: normalizeApiError(err).message };
     }
 
     const errorMapRoot = errors as Record<string, unknown>;
@@ -259,8 +259,8 @@ export const WinDetailPage = () => {
       setFieldErrors({});
       showToast("Claim submitted.", "success");
     } catch (err) {
-      const parsed = parseApiError(err);
-      if (parsed.type === "validation") {
+      const parsed = normalizeApiError(err);
+      if (parsed.status === 422) {
         const details = parseClaimValidationErrors(err);
         setFieldErrors(details.fields);
         setClaimError(

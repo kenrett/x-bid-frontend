@@ -4,7 +4,7 @@ import { Page } from "@components/Page";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { purchasesApi } from "../api/purchasesApi";
 import type { PurchaseSummary } from "../types/purchase";
-import { parseApiError } from "@utils/apiError";
+import { normalizeApiError } from "@api/normalizeApiError";
 
 const formatDate = (value: string) => {
   if (!value) return "—";
@@ -93,7 +93,7 @@ export const PurchasesListPage = () => {
       const data = await purchasesApi.list();
       setPurchases(data);
     } catch (err) {
-      const parsed = parseApiError(err);
+      const parsed = normalizeApiError(err);
       setError(parsed.message);
     } finally {
       setIsLoading(false);
@@ -157,7 +157,10 @@ export const PurchasesListPage = () => {
         </div>
 
         {error ? (
-          <div className="rounded-2xl border border-red-400/40 bg-red-900/30 p-4 text-red-100">
+          <div
+            className="rounded-2xl border border-red-400/40 bg-red-900/30 p-4 text-red-100"
+            role="alert"
+          >
             <div className="flex items-start justify-between gap-4">
               <p className="font-semibold">
                 We couldn&apos;t load your purchases: {error}

@@ -11,7 +11,7 @@ import { LoadingScreen } from "@components/LoadingScreen";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { purchasesApi } from "../api/purchasesApi";
 import type { PurchaseDetail } from "../types/purchase";
-import { parseApiError } from "@utils/apiError";
+import { normalizeApiError } from "@api/normalizeApiError";
 
 const formatDate = (value: string) => {
   if (!value) return "—";
@@ -146,10 +146,10 @@ export const PurchaseDetailPage = () => {
       const data = await purchasesApi.get(id);
       setPurchase(data);
     } catch (err) {
-      const parsed = parseApiError(err);
-      if (parsed.type === "not_found") {
+      const parsed = normalizeApiError(err);
+      if (parsed.status === 404) {
         setError("Purchase not found.");
-      } else if (parsed.type === "forbidden") {
+      } else if (parsed.status === 403) {
         setError("You do not have access to this purchase.");
       } else {
         setError(parsed.message);
@@ -196,7 +196,9 @@ export const PurchaseDetailPage = () => {
     return (
       <Page centered>
         <div className="max-w-xl mx-auto space-y-4">
-          <p className="text-lg text-red-200 font-semibold">{error}</p>
+          <p className="text-lg text-red-200 font-semibold" role="alert">
+            {error}
+          </p>
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => void handleLoad()}

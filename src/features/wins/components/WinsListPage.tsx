@@ -4,7 +4,7 @@ import { Page } from "@components/Page";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { winsApi } from "../api/winsApi";
 import type { WinFulfillmentStatus, WinSummary } from "../types/win";
-import { parseApiError } from "@utils/apiError";
+import { normalizeApiError } from "@api/normalizeApiError";
 
 const formatDate = (value: string) => {
   if (!value) return "—";
@@ -117,7 +117,7 @@ export const WinsListPage = () => {
       const data = await winsApi.list();
       setWins(data);
     } catch (err) {
-      setError(parseApiError(err).message);
+      setError(normalizeApiError(err).message);
     } finally {
       setIsLoading(false);
     }
@@ -165,7 +165,10 @@ export const WinsListPage = () => {
         </div>
 
         {error ? (
-          <div className="rounded-2xl border border-red-400/40 bg-red-900/30 p-4 text-red-100">
+          <div
+            className="rounded-2xl border border-red-400/40 bg-red-900/30 p-4 text-red-100"
+            role="alert"
+          >
             <div className="flex items-start justify-between gap-4">
               <p className="font-semibold">
                 We couldn&apos;t load your wins: {error}

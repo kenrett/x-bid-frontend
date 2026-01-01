@@ -7,7 +7,7 @@ import type {
   ActivityKind,
 } from "../types/activity";
 import { Page } from "@components/Page";
-import { parseApiError } from "@utils/apiError";
+import { normalizeApiError } from "@api/normalizeApiError";
 import { useAuth } from "@features/auth/hooks/useAuth";
 
 const FILTERS: { label: string; value: ActivityFilter }[] = [
@@ -191,7 +191,7 @@ export const ActivityPage = () => {
         const data = await activityApi.list({ page: 1, perPage: 25 });
         setItems(data.items);
       } catch (err) {
-        const parsed = parseApiError(err);
+        const parsed = normalizeApiError(err);
         setError(parsed.message);
       } finally {
         setIsLoading(false);
@@ -261,7 +261,7 @@ export const ActivityPage = () => {
                 Loading activity...
               </li>
             ) : error ? (
-              <li className="px-4 py-6 text-center text-red-200">
+              <li className="px-4 py-6 text-center text-red-200" role="alert">
                 {error}
                 <div className="mt-3">
                   <button
@@ -271,7 +271,9 @@ export const ActivityPage = () => {
                       void activityApi
                         .list({ page: 1, perPage: 25 })
                         .then((data) => setItems(data.items))
-                        .catch((err) => setError(parseApiError(err).message))
+                        .catch((err) =>
+                          setError(normalizeApiError(err).message),
+                        )
                         .finally(() => setIsLoading(false));
                     }}
                     className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors"
