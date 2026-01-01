@@ -31,10 +31,12 @@ vi.mock("@rails/actioncable", () => ({
 }));
 
 describe("cable service", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     socketCalls.length = 0;
     (import.meta as unknown as { env: Record<string, unknown> }).env = {};
+    const { authTokenStore } = await import("@features/auth/tokenStore");
+    authTokenStore.clear();
   });
 
   afterEach(() => {

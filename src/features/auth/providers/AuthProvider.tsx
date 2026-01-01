@@ -62,7 +62,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setSessionTokenId(payload.sessionTokenId);
       setSessionRemainingSeconds(null);
 
-      authTokenStore.setToken(payload.token);
+      authTokenStore.setSession({
+        token: payload.token,
+        refreshToken: payload.refreshToken,
+        sessionTokenId: payload.sessionTokenId,
+      });
       setSentryUser(normalizedUser);
       resetCable();
 
@@ -129,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // ignore (no storage in some environments)
     }
 
-    authTokenStore.setToken(null);
+    authTokenStore.clear();
     setSentryUser(null);
     resetCable();
 
@@ -241,7 +245,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (nextToken && nextRefreshToken && normalizedSessionTokenId) {
         setToken(nextToken);
-        authTokenStore.setToken(nextToken);
+        authTokenStore.setSession({
+          token: nextToken,
+          refreshToken: nextRefreshToken,
+          sessionTokenId: normalizedSessionTokenId,
+        });
         setRefreshToken(nextRefreshToken);
         setSessionTokenId(normalizedSessionTokenId);
 

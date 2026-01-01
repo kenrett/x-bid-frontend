@@ -1,6 +1,10 @@
 import axios, { type AxiosError, type AxiosInstance } from "axios";
 import { showToast } from "@services/toast";
-import { authTokenStore, getAuthToken } from "@features/auth/tokenStore";
+import {
+  authTokenStore,
+  getAuthToken,
+  getRefreshToken,
+} from "@features/auth/tokenStore";
 import { normalizeAuthResponse } from "@features/auth/api/authResponse";
 
 const rawBaseURL =
@@ -73,6 +77,9 @@ const isRefreshRequest = (configUrl: unknown) =>
   typeof configUrl === "string" &&
   configUrl.includes("/api/v1/session/refresh");
 
+let refreshPromise: Promise<ReturnType<typeof normalizeAuthResponse>> | null =
+  null;
+
 client.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -85,25 +92,38 @@ client.interceptors.response.use(
     } else if (status === 401 || status === 403) {
       const originalRequest = error.config;
 
-      const canRefresh =
+      const canRefreshWithCookie =
         status === 401 &&
         shouldAttemptCookieRefresh() &&
         originalRequest &&
         !(originalRequest as { __authRetry?: boolean }).__authRetry &&
         !isRefreshRequest(originalRequest.url);
 
-      if (canRefresh) {
+      const refreshToken = getRefreshToken();
+      const canRefreshWithToken =
+        status === 401 &&
+        Boolean(refreshToken) &&
+        originalRequest &&
+        !(originalRequest as { __authRetry?: boolean }).__authRetry &&
+        !isRefreshRequest(originalRequest.url);
+
+      if (canRefreshWithToken) {
         try {
-          const refreshResponse = await client.post(
-            "/api/v1/session/refresh",
-            undefined,
-            {
-              withCredentials: true,
-              headers: { Authorization: undefined },
-            },
-          );
-          const next = normalizeAuthResponse(refreshResponse.data);
-          authTokenStore.setToken(next.token);
+          refreshPromise ??= (async () => {
+            const refreshResponse = await client.post(
+              "/api/v1/session/refresh",
+              { refresh_token: refreshToken },
+              { headers: { Authorization: undefined } },
+            );
+            return normalizeAuthResponse(refreshResponse.data);
+          })();
+
+          const next = await refreshPromise;
+          authTokenStore.setSession({
+            token: next.token,
+            refreshToken: next.refreshToken,
+            sessionTokenId: next.sessionTokenId,
+          });
           window.dispatchEvent(
             new CustomEvent("app:auth:refreshed", { detail: next }),
           );
@@ -123,8 +143,56 @@ client.interceptors.response.use(
           originalRequest.headers = headers;
           return client.request(originalRequest);
         } catch (refreshError) {
+          refreshPromise = null;
+          // Fall through to centralized unauthorized handling.
+          console.warn("[api client] Refresh token flow failed", refreshError);
+        } finally {
+          refreshPromise = null;
+        }
+      } else if (canRefreshWithCookie) {
+        try {
+          refreshPromise ??= (async () => {
+            const refreshResponse = await client.post(
+              "/api/v1/session/refresh",
+              undefined,
+              {
+                withCredentials: true,
+                headers: { Authorization: undefined },
+              },
+            );
+            return normalizeAuthResponse(refreshResponse.data);
+          })();
+
+          const next = await refreshPromise;
+          authTokenStore.setSession({
+            token: next.token,
+            refreshToken: next.refreshToken,
+            sessionTokenId: next.sessionTokenId,
+          });
+          window.dispatchEvent(
+            new CustomEvent("app:auth:refreshed", { detail: next }),
+          );
+
+          (originalRequest as { __authRetry?: boolean }).__authRetry = true;
+          const headers = originalRequest.headers ?? {};
+          if (typeof (headers as { set?: unknown }).set === "function") {
+            (
+              headers as unknown as {
+                set: (key: string, value: string) => void;
+              }
+            ).set("Authorization", `Bearer ${next.token}`);
+          } else {
+            (headers as Record<string, unknown>).Authorization =
+              `Bearer ${next.token}`;
+          }
+          originalRequest.headers = headers;
+          return client.request(originalRequest);
+        } catch (refreshError) {
+          refreshPromise = null;
           // Fall through to centralized unauthorized handling.
           console.warn("[api client] Cookie refresh failed", refreshError);
+        } finally {
+          refreshPromise = null;
         }
       }
 
@@ -132,7 +200,7 @@ client.interceptors.response.use(
       window.dispatchEvent(
         new CustomEvent("app:unauthorized", { detail: { status } }),
       );
-      showToast("Your session expired; please sign in again.", "error");
+      showToast("Session expired. Please log in again.", "error");
     }
     return Promise.reject(error);
   },

@@ -52,7 +52,7 @@ describe("api client response interceptor", () => {
   const rejected = getRejectedInterceptor();
 
   beforeEach(() => {
-    authTokenStore.setToken(null);
+    authTokenStore.clear();
     showToast.mockClear();
     vi.restoreAllMocks();
   });
@@ -87,10 +87,96 @@ describe("api client response interceptor", () => {
       expect.objectContaining({ type: "app:unauthorized" }),
     );
     expect(showToast).toHaveBeenCalledWith(
-      "Your session expired; please sign in again.",
+      "Session expired. Please log in again.",
       "error",
     );
     expect(window.location.assign).not.toHaveBeenCalled();
+  });
+
+  it("refreshes on 401 with in-memory refreshToken and retries once", async () => {
+    const dispatchSpy = vi.spyOn(window, "dispatchEvent");
+    const postSpy = vi.spyOn(client, "post");
+    const requestSpy = vi.spyOn(client, "request");
+
+    authTokenStore.setSession({
+      token: "old-token",
+      refreshToken: "refresh-1",
+      sessionTokenId: "sid-1",
+    });
+
+    postSpy.mockResolvedValueOnce({
+      data: {
+        token: "new-token",
+        refresh_token: "refresh-2",
+        session_token_id: "sid-2",
+        user: {
+          id: 1,
+          email: "user@example.com",
+          name: "User",
+          bidCredits: 0,
+          is_admin: false,
+        },
+      },
+    } as never);
+
+    requestSpy.mockResolvedValueOnce({ data: "ok" } as never);
+
+    const error = {
+      response: { status: 401 },
+      config: { url: "/api/v1/protected", headers: {} },
+    } as AxiosError;
+
+    await expect(rejected(error)).resolves.toMatchObject({ data: "ok" });
+
+    expect(postSpy).toHaveBeenCalledWith(
+      "/api/v1/session/refresh",
+      { refresh_token: "refresh-1" },
+      { headers: { Authorization: undefined } },
+    );
+
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "app:auth:refreshed" }),
+    );
+
+    expect(requestSpy).toHaveBeenCalledTimes(1);
+    const retriedConfig = requestSpy.mock.calls[0]?.[0] as Record<
+      string,
+      unknown
+    >;
+    expect(retriedConfig.__authRetry).toBe(true);
+  });
+
+  it("dispatches unauthorized when refresh fails", async () => {
+    setPath("/auctions");
+    const dispatchSpy = vi.spyOn(window, "dispatchEvent");
+    const postSpy = vi.spyOn(client, "post").mockRejectedValueOnce(
+      Object.assign(new Error("refresh failed"), {
+        isAxiosError: true,
+        response: { status: 401 },
+      }),
+    );
+
+    authTokenStore.setSession({
+      token: "old-token",
+      refreshToken: "refresh-1",
+      sessionTokenId: "sid-1",
+    });
+
+    const error = {
+      response: { status: 401 },
+      config: { url: "/api/v1/protected", headers: {} },
+    } as AxiosError;
+
+    await expect(rejected(error)).rejects.toBe(error);
+
+    expect(postSpy).toHaveBeenCalled();
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "app:unauthorized" }),
+    );
+    expect(showToast).toHaveBeenCalledWith(
+      "Session expired. Please log in again.",
+      "error",
+    );
   });
 
   it("keeps maintenance redirect behavior for 503", async () => {

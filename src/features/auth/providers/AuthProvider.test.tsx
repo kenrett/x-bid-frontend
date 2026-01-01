@@ -89,7 +89,7 @@ const mockedClient = vi.mocked(client, true);
 beforeEach(() => {
   vi.clearAllMocks();
   localStorage.clear();
-  authTokenStore.setToken(null);
+  authTokenStore.clear();
   toastMocks.showToast.mockReset();
   mockedClient.get.mockReset();
   mockedClient.get.mockResolvedValue({
