@@ -41,3 +41,20 @@ describe("ACCOUNT_ENDPOINTS", () => {
     );
   });
 });
+
+describe("accountApi.getSecurity", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("treats email_verified_at as verified when boolean is missing", async () => {
+    mockedClient.get.mockResolvedValue({
+      data: { email_verified_at: "2025-01-01T00:00:00Z" },
+    });
+
+    const result = await accountApi.getSecurity();
+
+    expect(mockedClient.get).toHaveBeenCalledWith("/api/v1/account/security");
+    expect(result.emailVerified).toBe(true);
+  });
+});

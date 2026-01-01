@@ -75,6 +75,17 @@ const readString = (value: unknown): string | undefined =>
 const readBoolean = (value: unknown): boolean | undefined =>
   typeof value === "boolean" ? value : undefined;
 
+const readBooleanLike = (value: unknown): boolean | undefined => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number" && Number.isFinite(value)) return value !== 0;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (["true", "t", "1", "yes", "y"].includes(normalized)) return true;
+    if (["false", "f", "0", "no", "n"].includes(normalized)) return false;
+  }
+  return undefined;
+};
+
 const normalizeProfile = (payload: unknown): AccountProfile => {
   const record = asRecord(payload) ?? {};
 
@@ -130,12 +141,12 @@ const normalizeProfile = (payload: unknown): AccountProfile => {
     readFromCandidates((candidate) => readString(candidate.createdAt));
 
   const emailVerified =
-    readBoolean(record.email_verified) ??
-    readBoolean(record.emailVerified) ??
+    readBooleanLike(record.email_verified) ??
+    readBooleanLike(record.emailVerified) ??
     readBoolFromCandidates(
       (candidate) =>
-        readBoolean(candidate.email_verified) ??
-        readBoolean(candidate.emailVerified),
+        readBooleanLike(candidate.email_verified) ??
+        readBooleanLike(candidate.emailVerified),
     );
 
   const emailVerifiedAt =
@@ -151,19 +162,19 @@ const normalizeProfile = (payload: unknown): AccountProfile => {
     name,
     email,
     createdAt,
-    emailVerified,
+    emailVerified: emailVerified ?? Boolean(emailVerifiedAt),
     emailVerifiedAt,
   };
 };
 
 const normalizeSecurity = (payload: unknown): AccountSecurityStatus => {
   const record = asRecord(payload) ?? {};
-  const emailVerified =
-    readBoolean(record.email_verified) ??
-    readBoolean(record.emailVerified) ??
-    false;
   const emailVerifiedAt =
     readString(record.email_verified_at) ?? readString(record.emailVerifiedAt);
+  const emailVerified =
+    readBooleanLike(record.email_verified) ??
+    readBooleanLike(record.emailVerified) ??
+    Boolean(emailVerifiedAt);
   return { emailVerified, emailVerifiedAt: emailVerifiedAt ?? null };
 };
 
