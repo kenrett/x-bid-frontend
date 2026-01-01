@@ -33,7 +33,6 @@ vi.mock("@rails/actioncable", () => ({
 describe("cable service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    localStorage.clear();
     socketCalls.length = 0;
     (import.meta as unknown as { env: Record<string, unknown> }).env = {};
   });
@@ -43,7 +42,8 @@ describe("cable service", () => {
   });
 
   it("creates consumer with token query param and sets Authorization header on WebSocket", async () => {
-    localStorage.setItem("token", "abc");
+    const { authTokenStore } = await import("@features/auth/tokenStore");
+    authTokenStore.setToken("abc");
     const { resetCable } = await import("./cable");
 
     const firstCallUrl = createConsumerMock.mock.calls.at(0)?.[0];
@@ -74,7 +74,8 @@ describe("cable service", () => {
   });
 
   it("appends token without clobbering existing query params and encodes token", async () => {
-    localStorage.setItem("token", "a b");
+    const { authTokenStore } = await import("@features/auth/tokenStore");
+    authTokenStore.setToken("a b");
     const { buildCableUrl } = await import("./cable");
     const built = buildCableUrl(undefined, "ws://example.com/cable?foo=bar");
     const url = new URL(built);
