@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { accountApi } from "../api/accountApi";
-import { parseAccountApiError } from "../api/accountErrors";
+import { normalizeApiError } from "@api/normalizeApiError";
 import { AccountStatusContext } from "../contexts/accountStatusContext";
 import { useAuth } from "@features/auth/hooks/useAuth";
 
@@ -31,7 +31,7 @@ export const AccountStatusProvider = ({
       }
     } catch (err) {
       if (isMounted.current) {
-        setError(parseAccountApiError(err).message);
+        setError(normalizeApiError(err).message);
         setEmailVerified(null);
         setEmailVerifiedAt(null);
       }

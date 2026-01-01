@@ -17,6 +17,7 @@ import {
   UnexpectedResponseError,
 } from "@services/unexpectedResponse";
 import { Sentry } from "@sentryClient";
+import { normalizeApiError } from "@api/normalizeApiError";
 
 type EmbeddedCheckoutWithReadyProps = React.ComponentProps<
   typeof EmbeddedCheckout
@@ -267,11 +268,14 @@ export const BuyBids = () => {
       if (err instanceof UnexpectedResponseError) {
         setError(UNEXPECTED_RESPONSE_MESSAGE);
       } else if (axios.isAxiosError(err)) {
-        const message =
-          err.response?.data?.error || "Something went wrong during purchase.";
-        setError(message);
+        setError(normalizeApiError(err).message);
       } else {
-        setError("An unexpected error occurred.");
+        setError(
+          normalizeApiError(err, {
+            useRawErrorMessage: false,
+            fallbackMessage: "An unexpected error occurred.",
+          }).message,
+        );
       }
     } finally {
       setIsPurchasingPackId(null);

@@ -5,7 +5,7 @@ import client from "@api/client";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { CheckoutSuccessResponse } from "../../types/checkout";
 import { Page } from "@components/Page";
-import { parseApiError } from "@utils/apiError";
+import { normalizeApiError } from "@api/normalizeApiError";
 import {
   reportUnexpectedResponse,
   UNEXPECTED_RESPONSE_MESSAGE,
@@ -75,9 +75,14 @@ export const PurchaseStatus = () => {
         if (err instanceof UnexpectedResponseError) {
           setMessage(UNEXPECTED_RESPONSE_MESSAGE);
         } else if (axios.isAxiosError(err)) {
-          setMessage(parseApiError(err).message);
+          setMessage(normalizeApiError(err).message);
         } else {
-          setMessage("An unexpected error occurred.");
+          setMessage(
+            normalizeApiError(err, {
+              useRawErrorMessage: false,
+              fallbackMessage: "An unexpected error occurred.",
+            }).message,
+          );
         }
       }
     };
@@ -107,7 +112,10 @@ export const PurchaseStatus = () => {
       >
         {status === "success" ? "Payment Successful" : "Payment Error"}
       </h2>
-      <p className="mb-6 text-lg text-gray-400">
+      <p
+        className="mb-6 text-lg text-gray-400"
+        role={status === "success" ? "status" : "alert"}
+      >
         {message ?? "Something went wrong."}
       </p>
       <Link
