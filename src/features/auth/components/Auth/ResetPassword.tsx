@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import client from "@api/client";
 import type { ApiJsonResponse } from "@api/openapi-helpers";
 import { useAuth } from "../../hooks/useAuth";
-import { parseApiError } from "@utils/apiError";
+import { normalizeApiError } from "@api/normalizeApiError";
 
 export const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -53,7 +53,7 @@ export const ResetPassword = () => {
       setPassword("");
       setConfirmPassword("");
     } catch (err) {
-      const parsed = parseApiError(err);
+      const parsed = normalizeApiError(err);
       setError(parsed.message || "Unable to reset password. Please try again.");
     } finally {
       setIsSubmitting(false);

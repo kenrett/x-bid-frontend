@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import client from "@api/client";
 import type { ApiJsonResponse } from "@api/openapi-helpers";
-import { parseApiError } from "@utils/apiError";
+import { normalizeApiError } from "@api/normalizeApiError";
 
 export const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -35,7 +35,7 @@ export const ForgotPassword = () => {
       );
     } catch (err) {
       const message =
-        parseApiError(err).message ||
+        normalizeApiError(err).message ||
         "We couldn't process your request. Please try again.";
       // Still avoid user-enumeration; surface generic failure.
       setError(message);

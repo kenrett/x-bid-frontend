@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import client from "@api/client";
 import { useAuth } from "@features/auth/hooks/useAuth";
-import { parseApiError } from "@utils/apiError";
+import { normalizeApiError, type FieldErrors } from "@api/normalizeApiError";
 import { normalizeAuthResponse } from "@features/auth/api/authResponse";
 
 const isUnexpectedAuthResponseError = (err: unknown) =>
@@ -14,6 +14,7 @@ export const SignUpForm = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -21,6 +22,7 @@ export const SignUpForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
@@ -45,8 +47,9 @@ export const SignUpForm = () => {
         }
         return;
       }
-      const parsed = parseApiError(err);
+      const parsed = normalizeApiError(err);
       setError(parsed.message || "Failed to create account. Please try again.");
+      setFieldErrors(parsed.fieldErrors ?? {});
       if (import.meta.env.MODE !== "production") {
         console.error(err);
       }
@@ -124,7 +127,20 @@ export const SignUpForm = () => {
                   onChange={(e) => setName(e.target.value)}
                   className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
                   autoComplete="name"
+                  aria-invalid={fieldErrors.name?.length ? "true" : "false"}
+                  aria-describedby={
+                    fieldErrors.name?.length ? "signup-name-error" : undefined
+                  }
                 />
+                {fieldErrors.name?.length ? (
+                  <p
+                    id="signup-name-error"
+                    className="text-sm text-red-200"
+                    role="alert"
+                  >
+                    {fieldErrors.name[0]}
+                  </p>
+                ) : null}
               </div>
 
               <div className="space-y-2">
@@ -144,7 +160,29 @@ export const SignUpForm = () => {
                   onChange={(e) => setEmailAddress(e.target.value)}
                   className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
                   autoComplete="email"
+                  aria-invalid={
+                    fieldErrors.email_address?.length ||
+                    fieldErrors.email?.length
+                      ? "true"
+                      : "false"
+                  }
+                  aria-describedby={
+                    fieldErrors.email_address?.length ||
+                    fieldErrors.email?.length
+                      ? "signup-email-error"
+                      : undefined
+                  }
                 />
+                {fieldErrors.email_address?.length ||
+                fieldErrors.email?.length ? (
+                  <p
+                    id="signup-email-error"
+                    className="text-sm text-red-200"
+                    role="alert"
+                  >
+                    {(fieldErrors.email_address ?? fieldErrors.email)![0]}
+                  </p>
+                ) : null}
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -165,7 +203,24 @@ export const SignUpForm = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
                     autoComplete="new-password"
+                    aria-invalid={
+                      fieldErrors.password?.length ? "true" : "false"
+                    }
+                    aria-describedby={
+                      fieldErrors.password?.length
+                        ? "signup-password-error"
+                        : undefined
+                    }
                   />
+                  {fieldErrors.password?.length ? (
+                    <p
+                      id="signup-password-error"
+                      className="text-sm text-red-200"
+                      role="alert"
+                    >
+                      {fieldErrors.password[0]}
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="space-y-2">

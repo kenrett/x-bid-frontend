@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import client from "@api/client";
-import { parseApiError } from "@utils/apiError";
+import { normalizeApiError, type FieldErrors } from "@api/normalizeApiError";
 import { normalizeAuthResponse } from "@features/auth/api/authResponse";
 
 const isUnexpectedAuthResponseError = (err: unknown) =>
@@ -12,6 +12,7 @@ export const LoginForm = () => {
   const [email_address, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const [searchParams] = useSearchParams();
@@ -21,6 +22,7 @@ export const LoginForm = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setFieldErrors({});
 
     try {
       const response = await client.post("/api/v1/login", {
@@ -38,10 +40,11 @@ export const LoginForm = () => {
         }
         return;
       }
-      const parsed = parseApiError(err);
+      const parsed = normalizeApiError(err);
       setError(
         parsed.message || "Invalid email or password. Please try again.",
       );
+      setFieldErrors(parsed.fieldErrors ?? {});
       if (import.meta.env.MODE !== "production") {
         console.error(err);
       }
@@ -119,7 +122,29 @@ export const LoginForm = () => {
                   required
                   value={email_address}
                   onChange={(e) => setEmailAddress(e.target.value)}
+                  aria-invalid={
+                    fieldErrors.email_address?.length ||
+                    fieldErrors.email?.length
+                      ? "true"
+                      : "false"
+                  }
+                  aria-describedby={
+                    fieldErrors.email_address?.length ||
+                    fieldErrors.email?.length
+                      ? "login-email-error"
+                      : undefined
+                  }
                 />
+                {fieldErrors.email_address?.length ||
+                fieldErrors.email?.length ? (
+                  <p
+                    id="login-email-error"
+                    className="text-sm text-red-200"
+                    role="alert"
+                  >
+                    {(fieldErrors.email_address ?? fieldErrors.email)![0]}
+                  </p>
+                ) : null}
               </div>
 
               <div className="space-y-2">
@@ -139,7 +164,32 @@ export const LoginForm = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  aria-invalid={
+                    fieldErrors.password?.length ||
+                    fieldErrors.password_confirmation?.length
+                      ? "true"
+                      : "false"
+                  }
+                  aria-describedby={
+                    fieldErrors.password?.length ||
+                    fieldErrors.password_confirmation?.length
+                      ? "login-password-error"
+                      : undefined
+                  }
                 />
+                {fieldErrors.password?.length ||
+                fieldErrors.password_confirmation?.length ? (
+                  <p
+                    id="login-password-error"
+                    className="text-sm text-red-200"
+                    role="alert"
+                  >
+                    {
+                      (fieldErrors.password ??
+                        fieldErrors.password_confirmation)![0]
+                    }
+                  </p>
+                ) : null}
               </div>
 
               {error && (
