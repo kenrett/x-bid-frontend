@@ -6,7 +6,10 @@ import path from "node:path";
 type JsonObject = Record<string, unknown>;
 
 const readOpenApi = (): JsonObject => {
-  const filePath = path.resolve(process.cwd(), "src/contracts/openapi.json");
+  const filePath = path.resolve(
+    process.cwd(),
+    process.env.BACKEND_OPENAPI_PATH?.trim() || "src/contracts/openapi.json",
+  );
   return JSON.parse(fs.readFileSync(filePath, "utf8")) as JsonObject;
 };
 

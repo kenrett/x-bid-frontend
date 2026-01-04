@@ -10,6 +10,8 @@
     "format": "prettier --write .",
     "gen:api-types": "node scripts/gen-api-types.mjs --snapshot src/contracts/openapi.json",
     "check:api-types": "node scripts/check-api-types.mjs",
+    "openapi:types": "node scripts/openapi-types.mjs",
+    "ct-2": "node scripts/ct-2.mjs",
     "prepare": "husky",
     "preview": "vite preview",
     "test": "vitest",

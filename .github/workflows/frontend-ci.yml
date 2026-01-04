@@ -28,13 +28,93 @@ jobs:
       - name: Audit production dependencies
         run: npm audit --omit=dev
 
+      - name: Download backend OpenAPI artifact (PR only)
+        if: ${{ github.event_name == 'pull_request' }}
+        id: backend-openapi
+        uses: actions/github-script@v7
+        env:
+          BACKEND_REPO: ${{ vars.BACKEND_REPO || format('{0}/{1}', github.repository_owner, 'x-bid-backend') }}
+          GH_TOKEN: ${{ secrets.BACKEND_CI_TOKEN || github.token }}
+        with:
+          script: |
+            const [owner, repo] = process.env.BACKEND_REPO.split("/");
+            const headSha = context.payload.pull_request.head.sha;
+            const token = process.env.GH_TOKEN;
+
+            const runs = await github.request("GET /repos/{owner}/{repo}/actions/runs", {
+              owner,
+              repo,
+              event: "pull_request",
+              head_sha: headSha,
+              per_page: 50,
+              headers: { authorization: `Bearer ${token}` },
+            });
+            const run = runs.data.workflow_runs?.[0];
+            if (!run) {
+              core.setFailed(`No backend workflow run found for head_sha=${headSha} in ${process.env.BACKEND_REPO}`);
+              return;
+            }
+
+            const artifacts = await github.request(
+              "GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts",
+              {
+                owner,
+                repo,
+                run_id: run.id,
+                per_page: 100,
+                headers: { authorization: `Bearer ${token}` },
+              },
+            );
+            const artifact = artifacts.data.artifacts?.find((a) => a.name === "openapi-json");
+            if (!artifact) {
+              core.setFailed(`Backend run ${run.id} has no artifact named openapi-json`);
+              return;
+            }
+            core.setOutput("run_id", String(run.id));
+
+      - name: Download artifact openapi-json (PR only)
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: dawidd6/action-download-artifact@v6
+        env:
+          BACKEND_REPO: ${{ vars.BACKEND_REPO || format('{0}/{1}', github.repository_owner, 'x-bid-backend') }}
+        with:
+          github_token: ${{ secrets.BACKEND_CI_TOKEN || github.token }}
+          repo: ${{ env.BACKEND_REPO }}
+          run_id: ${{ steps.backend-openapi.outputs.run_id }}
+          name: openapi-json
+          path: openapi-artifact
+
+      - name: Set BACKEND_OPENAPI_PATH (PR only)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          OPENAPI_PATH="$(find openapi-artifact -name openapi.json -print -quit)"
+          if [ -z "$OPENAPI_PATH" ]; then
+            echo "openapi.json not found in downloaded artifact"
+            find openapi-artifact -maxdepth 4 -type f -print
+            exit 1
+          fi
+          echo "BACKEND_OPENAPI_PATH=$OPENAPI_PATH" >> "$GITHUB_ENV"
+
       - name: Typecheck
         run: npm run typecheck --if-present
 
       - name: Lint
         run: npm run lint --if-present
 
+      - name: Generate OpenAPI types from backend artifact (PR only)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: npm run openapi:types
+
+      - name: Fail on generated type diffs (PR only)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: git diff --exit-code -- src/api/openapi-types.ts
+
+      - name: Contract drift tests (CT-2) (PR only)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: npm run ct-2
+
       - name: Check generated API types
+        if: ${{ github.event_name != 'pull_request' }}
         run: npm run check:api-types
 
       - name: Test
