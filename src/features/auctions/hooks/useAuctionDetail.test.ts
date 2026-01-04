@@ -212,7 +212,7 @@ describe("useAuctionDetail", () => {
     mockedPlaceBid.mockRejectedValue(
       Object.assign(new Error("fail"), {
         isAxiosError: true,
-        response: { data: { error: "nope" } },
+        response: { status: 422, data: { error: "Insufficient bid credits." } },
       }),
     );
     const { result } = renderHook(() => useAuctionDetail(1));
@@ -222,7 +222,7 @@ describe("useAuctionDetail", () => {
       await result.current.placeUserBid();
     });
 
-    expect(result.current.bidError).toBe("nope");
+    expect(result.current.bidError).toBe("Insufficient bid credits.");
     expect(result.current.bids).toHaveLength(0);
   });
 

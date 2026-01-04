@@ -1,5 +1,6 @@
 import axios from "axios";
 import { normalizeApiError } from "@api/normalizeApiError";
+import type { FieldErrors, NormalizedApiError } from "@api/normalizeApiError";
 
 type ApiErrorResult = {
   type:
@@ -42,4 +43,38 @@ export const parseApiError = (error: unknown): ApiErrorResult => {
   if (!status) return { type: "network", message: normalized.message, code };
 
   return { type: "unknown", message: normalized.message, code };
+};
+
+type NormalizeOptions = {
+  fallbackMessage?: string;
+  useRawErrorMessage?: boolean;
+};
+
+export type ApiErrorDetails = NormalizedApiError & {
+  type: ApiErrorResult["type"];
+  fieldErrors: FieldErrors;
+};
+
+export const getApiErrorDetails = (
+  error: unknown,
+  options: NormalizeOptions = {},
+): ApiErrorDetails => {
+  const normalized = normalizeApiError(error, options);
+  const status = normalized.status;
+
+  const type: ApiErrorResult["type"] = (() => {
+    if (status === 401) return "unauthorized";
+    if (status === 403) return "forbidden";
+    if (status === 404) return "not_found";
+    if (status && status >= 500) return "server";
+    if (status && status >= 400) return "validation";
+    if (!status) return "network";
+    return "unknown";
+  })();
+
+  return {
+    ...normalized,
+    type,
+    fieldErrors: normalized.fieldErrors ?? {},
+  };
 };

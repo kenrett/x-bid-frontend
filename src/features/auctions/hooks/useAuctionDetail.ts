@@ -1,5 +1,4 @@
 import { useEffect, useReducer, useCallback, useRef } from "react";
-import { isAxiosError } from "axios";
 
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { getAuction } from "../api/auctions";
@@ -16,6 +15,8 @@ import {
   UNEXPECTED_RESPONSE_MESSAGE,
   UnexpectedResponseError,
 } from "@services/unexpectedResponse";
+import { getApiErrorDetails } from "@utils/apiError";
+import { showToast } from "@services/toast";
 
 /**
  * Defines the shape of the state for an auction detail page.
@@ -278,13 +279,19 @@ export function useAuctionDetail(auctionId: number) {
     } catch (err) {
       if (err instanceof UnexpectedResponseError) {
         dispatch({ type: "BID_FAILURE", payload: UNEXPECTED_RESPONSE_MESSAGE });
-      } else if (isAxiosError(err) && err.response?.data?.error) {
-        dispatch({ type: "BID_FAILURE", payload: err.response.data.error });
       } else {
-        dispatch({
-          type: "BID_FAILURE",
-          payload: "An unexpected error occurred while placing your bid.",
+        const parsed = getApiErrorDetails(err, {
+          useRawErrorMessage: false,
+          fallbackMessage:
+            "An unexpected error occurred while placing your bid.",
         });
+        dispatch({ type: "BID_FAILURE", payload: parsed.message });
+        if (
+          parsed.status === 403 ||
+          (parsed.status !== undefined && parsed.status >= 500)
+        ) {
+          showToast(parsed.message, "error");
+        }
       }
     } finally {
       // Keep the channel open; we rely on lastBidderId to ignore our own echoes.

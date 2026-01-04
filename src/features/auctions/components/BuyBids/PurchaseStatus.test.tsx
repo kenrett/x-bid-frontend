@@ -124,6 +124,18 @@ describe("PurchaseStatus", () => {
     expect(screen.getByText(UNEXPECTED_RESPONSE_MESSAGE)).toBeInTheDocument();
   });
 
+  it("shows an error when verification success payload is missing updated credits", async () => {
+    mockedClient.get.mockResolvedValue({
+      data: { status: "success" },
+    });
+
+    renderWithPath("?session_id=abc123");
+
+    expect(await screen.findByText(/payment error/i)).toBeInTheDocument();
+    expect(screen.queryByText(/payment successful/i)).not.toBeInTheDocument();
+    expect(screen.getByText(UNEXPECTED_RESPONSE_MESSAGE)).toBeInTheDocument();
+  });
+
   it("shows axios error message when request fails", async () => {
     const axiosError = Object.assign(new Error("fail"), {
       isAxiosError: true,
@@ -135,6 +147,24 @@ describe("PurchaseStatus", () => {
 
     expect(await screen.findByText(/payment error/i)).toBeInTheDocument();
     expect(screen.getByText("Server said no")).toBeInTheDocument();
+  });
+
+  it("shows stable error message for forbidden verification failures", async () => {
+    const axiosError = Object.assign(new Error("forbidden"), {
+      isAxiosError: true,
+      response: { status: 403, data: { error: "Forbidden" } },
+    });
+    mockedClient.get.mockRejectedValue(axiosError);
+
+    renderWithPath("?session_id=abc123");
+
+    expect(await screen.findByText(/payment error/i)).toBeInTheDocument();
+    expect(screen.queryByText(/payment successful/i)).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "We couldn't verify your purchase. Please contact support.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("shows generic error for non-axios failure", async () => {

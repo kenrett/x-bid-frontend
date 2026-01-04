@@ -183,10 +183,13 @@ describe("LoginForm Component", () => {
 
   describe("on failed login", () => {
     it("should display an error message and not call login or navigate", async () => {
-      const testError = new Error("Invalid credentials");
-      // Mock the implementation to return a rejected promise.
-      // This is often more stable than `mockRejectedValue`.
-      mockedClient.post.mockRejectedValue(testError);
+      mockedClient.post.mockRejectedValue({
+        isAxiosError: true,
+        response: {
+          status: 401,
+          data: { message: "Password incorrect for test@example.com" },
+        },
+      });
       const navigateFn = vi.fn();
       mockedNavigate.mockReturnValue(navigateFn);
       const user = userEvent.setup();
@@ -200,10 +203,11 @@ describe("LoginForm Component", () => {
       await user.type(screen.getByLabelText(/password/i), "wrong-password");
       await user.click(screen.getByRole("button", { name: /sign in/i }));
 
-      const errorMessage = await screen.findByText("Invalid credentials");
+      const errorMessage = await screen.findByText(
+        "Invalid email or password. Please try again.",
+      );
       expect(errorMessage).toBeInTheDocument();
 
-      expect(console.error).toHaveBeenCalledWith(testError);
       expect(mockLogin).not.toHaveBeenCalled();
       expect(navigateFn).not.toHaveBeenCalled();
     });

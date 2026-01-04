@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import client from "@api/client";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { CheckoutSuccessResponse } from "../../types/checkout";
 import { Page } from "@components/Page";
-import { normalizeApiError } from "@api/normalizeApiError";
+import { showToast } from "@services/toast";
+import { getApiErrorDetails } from "@utils/apiError";
 import {
   reportUnexpectedResponse,
   UNEXPECTED_RESPONSE_MESSAGE,
@@ -21,6 +21,15 @@ export const PurchaseStatus = () => {
   const [message, setMessage] = useState<string | null>(null);
   const { updateUserBalance } = useAuth();
   const hasVerifiedRef = useRef(false);
+
+  const stableVerifyFailureMessage = (statusCode: number | undefined) => {
+    if (statusCode === 401) return "Your session expired, please log in again.";
+    if (statusCode === 403)
+      return "We couldn't verify your purchase. Please contact support.";
+    if (statusCode && statusCode >= 500)
+      return "We couldn't verify your purchase right now. Please try again.";
+    return null;
+  };
 
   useEffect(() => {
     const sessionId = searchParams.get("session_id");
@@ -74,15 +83,21 @@ export const PurchaseStatus = () => {
         setStatus("error");
         if (err instanceof UnexpectedResponseError) {
           setMessage(UNEXPECTED_RESPONSE_MESSAGE);
-        } else if (axios.isAxiosError(err)) {
-          setMessage(normalizeApiError(err).message);
         } else {
-          setMessage(
-            normalizeApiError(err, {
-              useRawErrorMessage: false,
-              fallbackMessage: "An unexpected error occurred.",
-            }).message,
-          );
+          const parsed = getApiErrorDetails(err, {
+            useRawErrorMessage: false,
+            fallbackMessage: "An unexpected error occurred.",
+          });
+          const stable = stableVerifyFailureMessage(parsed.status);
+          const nextMessage = stable ?? parsed.message;
+          setMessage(nextMessage);
+          if (
+            parsed.status === 401 ||
+            parsed.status === 403 ||
+            (parsed.status && parsed.status >= 500)
+          ) {
+            showToast(nextMessage, "error");
+          }
         }
       }
     };

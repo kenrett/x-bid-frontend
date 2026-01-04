@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import client from "@api/client";
-import { normalizeApiError, type FieldErrors } from "@api/normalizeApiError";
 import { normalizeAuthResponse } from "@features/auth/api/authResponse";
+import { showToast } from "@services/toast";
+import { getApiErrorDetails } from "@utils/apiError";
+import type { FieldErrors } from "@api/normalizeApiError";
 
 const isUnexpectedAuthResponseError = (err: unknown) =>
   err instanceof Error && err.message.startsWith("Unexpected auth response:");
@@ -61,11 +63,23 @@ export const LoginForm = () => {
         }
         return;
       }
-      const parsed = normalizeApiError(err);
-      setError(
-        parsed.message || "Invalid email or password. Please try again.",
-      );
-      setFieldErrors(parsed.fieldErrors ?? {});
+      const parsed = getApiErrorDetails(err, {
+        useRawErrorMessage: false,
+        fallbackMessage: "We couldn't sign you in. Please try again.",
+      });
+
+      if (parsed.status === 401) {
+        setError("Invalid email or password. Please try again.");
+      } else if (parsed.status === 422) {
+        setError("Please check the highlighted fields and try again.");
+        setFieldErrors(parsed.fieldErrors);
+      } else {
+        setError(parsed.message);
+        if (parsed.status === 403 || (parsed.status && parsed.status >= 500)) {
+          showToast(parsed.message, "error");
+        }
+      }
+
       if (import.meta.env.MODE !== "production") {
         console.error(err);
       }
