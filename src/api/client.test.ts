@@ -86,10 +86,6 @@ describe("api client response interceptor", () => {
     expect(dispatchSpy).toHaveBeenCalledWith(
       expect.objectContaining({ type: "app:unauthorized" }),
     );
-    expect(showToast).toHaveBeenCalledWith(
-      "Session expired. Please log in again.",
-      "error",
-    );
     expect(window.location.assign).not.toHaveBeenCalled();
   });
 
@@ -155,6 +151,7 @@ describe("api client response interceptor", () => {
         response: { status: 401 },
       }),
     );
+    const requestSpy = vi.spyOn(client, "request");
 
     authTokenStore.setSession({
       token: "old-token",
@@ -170,13 +167,128 @@ describe("api client response interceptor", () => {
     await expect(rejected(error)).rejects.toBe(error);
 
     expect(postSpy).toHaveBeenCalled();
+    expect(requestSpy).not.toHaveBeenCalled();
     expect(dispatchSpy).toHaveBeenCalledWith(
       expect.objectContaining({ type: "app:unauthorized" }),
     );
-    expect(showToast).toHaveBeenCalledWith(
-      "Session expired. Please log in again.",
-      "error",
+    expect(authTokenStore.getSnapshot().token).toBeNull();
+  });
+
+  it("does not attempt refresh again after a refresh failure clears auth", async () => {
+    setPath("/auctions");
+    const dispatchSpy = vi.spyOn(window, "dispatchEvent");
+    const postSpy = vi.spyOn(client, "post").mockRejectedValueOnce(
+      Object.assign(new Error("refresh failed"), {
+        isAxiosError: true,
+        response: { status: 401 },
+      }),
     );
+
+    authTokenStore.setSession({
+      token: "old-token",
+      refreshToken: "refresh-1",
+      sessionTokenId: "sid-1",
+    });
+
+    const error1 = {
+      response: { status: 401 },
+      config: { url: "/api/v1/protected", headers: {} },
+    } as AxiosError;
+    const error2 = {
+      response: { status: 401 },
+      config: { url: "/api/v1/another", headers: {} },
+    } as AxiosError;
+
+    await expect(rejected(error1)).rejects.toBe(error1);
+    await expect(rejected(error2)).rejects.toBe(error2);
+
+    expect(postSpy).toHaveBeenCalledTimes(1);
+    const unauthorizedCalls = dispatchSpy.mock.calls.filter(
+      ([event]) => (event as Event).type === "app:unauthorized",
+    );
+    expect(unauthorizedCalls).toHaveLength(1);
+  });
+
+  it("treats structured invalid-session errors as a hard logout (no refresh)", async () => {
+    setPath("/auctions");
+    const dispatchSpy = vi.spyOn(window, "dispatchEvent");
+    const postSpy = vi.spyOn(client, "post");
+
+    authTokenStore.setSession({
+      token: "old-token",
+      refreshToken: "refresh-1",
+      sessionTokenId: "sid-1",
+    });
+
+    const error = {
+      response: { status: 401, data: { error_code: "session_invalidated" } },
+      config: { url: "/api/v1/protected", headers: {} },
+    } as AxiosError;
+
+    await expect(rejected(error)).rejects.toBe(error);
+
+    expect(postSpy).not.toHaveBeenCalled();
+    expect(authTokenStore.getSnapshot().token).toBeNull();
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "app:unauthorized" }),
+    );
+  });
+
+  it("shares a single refresh promise across concurrent 401s", async () => {
+    const postSpy = vi.spyOn(client, "post");
+    const requestSpy = vi.spyOn(client, "request");
+
+    authTokenStore.setSession({
+      token: "old-token",
+      refreshToken: "refresh-1",
+      sessionTokenId: "sid-1",
+    });
+
+    let resolveRefresh: ((value: unknown) => void) | null = null;
+    postSpy.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveRefresh = resolve;
+        }) as never,
+    );
+
+    requestSpy
+      .mockResolvedValueOnce({ data: "ok-1" } as never)
+      .mockResolvedValueOnce({ data: "ok-2" } as never);
+
+    const error1 = {
+      response: { status: 401 },
+      config: { url: "/api/v1/protected-1", headers: {} },
+    } as AxiosError;
+    const error2 = {
+      response: { status: 401 },
+      config: { url: "/api/v1/protected-2", headers: {} },
+    } as AxiosError;
+
+    const p1 = rejected(error1);
+    const p2 = rejected(error2);
+
+    expect(postSpy).toHaveBeenCalledTimes(1);
+
+    resolveRefresh?.({
+      data: {
+        token: "new-token",
+        refresh_token: "refresh-2",
+        session_token_id: "sid-2",
+        user: {
+          id: 1,
+          email: "user@example.com",
+          name: "User",
+          bidCredits: 0,
+          is_admin: false,
+        },
+      },
+    });
+
+    await expect(p1).resolves.toMatchObject({ data: "ok-1" });
+    await expect(p2).resolves.toMatchObject({ data: "ok-2" });
+    expect(postSpy).toHaveBeenCalledTimes(1);
+    expect(requestSpy).toHaveBeenCalledTimes(2);
   });
 
   it("keeps maintenance redirect behavior for 503", async () => {

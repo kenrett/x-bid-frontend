@@ -217,7 +217,7 @@ describe("AuthProvider", () => {
     });
 
     expect(toastMocks.showToast).toHaveBeenCalledWith(
-      "Session expired. Please log in again.",
+      "Your session expired, please log in again.",
       "error",
     );
     expect(localStorage.getItem("token")).toBeNull();
@@ -251,7 +251,7 @@ describe("AuthProvider", () => {
     });
 
     expect(toastMocks.showToast).toHaveBeenCalledWith(
-      "Session expired. Please log in again.",
+      "Your session expired, please log in again.",
       "error",
     );
   });
@@ -316,5 +316,67 @@ describe("AuthProvider", () => {
     await waitFor(() =>
       expect(screen.getByTestId("token")).toHaveTextContent("none"),
     );
+  });
+
+  it("handles repeated unauthorized events without looping or double-toasting", async () => {
+    render(
+      <Wrapper>
+        <TestConsumer />
+      </Wrapper>,
+    );
+
+    await act(async () => {
+      await screen.getByText("login").click();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("token")).toHaveTextContent("jwt"),
+    );
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent("app:unauthorized", { detail: { status: 401 } }),
+      );
+      window.dispatchEvent(
+        new CustomEvent("app:unauthorized", { detail: { status: 401 } }),
+      );
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("token")).toHaveTextContent("none"),
+    );
+
+    expect(toastMocks.showToast).toHaveBeenCalledTimes(1);
+  });
+
+  it("logs out on session_invalidated broadcast (once)", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    render(
+      <Wrapper>
+        <TestConsumer />
+      </Wrapper>,
+    );
+
+    await act(async () => {
+      await screen.getByText("login").click();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("token")).toHaveTextContent("jwt"),
+    );
+
+    const handler = cableMocks.create.mock.calls[0]?.[1] as
+      | { received?: (payload: unknown) => void }
+      | undefined;
+    act(() => {
+      handler?.received?.({ event: "session_invalidated" });
+      handler?.received?.({ event: "session_invalidated" });
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("token")).toHaveTextContent("none"),
+    );
+    expect(toastMocks.showToast).toHaveBeenCalledTimes(1);
+    warnSpy.mockRestore();
   });
 });

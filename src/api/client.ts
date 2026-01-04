@@ -1,5 +1,4 @@
 import axios, { type AxiosError, type AxiosInstance } from "axios";
-import { showToast } from "@services/toast";
 import {
   authTokenStore,
   getAuthToken,
@@ -80,6 +79,92 @@ const isRefreshRequest = (configUrl: unknown) =>
 let refreshPromise: Promise<ReturnType<typeof normalizeAuthResponse>> | null =
   null;
 
+const INVALID_SESSION_CODES = new Set([
+  "invalid_session",
+  "session_invalidated",
+  "session_expired",
+]);
+
+const extractErrorCode = (data: unknown): string | undefined => {
+  if (!data || typeof data !== "object") return undefined;
+  const record = data as Record<string, unknown>;
+
+  const maybeCode =
+    record.error_code ??
+    record.errorCode ??
+    record.code ??
+    (record.error && typeof record.error === "object"
+      ? (record.error as Record<string, unknown>).code
+      : undefined);
+
+  if (typeof maybeCode !== "string" && typeof maybeCode !== "number")
+    return undefined;
+  const normalized = String(maybeCode).trim();
+  return normalized ? normalized : undefined;
+};
+
+const isInvalidSessionError = (error: AxiosError): boolean => {
+  const code = extractErrorCode(error.response?.data);
+  if (!code) return false;
+  return INVALID_SESSION_CODES.has(code.toLowerCase());
+};
+
+let sessionInvalidated = false;
+authTokenStore.subscribe(() => {
+  const snapshot = authTokenStore.getSnapshot();
+  if (snapshot.token || snapshot.refreshToken || snapshot.sessionTokenId) {
+    sessionInvalidated = false;
+  }
+});
+
+const dispatchUnauthorized = (status: number, code?: string) => {
+  if (sessionInvalidated) return;
+  sessionInvalidated = true;
+  window.dispatchEvent(
+    new CustomEvent("app:unauthorized", { detail: { status, code } }),
+  );
+};
+
+const beginRefresh = ({
+  mode,
+  refreshToken,
+}: {
+  mode: "cookie" | "token";
+  refreshToken?: string;
+}) => {
+  refreshPromise ??= (async () => {
+    try {
+      const refreshResponse =
+        mode === "cookie"
+          ? await client.post("/api/v1/session/refresh", undefined, {
+              withCredentials: true,
+              headers: { Authorization: undefined },
+            })
+          : await client.post(
+              "/api/v1/session/refresh",
+              { refresh_token: refreshToken },
+              { headers: { Authorization: undefined } },
+            );
+
+      return normalizeAuthResponse(refreshResponse.data);
+    } catch (refreshError) {
+      const refreshAxiosError = refreshError as AxiosError;
+      const status = refreshAxiosError?.response?.status ?? 401;
+      const code = extractErrorCode(refreshAxiosError?.response?.data);
+
+      // Hard stop: refresh failed, so clear in-memory auth artifacts to prevent
+      // repeated refresh attempts and partial-auth states.
+      authTokenStore.clear();
+      dispatchUnauthorized(status, code);
+      throw refreshError;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+};
+
 client.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -90,6 +175,15 @@ client.interceptors.response.use(
         window.location.assign("/maintenance");
       }
     } else if (status === 401 || status === 403) {
+      if (isInvalidSessionError(error)) {
+        authTokenStore.clear();
+        dispatchUnauthorized(status, extractErrorCode(error.response?.data));
+        return Promise.reject(error);
+      }
+
+      if (isRefreshRequest(error.config?.url)) {
+        return Promise.reject(error);
+      }
       const originalRequest = error.config;
 
       const canRefreshWithCookie =
@@ -109,16 +203,7 @@ client.interceptors.response.use(
 
       if (canRefreshWithToken) {
         try {
-          refreshPromise ??= (async () => {
-            const refreshResponse = await client.post(
-              "/api/v1/session/refresh",
-              { refresh_token: refreshToken },
-              { headers: { Authorization: undefined } },
-            );
-            return normalizeAuthResponse(refreshResponse.data);
-          })();
-
-          const next = await refreshPromise;
+          const next = await beginRefresh({ mode: "token", refreshToken });
           authTokenStore.setSession({
             token: next.token,
             refreshToken: next.refreshToken,
@@ -143,27 +228,12 @@ client.interceptors.response.use(
           originalRequest.headers = headers;
           return client.request(originalRequest);
         } catch (refreshError) {
-          refreshPromise = null;
-          // Fall through to centralized unauthorized handling.
           console.warn("[api client] Refresh token flow failed", refreshError);
-        } finally {
-          refreshPromise = null;
+          return Promise.reject(error);
         }
       } else if (canRefreshWithCookie) {
         try {
-          refreshPromise ??= (async () => {
-            const refreshResponse = await client.post(
-              "/api/v1/session/refresh",
-              undefined,
-              {
-                withCredentials: true,
-                headers: { Authorization: undefined },
-              },
-            );
-            return normalizeAuthResponse(refreshResponse.data);
-          })();
-
-          const next = await refreshPromise;
+          const next = await beginRefresh({ mode: "cookie" });
           authTokenStore.setSession({
             token: next.token,
             refreshToken: next.refreshToken,
@@ -188,19 +258,14 @@ client.interceptors.response.use(
           originalRequest.headers = headers;
           return client.request(originalRequest);
         } catch (refreshError) {
-          refreshPromise = null;
-          // Fall through to centralized unauthorized handling.
           console.warn("[api client] Cookie refresh failed", refreshError);
-        } finally {
-          refreshPromise = null;
+          return Promise.reject(error);
         }
       }
 
       // Centralize unauthorized handling via AuthProvider listener.
-      window.dispatchEvent(
-        new CustomEvent("app:unauthorized", { detail: { status } }),
-      );
-      showToast("Session expired. Please log in again.", "error");
+      authTokenStore.clear();
+      dispatchUnauthorized(status, extractErrorCode(error.response?.data));
     }
     return Promise.reject(error);
   },

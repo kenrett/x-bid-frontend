@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { isAxiosError } from "axios";
 import { AuthContext } from "../contexts/authContext";
 import type { User } from "../types/user";
@@ -23,7 +23,7 @@ type SessionRemainingResponse = {
 };
 
 const SESSION_POLL_INTERVAL_MS = 60_000;
-const SESSION_EXPIRED_TOAST = "Session expired. Please log in again.";
+const SESSION_EXPIRED_TOAST = "Your session expired, please log in again.";
 
 const getSessionEventName = (payload: unknown): string | undefined => {
   if (typeof payload === "string") return payload;
@@ -44,6 +44,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     [],
   );
 
+  const invalidatingRef = useRef(false);
+
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
@@ -55,6 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const applyAuthPayload = useCallback(
     (payload: LoginPayload) => {
+      invalidatingRef.current = false;
       const normalizedUser = normalizeAuthUser(payload.user as User);
       setUser(normalizedUser);
       setToken(payload.token);
@@ -146,9 +149,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const handleSessionInvalidated = useCallback(
     (reason?: string) => {
+      if (invalidatingRef.current) return;
+      invalidatingRef.current = true;
       console.warn(
         `[AuthProvider] Session invalidated${reason ? ` (${reason})` : ""}`,
       );
+
+      // Clear local auth state immediately to avoid partial-auth UI and prevent
+      // any new requests from attaching stale tokens.
+      logout();
+
       if (!window.location.pathname.startsWith("/login")) {
         showToast(SESSION_EXPIRED_TOAST, "error");
         const redirectParam = encodeURIComponent(
@@ -161,7 +171,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           window.location.assign(targetUrl);
         }
       }
-      logout();
     },
     [logout],
   );
