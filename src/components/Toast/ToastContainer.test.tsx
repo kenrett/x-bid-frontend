@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
+import { fireEvent } from "@testing-library/react";
 import { ToastContainer } from "./ToastContainer";
 import { subscribeToToasts, type ToastListener } from "../../services/toast";
 
@@ -33,12 +34,29 @@ describe("ToastContainer", () => {
     });
 
     expect(screen.getByText("Hello")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /dismiss notification/i }),
+    ).toBeInTheDocument();
 
     act(() => {
       vi.advanceTimersByTime(3500);
     });
 
     expect(screen.queryByText("Hello")).not.toBeInTheDocument();
+  });
+
+  it("allows dismissing a toast via keyboard", () => {
+    render(<ToastContainer />);
+    if (!capturedListener) throw new Error("Subscription callback not set");
+
+    act(() => {
+      capturedListener?.({ id: "k1", message: "Keyboard", variant: "info" });
+    });
+
+    const toast = screen.getByRole("status");
+    fireEvent.keyDown(toast, { key: "Escape" });
+
+    expect(screen.queryByText("Keyboard")).not.toBeInTheDocument();
   });
 
   it("applies variant styling classes", () => {
@@ -49,7 +67,9 @@ describe("ToastContainer", () => {
       capturedListener?.({ id: "2", message: "Saved", variant: "success" });
     });
 
-    const toast = screen.getByText("Saved");
+    const message = screen.getByText("Saved");
+    const toast = message.closest('[role="status"]');
+    expect(toast).not.toBeNull();
     expect(toast).toHaveClass("bg-green-900/60");
   });
 });

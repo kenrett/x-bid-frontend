@@ -39,6 +39,22 @@ describe("ResetPassword", () => {
     });
   });
 
+  it("has accessible form controls and tab order", async () => {
+    const user = userEvent.setup();
+    renderWithToken();
+
+    const tokenInput = screen.getByRole("textbox", { name: /reset token/i });
+    const newPasswordInput = screen.getByLabelText(/new password/i);
+    const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
+
+    await user.tab();
+    expect(tokenInput).toHaveFocus();
+    await user.tab();
+    expect(newPasswordInput).toHaveFocus();
+    await user.tab();
+    expect(confirmPasswordInput).toHaveFocus();
+  });
+
   it("submits reset with token and new password", async () => {
     const user = userEvent.setup();
     renderWithToken();
@@ -60,6 +76,26 @@ describe("ResetPassword", () => {
     expect(
       await screen.findByText(/password updated\. please sign in/i),
     ).toBeInTheDocument();
+  });
+
+  it("focuses the first invalid field and wires aria-describedby on submit failure", async () => {
+    const user = userEvent.setup();
+    renderWithToken();
+
+    await user.type(screen.getByLabelText(/new password/i), "password123");
+    await user.type(screen.getByLabelText(/confirm password/i), "password1234");
+    await user.click(screen.getByRole("button", { name: /update password/i }));
+
+    const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
+    await waitFor(() => {
+      expect(confirmPasswordInput).toHaveFocus();
+      expect(confirmPasswordInput).toHaveAttribute("aria-invalid", "true");
+      expect(confirmPasswordInput).toHaveAttribute(
+        "aria-describedby",
+        "reset-password-confirm-error",
+      );
+    });
+    expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
   });
 
   it("shows error for invalid token", async () => {

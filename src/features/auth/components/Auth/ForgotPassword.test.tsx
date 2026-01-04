@@ -22,6 +22,41 @@ describe("ForgotPassword", () => {
     mockedClient.post.mockResolvedValue({ data: { status: "ok" } });
   });
 
+  it("has accessible form controls and tab order", async () => {
+    const user = userEvent.setup();
+    renderComponent();
+
+    const emailInput = screen.getByRole("textbox", { name: /email address/i });
+    expect(emailInput).toBeInTheDocument();
+
+    await user.tab();
+    expect(emailInput).toHaveFocus();
+
+    await user.tab();
+    expect(
+      screen.getByRole("button", { name: /send reset link/i }),
+    ).toHaveFocus();
+  });
+
+  it("focuses the email field and connects the error on submit when empty", async () => {
+    const user = userEvent.setup();
+    renderComponent();
+
+    await user.click(screen.getByRole("button", { name: /send reset link/i }));
+
+    const emailInput = screen.getByRole("textbox", { name: /email address/i });
+    await waitFor(() => {
+      expect(emailInput).toHaveFocus();
+      expect(emailInput).toHaveAttribute("aria-invalid", "true");
+      expect(emailInput).toHaveAttribute(
+        "aria-describedby",
+        "forgot-email-error",
+      );
+    });
+    expect(screen.getByText(/email is required/i)).toBeInTheDocument();
+    expect(mockedClient.post).not.toHaveBeenCalled();
+  });
+
   it("submits email and shows generic success", async () => {
     const user = userEvent.setup();
     renderComponent();

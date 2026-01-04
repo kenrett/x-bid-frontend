@@ -1,21 +1,51 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import client from "@api/client";
 import type { ApiJsonResponse } from "@api/openapi-helpers";
-import { normalizeApiError } from "@api/normalizeApiError";
+import type { FieldErrors } from "@api/normalizeApiError";
+import { getApiErrorDetails } from "@utils/apiError";
 
 export const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [debugToken, setDebugToken] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const emailRef = useRef<HTMLInputElement | null>(null);
+  const errorRef = useRef<HTMLParagraphElement | null>(null);
+  const submitAttemptedRef = useRef(false);
+
+  useEffect(() => {
+    if (!submitAttemptedRef.current) return;
+    if (isSubmitting) return;
+
+    const firstInvalid =
+      formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]') ??
+      null;
+    if (firstInvalid) {
+      firstInvalid.focus();
+      return;
+    }
+    if (error) {
+      errorRef.current?.focus();
+    }
+  }, [error, fieldErrors, isSubmitting]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    submitAttemptedRef.current = true;
     setMessage(null);
     setError(null);
+    setFieldErrors({});
     setDebugToken(null);
+
+    if (!email.trim()) {
+      setFieldErrors({ email_address: ["Email is required."] });
+      emailRef.current?.focus();
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -34,11 +64,13 @@ export const ForgotPassword = () => {
         "If that account exists, we've emailed instructions to reset the password.",
       );
     } catch (err) {
-      const message =
-        normalizeApiError(err).message ||
-        "We couldn't process your request. Please try again.";
+      const parsed = getApiErrorDetails(err, {
+        useRawErrorMessage: false,
+        fallbackMessage: "We couldn't process your request. Please try again.",
+      });
       // Still avoid user-enumeration; surface generic failure.
-      setError(message);
+      setError(parsed.message);
+      setFieldErrors(parsed.fieldErrors);
       setMessage(
         "If that account exists, we've emailed instructions to reset the password.",
       );
@@ -79,7 +111,13 @@ export const ForgotPassword = () => {
               </h2>
             </div>
 
-            <form className="space-y-5" onSubmit={handleSubmit}>
+            <form
+              className="space-y-5"
+              onSubmit={handleSubmit}
+              ref={formRef}
+              aria-busy={isSubmitting ? "true" : "false"}
+              noValidate
+            >
               <div className="space-y-2">
                 <label
                   htmlFor="forgot-email"
@@ -95,9 +133,32 @@ export const ForgotPassword = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  ref={emailRef}
                   className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
                   autoComplete="email"
+                  aria-invalid={
+                    fieldErrors.email_address?.length ||
+                    fieldErrors.email?.length
+                      ? "true"
+                      : "false"
+                  }
+                  aria-describedby={
+                    fieldErrors.email_address?.length ||
+                    fieldErrors.email?.length
+                      ? "forgot-email-error"
+                      : undefined
+                  }
                 />
+                {fieldErrors.email_address?.length ||
+                fieldErrors.email?.length ? (
+                  <p
+                    id="forgot-email-error"
+                    className="text-sm text-red-200"
+                    role="alert"
+                  >
+                    {(fieldErrors.email_address ?? fieldErrors.email)![0]}
+                  </p>
+                ) : null}
               </div>
 
               {message && (
@@ -110,6 +171,8 @@ export const ForgotPassword = () => {
               )}
               {error && (
                 <p
+                  ref={errorRef}
+                  tabIndex={-1}
                   className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-200"
                   role="alert"
                 >

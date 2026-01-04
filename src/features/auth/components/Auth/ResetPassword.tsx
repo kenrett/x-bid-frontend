@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import client from "@api/client";
 import type { ApiJsonResponse } from "@api/openapi-helpers";
 import { useAuth } from "../../hooks/useAuth";
-import { normalizeApiError } from "@api/normalizeApiError";
+import type { FieldErrors } from "@api/normalizeApiError";
+import { getApiErrorDetails } from "@utils/apiError";
 
 export const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -13,7 +14,14 @@ export const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const errorRef = useRef<HTMLParagraphElement | null>(null);
+  const tokenRef = useRef<HTMLInputElement | null>(null);
+  const passwordRef = useRef<HTMLInputElement | null>(null);
+  const confirmPasswordRef = useRef<HTMLInputElement | null>(null);
+  const submitAttemptedRef = useRef(false);
   const navigate = useNavigate();
   const { logout } = useAuth();
 
@@ -22,18 +30,40 @@ export const ResetPassword = () => {
     logout?.();
   }, [logout]);
 
+  useEffect(() => {
+    if (!submitAttemptedRef.current) return;
+    if (isSubmitting) return;
+
+    const firstInvalid =
+      formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]') ??
+      null;
+    if (firstInvalid) {
+      firstInvalid.focus();
+      return;
+    }
+    if (error) {
+      errorRef.current?.focus();
+    }
+  }, [error, fieldErrors, isSubmitting]);
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    submitAttemptedRef.current = true;
     setMessage(null);
     setError(null);
+    setFieldErrors({});
 
     if (!token.trim()) {
-      setError("Reset token is missing. Please use the link from your email.");
+      setError("Please check the highlighted fields and try again.");
+      setFieldErrors({
+        token: ["Reset token is missing. Please use the link from your email."],
+      });
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError("Please check the highlighted fields and try again.");
+      setFieldErrors({ password_confirmation: ["Passwords do not match."] });
       return;
     }
 
@@ -53,8 +83,16 @@ export const ResetPassword = () => {
       setPassword("");
       setConfirmPassword("");
     } catch (err) {
-      const parsed = normalizeApiError(err);
-      setError(parsed.message || "Unable to reset password. Please try again.");
+      const parsed = getApiErrorDetails(err, {
+        useRawErrorMessage: false,
+        fallbackMessage: "Unable to reset password. Please try again.",
+      });
+      if (parsed.status === 422) {
+        setError("Please check the highlighted fields and try again.");
+      } else {
+        setError(parsed.message);
+      }
+      setFieldErrors(parsed.fieldErrors);
     } finally {
       setIsSubmitting(false);
     }
@@ -90,7 +128,13 @@ export const ResetPassword = () => {
               <h2 className="text-2xl font-bold text-white">Update password</h2>
             </div>
 
-            <form className="space-y-5" onSubmit={handleSubmit}>
+            <form
+              className="space-y-5"
+              onSubmit={handleSubmit}
+              ref={formRef}
+              aria-busy={isSubmitting ? "true" : "false"}
+              noValidate
+            >
               <div className="space-y-2">
                 <label
                   htmlFor="reset-token"
@@ -106,8 +150,22 @@ export const ResetPassword = () => {
                   required
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
+                  ref={tokenRef}
                   className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
+                  aria-invalid={fieldErrors.token?.length ? "true" : "false"}
+                  aria-describedby={
+                    fieldErrors.token?.length ? "reset-token-error" : undefined
+                  }
                 />
+                {fieldErrors.token?.length ? (
+                  <p
+                    id="reset-token-error"
+                    className="text-sm text-red-200"
+                    role="alert"
+                  >
+                    {fieldErrors.token[0]}
+                  </p>
+                ) : null}
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -126,9 +184,27 @@ export const ResetPassword = () => {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    ref={passwordRef}
                     className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
                     autoComplete="new-password"
+                    aria-invalid={
+                      fieldErrors.password?.length ? "true" : "false"
+                    }
+                    aria-describedby={
+                      fieldErrors.password?.length
+                        ? "reset-password-error"
+                        : undefined
+                    }
                   />
+                  {fieldErrors.password?.length ? (
+                    <p
+                      id="reset-password-error"
+                      className="text-sm text-red-200"
+                      role="alert"
+                    >
+                      {fieldErrors.password[0]}
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="space-y-2">
@@ -146,9 +222,29 @@ export const ResetPassword = () => {
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    ref={confirmPasswordRef}
                     className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
                     autoComplete="new-password"
+                    aria-invalid={
+                      fieldErrors.password_confirmation?.length
+                        ? "true"
+                        : "false"
+                    }
+                    aria-describedby={
+                      fieldErrors.password_confirmation?.length
+                        ? "reset-password-confirm-error"
+                        : undefined
+                    }
                   />
+                  {fieldErrors.password_confirmation?.length ? (
+                    <p
+                      id="reset-password-confirm-error"
+                      className="text-sm text-red-200"
+                      role="alert"
+                    >
+                      {fieldErrors.password_confirmation[0]}
+                    </p>
+                  ) : null}
                 </div>
               </div>
 
@@ -169,6 +265,8 @@ export const ResetPassword = () => {
               )}
               {error && (
                 <p
+                  ref={errorRef}
+                  tabIndex={-1}
                   className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-200"
                   role="alert"
                 >

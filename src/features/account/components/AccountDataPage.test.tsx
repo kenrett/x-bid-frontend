@@ -104,4 +104,23 @@ describe("AccountDataPage", () => {
       expect(mockNavigate).toHaveBeenCalledWith("/", { replace: true });
     });
   });
+
+  it("shows validation errors and focuses the first invalid field", async () => {
+    const user = userEvent.setup();
+    renderPage(authValue());
+
+    await user.click(
+      await screen.findByRole("button", { name: /delete account/i }),
+    );
+
+    const passwordInput = await screen.findByLabelText(/current password/i);
+    await waitFor(() => {
+      expect(passwordInput).toHaveFocus();
+      expect(passwordInput).toHaveAttribute("aria-invalid", "true");
+    });
+    expect(
+      await screen.findByText(/check the highlighted fields/i),
+    ).toBeInTheDocument();
+    expect(mockedClient.delete).not.toHaveBeenCalled();
+  });
 });
