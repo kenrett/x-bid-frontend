@@ -244,12 +244,12 @@ describe("api client response interceptor", () => {
       sessionTokenId: "sid-1",
     });
 
-    let resolveRefresh: ((value: unknown) => void) | null = null;
+    let resolveRefresh!: (value: unknown) => void;
+    const refreshResponsePromise = new Promise<unknown>((resolve) => {
+      resolveRefresh = resolve;
+    });
     postSpy.mockImplementationOnce(
-      () =>
-        new Promise((resolve) => {
-          resolveRefresh = resolve;
-        }) as never,
+      () => refreshResponsePromise as unknown as ReturnType<typeof client.post>,
     );
 
     requestSpy
@@ -270,7 +270,7 @@ describe("api client response interceptor", () => {
 
     expect(postSpy).toHaveBeenCalledTimes(1);
 
-    resolveRefresh?.({
+    resolveRefresh({
       data: {
         token: "new-token",
         refresh_token: "refresh-2",

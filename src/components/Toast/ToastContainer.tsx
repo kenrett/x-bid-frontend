@@ -22,20 +22,21 @@ export const ToastContainer = () => {
   );
 
   useEffect(() => {
+    const timeouts = timeoutRef.current;
     const unsubscribe = subscribeToToasts((toast) => {
       setToasts((prev) => [...prev, toast]);
       const timeoutId = window.setTimeout(() => {
         removeToast(toast.id);
       }, 3500);
-      timeoutRef.current.set(toast.id, timeoutId);
+      timeouts.set(toast.id, timeoutId);
     });
 
     return () => {
       unsubscribe();
-      for (const timeoutId of timeoutRef.current.values()) {
+      for (const timeoutId of timeouts.values()) {
         window.clearTimeout(timeoutId);
       }
-      timeoutRef.current.clear();
+      timeouts.clear();
     };
   }, [removeToast]);
 

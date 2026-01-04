@@ -1,0 +1,5106 @@
+{
+  "components": {
+    "callbacks": {},
+    "examples": {},
+    "headers": {},
+    "links": {},
+    "parameters": {
+      "08c34767a5405f30927bbac7a3c4fc71": {
+        "description": "ID of the auction",
+        "in": "path",
+        "name": "id",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "simple"
+      },
+      "0abd227a13448d9299e1c1de37060965": {
+        "description": "Page number for pagination",
+        "in": "query",
+        "name": "page",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "form"
+      },
+      "1ab6dc819a121c51b85fe92cef981390": {
+        "description": "ID of the user",
+        "in": "path",
+        "name": "id",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "simple"
+      },
+      "2f283202ff70ebb99d8bc91461022917": {
+        "description": "Sort direction (asc or desc)",
+        "in": "query",
+        "name": "direction",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "style": "form"
+      },
+      "3351e2e3c00563360e4e4fd54846fd80": {
+        "description": "Sort column (e.g., start_date, end_time)",
+        "in": "query",
+        "name": "sort",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "style": "form"
+      },
+      "3c3ce4ffa8cd4a597cfcbc9686ae2240": {
+        "description": "ID of the payment",
+        "in": "path",
+        "name": "id",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "simple"
+      },
+      "3c76e0904ddc71e0dcc8562e902e37e4": {
+        "description": "Filter by status (allowed: inactive, scheduled, active, complete, cancelled)",
+        "in": "query",
+        "name": "status",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "style": "form"
+      },
+      "4b8201d282702e38320140ce419db69c": {
+        "description": "Page number (1-indexed)",
+        "in": "query",
+        "name": "page",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "form"
+      },
+      "4d8a0e115b89a8f46b84d94493a18636": {
+        "description": "Set to true to enable maintenance mode (optional if provided in body)",
+        "in": "query",
+        "name": "enabled",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        },
+        "style": "form"
+      },
+      "69c0d7704ead151b48aa2783eb58caba": {
+        "description": "Id of existing payment.",
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "style": "simple"
+      },
+      "6d2922b757358bf49bc76b1d1dbd2d51": {
+        "description": "Id of existing win.",
+        "in": "path",
+        "name": "auction_id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "style": "simple"
+      },
+      "6e0158f0b618754c963898ab74806752": {
+        "description": "ID of the auction",
+        "in": "path",
+        "name": "auction_id",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "simple"
+      },
+      "777694c3b434f8ee8851ce24570d1fa4": {
+        "description": "Id of existing fulfillment.",
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "style": "simple"
+      },
+      "824c479f1b10dd39acc3ac03aaf34dc6": {
+        "description": "Filter payments by user email substring",
+        "in": "query",
+        "name": "search",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "style": "form"
+      },
+      "8b577654ea2cfd842be3fdfd02ff6509": {
+        "description": "Page size (default 25, max 100)",
+        "in": "query",
+        "name": "per_page",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "form"
+      },
+      "8d0599f85a9865e57a0e4ad8eacd5beb": {
+        "description": "ID of the bid pack",
+        "in": "path",
+        "name": "id",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "simple"
+      },
+      "98630f24a9e2ae556ba92595202094b3": {
+        "description": "Id of existing auction.",
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "style": "simple"
+      },
+      "a841405d71064dbcce48f7d27ae6a081": {
+        "description": "ISO8601 upper bound for start date",
+        "in": "query",
+        "name": "start_date_to",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "style": "form"
+      },
+      "af0db788db137a22186baada5847a117": {
+        "description": "ISO8601 lower bound for start date",
+        "in": "query",
+        "name": "start_date_from",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "style": "form"
+      },
+      "b5e011eb97af026f0de4a08c94735bc7": {
+        "description": "Email verification token",
+        "in": "query",
+        "name": "token",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "style": "form"
+      },
+      "b616e3297225d84121c506134222a819": {
+        "description": "Session token ID",
+        "in": "path",
+        "name": "id",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "simple"
+      },
+      "c96cce3d59cd4fa44833d2fd8dcb937c": {
+        "description": "ID of the Stripe checkout session",
+        "in": "query",
+        "name": "session_id",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "style": "form"
+      },
+      "e47fcdce1e2038e964734571e689bfeb": {
+        "description": "ID of the bid pack to purchase",
+        "in": "query",
+        "name": "bid_pack_id",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "form"
+      },
+      "efcd9d2952f804307e8ffce6decf5e94": {
+        "description": "Search by title or description",
+        "in": "query",
+        "name": "search",
+        "required": false,
+        "schema": {
+          "type": "string"
+        },
+        "style": "form"
+      },
+      "f1b9d71bc5c9d7c5d3b7d0c3e3d4faa8": {
+        "description": "Id of existing purchase.",
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "style": "simple"
+      },
+      "fa14d9ed9953c24b7ca86e0fc8af5f19": {
+        "description": "Number of records per page",
+        "in": "query",
+        "name": "per_page",
+        "required": false,
+        "schema": {
+          "type": "integer"
+        },
+        "style": "form"
+      }
+    },
+    "requestBodies": {
+      "req_001": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/f8ac92928e658c77a32eae4ed5b9ea93"
+            }
+          }
+        },
+        "description": "Update payload",
+        "required": true
+      },
+      "req_002": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/8fcf44720df100dc78c3cb161689ebb0"
+            }
+          }
+        },
+        "description": "Refresh payload",
+        "required": true
+      },
+      "req_003": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/8f2da65cfba791e94dd2ba283fcaf20b"
+            }
+          }
+        },
+        "description": "Auction payload",
+        "required": true
+      },
+      "req_004": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/276c024e8515065c3bec759819bda57c"
+            }
+          }
+        },
+        "description": "Login payload",
+        "required": true
+      },
+      "req_005": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/78da01e9c4466fd305f19c38c1a268aa"
+            }
+          }
+        },
+        "description": "Refund payload",
+        "required": false
+      },
+      "req_006": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/fd0dd4b96d26e41ffa16eb08756286bc"
+            }
+          }
+        },
+        "description": "Change email payload",
+        "required": true
+      },
+      "req_007": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/dfa5b43a7ec1e69f60149bf0d37749f8"
+            }
+          }
+        },
+        "description": "Update preferences payload",
+        "required": true
+      },
+      "req_008": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/264961f1d98ca80176fc486fdf41eaba"
+            }
+          }
+        },
+        "description": "Delete account payload",
+        "required": true
+      },
+      "req_009": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/3b6a8f53a53c0471294532bfc2aa40b3"
+            }
+          }
+        },
+        "description": "Admin user payload",
+        "required": false
+      },
+      "req_010": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/5fa0310957b5c0b33595a49f03b95e19"
+            }
+          }
+        },
+        "description": "Change password payload",
+        "required": true
+      },
+      "req_011": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/0ff4072fbad423c5d8e556357b2a12e7"
+            }
+          }
+        },
+        "description": "Bid pack payload",
+        "required": true
+      },
+      "req_012": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/a9e1a606eb82c3fa25a4df4f74ec3380"
+            }
+          }
+        },
+        "description": "Audit payload",
+        "required": true
+      },
+      "req_013": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/30d3c70eaf62d1e420cb43b97fdec55f"
+            }
+          }
+        },
+        "description": "Maintenance toggle",
+        "required": false
+      },
+      "req_014": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/fca7ae9c5b5a5fdbca32473db8333bdf"
+            }
+          }
+        },
+        "description": "Signup payload",
+        "required": true
+      }
+    },
+    "responses": {
+      "resp_001": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/f009e6be2776100ca0e0a85b276069e1"
+            }
+          }
+        },
+        "description": "Bid pack updated"
+      },
+      "resp_002": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/3e47d336c6c6a6fa077f7f17876e56f1"
+            }
+          }
+        },
+        "description": "Not found"
+      },
+      "resp_003": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/73ecc0629092579294659b44067a079e"
+            }
+          }
+        },
+        "description": "Password reset"
+      },
+      "resp_004": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/09eda044efad4320218b100180234bec"
+            }
+          }
+        },
+        "description": "Session created"
+      },
+      "resp_005": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/f1c20ccef0049507184555a5f2ee6723"
+            }
+          }
+        },
+        "description": "Audit logged"
+      },
+      "resp_006": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/2d935b114de85d13479f1b86247e8262"
+            }
+          }
+        },
+        "description": "Success"
+      },
+      "resp_007": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/92391726031d167dc21005ee2680953a"
+            }
+          }
+        },
+        "description": "Auction found"
+      },
+      "resp_008": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/09eda044efad4320218b100180234bec"
+            }
+          }
+        },
+        "description": "Session valid"
+      },
+      "resp_009": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/797b200d569c2326e602789cf5857a55"
+            }
+          }
+        },
+        "description": "Session timing"
+      },
+      "resp_010": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/f009e6be2776100ca0e0a85b276069e1"
+            }
+          }
+        },
+        "description": "Bid pack created"
+      },
+      "resp_011": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/a077befc92201cc9817e570d6ae70b40"
+            }
+          }
+        },
+        "description": "Wins"
+      },
+      "resp_012": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/fc208d7705ebd47b7b4f9cba41ec4d24"
+            }
+          }
+        },
+        "description": "Purchases"
+      },
+      "resp_013": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/92391726031d167dc21005ee2680953a"
+            }
+          }
+        },
+        "description": "Auction extended"
+      },
+      "resp_014": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/feca50860d589971172a2b752bbc787f"
+            }
+          }
+        },
+        "description": "Bid history"
+      },
+      "resp_015": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/09eda044efad4320218b100180234bec"
+            }
+          }
+        },
+        "description": "Session refreshed"
+      },
+      "resp_016": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/3e47d336c6c6a6fa077f7f17876e56f1"
+            }
+          }
+        },
+        "description": "Unprocessable content"
+      },
+      "resp_017": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ddaf05b3867210b395551e23d4d571d8"
+            }
+          }
+        },
+        "description": "Admin auctions"
+      },
+      "resp_018": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/195fee13a2e676e36bcaf119071f3cc9"
+            }
+          }
+        },
+        "description": "Bid packs"
+      },
+      "resp_019": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/1d72cc17842046d9c1a343fb85baa2bc"
+            }
+          }
+        },
+        "description": "Payments"
+      },
+      "resp_020": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/3e47d336c6c6a6fa077f7f17876e56f1"
+            }
+          }
+        },
+        "description": "Bad request"
+      },
+      "resp_021": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/d79407304a1f91dbdcfa03f0d06dc75e"
+            }
+          }
+        },
+        "description": "An unexpected error occurred on the server. The server was unable to process the request."
+      },
+      "resp_022": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/6a66905fa98d3338490e0e1fa319f020"
+            }
+          }
+        },
+        "description": "Auctions"
+      },
+      "resp_023": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/92a957eccee8f5d76aa3a12647cfa5fd"
+            }
+          }
+        },
+        "description": "Wallet balance"
+      },
+      "resp_024": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/2fcd9b5aab073fe3e7e089bfc0ede365"
+            }
+          }
+        },
+        "description": "Role updated"
+      },
+      "resp_025": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/92391726031d167dc21005ee2680953a"
+            }
+          }
+        },
+        "description": "Auction updated"
+      },
+      "resp_026": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/2fcd9b5aab073fe3e7e089bfc0ede365"
+            }
+          }
+        },
+        "description": "User updated"
+      },
+      "resp_027": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/f2665844cf5f03dc4ddfa6080cc97647"
+            }
+          }
+        },
+        "description": "Success"
+      },
+      "resp_028": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/071d7542ed3e657e63c9bbdfb6c66c5e"
+            }
+          }
+        },
+        "description": "Refund issued"
+      },
+      "resp_029": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/0cc56eaebe1128597970f1e9d17d5db5"
+            }
+          }
+        },
+        "description": "Accepted"
+      },
+      "resp_030": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/0b27bc2d4f067d7b4e46fc6fbfbaf4c2"
+            }
+          }
+        },
+        "description": "Wallet transactions"
+      },
+      "resp_031": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/701cfa5771768716c533d79a64c9de4e"
+            }
+          }
+        },
+        "description": "Win claimed"
+      },
+      "resp_032": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/b6f9ed4b3630fb2e02eba22dced97fac"
+            }
+          }
+        },
+        "description": "Already processed"
+      },
+      "resp_033": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/9862e02456e496d619bf8d0e1f385fb1"
+            }
+          }
+        },
+        "description": "Success"
+      },
+      "resp_034": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/f009e6be2776100ca0e0a85b276069e1"
+            }
+          }
+        },
+        "description": "Template"
+      },
+      "resp_035": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/a5a373a545e3cb0ecbc6b5a1ef83a993"
+            }
+          }
+        },
+        "description": "Maintenance updated"
+      },
+      "resp_036": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/f1c20ccef0049507184555a5f2ee6723"
+            }
+          }
+        },
+        "description": "Success"
+      },
+      "resp_037": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/701cfa5771768716c533d79a64c9de4e"
+            }
+          }
+        },
+        "description": "Win"
+      },
+      "resp_038": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/6383e51ee52c0c02bb879720dd1369ff"
+            }
+          }
+        },
+        "description": "Updated"
+      },
+      "resp_039": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/d79407304a1f91dbdcfa03f0d06dc75e"
+            }
+          }
+        },
+        "description": "You are not authorized to access this resource. You need to authenticate yourself first."
+      },
+      "resp_040": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/f009e6be2776100ca0e0a85b276069e1"
+            }
+          }
+        },
+        "description": "Bid pack"
+      },
+      "resp_041": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/d79407304a1f91dbdcfa03f0d06dc75e"
+            }
+          }
+        },
+        "description": "The requested resource could not be found."
+      },
+      "resp_042": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/3e47d336c6c6a6fa077f7f17876e56f1"
+            }
+          }
+        },
+        "description": "Validation error"
+      },
+      "resp_043": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/f009e6be2776100ca0e0a85b276069e1"
+            }
+          }
+        },
+        "description": "Bid pack retired"
+      },
+      "resp_044": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/d79407304a1f91dbdcfa03f0d06dc75e"
+            }
+          }
+        },
+        "description": "You are not allowed to access this resource. You do not have the necessary permissions."
+      },
+      "resp_045": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/baee3b1db606d749e58b0bc1b6fe9095"
+            }
+          }
+        },
+        "description": "Purchase"
+      },
+      "resp_046": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/d79407304a1f91dbdcfa03f0d06dc75e"
+            }
+          }
+        },
+        "description": "The server could not process the request due to semantic errors. Please check your input and try again."
+      },
+      "resp_047": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/0cc56eaebe1128597970f1e9d17d5db5"
+            }
+          }
+        },
+        "description": "Success"
+      },
+      "resp_048": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/f1c20ccef0049507184555a5f2ee6723"
+            }
+          }
+        },
+        "description": "Logged out"
+      },
+      "resp_049": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/3e47d336c6c6a6fa077f7f17876e56f1"
+            }
+          }
+        },
+        "description": "Forbidden"
+      },
+      "resp_050": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/b6f9ed4b3630fb2e02eba22dced97fac"
+            }
+          }
+        },
+        "description": "Checkout session created"
+      },
+      "resp_051": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/2fcd9b5aab073fe3e7e089bfc0ede365"
+            }
+          }
+        },
+        "description": "User banned"
+      },
+      "resp_052": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/b6f9ed4b3630fb2e02eba22dced97fac"
+            }
+          }
+        },
+        "description": "Checkout status"
+      },
+      "resp_053": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ac552b948996489944d9b1c178477677"
+            }
+          }
+        },
+        "description": "Notifications"
+      },
+      "resp_054": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/b6f9ed4b3630fb2e02eba22dced97fac"
+            }
+          }
+        },
+        "description": "Purchase applied"
+      },
+      "resp_055": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/48ae3f28abfc1838fe5cc1decd11167c"
+            }
+          }
+        },
+        "description": "Success"
+      },
+      "resp_056": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/6175057dd6ab3c3e45d847a73028d9c3"
+            }
+          }
+        },
+        "description": "Bid placed"
+      },
+      "resp_057": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/183f737b640374d4f693193012fa6154"
+            }
+          }
+        },
+        "description": "Auction retired"
+      },
+      "resp_058": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/0c805fddae341e8fec983e81eca5ba05"
+            }
+          }
+        },
+        "description": "Unprocessable content"
+      },
+      "resp_059": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/3e47d336c6c6a6fa077f7f17876e56f1"
+            }
+          }
+        },
+        "description": "Too many requests"
+      },
+      "resp_060": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/0c90018525308fa74a5c4563f158a360"
+            }
+          }
+        },
+        "description": "Admin users"
+      },
+      "resp_061": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/92391726031d167dc21005ee2680953a"
+            }
+          }
+        },
+        "description": "Auction created"
+      },
+      "resp_062": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/f1c20ccef0049507184555a5f2ee6723"
+            }
+          }
+        },
+        "description": "Accepted"
+      },
+      "resp_063": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/3e47d336c6c6a6fa077f7f17876e56f1"
+            }
+          }
+        },
+        "description": "Unauthorized"
+      },
+      "resp_064": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/a5a373a545e3cb0ecbc6b5a1ef83a993"
+            }
+          }
+        },
+        "description": "Maintenance status"
+      },
+      "resp_065": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/6383e51ee52c0c02bb879720dd1369ff"
+            }
+          }
+        },
+        "description": "Success"
+      }
+    },
+    "schemas": {
+      "071d7542ed3e657e63c9bbdfb6c66c5e": {
+        "properties": {
+          "amount": {
+            "type": "float"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "refund_id": {
+            "type": "string"
+          },
+          "refunded_cents": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "stripe_checkout_session_id": {
+            "type": "string"
+          },
+          "stripe_event_id": {
+            "type": "string"
+          },
+          "stripe_payment_intent_id": {
+            "type": "string"
+          },
+          "user_email": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "09eda044efad4320218b100180234bec": {
+        "$ref": "#/components/schemas/UserSession"
+      },
+      "0b27bc2d4f067d7b4e46fc6fbfbaf4c2": "wallettransactions",
+      "0c805fddae341e8fec983e81eca5ba05": {
+        "$ref": "#/components/schemas/ValidationErrors"
+      },
+      "0c90018525308fa74a5c4563f158a360": {
+        "items": {
+          "properties": {
+            "email_address": {
+              "type": "string"
+            },
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "0cc56eaebe1128597970f1e9d17d5db5": {
+        "$ref": "#/components/schemas/AccountExportResponse"
+      },
+      "0ff4072fbad423c5d8e556357b2a12e7": {
+        "$ref": "#/components/schemas/BidPackUpsert"
+      },
+      "183f737b640374d4f693193012fa6154": "hash{}",
+      "195fee13a2e676e36bcaf119071f3cc9": {
+        "items": {
+          "$ref": "#/components/schemas/BidPack"
+        },
+        "type": "array"
+      },
+      "1d72cc17842046d9c1a343fb85baa2bc": {
+        "items": {
+          "properties": {
+            "amount": {
+              "type": "float"
+            },
+            "created_at": {
+              "type": "string"
+            },
+            "id": {
+              "type": "integer"
+            },
+            "refunded_cents": {
+              "type": "integer"
+            },
+            "status": {
+              "type": "string"
+            },
+            "user_email": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "264961f1d98ca80176fc486fdf41eaba": {
+        "$ref": "#/components/schemas/AccountDeleteRequest"
+      },
+      "276c024e8515065c3bec759819bda57c": {
+        "$ref": "#/components/schemas/LoginRequest"
+      },
+      "2d935b114de85d13479f1b86247e8262": {
+        "$ref": "#/components/schemas/AccountSessionsResponse"
+      },
+      "2fcd9b5aab073fe3e7e089bfc0ede365": {
+        "properties": {
+          "email_address": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "30d3c70eaf62d1e420cb43b97fdec55f": {
+        "$ref": "#/components/schemas/MaintenanceToggle"
+      },
+      "3b6a8f53a53c0471294532bfc2aa40b3": {
+        "$ref": "#/components/schemas/AdminUserUpdate"
+      },
+      "3e47d336c6c6a6fa077f7f17876e56f1": {
+        "$ref": "#/components/schemas/Error"
+      },
+      "48ae3f28abfc1838fe5cc1decd11167c": {
+        "properties": {
+          "sessions_revoked": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "5fa0310957b5c0b33595a49f03b95e19": {
+        "$ref": "#/components/schemas/ChangePasswordRequest"
+      },
+      "6175057dd6ab3c3e45d847a73028d9c3": {
+        "$ref": "#/components/schemas/BidPlacementResponse"
+      },
+      "6383e51ee52c0c02bb879720dd1369ff": {
+        "$ref": "#/components/schemas/AccountProfile"
+      },
+      "6a66905fa98d3338490e0e1fa319f020": {
+        "items": {
+          "$ref": "#/components/schemas/AuctionSummary"
+        },
+        "type": "array"
+      },
+      "701cfa5771768716c533d79a64c9de4e": "wonauctiondetail",
+      "73ecc0629092579294659b44067a079e": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "78da01e9c4466fd305f19c38c1a268aa": {
+        "$ref": "#/components/schemas/PaymentRefundRequest"
+      },
+      "797b200d569c2326e602789cf5857a55": {
+        "properties": {
+          "is_admin": {
+            "type": "boolean"
+          },
+          "is_superuser": {
+            "type": "boolean"
+          },
+          "remaining_seconds": {
+            "type": "integer"
+          },
+          "session_expires_at": {
+            "type": "string"
+          },
+          "session_token_id": {
+            "type": "integer"
+          },
+          "user": {
+            "type": "hash"
+          }
+        },
+        "type": "object"
+      },
+      "8f2da65cfba791e94dd2ba283fcaf20b": {
+        "$ref": "#/components/schemas/AuctionUpsert"
+      },
+      "8fcf44720df100dc78c3cb161689ebb0": {
+        "$ref": "#/components/schemas/RefreshRequest"
+      },
+      "92391726031d167dc21005ee2680953a": {
+        "$ref": "#/components/schemas/Auction"
+      },
+      "92a957eccee8f5d76aa3a12647cfa5fd": "walletbalance",
+      "9862e02456e496d619bf8d0e1f385fb1": {
+        "$ref": "#/components/schemas/NotificationPreferencesResponse"
+      },
+      "AccountDeleteRequest": {
+        "oneOf": [
+          {
+            "properties": {
+              "account": {
+                "properties": {
+                  "confirmation": {
+                    "enum": ["DELETE"],
+                    "type": "string"
+                  },
+                  "current_password": {
+                    "type": "string"
+                  }
+                },
+                "required": ["current_password", "confirmation"],
+                "type": "object"
+              }
+            },
+            "required": ["account"],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "confirmation": {
+                "enum": ["DELETE"],
+                "type": "string"
+              },
+              "current_password": {
+                "type": "string"
+              }
+            },
+            "required": ["current_password", "confirmation"],
+            "type": "object"
+          }
+        ]
+      },
+      "AccountExport": {
+        "properties": {
+          "data": {
+            "additionalProperties": true,
+            "nullable": true,
+            "type": "object"
+          },
+          "download_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "ready_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "requested_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "enum": ["pending", "ready", "failed"],
+            "type": "string"
+          }
+        },
+        "required": ["id", "status", "requested_at"],
+        "type": "object"
+      },
+      "AccountExportResponse": {
+        "properties": {
+          "export": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AccountExport"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": ["export"],
+        "type": "object"
+      },
+      "AccountProfile": {
+        "properties": {
+          "user": {
+            "properties": {
+              "created_at": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "email_address": {
+                "format": "email",
+                "type": "string"
+              },
+              "email_verified": {
+                "type": "boolean"
+              },
+              "email_verified_at": {
+                "format": "date-time",
+                "nullable": true,
+                "type": "string"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "nullable": true,
+                "type": "string"
+              },
+              "notification_preferences": {
+                "$ref": "#/components/schemas/NotificationPreferences"
+              }
+            },
+            "required": [
+              "id",
+              "email_address",
+              "email_verified",
+              "created_at",
+              "notification_preferences"
+            ],
+            "type": "object"
+          }
+        },
+        "required": ["user"],
+        "type": "object"
+      },
+      "AccountSecurity": {
+        "properties": {
+          "security": {
+            "properties": {
+              "email_address": {
+                "format": "email",
+                "type": "string"
+              },
+              "email_verification_sent_at": {
+                "format": "date-time",
+                "nullable": true,
+                "type": "string"
+              },
+              "email_verified": {
+                "type": "boolean"
+              },
+              "email_verified_at": {
+                "format": "date-time",
+                "nullable": true,
+                "type": "string"
+              },
+              "unverified_email_address": {
+                "format": "email",
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": ["email_address", "email_verified"],
+            "type": "object"
+          }
+        },
+        "required": ["security"],
+        "type": "object"
+      },
+      "AccountSession": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "current": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "ip_address": {
+            "nullable": true,
+            "type": "string"
+          },
+          "last_seen_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "user_agent": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": ["id", "created_at", "current"],
+        "type": "object"
+      },
+      "AccountSessionsResponse": {
+        "properties": {
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/AccountSession"
+            },
+            "type": "array"
+          }
+        },
+        "required": ["sessions"],
+        "type": "object"
+      },
+      "AccountUpdateRequest": {
+        "properties": {
+          "account": {
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": ["name"],
+            "type": "object"
+          }
+        },
+        "required": ["account"],
+        "type": "object"
+      },
+      "AdminUserUpdate": {
+        "properties": {
+          "user": {
+            "properties": {
+              "email_address": {
+                "format": "email",
+                "nullable": true,
+                "type": "string"
+              },
+              "name": {
+                "nullable": true,
+                "type": "string"
+              },
+              "role": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "required": ["user"],
+        "type": "object"
+      },
+      "Auction": {
+        "description": "Full auction details including pricing and winner information.",
+        "properties": {
+          "bids": {
+            "items": {
+              "$ref": "#/components/schemas/Bid"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "current_price": {
+            "format": "float",
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          },
+          "end_time": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "highest_bidder_id": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "image_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "start_date": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "inactive",
+              "scheduled",
+              "active",
+              "complete",
+              "cancelled"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "winning_user_id": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "winning_user_name": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "status",
+          "start_date",
+          "end_time",
+          "current_price"
+        ],
+        "type": "object"
+      },
+      "AuctionSummary": {
+        "description": "Slimmer auction representation for list views to reduce payload size.",
+        "properties": {
+          "current_price": {
+            "format": "float",
+            "type": "number"
+          },
+          "end_time": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "image_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "inactive",
+              "scheduled",
+              "active",
+              "complete",
+              "cancelled"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "winning_user_id": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "winning_user_name": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": ["id", "title", "status", "end_time", "current_price"],
+        "type": "object"
+      },
+      "AuctionUpsert": {
+        "description": "Attributes accepted when creating or updating an auction via admin endpoints.",
+        "properties": {
+          "auction": {
+            "properties": {
+              "current_price": {
+                "format": "float",
+                "nullable": true,
+                "type": "number"
+              },
+              "description": {
+                "type": "string"
+              },
+              "end_time": {
+                "format": "date-time",
+                "nullable": true,
+                "type": "string"
+              },
+              "image_url": {
+                "nullable": true,
+                "type": "string"
+              },
+              "start_date": {
+                "format": "date-time",
+                "nullable": true,
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "inactive",
+                  "scheduled",
+                  "active",
+                  "complete",
+                  "cancelled"
+                ],
+                "nullable": true,
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              }
+            },
+            "required": ["title", "description"],
+            "type": "object"
+          }
+        },
+        "required": ["auction"],
+        "type": "object"
+      },
+      "AuditLogCreate": {
+        "properties": {
+          "audit": {
+            "properties": {
+              "action": {
+                "type": "string"
+              },
+              "payload": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "target_id": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "target_type": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": ["action"],
+            "type": "object"
+          }
+        },
+        "required": ["audit"],
+        "type": "object"
+      },
+      "Bid": {
+        "description": "A single bid placed against an auction.",
+        "properties": {
+          "amount": {
+            "format": "float",
+            "type": "number"
+          },
+          "auction_id": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "user_id": {
+            "type": "integer"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "user_id", "username", "amount", "created_at"],
+        "type": "object"
+      },
+      "BidHistoryItem": {
+        "description": "Bid history entry with bidder display name.",
+        "properties": {
+          "amount": {
+            "format": "float",
+            "type": "number"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "user_id": {
+            "type": "integer"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "user_id", "username", "amount", "created_at"],
+        "type": "object"
+      },
+      "BidHistoryResponse": {
+        "description": "Envelope returned from bid history endpoints.",
+        "properties": {
+          "auction": {
+            "properties": {
+              "winning_user_id": {
+                "nullable": true,
+                "type": "integer"
+              },
+              "winning_user_name": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "bids": {
+            "items": {
+              "$ref": "#/components/schemas/BidHistoryItem"
+            },
+            "type": "array"
+          }
+        },
+        "required": ["auction", "bids"],
+        "type": "object"
+      },
+      "BidPack": {
+        "description": "Information about a purchasable bid pack.",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "bids": {
+            "description": "Number of bids included.",
+            "type": "integer"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "highlight": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "format": "float",
+            "type": "number"
+          },
+          "pricePerBid": {
+            "type": "string"
+          },
+          "status": {
+            "enum": ["active", "retired"],
+            "type": "string"
+          }
+        },
+        "required": ["id", "name", "bids", "price", "status", "active"],
+        "type": "object"
+      },
+      "BidPackUpsert": {
+        "description": "Attributes accepted when creating or updating bid packs via admin endpoints.",
+        "properties": {
+          "bid_pack": {
+            "properties": {
+              "active": {
+                "nullable": true,
+                "type": "boolean"
+              },
+              "bids": {
+                "type": "integer"
+              },
+              "description": {
+                "nullable": true,
+                "type": "string"
+              },
+              "highlight": {
+                "nullable": true,
+                "type": "boolean"
+              },
+              "name": {
+                "type": "string"
+              },
+              "price": {
+                "format": "float",
+                "type": "number"
+              },
+              "status": {
+                "enum": ["active", "retired"],
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": ["name", "price", "bids"],
+            "type": "object"
+          }
+        },
+        "required": ["bid_pack"],
+        "type": "object"
+      },
+      "BidPlacementResponse": {
+        "description": "Response envelope returned after placing a bid.",
+        "properties": {
+          "bid": {
+            "$ref": "#/components/schemas/Bid"
+          },
+          "bidCredits": {
+            "type": "integer"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": ["success", "bid", "bidCredits"],
+        "type": "object"
+      },
+      "ChangeEmailRequest": {
+        "oneOf": [
+          {
+            "properties": {
+              "email": {
+                "properties": {
+                  "current_password": {
+                    "type": "string"
+                  },
+                  "new_email_address": {
+                    "format": "email",
+                    "type": "string"
+                  }
+                },
+                "required": ["new_email_address", "current_password"],
+                "type": "object"
+              }
+            },
+            "required": ["email"],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "current_password": {
+                "type": "string"
+              },
+              "new_email_address": {
+                "format": "email",
+                "type": "string"
+              }
+            },
+            "required": ["new_email_address", "current_password"],
+            "type": "object"
+          }
+        ]
+      },
+      "ChangePasswordRequest": {
+        "oneOf": [
+          {
+            "properties": {
+              "password": {
+                "properties": {
+                  "current_password": {
+                    "type": "string"
+                  },
+                  "new_password": {
+                    "type": "string"
+                  }
+                },
+                "required": ["current_password", "new_password"],
+                "type": "object"
+              }
+            },
+            "required": ["password"],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "current_password": {
+                "type": "string"
+              },
+              "new_password": {
+                "type": "string"
+              }
+            },
+            "required": ["current_password", "new_password"],
+            "type": "object"
+          }
+        ]
+      },
+      "CheckoutSession": {
+        "description": "Stripe checkout session details used to complete purchases.",
+        "properties": {
+          "clientSecret": {
+            "description": "Client secret used to render the Stripe checkout flow.",
+            "type": "string"
+          },
+          "message": {
+            "nullable": true,
+            "type": "string"
+          },
+          "payment_status": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "nullable": true,
+            "type": "string"
+          },
+          "updated_bid_credits": {
+            "nullable": true,
+            "type": "integer"
+          }
+        },
+        "required": ["clientSecret"],
+        "type": "object"
+      },
+      "Error": {
+        "description": "Standard error envelope returned by all error responses. error_code maps to ServiceResult#code or controller error codes.",
+        "properties": {
+          "details": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "items": {},
+                "type": "array"
+              }
+            ]
+          },
+          "error_code": {
+            "description": "Symbol/string code derived from ServiceResult#code so clients can branch on error type.",
+            "enum": [
+              "forbidden",
+              "not_found",
+              "bad_request",
+              "invalid_status",
+              "invalid_state",
+              "invalid_auction",
+              "invalid_bid_pack",
+              "invalid_payment",
+              "invalid_amount",
+              "amount_exceeds_charge",
+              "gateway_error",
+              "database_error",
+              "unexpected_error",
+              "validation_error",
+              "auction_not_active",
+              "insufficient_credits",
+              "bid_race_lost",
+              "bid_invalid",
+              "bid_pack_purchase_failed",
+              "invalid_credentials",
+              "invalid_session",
+              "account_disabled",
+              "invalid_token",
+              "invalid_password",
+              "invalid_email",
+              "invalid_user",
+              "invalid_delta",
+              "already_disabled",
+              "already_verified",
+              "already_refunded",
+              "rate_limited",
+              "retired",
+              "missing_payment_intent"
+            ],
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["error_code", "message"],
+        "type": "object"
+      },
+      "LoginRequest": {
+        "description": "Login payload accepted by /api/v1/login (nested or flat).",
+        "oneOf": [
+          {
+            "properties": {
+              "session": {
+                "properties": {
+                  "email_address": {
+                    "format": "email",
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": ["email_address", "password"],
+                "type": "object"
+              }
+            },
+            "required": ["session"],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "email_address": {
+                "format": "email",
+                "type": "string"
+              },
+              "password": {
+                "type": "string"
+              }
+            },
+            "required": ["email_address", "password"],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "emailAddress": {
+                "format": "email",
+                "type": "string"
+              },
+              "password": {
+                "type": "string"
+              }
+            },
+            "required": ["emailAddress", "password"],
+            "type": "object"
+          }
+        ]
+      },
+      "MaintenanceToggle": {
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": ["enabled"],
+        "type": "object"
+      },
+      "NotificationPreferences": {
+        "description": "User notification preferences (all boolean flags).",
+        "properties": {
+          "bidding_alerts": {
+            "type": "boolean"
+          },
+          "marketing_emails": {
+            "type": "boolean"
+          },
+          "outbid_alerts": {
+            "type": "boolean"
+          },
+          "product_updates": {
+            "type": "boolean"
+          },
+          "receipts": {
+            "type": "boolean"
+          },
+          "watched_auction_ending": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "bidding_alerts",
+          "outbid_alerts",
+          "watched_auction_ending",
+          "receipts",
+          "product_updates",
+          "marketing_emails"
+        ],
+        "type": "object"
+      },
+      "NotificationPreferencesResponse": {
+        "properties": {
+          "notification_preferences": {
+            "$ref": "#/components/schemas/NotificationPreferences"
+          }
+        },
+        "required": ["notification_preferences"],
+        "type": "object"
+      },
+      "NotificationPreferencesUpdateRequest": {
+        "properties": {
+          "account": {
+            "properties": {
+              "notification_preferences": {
+                "$ref": "#/components/schemas/NotificationPreferences"
+              }
+            },
+            "required": ["notification_preferences"],
+            "type": "object"
+          }
+        },
+        "required": ["account"],
+        "type": "object"
+      },
+      "PaymentRefundRequest": {
+        "properties": {
+          "amount_cents": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "Purchase": {
+        "description": "Bid-pack purchase record for the current user.",
+        "properties": {
+          "amount_cents": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "bid_pack": {
+            "properties": {
+              "credits": {
+                "type": "integer"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "price_cents": {
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": ["id", "name", "credits", "price_cents"],
+            "type": "object"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "receipt_status": {
+            "enum": ["pending", "available", "unavailable"],
+            "type": "string"
+          },
+          "receipt_url": {
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "completed",
+              "partially_refunded",
+              "refunded",
+              "voided",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "stripe_checkout_session_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "stripe_payment_intent_id": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "status",
+          "amount_cents",
+          "currency",
+          "receipt_status",
+          "bid_pack"
+        ],
+        "type": "object"
+      },
+      "RefreshRequest": {
+        "description": "Session refresh payload accepted by /api/v1/session/refresh (nested or flat).",
+        "oneOf": [
+          {
+            "properties": {
+              "session": {
+                "properties": {
+                  "refresh_token": {
+                    "type": "string"
+                  }
+                },
+                "required": ["refresh_token"],
+                "type": "object"
+              }
+            },
+            "required": ["session"],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "refresh_token": {
+                "type": "string"
+              }
+            },
+            "required": ["refresh_token"],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "refreshToken": {
+                "type": "string"
+              }
+            },
+            "required": ["refreshToken"],
+            "type": "object"
+          }
+        ]
+      },
+      "SignupRequest": {
+        "description": "User registration payload accepted by /api/v1/signup (and legacy /api/v1/users).",
+        "oneOf": [
+          {
+            "properties": {
+              "user": {
+                "properties": {
+                  "email_address": {
+                    "format": "email",
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "password_confirmation": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email_address",
+                  "password",
+                  "password_confirmation"
+                ],
+                "type": "object"
+              }
+            },
+            "required": ["user"],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "email_address": {
+                "format": "email",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "password": {
+                "type": "string"
+              },
+              "password_confirmation": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "email_address",
+              "password",
+              "password_confirmation"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "UserSession": {
+        "description": "Session details and tokens returned after login/refresh.",
+        "properties": {
+          "is_admin": {
+            "type": "boolean"
+          },
+          "is_superuser": {
+            "type": "boolean"
+          },
+          "redirect_path": {
+            "nullable": true,
+            "type": "string"
+          },
+          "refresh_token": {
+            "type": "string"
+          },
+          "session": {
+            "properties": {
+              "seconds_remaining": {
+                "type": "integer"
+              },
+              "session_expires_at": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "session_token_id": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "session_token_id",
+              "session_expires_at",
+              "seconds_remaining"
+            ],
+            "type": "object"
+          },
+          "session_token_id": {
+            "type": "integer"
+          },
+          "token": {
+            "description": "JWT used for authenticated requests.",
+            "type": "string"
+          },
+          "user": {
+            "properties": {
+              "bidCredits": {
+                "type": "integer"
+              },
+              "emailAddress": {
+                "format": "email",
+                "type": "string"
+              },
+              "id": {
+                "type": "integer"
+              },
+              "is_admin": {
+                "type": "boolean"
+              },
+              "is_superuser": {
+                "type": "boolean"
+              },
+              "name": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              }
+            },
+            "required": ["id", "name", "role", "emailAddress", "bidCredits"],
+            "type": "object"
+          }
+        },
+        "required": [
+          "token",
+          "refresh_token",
+          "session_token_id",
+          "session",
+          "is_admin",
+          "is_superuser",
+          "redirect_path",
+          "user"
+        ],
+        "type": "object"
+      },
+      "ValidationErrors": {
+        "description": "Validation error payload returned when user input is invalid.",
+        "properties": {
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": ["errors"],
+        "type": "object"
+      },
+      "a077befc92201cc9817e570d6ae70b40": {
+        "items": "wonauction",
+        "type": "array"
+      },
+      "a5a373a545e3cb0ecbc6b5a1ef83a993": {
+        "properties": {
+          "maintenance": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "updated_at": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "a9e1a606eb82c3fa25a4df4f74ec3380": {
+        "$ref": "#/components/schemas/AuditLogCreate"
+      },
+      "ac552b948996489944d9b1c178477677": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "data": "object",
+            "id": {
+              "type": "integer"
+            },
+            "kind": {
+              "type": "string"
+            },
+            "read_at": {
+              "format": "date-time",
+              "type": ["string", "null"]
+            }
+          },
+          "required": ["id", "kind", "data", "read_at"],
+          "title": "Notification",
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "b6f9ed4b3630fb2e02eba22dced97fac": {
+        "$ref": "#/components/schemas/CheckoutSession"
+      },
+      "baee3b1db606d749e58b0bc1b6fe9095": {
+        "$ref": "#/components/schemas/Purchase"
+      },
+      "d79407304a1f91dbdcfa03f0d06dc75e": {
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          }
+        },
+        "required": ["status"],
+        "type": "object"
+      },
+      "ddaf05b3867210b395551e23d4d571d8": {
+        "items": {
+          "$ref": "#/components/schemas/Auction"
+        },
+        "type": "array"
+      },
+      "dfa5b43a7ec1e69f60149bf0d37749f8": {
+        "$ref": "#/components/schemas/NotificationPreferencesUpdateRequest"
+      },
+      "f009e6be2776100ca0e0a85b276069e1": {
+        "$ref": "#/components/schemas/BidPack"
+      },
+      "f1c20ccef0049507184555a5f2ee6723": {
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "f2665844cf5f03dc4ddfa6080cc97647": {
+        "$ref": "#/components/schemas/AccountSecurity"
+      },
+      "f8ac92928e658c77a32eae4ed5b9ea93": {
+        "$ref": "#/components/schemas/AccountUpdateRequest"
+      },
+      "fc208d7705ebd47b7b4f9cba41ec4d24": {
+        "items": {
+          "$ref": "#/components/schemas/Purchase"
+        },
+        "type": "array"
+      },
+      "fca7ae9c5b5a5fdbca32473db8333bdf": {
+        "$ref": "#/components/schemas/SignupRequest"
+      },
+      "fd0dd4b96d26e41ffa16eb08756286bc": {
+        "$ref": "#/components/schemas/ChangeEmailRequest"
+      },
+      "feca50860d589971172a2b752bbc787f": {
+        "$ref": "#/components/schemas/BidHistoryResponse"
+      }
+    },
+    "securitySchemes": {
+      "bearer_jwt": {
+        "bearerFormat": "JWT",
+        "description": "A bearer token that will be supplied within an `Authorization` header as `bearer <token>`. In this case, the format of the token is specified as JWT.",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "contact": {
+      "email": "",
+      "name": "",
+      "url": ""
+    },
+    "description": "REST API for the XBid auction platform. Endpoints cover authentication,\nauctions, bidding, bid packs, payments, maintenance mode, and admin tools.\n",
+    "license": {
+      "name": "GPL 3.0",
+      "url": "https://www.gnu.org/licenses/gpl-3.0.html#license-text"
+    },
+    "summary": "Interactive docs for the XBid backend",
+    "termsOfService": "",
+    "title": "XBid API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/": {
+      "get": {
+        "description": "Returns public auction summaries filtered by status.",
+        "operationId": "GET__",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/3c76e0904ddc71e0dcc8562e902e37e4"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_022"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          }
+        },
+        "summary": "List all auctions"
+      }
+    },
+    "/api/v1/account": {
+      "delete": {
+        "description": "DELETE /api/v1/account",
+        "operationId": "DELETE__api_v1_account",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_008"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_036"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_016"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Disable (soft delete) the current account and revoke sessions",
+        "tags": ["Api"]
+      },
+      "get": {
+        "description": "GET /api/v1/account",
+        "operationId": "GET__api_v1_account",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_065"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Return current account profile",
+        "tags": ["Api"]
+      },
+      "patch": {
+        "description": "PATCH /api/v1/account",
+        "operationId": "PATCH__api_v1_account",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_001"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_038"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_016"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Update account profile (MVP: name only)",
+        "tags": ["Api"]
+      },
+      "put": {
+        "description": "PATCH /api/v1/account",
+        "operationId": "PUT__api_v1_account",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_001"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_038"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_016"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Update account profile (MVP: name only)",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/account/data/export": {
+      "get": {
+        "description": "GET /api/v1/account/data/export",
+        "operationId": "GET__api_v1_account_data_export",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_047"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Get the latest account export status",
+        "tags": ["Api"]
+      },
+      "post": {
+        "description": "POST /api/v1/account/data/export",
+        "operationId": "POST__api_v1_account_data_export",
+        "responses": {
+          "202": {
+            "$ref": "#/components/responses/resp_029"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_046"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Request an account export (MVP)",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/account/email-change": {
+      "post": {
+        "description": "POST /api/v1/account/email-change",
+        "operationId": "POST__api_v1_account_email-change",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_006"
+        },
+        "responses": {
+          "202": {
+            "$ref": "#/components/responses/resp_062"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_016"
+          },
+          "429": {
+            "$ref": "#/components/responses/resp_059"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Request an email address change (verification required)",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/account/notifications": {
+      "get": {
+        "description": "GET /api/v1/account/notifications",
+        "operationId": "GET__api_v1_account_notifications",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_033"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Return notification preferences for the current user",
+        "tags": ["Api"]
+      },
+      "put": {
+        "description": "PUT /api/v1/account/notifications",
+        "operationId": "PUT__api_v1_account_notifications",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_007"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_033"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_016"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Update notification preferences for the current user",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/account/password": {
+      "post": {
+        "description": "POST /api/v1/account/password\nRevokes all other active sessions on success.",
+        "operationId": "POST__api_v1_account_password",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_010"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_055"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_016"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Change password for the current user",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/account/security": {
+      "get": {
+        "description": "GET /api/v1/account/security",
+        "operationId": "GET__api_v1_account_security",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_027"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Return account security fields (email verification)",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/account/sessions": {
+      "get": {
+        "description": "GET /api/v1/account/sessions",
+        "operationId": "GET__api_v1_account_sessions",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_006"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "List active sessions for the current user",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/account/sessions/revoke_others": {
+      "post": {
+        "description": "POST /api/v1/account/sessions/revoke_others",
+        "operationId": "POST__api_v1_account_sessions_revoke_others",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_055"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Revoke all sessions except current",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/account/sessions/{id}": {
+      "delete": {
+        "description": "DELETE /api/v1/account/sessions/:id",
+        "operationId": "DELETE__api_v1_account_sessions_{id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/b616e3297225d84121c506134222a819"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_036"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_016"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Revoke a session token for the current user",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/auctions": {
+      "get": {
+        "description": "GET /api/v1/admin/auctions\nReturns auctions with optional status, date, and search filters for admin views.",
+        "operationId": "GET__api_v1_admin_auctions",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/3c76e0904ddc71e0dcc8562e902e37e4"
+          },
+          {
+            "$ref": "#/components/parameters/efcd9d2952f804307e8ffce6decf5e94"
+          },
+          {
+            "$ref": "#/components/parameters/af0db788db137a22186baada5847a117"
+          },
+          {
+            "$ref": "#/components/parameters/a841405d71064dbcce48f7d27ae6a081"
+          },
+          {
+            "$ref": "#/components/parameters/3351e2e3c00563360e4e4fd54846fd80"
+          },
+          {
+            "$ref": "#/components/parameters/2f283202ff70ebb99d8bc91461022917"
+          },
+          {
+            "$ref": "#/components/parameters/0abd227a13448d9299e1c1de37060965"
+          },
+          {
+            "$ref": "#/components/parameters/fa14d9ed9953c24b7ca86e0fc8af5f19"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_017"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "List auctions for admin with filters and pagination",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/auctions/{id}": {
+      "get": {
+        "description": "GET /api/v1/admin/auctions/:id\nRetrieves full auction details for administrators.",
+        "operationId": "GET__api_v1_admin_auctions_{id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/08c34767a5405f30927bbac7a3c4fc71"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_007"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Show auction details for admin",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/audit": {
+      "post": {
+        "description": "POST /api/v1/admin/audit\nRecords an audit log for administrative actions.",
+        "operationId": "POST__api_v1_admin_audit",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_012"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/resp_005"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Create an audit log entry",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/bid-packs": {
+      "get": {
+        "description": "GET /admin/bid_packs\nLists all bid packs including retired ones for administrative management.",
+        "operationId": "GET__api_v1_admin_bid-packs",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_018"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "List all bid packs (admin)",
+        "tags": ["Api"]
+      },
+      "post": {
+        "description": "POST /admin/bid_packs\nCreate a bid pack with the provided attributes.",
+        "operationId": "POST__api_v1_admin_bid-packs",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_011"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/resp_010"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Create",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/bid-packs/new": {
+      "get": {
+        "description": "GET /admin/bid_packs/new",
+        "operationId": "GET__api_v1_admin_bid-packs_new",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_034"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Return a template bid pack for creation",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/bid-packs/{id}": {
+      "delete": {
+        "description": "DELETE /admin/bid_packs/:id\nRetires a bid pack to prevent purchase while keeping history.\nRetires an existing bid pack while preserving purchase history.",
+        "operationId": "DELETE__api_v1_admin_bid-packs_{id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/8d0599f85a9865e57a0e4ad8eacd5beb"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_043"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Retire (deactivate) a bid pack (admin)",
+        "tags": ["Api"]
+      },
+      "get": {
+        "description": "GET /admin/bid_packs/:id",
+        "operationId": "GET__api_v1_admin_bid-packs_{id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/8d0599f85a9865e57a0e4ad8eacd5beb"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_040"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Show a bid pack (admin)",
+        "tags": ["Api"]
+      },
+      "patch": {
+        "description": "PATCH/PUT /admin/bid_packs/:id\nUpdates bid pack fields or status.",
+        "operationId": "PATCH__api_v1_admin_bid-packs_{id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/8d0599f85a9865e57a0e4ad8eacd5beb"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_011"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_001"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Update a bid pack (admin)",
+        "tags": ["Api"]
+      },
+      "put": {
+        "description": "PATCH/PUT /admin/bid_packs/:id\nUpdates bid pack fields or status.",
+        "operationId": "PUT__api_v1_admin_bid-packs_{id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/8d0599f85a9865e57a0e4ad8eacd5beb"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_011"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_001"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Update a bid pack (admin)",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/bid-packs/{id}/edit": {
+      "get": {
+        "description": "GET /admin/bid_packs/:id/edit",
+        "operationId": "GET__api_v1_admin_bid-packs_{id}_edit",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/8d0599f85a9865e57a0e4ad8eacd5beb"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_040"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Fetch a bid pack for editing",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/fulfillments/{id}/complete": {
+      "post": {
+        "description": "POST /api/v1/admin/fulfillments/:id/complete",
+        "operationId": "POST__api_v1_admin_fulfillments_{id}_complete",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/777694c3b434f8ee8851ce24570d1fa4"
+          }
+        ],
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/resp_039"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Move fulfillment from shipped -> complete",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/fulfillments/{id}/process": {
+      "post": {
+        "description": "POST /api/v1/admin/fulfillments/:id/process",
+        "operationId": "POST__api_v1_admin_fulfillments_{id}_process",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/777694c3b434f8ee8851ce24570d1fa4"
+          }
+        ],
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/resp_039"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Move fulfillment from claimed -> processing",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/fulfillments/{id}/ship": {
+      "post": {
+        "description": "POST /api/v1/admin/fulfillments/:id/ship",
+        "operationId": "POST__api_v1_admin_fulfillments_{id}_ship",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/777694c3b434f8ee8851ce24570d1fa4"
+          }
+        ],
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/resp_039"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Move fulfillment from processing -> shipped",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/maintenance": {
+      "get": {
+        "description": "GET /api/v1/admin/maintenance\nReturns the maintenance toggle state for administrators.",
+        "operationId": "GET__api_v1_admin_maintenance",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_064"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Show current maintenance mode state",
+        "tags": ["Api"]
+      },
+      "post": {
+        "description": "POST /api/v1/admin/maintenance?enabled=true\nAlso accepts JSON body { enabled: true }\nEnables or disables maintenance mode.",
+        "operationId": "POST__api_v1_admin_maintenance",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/4d8a0e115b89a8f46b84d94493a18636"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_013"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_035"
+          },
+          "400": {
+            "$ref": "#/components/responses/resp_020"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_046"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Toggle maintenance mode on or off",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/payments": {
+      "get": {
+        "description": "GET /api/v1/admin/payments\nLists purchases with optional fuzzy email search for admins.",
+        "operationId": "GET__api_v1_admin_payments",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/824c479f1b10dd39acc3ac03aaf34dc6"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_019"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "List payments with optional email search",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/payments/{id}": {
+      "get": {
+        "description": "GET /api/v1/admin/payments/:id\nReturns the purchase, related credit transactions, and a balance audit for admins.",
+        "operationId": "GET__api_v1_admin_payments_{id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/69c0d7704ead151b48aa2783eb58caba"
+          }
+        ],
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/resp_039"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Show a payment reconciliation view",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/payments/{id}/refund": {
+      "post": {
+        "description": "POST /api/v1/admin/payments/:id/refund\nIssues a refund for a payment and records the refund ID from the gateway.",
+        "operationId": "POST__api_v1_admin_payments_{id}_refund",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/3c3ce4ffa8cd4a597cfcbc9686ae2240"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_005"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_028"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Issue a refund for a payment",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/payments/{id}/repair_credits": {
+      "post": {
+        "description": "POST /api/v1/admin/payments/:id/repair_credits\nEnsures the ledger grant exists for a completed purchase without double-crediting.",
+        "operationId": "POST__api_v1_admin_payments_{id}_repair_credits",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/69c0d7704ead151b48aa2783eb58caba"
+          }
+        ],
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/resp_039"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Repair missing purchase credits",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/users": {
+      "get": {
+        "description": "GET /api/v1/admin/users\nReturns the list of administrative users.",
+        "operationId": "GET__api_v1_admin_users",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_060"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "List admin and superadmin users",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/users/{id}": {
+      "patch": {
+        "description": "PATCH/PUT /api/v1/admin/users/:id",
+        "operationId": "PATCH__api_v1_admin_users_{id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/1ab6dc819a121c51b85fe92cef981390"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_009"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_026"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Update an admin/superadmin user record",
+        "tags": ["Api"]
+      },
+      "put": {
+        "description": "PATCH/PUT /api/v1/admin/users/:id",
+        "operationId": "PUT__api_v1_admin_users_{id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/1ab6dc819a121c51b85fe92cef981390"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_009"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_026"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Update an admin/superadmin user record",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/users/{id}/ban": {
+      "post": {
+        "description": "",
+        "operationId": "POST__api_v1_admin_users_{id}_ban",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/1ab6dc819a121c51b85fe92cef981390"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_051"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Ban a user account",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/users/{id}/grant_admin": {
+      "post": {
+        "description": "",
+        "operationId": "POST__api_v1_admin_users_{id}_grant_admin",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/1ab6dc819a121c51b85fe92cef981390"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_024"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Grant admin role to a user",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/users/{id}/grant_superadmin": {
+      "post": {
+        "description": "",
+        "operationId": "POST__api_v1_admin_users_{id}_grant_superadmin",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/1ab6dc819a121c51b85fe92cef981390"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_024"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Grant superadmin role to a user",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/users/{id}/revoke_admin": {
+      "post": {
+        "description": "",
+        "operationId": "POST__api_v1_admin_users_{id}_revoke_admin",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/1ab6dc819a121c51b85fe92cef981390"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_024"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Revoke admin role from a user",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/admin/users/{id}/revoke_superadmin": {
+      "post": {
+        "description": "",
+        "operationId": "POST__api_v1_admin_users_{id}_revoke_superadmin",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/1ab6dc819a121c51b85fe92cef981390"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_024"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Revoke superadmin role from a user",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/auctions": {
+      "get": {
+        "description": "Returns public auction summaries filtered by status.",
+        "operationId": "GET__api_v1_auctions",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/3c76e0904ddc71e0dcc8562e902e37e4"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_022"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          }
+        },
+        "summary": "List all auctions",
+        "tags": ["Api"]
+      },
+      "post": {
+        "description": "Create and schedule or activate an auction. Status values are normalized to the allowed list.",
+        "operationId": "POST__api_v1_auctions",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_003"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/resp_061"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Create a new auction (admin only)",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/auctions/{auction_id}/bid_history": {
+      "get": {
+        "description": "GET /api/v1/auctions/:auction_id/bid_history\nReturns the current bid list for an auction along with the winning user, if present.",
+        "operationId": "GET__api_v1_auctions_{auction_id}_bid_history",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/6e0158f0b618754c963898ab74806752"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_014"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          }
+        },
+        "summary": "List bids for a given auction (newest first)",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/auctions/{auction_id}/bids": {
+      "post": {
+        "description": "Places a bid for the current user on the specified auction.",
+        "operationId": "POST__api_v1_auctions_{auction_id}_bids",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/6e0158f0b618754c963898ab74806752"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_056"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Place a bid on an auction",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/auctions/{id}": {
+      "delete": {
+        "description": "Retire an auction to prevent further bids while keeping history intact.",
+        "operationId": "DELETE__api_v1_auctions_{id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/08c34767a5405f30927bbac7a3c4fc71"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/resp_057"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Retire an auction (admin only)",
+        "tags": ["Api"]
+      },
+      "get": {
+        "description": "Fetches the auction and embeds the current bid list.",
+        "operationId": "GET__api_v1_auctions_{id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/08c34767a5405f30927bbac7a3c4fc71"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_007"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          }
+        },
+        "summary": "Retrieve a single auction with bids",
+        "tags": ["Api"]
+      },
+      "patch": {
+        "description": "Update auction details or transition status for an existing auction.",
+        "operationId": "PATCH__api_v1_auctions_{id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/08c34767a5405f30927bbac7a3c4fc71"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_003"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_025"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Update an existing auction (admin only)",
+        "tags": ["Api"]
+      },
+      "put": {
+        "description": "Update auction details or transition status for an existing auction.",
+        "operationId": "PUT__api_v1_auctions_{id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/08c34767a5405f30927bbac7a3c4fc71"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_003"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_025"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Update an existing auction (admin only)",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/auctions/{id}/extend_time": {
+      "post": {
+        "description": "Extends an active auction within the configured extension window.",
+        "operationId": "POST__api_v1_auctions_{id}_extend_time",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/08c34767a5405f30927bbac7a3c4fc71"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_013"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Extend an auction's end time (admin only)",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/auctions/{id}/watch": {
+      "delete": {
+        "description": "DELETE /api/v1/auctions/:id/watch",
+        "operationId": "DELETE__api_v1_auctions_{id}_watch",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/98630f24a9e2ae556ba92595202094b3"
+          }
+        ],
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/resp_039"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Delete",
+        "tags": ["Api"]
+      },
+      "post": {
+        "description": "POST /api/v1/auctions/:id/watch",
+        "operationId": "POST__api_v1_auctions_{id}_watch",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/98630f24a9e2ae556ba92595202094b3"
+          }
+        ],
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/resp_039"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_046"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Create",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/bid_packs": {
+      "get": {
+        "description": "Publicly lists active bid packs available for purchase.",
+        "operationId": "GET__api_v1_bid_packs",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_018"
+          }
+        },
+        "summary": "List available bid packs",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/checkout/status": {
+      "get": {
+        "description": "Fetches the status of a Stripe checkout session using its ID.",
+        "operationId": "GET__api_v1_checkout_status",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/c96cce3d59cd4fa44833d2fd8dcb937c"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_052"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Check the Stripe checkout session status",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/checkout/success": {
+      "get": {
+        "description": "Idempotently processes a paid checkout session and credits the user with purchased bids.",
+        "operationId": "GET__api_v1_checkout_success",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/c96cce3d59cd4fa44833d2fd8dcb937c"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_054"
+          },
+          "208": {
+            "$ref": "#/components/responses/resp_032"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Handle successful checkout callbacks and credit the user",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/checkouts": {
+      "post": {
+        "description": "Initializes a Stripe checkout session for the given bid pack and returns the client secret.",
+        "operationId": "POST__api_v1_checkouts",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/e47fcdce1e2038e964734571e689bfeb"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_050"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Start a Stripe Checkout session for a bid pack",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/email_verifications/resend": {
+      "post": {
+        "description": "POST /api/v1/email_verifications/resend",
+        "operationId": "POST__api_v1_email_verifications_resend",
+        "responses": {
+          "202": {
+            "$ref": "#/components/responses/resp_062"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "429": {
+            "$ref": "#/components/responses/resp_059"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Resend verification email for the current user",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/email_verifications/verify": {
+      "get": {
+        "description": "GET /api/v1/email_verifications/verify",
+        "operationId": "GET__api_v1_email_verifications_verify",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/b5e011eb97af026f0de4a08c94735bc7"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_036"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_016"
+          }
+        },
+        "summary": "Verify an email verification token",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/logged_in": {
+      "get": {
+        "description": "GET /api/v1/logged_in\nReturns session and user context if the token is valid.",
+        "operationId": "GET__api_v1_logged_in",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_008"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Check whether the provided token is valid",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/login": {
+      "post": {
+        "description": "POST /api/v1/login\nAuthenticates a user and returns session tokens plus user context.",
+        "operationId": "POST__api_v1_login",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_004"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_004"
+          },
+          "400": {
+            "$ref": "#/components/responses/resp_020"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_046"
+          }
+        },
+        "summary": "Log in and create a session",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/logout": {
+      "delete": {
+        "description": "DELETE /api/v1/logout\nRevokes the active session token and returns a confirmation message.",
+        "operationId": "DELETE__api_v1_logout",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_048"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Log out and revoke the current session token",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/maintenance": {
+      "get": {
+        "description": "GET /api/v1/maintenance\nReturns whether maintenance mode is enabled for end users.",
+        "operationId": "GET__api_v1_maintenance",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_064"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          }
+        },
+        "summary": "Show public maintenance mode state",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/me/account": {},
+    "/api/v1/me/account/*path": {},
+    "/api/v1/me/activity": {
+      "get": {
+        "description": "GET /api/v1/me/activity\nMerges bids, watches, and outcomes into a single newest-first feed.\nNOTE: Currently merges in Ruby; may not scale for large histories.",
+        "operationId": "GET__api_v1_me_activity",
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/resp_039"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "List current user's activity feed",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/me/notifications": {
+      "get": {
+        "description": "GET /api/v1/me/notifications",
+        "operationId": "GET__api_v1_me_notifications",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_053"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "List current user's notifications (newest first)",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/me/purchases": {
+      "get": {
+        "description": "GET /api/v1/me/purchases",
+        "operationId": "GET__api_v1_me_purchases",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_012"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "List current user's purchases (newest first)",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/me/purchases/{id}": {
+      "get": {
+        "description": "GET /api/v1/me/purchases/:id",
+        "operationId": "GET__api_v1_me_purchases_{id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/f1b9d71bc5c9d7c5d3b7d0c3e3d4faa8"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_045"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Show purchase details for current user",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/me/wins": {
+      "get": {
+        "description": "GET /api/v1/me/wins",
+        "operationId": "GET__api_v1_me_wins",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_011"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "List current user's auction wins (newest first)",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/me/wins/{auction_id}": {
+      "get": {
+        "description": "GET /api/v1/me/wins/:auction_id",
+        "operationId": "GET__api_v1_me_wins_{auction_id}",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/6d2922b757358bf49bc76b1d1dbd2d51"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_037"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Show win details for current user",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/me/wins/{auction_id}/claim": {
+      "post": {
+        "description": "POST /api/v1/me/wins/:auction_id/claim",
+        "operationId": "POST__api_v1_me_wins_{auction_id}_claim",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/6d2922b757358bf49bc76b1d1dbd2d51"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_031"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_002"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Claim a won auction by providing a shipping address",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/password/forgot": {
+      "post": {
+        "description": "",
+        "operationId": "POST__api_v1_password_forgot",
+        "responses": {
+          "202": {
+            "$ref": "#/components/responses/resp_062"
+          },
+          "400": {
+            "$ref": "#/components/responses/resp_020"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_046"
+          }
+        },
+        "summary": "Request a password reset email",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/password/reset": {
+      "post": {
+        "description": "",
+        "operationId": "POST__api_v1_password_reset",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_003"
+          },
+          "400": {
+            "$ref": "#/components/responses/resp_020"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_042"
+          }
+        },
+        "summary": "Reset a password using a token",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/session/refresh": {
+      "post": {
+        "description": "Exchanges a valid refresh token for a new session token pair.",
+        "operationId": "POST__api_v1_session_refresh",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_002"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_015"
+          },
+          "400": {
+            "$ref": "#/components/responses/resp_020"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_049"
+          }
+        },
+        "summary": "Refresh the current session using a refresh token",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/session/remaining": {
+      "get": {
+        "description": "Provides session token metadata for the authenticated user.",
+        "operationId": "GET__api_v1_session_remaining",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_009"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Return remaining time for the current session token",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/signup": {
+      "post": {
+        "description": "POST /api/v1/signup",
+        "operationId": "POST__api_v1_signup",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_014"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/resp_004"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_058"
+          }
+        },
+        "summary": "Register a new user account and create a session (login-equivalent contract)",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/stripe/webhooks": {
+      "post": {
+        "description": "",
+        "operationId": "POST__api_v1_stripe_webhooks",
+        "responses": {
+          "401": {
+            "$ref": "#/components/responses/resp_039"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_046"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Create",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/users": {
+      "post": {
+        "description": "POST /api/v1/users",
+        "operationId": "POST__api_v1_users",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/req_014"
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/resp_004"
+          },
+          "422": {
+            "$ref": "#/components/responses/resp_058"
+          }
+        },
+        "summary": "Register a new user account (legacy alias of /api/v1/signup)",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/wallet": {
+      "get": {
+        "description": "GET /api/v1/wallet\nReturns the user's current credits balance, derived from the append-only ledger,\nplus an audit comparison against the cached `bid_credits` column.",
+        "operationId": "GET__api_v1_wallet",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_023"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "404": {
+            "$ref": "#/components/responses/resp_041"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "Show current credits balance",
+        "tags": ["Api"]
+      }
+    },
+    "/api/v1/wallet/transactions": {
+      "get": {
+        "description": "GET /api/v1/wallet/transactions\nReturns a paginated view of the user's append-only ledger history.",
+        "operationId": "GET__api_v1_wallet_transactions",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/4b8201d282702e38320140ce419db69c"
+          },
+          {
+            "$ref": "#/components/parameters/8b577654ea2cfd842be3fdfd02ff6509"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/resp_030"
+          },
+          "401": {
+            "$ref": "#/components/responses/resp_063"
+          },
+          "403": {
+            "$ref": "#/components/responses/resp_044"
+          },
+          "500": {
+            "$ref": "#/components/responses/resp_021"
+          }
+        },
+        "security": [
+          {
+            "bearer_jwt": []
+          }
+        ],
+        "summary": "List wallet ledger transactions (newest first)",
+        "tags": ["Api"]
+      }
+    }
+  },
+  "security": [
+    {
+      "bearer_jwt": []
+    }
+  ],
+  "servers": [
+    {
+      "description": "Default server",
+      "url": "http://localhost:3000"
+    }
+  ]
+}

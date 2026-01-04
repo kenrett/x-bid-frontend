@@ -6,6 +6,7 @@ import { normalizeAuthResponse } from "@features/auth/api/authResponse";
 import { showToast } from "@services/toast";
 import { getApiErrorDetails } from "@utils/apiError";
 import type { FieldErrors } from "@api/normalizeApiError";
+import type { ApiJsonResponse } from "@api/openapi-helpers";
 
 const isUnexpectedAuthResponseError = (err: unknown) =>
   err instanceof Error && err.message.startsWith("Unexpected auth response:");
@@ -48,7 +49,9 @@ export const LoginForm = () => {
     setFieldErrors({});
 
     try {
-      const response = await client.post("/api/v1/login", {
+      const response = await client.post<
+        ApiJsonResponse<"/api/v1/login", "post">
+      >("/api/v1/login", {
         email_address,
         password,
       });

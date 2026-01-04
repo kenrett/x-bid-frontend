@@ -1,0 +1,192 @@
+import fs from "node:fs/promises";
+import path from "node:path";
+import process from "node:process";
+import openapiTS from "openapi-typescript";
+import ts from "typescript";
+
+const DEFAULT_OUT_FILE = "src/api/openapi-types.ts";
+const DEFAULT_SPEC_SNAPSHOT_FILE = "docs/api/openapi.json";
+
+const isUrl = (value) => /^https?:\/\//i.test(value);
+
+const parseArgs = (argv) => {
+  const args = { spec: undefined, out: DEFAULT_OUT_FILE, snapshot: undefined };
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (arg === "--spec") {
+      args.spec = argv[i + 1];
+      i += 1;
+      continue;
+    }
+    if (arg === "--out") {
+      args.out = argv[i + 1];
+      i += 1;
+      continue;
+    }
+    if (arg === "--snapshot") {
+      args.snapshot = argv[i + 1];
+      i += 1;
+      continue;
+    }
+  }
+  return args;
+};
+
+const readJsonFile = async (filePath) => {
+  const raw = await fs.readFile(filePath, "utf8");
+  return JSON.parse(raw);
+};
+
+const readJsonUrl = async (url) => {
+  const response = await fetch(url, {
+    headers: { Accept: "application/json" },
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch OpenAPI schema (${response.status}) ${url}`);
+  }
+  return response.json();
+};
+
+const findDefaultSpec = async () => {
+  const candidates = [
+    process.env.OPENAPI_SPEC,
+    path.join("..", "x-bid-backend", "docs", "api", "openapi.json"),
+    DEFAULT_SPEC_SNAPSHOT_FILE,
+    process.env.OPENAPI_URL,
+    "http://localhost:3000/docs.json",
+    "http://localhost:3000/api-docs.json",
+  ].filter(Boolean);
+
+  for (const candidate of candidates) {
+    if (isUrl(candidate)) return candidate;
+    try {
+      await fs.access(candidate);
+      return candidate;
+    } catch {
+      // keep searching
+    }
+  }
+
+  return undefined;
+};
+
+const ensureDir = async (filePath) => {
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+};
+
+const cloneJson = (value) => {
+  if (typeof globalThis.structuredClone === "function") {
+    return globalThis.structuredClone(value);
+  }
+  return JSON.parse(JSON.stringify(value));
+};
+
+const sanitizeOpenApiSchema = (schema) => {
+  const components = schema?.components;
+  const schemas = components?.schemas;
+  if (!schemas || typeof schemas !== "object") return schema;
+
+  const placeholderSchema = (note) => ({
+    type: "object",
+    description: `Invalid schema placeholder from source: ${note}`,
+    additionalProperties: true,
+  });
+
+  const fixNode = (node) => {
+    if (!node || typeof node !== "object") return;
+    if (Array.isArray(node)) {
+      for (const entry of node) fixNode(entry);
+      return;
+    }
+
+    if (node.properties && typeof node.properties === "object") {
+      for (const [propKey, propValue] of Object.entries(node.properties)) {
+        if (typeof propValue === "string") {
+          node.properties[propKey] = { type: propValue };
+          continue;
+        }
+        fixNode(propValue);
+      }
+    }
+
+    if (typeof node.items === "string") {
+      node.items = placeholderSchema(node.items);
+    } else {
+      fixNode(node.items);
+    }
+
+    if (typeof node.additionalProperties === "string") {
+      node.additionalProperties = placeholderSchema(node.additionalProperties);
+    } else {
+      fixNode(node.additionalProperties);
+    }
+
+    for (const [key, value] of Object.entries(node)) {
+      if (key === "properties" || key === "items" || key === "additionalProperties")
+        continue;
+      fixNode(value);
+    }
+  };
+
+  for (const [key, value] of Object.entries(schemas)) {
+    if (typeof value !== "string") continue;
+    schemas[key] = placeholderSchema(value);
+  }
+
+  for (const value of Object.values(schemas)) fixNode(value);
+
+  return schema;
+};
+
+const main = async () => {
+  const { spec, out, snapshot } = parseArgs(process.argv.slice(2));
+  const resolvedSpec = spec ?? (await findDefaultSpec());
+  if (!resolvedSpec) {
+    throw new Error(
+      "OpenAPI spec not found. Provide `--spec <path|url>` or set OPENAPI_SPEC/OPENAPI_URL.",
+    );
+  }
+
+  const rawSchema = isUrl(resolvedSpec)
+    ? await readJsonUrl(resolvedSpec)
+    : await readJsonFile(resolvedSpec);
+
+  if (snapshot) {
+    await ensureDir(snapshot);
+    await fs.writeFile(
+      snapshot,
+      `${JSON.stringify(rawSchema, null, 2)}\n`,
+      "utf8",
+    );
+  }
+
+  const schemaForTypes = sanitizeOpenApiSchema(cloneJson(rawSchema));
+  const types = await openapiTS(schemaForTypes);
+  const output =
+    typeof types === "string"
+      ? types
+      : (() => {
+          const source = ts.createSourceFile(
+            path.basename(out),
+            "",
+            ts.ScriptTarget.Latest,
+            false,
+            ts.ScriptKind.TS,
+          );
+          const printer = ts.createPrinter({
+            newLine: ts.NewLineKind.LineFeed,
+          });
+          return printer.printList(
+            ts.ListFormat.MultiLine,
+            ts.factory.createNodeArray(types),
+            source,
+          );
+        })();
+  await ensureDir(out);
+  await fs.writeFile(out, output, "utf8");
+};
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

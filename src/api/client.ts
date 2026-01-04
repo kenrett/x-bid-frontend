@@ -203,7 +203,10 @@ client.interceptors.response.use(
 
       if (canRefreshWithToken) {
         try {
-          const next = await beginRefresh({ mode: "token", refreshToken });
+          const next = await beginRefresh({
+            mode: "token",
+            refreshToken: refreshToken ?? undefined,
+          });
           authTokenStore.setSession({
             token: next.token,
             refreshToken: next.refreshToken,
