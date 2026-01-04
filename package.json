@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "gen:api-types": "node scripts/gen-api-types.mjs --snapshot docs/api/openapi.json",
+    "gen:api-types": "node scripts/gen-api-types.mjs --snapshot src/contracts/openapi.json",
     "check:api-types": "node scripts/check-api-types.mjs",
     "prepare": "husky",
     "preview": "vite preview",

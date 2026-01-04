@@ -7,7 +7,7 @@ const main = () => {
   run("node", [
     "scripts/gen-api-types.mjs",
     "--spec",
-    "docs/api/openapi.json",
+    "src/contracts/openapi.json",
     "--out",
     "src/api/openapi-types.ts",
   ]);
@@ -23,4 +23,3 @@ try {
   );
   process.exit(1);
 }
-

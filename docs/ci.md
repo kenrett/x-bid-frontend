@@ -1,6 +1,6 @@
 # CI pipeline
 
-- **Pull requests:** run `Frontend Tests` (npm ci → generated API type check → optional typecheck/lint/test → build). If a Rails backend is present, `Backend Tests` run with Ruby 3.4, PostgreSQL, `rails db:prepare`, and `rails test`. Vercel preview deploys happen via the Vercel integration when enabled.
+- **Pull requests:** run `Frontend Tests` (npm ci → OpenAPI contract drift check → optional typecheck/lint/test → build). If a Rails backend is present, `Backend Tests` run with Ruby 3.4, PostgreSQL, `rails db:prepare`, and `rails test`. Vercel preview deploys happen via the Vercel integration when enabled.
 - **Main branch:** same checks as PRs; on merge, Vercel deploys the frontend and Render deploys the backend via their native integrations.
 
 ## Deploy gating
