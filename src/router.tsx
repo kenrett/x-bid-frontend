@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import type { RouteObject } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { RouteErrorBoundary } from "./components/ErrorBoundary/RouteErrorBoundary";
 import { ADMIN_PATHS } from "@features/admin/components/Admin/adminPaths";
@@ -13,7 +14,7 @@ const lazy =
     return { Component };
   };
 
-export const routes = [
+export const routes: RouteObject[] = [
   {
     element: <Layout />,
     errorElement: <RouteErrorBoundary />,
@@ -330,4 +331,4 @@ export const routes = [
       },
     ],
   },
-] as const;
+];

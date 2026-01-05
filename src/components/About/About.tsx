@@ -38,6 +38,10 @@ export const About = () => {
               <img
                 src={logo}
                 alt="XBid logo on a luxurious dark background"
+                loading="lazy"
+                decoding="async"
+                width={512}
+                height={512}
                 className="w-full max-w-sm rounded-full shadow-2xl transition-all duration-500 ease-in-out hover:scale-105 drop-shadow-[0_0_20px_rgba(255,105,180,0.7)]"
               />
             </Link>
@@ -52,6 +56,10 @@ export const About = () => {
             <img
               src="https://placehold.co/300x300/0d0d1a/a020f0?text=Secure"
               alt="Stylized glowing padlock representing security and tantalizing mystery"
+              loading="lazy"
+              decoding="async"
+              width={256}
+              height={256}
               className="w-64 h-64 object-contain transition-all duration-500 hover:rotate-3 drop-shadow-[0_0_15px_rgba(160,32,240,0.6)]"
             />
           </div>
@@ -221,6 +229,10 @@ export const About = () => {
               <img
                 src={member.img}
                 alt={`Portrait of ${member.name}`}
+                loading="lazy"
+                decoding="async"
+                width={144}
+                height={144}
                 className={`w-36 h-36 rounded-full object-cover mb-6 border-4 ${member.borderColor} shadow-lg transform hover:scale-105 transition-transform duration-300`}
               />
               <h3 className="font-serif text-3xl font-bold mb-2">

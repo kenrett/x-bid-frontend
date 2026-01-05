@@ -23,12 +23,13 @@ export const reportUnexpectedResponse = (
 
   try {
     if (typeof Sentry.withScope === "function") {
-      Sentry.withScope((scope: SentryScope) => {
-        scope.setTag("response_context", context);
+      Sentry.withScope((scope) => {
+        const typedScope = scope as SentryScope;
+        typedScope.setTag("response_context", context);
         try {
-          scope.setExtra("payload", payload);
+          typedScope.setExtra("payload", payload);
         } catch {
-          scope.setExtra("payload", "[unserializable]");
+          typedScope.setExtra("payload", "[unserializable]");
         }
         Sentry.captureException(error);
       });
