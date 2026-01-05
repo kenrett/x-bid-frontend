@@ -215,7 +215,7 @@ export function Header() {
                     </span>
                   ) : emailVerified === false ? (
                     <Link
-                      to="/account/security"
+                      to="/account/verify-email"
                       className="inline-flex items-center rounded-full border border-amber-300/30 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-50 hover:bg-amber-500/15 transition-colors"
                     >
                       Email unverified

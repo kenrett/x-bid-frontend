@@ -172,6 +172,14 @@ export const routes: RouteObject[] = [
                 ),
               },
               {
+                path: "verify-email",
+                lazy: lazy(
+                  () =>
+                    import("@features/account/components/AccountVerifyEmailPage"),
+                  "AccountVerifyEmailPage",
+                ),
+              },
+              {
                 path: "sessions",
                 lazy: lazy(
                   () =>

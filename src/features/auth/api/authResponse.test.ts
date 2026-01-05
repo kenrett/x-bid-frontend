@@ -28,6 +28,8 @@ describe("normalizeAuthResponse", () => {
         bidCredits: 463,
         is_admin: false,
         is_superuser: false,
+        email_verified: null,
+        email_verified_at: null,
       },
     });
   });

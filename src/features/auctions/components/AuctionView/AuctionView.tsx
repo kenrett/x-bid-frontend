@@ -20,6 +20,8 @@ interface AuctionViewProps {
     name: string;
     is_admin?: boolean;
     is_superuser?: boolean;
+    email_verified?: boolean;
+    email_verified_at?: string | null;
   } | null;
   isBidding: boolean;
   bidError: string | null;
@@ -44,6 +46,17 @@ const AuctionViewComponent = ({
   const navigate = useNavigate();
   const isConnected = connectionState === "connected";
   const isConnecting = connectionState === "connecting";
+  const isEmailVerified =
+    user?.email_verified === true || Boolean(user?.email_verified_at);
+  const isEmailVerificationUnknown = Boolean(
+    user && user.email_verified === null && !user.email_verified_at,
+  );
+  const isBiddingBlockedByEmail = Boolean(
+    auction.status === "active" &&
+    user &&
+    !(user.is_admin || user.is_superuser) &&
+    !isEmailVerified,
+  );
 
   return (
     <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4">
@@ -194,16 +207,40 @@ const AuctionViewComponent = ({
                     onClick={onPlaceBid}
                     disabled={
                       isBidding ||
+                      isBiddingBlockedByEmail ||
                       Number(user?.id) === Number(auction.highest_bidder_id)
+                    }
+                    title={
+                      isBiddingBlockedByEmail
+                        ? isEmailVerificationUnknown
+                          ? "Checking email verification status..."
+                          : "Verify your email to place bids."
+                        : undefined
                     }
                     className="mt-4 w-full text-lg bg-[#ff69b4] text-[#1a0d2e] px-10 py-4 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20 disabled:bg-gray-500 disabled:cursor-not-allowed disabled:shadow-none disabled:scale-100"
                   >
                     {isBidding
                       ? "Placing Bid..."
-                      : Number(user?.id) === Number(auction.highest_bidder_id)
-                        ? "You are the highest bidder"
-                        : "Place Your Bid"}
+                      : isBiddingBlockedByEmail
+                        ? isEmailVerificationUnknown
+                          ? "Checking verification..."
+                          : "Verify email to bid"
+                        : Number(user?.id) === Number(auction.highest_bidder_id)
+                          ? "You are the highest bidder"
+                          : "Place Your Bid"}
                   </button>
+                  {isBiddingBlockedByEmail && user?.email_verified === false ? (
+                    <div className="mt-3 rounded-xl border border-amber-300/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                      Verify your email to place bids.{" "}
+                      <button
+                        type="button"
+                        onClick={() => navigate("/account/verify-email")}
+                        className="font-semibold underline underline-offset-2 hover:text-white"
+                      >
+                        Verify now
+                      </button>
+                    </div>
+                  ) : null}
                 </>
               )}
           </div>

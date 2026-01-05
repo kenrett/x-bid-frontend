@@ -29,7 +29,7 @@ export const AccountCompletionBanner = () => {
           email to unlock withdrawals/checkout.
         </div>
         <Link
-          to="/account/security"
+          to="/account/verify-email"
           className="shrink-0 rounded-lg border border-amber-300/30 bg-black/20 px-3 py-1.5 text-xs font-semibold text-amber-50 hover:bg-black/30 transition-colors"
         >
           Verify now

@@ -19,8 +19,11 @@ export const PurchaseStatus = () => {
     "loading",
   );
   const [message, setMessage] = useState<string | null>(null);
-  const { updateUserBalance } = useAuth();
+  const { updateUserBalance, user } = useAuth();
   const hasVerifiedRef = useRef(false);
+  const isEmailVerified = Boolean(
+    user && (user.email_verified === true || user.email_verified_at),
+  );
 
   const stableVerifyFailureMessage = (statusCode: number | undefined) => {
     if (statusCode === 401) return "Your session expired, please log in again.";
@@ -45,6 +48,20 @@ export const PurchaseStatus = () => {
 
     const verifyPayment = async () => {
       try {
+        if (user && !isEmailVerified) {
+          setStatus("error");
+          if (user.email_verified === false) {
+            setMessage("Verify your email to complete checkout.");
+            window.dispatchEvent(
+              new CustomEvent("app:email_unverified", {
+                detail: { status: 403, code: "email_unverified" },
+              }),
+            );
+          } else {
+            setMessage("Checking email verification status...");
+          }
+          return;
+        }
         const response = await client.get<CheckoutSuccessResponse>(
           `/api/v1/checkout/success`,
           {
@@ -103,7 +120,7 @@ export const PurchaseStatus = () => {
     };
 
     void verifyPayment();
-  }, [searchParams, updateUserBalance]);
+  }, [searchParams, updateUserBalance, user, isEmailVerified]);
 
   useEffect(() => {
     if (status === "success") {

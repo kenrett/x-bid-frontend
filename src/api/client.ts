@@ -83,6 +83,8 @@ const INVALID_SESSION_CODES = new Set([
   "session_expired",
 ]);
 
+const EMAIL_UNVERIFIED_CODES = new Set(["email_unverified"]);
+
 const extractErrorCode = (data: unknown): string | undefined => {
   if (!data || typeof data !== "object") return undefined;
   const record = data as Record<string, unknown>;
@@ -107,6 +109,12 @@ const isInvalidSessionError = (error: AxiosError): boolean => {
   return INVALID_SESSION_CODES.has(code.toLowerCase());
 };
 
+const isEmailUnverifiedError = (error: AxiosError): boolean => {
+  const code = extractErrorCode(error.response?.data);
+  if (!code) return false;
+  return EMAIL_UNVERIFIED_CODES.has(code.toLowerCase());
+};
+
 let sessionInvalidated = false;
 authSessionStore.subscribe(() => {
   const snapshot = authSessionStore.getSnapshot();
@@ -124,6 +132,12 @@ const dispatchUnauthorized = (status: number, code?: string) => {
   sessionInvalidated = true;
   window.dispatchEvent(
     new CustomEvent("app:unauthorized", { detail: { status, code } }),
+  );
+};
+
+const dispatchEmailUnverified = (status: number, code?: string) => {
+  window.dispatchEvent(
+    new CustomEvent("app:email_unverified", { detail: { status, code } }),
   );
 };
 
@@ -165,6 +179,10 @@ client.interceptors.response.use(
         window.location.assign("/maintenance");
       }
     } else if (status === 401 || status === 403) {
+      if (status === 403 && isEmailUnverifiedError(error)) {
+        dispatchEmailUnverified(status, extractErrorCode(error.response?.data));
+        return Promise.reject(error);
+      }
       if (isInvalidSessionError(error)) {
         authSessionStore.clear();
         dispatchUnauthorized(status, extractErrorCode(error.response?.data));

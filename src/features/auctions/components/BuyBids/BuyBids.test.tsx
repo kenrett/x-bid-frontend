@@ -73,6 +73,7 @@ const mockUserLoggedIn = {
   bidCredits: 100,
   email: "test@example.com",
   is_admin: false,
+  email_verified: true,
 };
 
 // Helper to create a full mock UseAuthReturn object
@@ -160,6 +161,21 @@ describe("BuyBids Component", () => {
       mockedClient.get.mockReturnValue(new Promise(() => {}));
       renderComponent();
       expect(screen.getByText("Loading bid packs...")).toBeInTheDocument();
+    });
+
+    it("blocks unverified users from starting checkout", async () => {
+      mockedUseAuth.mockReturnValue(
+        createMockAuthReturn({ ...mockUserLoggedIn, email_verified: false }),
+      );
+      renderComponent();
+
+      expect(
+        await screen.findByText(/Verify your email to buy bids/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /verify email/i }),
+      ).toHaveAttribute("href", "/account/verify-email");
+      expect(mockedClient.post).not.toHaveBeenCalled();
     });
 
     it("shows an error if fetching packs fails", async () => {

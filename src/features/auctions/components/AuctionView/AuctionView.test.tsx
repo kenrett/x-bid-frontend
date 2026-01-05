@@ -56,7 +56,7 @@ const mockAuction: AuctionDetail = {
   bids: [],
 };
 
-const mockUser = { id: 1, name: "Test User" };
+const mockUser = { id: 1, name: "Test User", email_verified: true };
 
 const defaultProps = {
   auction: mockAuction,
@@ -182,6 +182,18 @@ describe("AuctionView Component", () => {
       const bidButton = screen.getByRole("button", { name: /place your bid/i });
       await user.click(bidButton);
       expect(onPlaceBidMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("disables bidding and shows guidance when email is unverified", async () => {
+      renderComponent({ user: { ...mockUser, email_verified: false } });
+      const bidButton = screen.getByRole("button", {
+        name: /verify email to bid/i,
+      });
+      expect(bidButton).toBeDisabled();
+      expect(
+        screen.getByText(/Verify your email to place bids/i),
+      ).toBeInTheDocument();
+      await screen.findByTestId("bid-history");
     });
   });
 

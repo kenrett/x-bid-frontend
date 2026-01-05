@@ -68,6 +68,8 @@ export const BuyBids = () => {
   const { promise: stripeLoader, hasKey: hasStripeKey } =
     buildStripeLoader(mockStripePromise);
   const { user } = useAuth();
+  const isEmailVerified =
+    user?.email_verified === true || Boolean(user?.email_verified_at);
   const [bidPacks, setBidPacks] = useState<BidPack[]>([]);
   const [isLoadingPacks, setIsLoadingPacks] = useState(true);
   const [isPurchasingPackId, setIsPurchasingPackId] = useState<number | null>(
@@ -188,12 +190,12 @@ export const BuyBids = () => {
       }
     };
 
-    if (user) {
+    if (user && isEmailVerified) {
       void fetchBidPacks();
     } else {
       setIsLoadingPacks(false);
     }
-  }, [user]);
+  }, [user, isEmailVerified]);
 
   if (!user) {
     return (
@@ -209,6 +211,35 @@ export const BuyBids = () => {
           className="inline-block text-lg bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20"
         >
           Log In to Continue
+        </Link>
+      </Page>
+    );
+  }
+
+  if (user.email_verified === null && !user.email_verified_at) {
+    return (
+      <Page centered>
+        <p className="text-gray-400 text-lg">
+          Checking email verification status...
+        </p>
+      </Page>
+    );
+  }
+
+  if (!isEmailVerified) {
+    return (
+      <Page centered>
+        <h2 className="font-serif text-4xl font-bold mb-4 text-white">
+          Verify your email to buy bids
+        </h2>
+        <p className="mb-6 text-lg text-gray-400">
+          Email verification is required before you can start checkout.
+        </p>
+        <Link
+          to="/account/verify-email"
+          className="inline-block text-lg bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20"
+        >
+          Verify email
         </Link>
       </Page>
     );
@@ -244,6 +275,15 @@ export const BuyBids = () => {
 
     if (!user) {
       setError("You must be logged in to purchase a pack.");
+      return;
+    }
+    if (!isEmailVerified) {
+      setError("Verify your email before purchasing bid packs.");
+      window.dispatchEvent(
+        new CustomEvent("app:email_unverified", {
+          detail: { status: 403, code: "email_unverified" },
+        }),
+      );
       return;
     }
 

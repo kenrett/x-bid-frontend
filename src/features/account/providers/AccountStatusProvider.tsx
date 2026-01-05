@@ -10,7 +10,7 @@ export const AccountStatusProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const { user, accessToken, isReady } = useAuth();
+  const { user, accessToken, isReady, updateUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
@@ -26,8 +26,15 @@ export const AccountStatusProvider = ({
     try {
       const data = await accountApi.getSecurity();
       if (isMounted.current) {
-        setEmailVerified(Boolean(data.emailVerified));
-        setEmailVerifiedAt(data.emailVerifiedAt ?? null);
+        const verified = Boolean(data.emailVerified);
+        const verifiedAt = data.emailVerifiedAt ?? null;
+        setEmailVerified(verified);
+        setEmailVerifiedAt(verifiedAt);
+        updateUser((current) => ({
+          ...current,
+          email_verified: verified,
+          email_verified_at: verifiedAt,
+        }));
       }
     } catch (err) {
       if (isMounted.current) {
@@ -38,7 +45,7 @@ export const AccountStatusProvider = ({
     } finally {
       if (isMounted.current) setIsLoading(false);
     }
-  }, [isAuthed]);
+  }, [isAuthed, updateUser]);
 
   useEffect(() => {
     isMounted.current = true;

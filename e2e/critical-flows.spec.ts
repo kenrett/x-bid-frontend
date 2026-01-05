@@ -64,6 +64,8 @@ const authedUser = {
   bidCredits: 120,
   is_admin: false,
   is_superuser: false,
+  email_verified: true,
+  email_verified_at: "2025-01-01T00:00:00Z",
 };
 
 const loginResponse = {

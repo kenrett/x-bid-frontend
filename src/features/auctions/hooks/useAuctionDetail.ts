@@ -170,6 +170,9 @@ export function useAuctionDetail(auctionId: number) {
   const [state, dispatch] = useReducer(auctionReducer, initialState);
   const lastRefreshEndTimeRef = useRef<string | null>(null);
 
+  const isEmailVerified =
+    user?.email_verified === true || Boolean(user?.email_verified_at);
+
   const refreshAuction = useCallback(async () => {
     if (!auctionId) return;
 
@@ -227,10 +230,23 @@ export function useAuctionDetail(auctionId: number) {
     if (
       !state.auction ||
       !user ||
+      !isEmailVerified ||
       state.isBidding ||
       user.id === state.auction.highest_bidder_id ||
       !auctionSubscription
     ) {
+      if (user && !isEmailVerified) {
+        if (user.email_verified === false) {
+          showToast("Verify your email to place bids.", "error");
+          window.dispatchEvent(
+            new CustomEvent("app:email_unverified", {
+              detail: { status: 403, code: "email_unverified" },
+            }),
+          );
+        } else {
+          showToast("Checking email verification status...", "error");
+        }
+      }
       return;
     }
 

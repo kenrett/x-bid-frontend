@@ -1,19 +1,42 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import { Header } from "./Header/Header";
 import { Footer } from "./Footer/Footer";
 import { AccountStatusProvider } from "@features/account/providers/AccountStatusProvider";
 import { AccountCompletionBanner } from "./AccountCompletionBanner";
+import { showToast } from "@services/toast";
 
 export const Layout = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const redirectingRef = useRef(false);
+
+  useEffect(() => {
+    const onEmailUnverified = () => {
+      if (redirectingRef.current) return;
+      redirectingRef.current = true;
+      showToast("Verify your email to continue.", "error");
+      if (!location.pathname.startsWith("/account/verify-email")) {
+        navigate("/account/verify-email");
+      }
+      window.setTimeout(() => {
+        redirectingRef.current = false;
+      }, 500);
+    };
+    window.addEventListener("app:email_unverified", onEmailUnverified);
+    return () =>
+      window.removeEventListener("app:email_unverified", onEmailUnverified);
+  }, [navigate, location.pathname]);
+
   return (
     <div className="flex min-h-screen flex-col bg-[#0d0d1a]">
       <AccountStatusProvider>
         <Header />
         <AccountCompletionBanner />
+        <main className="flex-1">
+          <Outlet />
+        </main>
       </AccountStatusProvider>
-      <main className="flex-1">
-        <Outlet />
-      </main>
       <Footer />
     </div>
   );

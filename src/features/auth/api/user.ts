@@ -64,6 +64,24 @@ export const normalizeUser = (apiUser: UserPayload): User => {
   const normalizedName = typeof record.name === "string" ? record.name : "";
   const normalizedEmail = typeof email === "string" ? email : "";
 
+  const emailVerifiedAt = (() => {
+    const raw =
+      record.email_verified_at ??
+      record.emailVerifiedAt ??
+      record.email_verifiedAt ??
+      null;
+    return typeof raw === "string" && raw.trim() ? raw : null;
+  })();
+
+  const emailVerifiedRaw =
+    record.email_verified ?? record.emailVerified ?? undefined;
+  const emailVerified =
+    typeof emailVerifiedRaw === "undefined"
+      ? emailVerifiedAt
+        ? true
+        : null
+      : coerceAdminFlag(emailVerifiedRaw) || Boolean(emailVerifiedAt);
+
   return {
     id: Number(record.id ?? 0),
     name: normalizedName,
@@ -76,5 +94,7 @@ export const normalizeUser = (apiUser: UserPayload): User => {
     ),
     is_admin: isAdmin,
     is_superuser: isSuperuser,
+    email_verified: emailVerified,
+    email_verified_at: emailVerifiedAt,
   };
 };

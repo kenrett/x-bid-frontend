@@ -94,6 +94,27 @@ describe("api client response interceptor", () => {
     expect(window.location.assign).not.toHaveBeenCalled();
   });
 
+  it("dispatches email-unverified event on 403 email_unverified without clearing auth", async () => {
+    const dispatchSpy = vi.spyOn(window, "dispatchEvent");
+    authSessionStore.setTokens({
+      accessToken: "old-token",
+      refreshToken: "refresh-1",
+      sessionTokenId: "sid-1",
+    });
+
+    const error = {
+      response: { status: 403, data: { error_code: "email_unverified" } },
+      config: { url: "/api/v1/checkouts", headers: {} },
+    } as AxiosError;
+
+    await expect(rejected(error)).rejects.toBe(error);
+
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "app:email_unverified" }),
+    );
+    expect(authSessionStore.getSnapshot().accessToken).toBe("old-token");
+  });
+
   it("refreshes on 401 with in-memory refreshToken and retries once", async () => {
     const dispatchSpy = vi.spyOn(window, "dispatchEvent");
     const postSpy = vi.spyOn(client, "post");
