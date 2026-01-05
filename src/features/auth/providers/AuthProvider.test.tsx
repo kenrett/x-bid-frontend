@@ -14,12 +14,19 @@ vi.mock("@services/toast", () => ({
   },
 }));
 
-const cableMocks = vi.hoisted(() => ({
-  connect: vi.fn(),
-  disconnect: vi.fn(),
-  create: vi.fn(() => mockSubscription),
-  reset: vi.fn(),
-}));
+const cableMocks = vi.hoisted(() => {
+  const subscription = { unsubscribe: vi.fn() };
+  return {
+    connect: vi.fn(),
+    disconnect: vi.fn(),
+    subscription,
+    create: vi.fn((...args: unknown[]) => {
+      void args;
+      return subscription;
+    }),
+    reset: vi.fn(),
+  };
+});
 
 vi.mock("@api/client", () => {
   const get = vi.fn();
@@ -31,7 +38,6 @@ vi.mock("@api/client", () => {
   };
 });
 
-const mockSubscription = { unsubscribe: vi.fn() };
 vi.mock("@services/cable", () => ({
   cable: {
     connect: cableMocks.connect,
@@ -95,7 +101,7 @@ beforeEach(() => {
   mockedClient.get.mockResolvedValue({
     data: { remaining_seconds: 300 },
   });
-  mockSubscription.unsubscribe.mockReset();
+  cableMocks.subscription.unsubscribe.mockReset();
 });
 
 afterEach(() => {
@@ -171,7 +177,7 @@ describe("AuthProvider", () => {
     expect(localStorage.getItem("sessionTokenId")).toBeNull();
     expect(authTokenStore.getSnapshot().token).toBeNull();
     expect(cableMocks.reset).toHaveBeenCalled();
-    expect(mockSubscription.unsubscribe).toHaveBeenCalled();
+    expect(cableMocks.subscription.unsubscribe).toHaveBeenCalled();
   });
 
   it("uses remaining_seconds to drive countdown state", async () => {
