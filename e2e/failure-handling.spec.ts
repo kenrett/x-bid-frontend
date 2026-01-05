@@ -21,7 +21,9 @@ test("login shows error on invalid credentials", async ({ page }) => {
   await page.getByRole("button", { name: "Sign in" }).click();
 
   await expect(page).toHaveURL(/\/login$/);
-  await expect(page.getByRole("alert")).toContainText("Invalid credentials");
+  await expect(page.getByRole("alert")).toContainText(
+    "Invalid email or password. Please try again.",
+  );
 });
 
 test("auctions list shows error on server failure", async ({ page }) => {
