@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { AxiosError } from "axios";
-import { authTokenStore } from "@features/auth/tokenStore";
+import { authSessionStore } from "@features/auth/tokenStore";
 
 const showToast = vi.fn();
 vi.mock("@services/toast", () => ({
@@ -52,12 +52,13 @@ describe("api client response interceptor", () => {
   const rejected = getRejectedInterceptor();
 
   beforeEach(() => {
-    authTokenStore.clear();
+    authSessionStore.clear();
+    localStorage.clear();
     showToast.mockClear();
     vi.restoreAllMocks();
   });
 
-  it("attaches Authorization header only when token is in memory", () => {
+  it("attaches Authorization header only when access token is present", () => {
     const getItemSpy = vi.spyOn(Storage.prototype, "getItem");
     const baseConfig = { url: "/api/v1/example", headers: {} };
 
@@ -66,7 +67,11 @@ describe("api client response interceptor", () => {
       (withoutToken.headers as Record<string, unknown>).Authorization,
     ).toBe(undefined);
 
-    authTokenStore.setToken("abc");
+    authSessionStore.setTokens({
+      accessToken: "abc",
+      refreshToken: "refresh",
+      sessionTokenId: "sid",
+    });
     const withToken = applyRequestInterceptors({ ...baseConfig });
     expect((withToken.headers as Record<string, unknown>).Authorization).toBe(
       "Bearer abc",
@@ -94,15 +99,15 @@ describe("api client response interceptor", () => {
     const postSpy = vi.spyOn(client, "post");
     const requestSpy = vi.spyOn(client, "request");
 
-    authTokenStore.setSession({
-      token: "old-token",
+    authSessionStore.setTokens({
+      accessToken: "old-token",
       refreshToken: "refresh-1",
       sessionTokenId: "sid-1",
     });
 
     postSpy.mockResolvedValueOnce({
       data: {
-        token: "new-token",
+        access_token: "new-token",
         refresh_token: "refresh-2",
         session_token_id: "sid-2",
         user: {
@@ -142,6 +147,56 @@ describe("api client response interceptor", () => {
     expect(retriedConfig.__authRetry).toBe(true);
   });
 
+  it("clears auth and dispatches unauthorized when refresh_token is missing", async () => {
+    setPath("/auctions");
+    const dispatchSpy = vi.spyOn(window, "dispatchEvent");
+    const postSpy = vi.spyOn(client, "post");
+
+    authSessionStore.setTokens({
+      accessToken: "old-token",
+      refreshToken: "",
+      sessionTokenId: "sid-1",
+    });
+
+    const error = {
+      response: { status: 401 },
+      config: { url: "/api/v1/protected", headers: {} },
+    } as AxiosError;
+
+    await expect(rejected(error)).rejects.toBe(error);
+
+    expect(postSpy).not.toHaveBeenCalled();
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "app:unauthorized" }),
+    );
+    expect(authSessionStore.getSnapshot().accessToken).toBeNull();
+  });
+
+  it("clears auth and dispatches unauthorized when session_token_id is missing", async () => {
+    setPath("/auctions");
+    const dispatchSpy = vi.spyOn(window, "dispatchEvent");
+    const postSpy = vi.spyOn(client, "post");
+
+    authSessionStore.setTokens({
+      accessToken: "old-token",
+      refreshToken: "refresh-1",
+      sessionTokenId: "",
+    });
+
+    const error = {
+      response: { status: 401 },
+      config: { url: "/api/v1/protected", headers: {} },
+    } as AxiosError;
+
+    await expect(rejected(error)).rejects.toBe(error);
+
+    expect(postSpy).not.toHaveBeenCalled();
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "app:unauthorized" }),
+    );
+    expect(authSessionStore.getSnapshot().accessToken).toBeNull();
+  });
+
   it("dispatches unauthorized when refresh fails", async () => {
     setPath("/auctions");
     const dispatchSpy = vi.spyOn(window, "dispatchEvent");
@@ -153,8 +208,8 @@ describe("api client response interceptor", () => {
     );
     const requestSpy = vi.spyOn(client, "request");
 
-    authTokenStore.setSession({
-      token: "old-token",
+    authSessionStore.setTokens({
+      accessToken: "old-token",
       refreshToken: "refresh-1",
       sessionTokenId: "sid-1",
     });
@@ -171,7 +226,7 @@ describe("api client response interceptor", () => {
     expect(dispatchSpy).toHaveBeenCalledWith(
       expect.objectContaining({ type: "app:unauthorized" }),
     );
-    expect(authTokenStore.getSnapshot().token).toBeNull();
+    expect(authSessionStore.getSnapshot().accessToken).toBeNull();
   });
 
   it("does not attempt refresh again after a refresh failure clears auth", async () => {
@@ -184,8 +239,8 @@ describe("api client response interceptor", () => {
       }),
     );
 
-    authTokenStore.setSession({
-      token: "old-token",
+    authSessionStore.setTokens({
+      accessToken: "old-token",
       refreshToken: "refresh-1",
       sessionTokenId: "sid-1",
     });
@@ -214,8 +269,8 @@ describe("api client response interceptor", () => {
     const dispatchSpy = vi.spyOn(window, "dispatchEvent");
     const postSpy = vi.spyOn(client, "post");
 
-    authTokenStore.setSession({
-      token: "old-token",
+    authSessionStore.setTokens({
+      accessToken: "old-token",
       refreshToken: "refresh-1",
       sessionTokenId: "sid-1",
     });
@@ -228,7 +283,7 @@ describe("api client response interceptor", () => {
     await expect(rejected(error)).rejects.toBe(error);
 
     expect(postSpy).not.toHaveBeenCalled();
-    expect(authTokenStore.getSnapshot().token).toBeNull();
+    expect(authSessionStore.getSnapshot().accessToken).toBeNull();
     expect(dispatchSpy).toHaveBeenCalledWith(
       expect.objectContaining({ type: "app:unauthorized" }),
     );
@@ -238,8 +293,8 @@ describe("api client response interceptor", () => {
     const postSpy = vi.spyOn(client, "post");
     const requestSpy = vi.spyOn(client, "request");
 
-    authTokenStore.setSession({
-      token: "old-token",
+    authSessionStore.setTokens({
+      accessToken: "old-token",
       refreshToken: "refresh-1",
       sessionTokenId: "sid-1",
     });
@@ -272,7 +327,7 @@ describe("api client response interceptor", () => {
 
     resolveRefresh({
       data: {
-        token: "new-token",
+        access_token: "new-token",
         refresh_token: "refresh-2",
         session_token_id: "sid-2",
         user: {

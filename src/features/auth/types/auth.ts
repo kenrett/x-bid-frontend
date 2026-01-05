@@ -1,7 +1,7 @@
 import type { User } from "./user";
 
 export type LoginPayload = {
-  token: string;
+  accessToken: string;
   refreshToken: string;
   sessionTokenId: string;
   user: User;
@@ -9,7 +9,7 @@ export type LoginPayload = {
 
 export type AuthContextType = {
   user: User | null;
-  token: string | null;
+  accessToken: string | null;
   refreshToken: string | null;
   sessionTokenId: string | null;
   sessionRemainingSeconds: number | null;

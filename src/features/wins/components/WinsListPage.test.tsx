@@ -26,7 +26,7 @@ const createAuthReturn = () =>
     login: vi.fn(),
     logout: vi.fn(),
     updateUserBalance: vi.fn(),
-    token: "token",
+    accessToken: "token",
     refreshToken: "refresh",
     sessionTokenId: "session",
     sessionRemainingSeconds: 900,

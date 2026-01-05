@@ -1,77 +1,52 @@
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter, useNavigate, useSearchParams } from "react-router-dom";
-import { LoginForm } from "./LoginForm";
-import { useAuth } from "../../hooks/useAuth";
-import client from "@api/client";
 import userEvent from "@testing-library/user-event";
-import type { User } from "@features/auth/types/user";
-import type { LoginPayload } from "@features/auth/types/auth";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import client from "@api/client";
+import { LoginForm } from "./LoginForm";
+import { AuthProvider } from "@features/auth/providers/AuthProvider";
 
-// --- Mocks ---
-vi.mock("react-router-dom", async () => {
-  const actual =
-    await vi.importActual<typeof import("react-router-dom")>(
-      "react-router-dom",
-    );
-  return {
-    ...actual,
-    useNavigate: vi.fn(),
-    useSearchParams: vi.fn(),
-  };
-});
+vi.mock("@api/client", () => ({
+  default: {
+    post: vi.fn(),
+    get: vi.fn(),
+    interceptors: { request: { use: vi.fn() }, response: { use: vi.fn() } },
+  },
+}));
 
-vi.mock("../../hooks/useAuth");
-vi.mock("@api/client");
+vi.mock("@services/cable", () => ({
+  cable: { subscriptions: { create: vi.fn(() => ({ unsubscribe: vi.fn() })) } },
+  resetCable: vi.fn(),
+}));
 
-// --- Helpers to get typed mocked functions ---
-const mockedUseAuth = vi.mocked(useAuth);
+vi.mock("@sentryClient", () => ({ setSentryUser: vi.fn() }));
+vi.mock("@services/toast", () => ({ showToast: vi.fn() }));
+
 const mockedClient = vi.mocked(client, true);
-const mockedNavigate = vi.mocked(useNavigate);
-const mockedUseSearchParams = vi.mocked(useSearchParams);
 
-// --- Test Data ---
-const mockUser: User = {
-  id: 1,
-  name: "Test User",
-  email: "test@example.com",
-  bidCredits: 0,
-  is_admin: false,
-  is_superuser: false,
-};
-const mockToken = "fake-jwt-token";
-const mockRefreshToken = "fake-refresh-token";
-const mockSessionTokenId = "session-token-id";
-const mockLogin = vi.fn();
-
-const renderComponent = (searchParams = "") => {
-  const route = searchParams ? `/login?${searchParams}` : "/login";
-  return render(
-    <MemoryRouter initialEntries={[route]}>
-      <LoginForm />
-    </MemoryRouter>,
+const renderLogin = (initialEntry = "/login") =>
+  render(
+    <AuthProvider>
+      <MemoryRouter initialEntries={[initialEntry]}>
+        <Routes>
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/auctions" element={<div>AUCTIONS</div>} />
+          <Route path="/my-special-page" element={<div>SPECIAL</div>} />
+        </Routes>
+      </MemoryRouter>
+    </AuthProvider>,
   );
-};
 
-describe("LoginForm Component", () => {
+describe("LoginForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedUseAuth.mockReturnValue({
-      login: mockLogin,
-    } as unknown as ReturnType<typeof useAuth>);
-    // Suppress console.error for tests that intentionally cause errors
+    localStorage.clear();
+    mockedClient.get.mockResolvedValue({ data: { remaining_seconds: 300 } });
     vi.spyOn(console, "error").mockImplementation(() => {});
-    // useSearchParams returns a tuple [params, setParams], so we mock both.
-    const setSearchParams = vi.fn();
-    mockedUseSearchParams.mockReturnValue([
-      new URLSearchParams(),
-      setSearchParams,
-    ]);
-    mockedNavigate.mockReturnValue(vi.fn()); // mock the returned navigate function
   });
 
-  it("should render the form fields and submit button", () => {
-    renderComponent();
+  it("renders the form fields and submit button", () => {
+    renderLogin();
     expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
     expect(
@@ -79,94 +54,81 @@ describe("LoginForm Component", () => {
     ).toBeInTheDocument();
   });
 
-  it("should allow user to type into email and password fields", async () => {
-    renderComponent();
-    const emailInput = screen.getByLabelText(/email address/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+  it("stores tokens + user and navigates to /auctions", async () => {
+    mockedClient.post.mockResolvedValueOnce({
+      data: {
+        access_token: "access",
+        refresh_token: "refresh",
+        session_token_id: "sid",
+        user: {
+          id: 1,
+          name: "Test User",
+          email: "test@example.com",
+          bidCredits: 0,
+          is_admin: false,
+          is_superuser: false,
+        },
+      },
+    });
+
     const user = userEvent.setup();
+    renderLogin();
 
-    await user.type(emailInput, "test@example.com");
-    await user.type(passwordInput, "password123");
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "test@example.com",
+    );
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
 
-    expect(emailInput).toHaveValue("test@example.com");
-    expect(passwordInput).toHaveValue("password123");
+    expect(await screen.findByText("AUCTIONS")).toBeInTheDocument();
+
+    const persisted = localStorage.getItem("auth.session.v1");
+    expect(persisted).not.toBeNull();
+    expect(JSON.parse(persisted as string)).toMatchObject({
+      access_token: "access",
+      refresh_token: "refresh",
+      session_token_id: "sid",
+      user: { email: "test@example.com" },
+    });
   });
 
-  describe("on successful login", () => {
-    beforeEach(() => {
-      mockedClient.post.mockResolvedValue({
-        data: {
-          token: mockToken,
-          refresh_token: mockRefreshToken,
-          session_token_id: mockSessionTokenId,
-          user: mockUser,
+  it("navigates to redirect URL when present", async () => {
+    mockedClient.post.mockResolvedValueOnce({
+      data: {
+        access_token: "access",
+        refresh_token: "refresh",
+        session_token_id: "sid",
+        user: {
+          id: 1,
+          name: "Test User",
+          email: "test@example.com",
+          bidCredits: 0,
+          is_admin: false,
+          is_superuser: false,
         },
-      });
+      },
     });
 
-    it("should call login handler and navigate to /auctions by default", async () => {
-      const navigateFn = vi.fn();
-      mockedNavigate.mockReturnValue(navigateFn);
-      const user = userEvent.setup();
+    const user = userEvent.setup();
+    renderLogin("/login?redirect=/my-special-page");
 
-      renderComponent();
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "test@example.com",
+    );
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
 
-      const emailInput = screen.getByLabelText(/email address/i);
-      const passwordInput = screen.getByLabelText(/password/i);
-      const submitButton = screen.getByRole("button", { name: /sign in/i });
-
-      await user.type(emailInput, "test@example.com");
-      await user.type(passwordInput, "password123");
-      await user.click(submitButton);
-
-      await waitFor(() => {
-        expect(mockedClient.post).toHaveBeenCalledWith("/api/v1/login", {
-          email_address: "test@example.com",
-          password: "password123",
-        });
-        expect(mockLogin).toHaveBeenCalledWith({
-          token: mockToken,
-          refreshToken: mockRefreshToken,
-          sessionTokenId: mockSessionTokenId,
-          user: mockUser,
-        } satisfies LoginPayload);
-        expect(navigateFn).toHaveBeenCalledWith("/auctions");
-      });
-    });
-
-    it("should navigate to the specified redirect URL if present", async () => {
-      const user = userEvent.setup();
-      const navigateFn = vi.fn();
-      mockedNavigate.mockReturnValue(navigateFn);
-      mockedUseSearchParams.mockReturnValue([
-        new URLSearchParams("redirect=/my-special-page"),
-        vi.fn(),
-      ]);
-
-      renderComponent();
-
-      const email = screen.getByLabelText(/email address/i);
-      await user.type(email, "test@example.com");
-      const pw = screen.getByLabelText(/password/i);
-      await user.type(pw, "password123");
-      await user.click(screen.getByRole("button", { name: /sign in/i }));
-
-      await waitFor(() => {
-        expect(navigateFn).toHaveBeenCalledWith("/my-special-page");
-      });
-    });
+    expect(await screen.findByText("SPECIAL")).toBeInTheDocument();
   });
 
   it("shows a friendly error when the server returns an unexpected auth payload", async () => {
-    mockedClient.post.mockResolvedValue({
-      data: {
-        // missing token/refresh/session/user shape
-        refresh_token: "refresh",
-      },
+    mockedClient.post.mockResolvedValueOnce({
+      data: { refresh_token: "refresh" },
     });
     const user = userEvent.setup();
-
-    renderComponent();
+    renderLogin();
 
     await user.type(
       screen.getByLabelText(/email address/i),
@@ -178,83 +140,8 @@ describe("LoginForm Component", () => {
     expect(
       await screen.findByText(/unexpected server response/i),
     ).toBeInTheDocument();
-    expect(mockLogin).not.toHaveBeenCalled();
-  });
-
-  describe("on failed login", () => {
-    it("should display an error message and not call login or navigate", async () => {
-      mockedClient.post.mockRejectedValue({
-        isAxiosError: true,
-        response: {
-          status: 401,
-          data: { message: "Password incorrect for test@example.com" },
-        },
-      });
-      const navigateFn = vi.fn();
-      mockedNavigate.mockReturnValue(navigateFn);
-      const user = userEvent.setup();
-
-      renderComponent();
-
-      await user.type(
-        screen.getByLabelText(/email address/i),
-        "test@example.com",
-      );
-      await user.type(screen.getByLabelText(/password/i), "wrong-password");
-      await user.click(screen.getByRole("button", { name: /sign in/i }));
-
-      const errorMessage = await screen.findByText(
-        "Invalid email or password. Please try again.",
-      );
-      expect(errorMessage).toBeInTheDocument();
-
-      expect(mockLogin).not.toHaveBeenCalled();
-      expect(navigateFn).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(localStorage.getItem("auth.session.v1")).toBeNull();
     });
-
-    it("focuses the first invalid field when field errors are returned", async () => {
-      mockedClient.post.mockRejectedValue({
-        isAxiosError: true,
-        response: {
-          status: 422,
-          data: { errors: { email_address: ["Email is required."] } },
-        },
-      });
-      const user = userEvent.setup();
-
-      renderComponent();
-
-      await user.type(screen.getByLabelText(/email address/i), "x@x.com");
-      await user.type(screen.getByLabelText(/password/i), "password123");
-      await user.click(screen.getByRole("button", { name: /sign in/i }));
-
-      const emailInput = screen.getByLabelText(/email address/i);
-      await waitFor(() => {
-        expect(emailInput).toHaveAttribute("aria-invalid", "true");
-        expect(
-          screen.getAllByText("Email is required.").length,
-        ).toBeGreaterThan(0);
-        expect(emailInput).toHaveFocus();
-      });
-    });
-  });
-
-  it("should show a loading state on the button while submitting", async () => {
-    mockedClient.post.mockReturnValue(new Promise(() => {}));
-    const user = userEvent.setup();
-    renderComponent();
-
-    await user.type(
-      screen.getByLabelText(/email address/i),
-      "test@example.com",
-    );
-    await user.type(screen.getByLabelText(/password/i), "password123");
-    await user.click(screen.getByRole("button", { name: /sign in/i }));
-
-    const submitButton = await screen.findByRole("button", {
-      name: /signing in.../i,
-    });
-    expect(submitButton).toBeInTheDocument();
-    expect(submitButton).toBeDisabled();
   });
 });

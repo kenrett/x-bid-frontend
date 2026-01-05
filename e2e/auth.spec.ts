@@ -35,19 +35,20 @@ test("user can log in and land on the auctions feed", async ({ page }) => {
     return window.__lastSessionState;
   });
   expect(state).toMatchObject({
-    token: loginResponse.token,
+    accessToken: loginResponse.access_token,
     refreshToken: loginResponse.refresh_token,
     sessionTokenId: loginResponse.session_token_id,
   });
 
   const stored = await page.evaluate(() => ({
-    token: localStorage.getItem("token"),
-    refresh: localStorage.getItem("refreshToken"),
-    sessionId: localStorage.getItem("sessionTokenId"),
-    user: localStorage.getItem("user"),
+    legacyToken: localStorage.getItem("token"),
+    session: localStorage.getItem("auth.session.v1"),
   }));
-  expect(stored.token).toBeNull();
-  expect(stored.refresh).toBeNull();
-  expect(stored.sessionId).toBeNull();
-  expect(stored.user).toBeNull();
+  expect(stored.legacyToken).toBeNull();
+  expect(JSON.parse(stored.session as string)).toMatchObject({
+    access_token: loginResponse.access_token,
+    refresh_token: loginResponse.refresh_token,
+    session_token_id: loginResponse.session_token_id,
+    user: { email: authedUser.email },
+  });
 });

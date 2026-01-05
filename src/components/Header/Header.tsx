@@ -85,7 +85,7 @@ const NAV_ITEMS = [
 ];
 
 export function Header() {
-  const { user, logout, token, isReady } = useAuth();
+  const { user, logout, accessToken, isReady } = useAuth();
   const { isLoading: isAccountStatusLoading, emailVerified } =
     useAccountStatus();
   const isSuperAdmin = Boolean(user?.is_superuser);
@@ -97,14 +97,14 @@ export function Header() {
       const base = apiBase
         ? new URL("/api-docs", apiBase)
         : new URL("/api-docs", window.location.origin);
-      if (token) base.searchParams.set("token", token);
+      if (accessToken) base.searchParams.set("token", accessToken);
       return base.toString();
     } catch {
-      return token
-        ? `/api-docs?token=${encodeURIComponent(token)}`
+      return accessToken
+        ? `/api-docs?token=${encodeURIComponent(accessToken)}`
         : "/api-docs";
     }
-  }, [apiBase, token]);
+  }, [apiBase, accessToken]);
 
   const adminNavItems = useMemo(
     () =>

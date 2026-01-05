@@ -50,7 +50,7 @@ vi.mock("@services/cable", () => ({
 import { AuthProvider } from "./AuthProvider";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import client from "@api/client";
-import { authTokenStore } from "../tokenStore";
+import { authSessionStore } from "../tokenStore";
 
 // Minimal consumer to read context values
 const TestConsumer = () => {
@@ -65,7 +65,7 @@ const TestConsumer = () => {
   return (
     <div>
       <div data-testid="user">{auth.user?.email ?? "none"}</div>
-      <div data-testid="token">{auth.token ?? "none"}</div>
+      <div data-testid="token">{auth.accessToken ?? "none"}</div>
       <div data-testid="remaining">
         {auth.sessionRemainingSeconds ?? "none"}
       </div>
@@ -73,7 +73,7 @@ const TestConsumer = () => {
       <button
         onClick={() =>
           auth.login({
-            token: "jwt",
+            accessToken: "jwt",
             refreshToken: "refresh",
             sessionTokenId: "sid",
             user: mockUser,
@@ -95,7 +95,7 @@ const mockedClient = vi.mocked(client, true);
 beforeEach(() => {
   vi.clearAllMocks();
   localStorage.clear();
-  authTokenStore.clear();
+  authSessionStore.clear();
   toastMocks.showToast.mockReset();
   mockedClient.get.mockReset();
   mockedClient.get.mockResolvedValue({
@@ -109,7 +109,7 @@ afterEach(() => {
 });
 
 describe("AuthProvider", () => {
-  it("logs in without persisting tokens to localStorage", async () => {
+  it("persists a complete session and hydrates it on remount", async () => {
     const setItemSpy = vi.spyOn(Storage.prototype, "setItem");
     const view = render(
       <Wrapper>
@@ -128,22 +128,23 @@ describe("AuthProvider", () => {
         "user@example.com",
       );
     });
-    expect(localStorage.getItem("token")).toBeNull();
-    expect(localStorage.getItem("refreshToken")).toBeNull();
-    expect(localStorage.getItem("sessionTokenId")).toBeNull();
-    expect(setItemSpy).not.toHaveBeenCalledWith("token", expect.anything());
-    expect(setItemSpy).not.toHaveBeenCalledWith(
-      "refreshToken",
-      expect.anything(),
-    );
-    expect(setItemSpy).not.toHaveBeenCalledWith(
-      "sessionTokenId",
-      expect.anything(),
+    expect(localStorage.getItem("token")).toBeNull(); // legacy key should not be used
+    const persisted = localStorage.getItem("auth.session.v1");
+    expect(persisted).not.toBeNull();
+    expect(JSON.parse(persisted as string)).toMatchObject({
+      access_token: "jwt",
+      refresh_token: "refresh",
+      session_token_id: "sid",
+      user: expect.any(Object),
+    });
+    expect(setItemSpy).toHaveBeenCalledWith(
+      "auth.session.v1",
+      expect.any(String),
     );
     expect(cableMocks.reset).toHaveBeenCalledTimes(1);
-    expect(authTokenStore.getSnapshot().token).toBe("jwt");
+    expect(authSessionStore.getSnapshot().accessToken).toBe("jwt");
 
-    // Remount to ensure values are not restored from storage.
+    // Remount to ensure values are restored from storage.
     view.unmount();
     render(
       <Wrapper>
@@ -151,9 +152,43 @@ describe("AuthProvider", () => {
       </Wrapper>,
     );
     await waitFor(() => {
-      expect(screen.getByTestId("user")).toHaveTextContent("none");
-      expect(screen.getByTestId("token")).toHaveTextContent("none");
+      expect(screen.getByTestId("user")).toHaveTextContent("user@example.com");
+      expect(screen.getByTestId("token")).toHaveTextContent("jwt");
     });
+  });
+
+  it("clears invalid persisted auth and redirects to /login", async () => {
+    localStorage.setItem(
+      "auth.session.v1",
+      JSON.stringify({
+        access_token: "jwt",
+        // refresh_token intentionally missing
+        session_token_id: "sid",
+        user: {
+          id: 1,
+          email: "user@example.com",
+          name: "User",
+          bidCredits: 0,
+          is_admin: false,
+          is_superuser: false,
+        },
+      }),
+    );
+
+    render(
+      <Wrapper>
+        <TestConsumer />
+      </Wrapper>,
+    );
+
+    await waitFor(() => {
+      expect((window as { __lastRedirect?: string }).__lastRedirect).toMatch(
+        /^\/login\?redirect=/,
+      );
+    });
+    expect(localStorage.getItem("auth.session.v1")).toBeNull();
+    expect(screen.getByTestId("user")).toHaveTextContent("none");
+    expect(screen.getByTestId("token")).toHaveTextContent("none");
   });
 
   it("logs out and clears in-memory auth state", async () => {
@@ -172,10 +207,8 @@ describe("AuthProvider", () => {
     });
 
     expect(screen.getByTestId("user")).toHaveTextContent("none");
-    expect(localStorage.getItem("token")).toBeNull();
-    expect(localStorage.getItem("refreshToken")).toBeNull();
-    expect(localStorage.getItem("sessionTokenId")).toBeNull();
-    expect(authTokenStore.getSnapshot().token).toBeNull();
+    expect(localStorage.getItem("auth.session.v1")).toBeNull();
+    expect(authSessionStore.getSnapshot().accessToken).toBeNull();
     expect(cableMocks.reset).toHaveBeenCalled();
     expect(cableMocks.subscription.unsubscribe).toHaveBeenCalled();
   });
@@ -230,7 +263,8 @@ describe("AuthProvider", () => {
     expect(localStorage.getItem("refreshToken")).toBeNull();
     expect(localStorage.getItem("sessionTokenId")).toBeNull();
     expect(localStorage.getItem("user")).toBeNull();
-    expect(authTokenStore.getSnapshot().token).toBeNull();
+    expect(localStorage.getItem("auth.session.v1")).toBeNull();
+    expect(authSessionStore.getSnapshot().accessToken).toBeNull();
     expect(cableMocks.reset).toHaveBeenCalled();
 
     warnSpy.mockRestore();
@@ -266,7 +300,7 @@ describe("AuthProvider", () => {
     mockedClient.get.mockResolvedValueOnce({
       data: {
         remaining_seconds: 100,
-        token: "next-jwt",
+        access_token: "next-jwt",
         refresh_token: "next-refresh",
         session_token_id: "next-sid",
         user: {
@@ -293,7 +327,7 @@ describe("AuthProvider", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("token")).toHaveTextContent("next-jwt");
-      expect(authTokenStore.getSnapshot().token).toBe("next-jwt");
+      expect(authSessionStore.getSnapshot().accessToken).toBe("next-jwt");
     });
     expect(cableMocks.reset).toHaveBeenCalledTimes(2);
   });

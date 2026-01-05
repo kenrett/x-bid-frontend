@@ -1,22 +1,22 @@
 # Session Lifecycle (Frontend Contract)
 
-This app treats a “session” as the combination of `token`, `refresh_token`, `session.session_token_id`, and the normalized `user`.
+This app treats a “session” as the combination of `access_token`, `refresh_token`, `session_token_id`, and the normalized `user`.
 
 ## Creation
 
-- On `/login` or `/signup`, the API returns `token`, `refresh_token`, `session` (`session_token_id`, `session_expires_at`, `seconds_remaining`), `user`, optional `is_admin`/`is_superuser`, and optional `redirect_path`.
-- The AuthProvider normalizes the user and sets context state. Tokens/session ids are kept in-memory only (not persisted).
+- On `/login` or `/signup`, the API returns `access_token`, `refresh_token`, `session_token_id`, and `user` (Auth Contract v1).
+- AuthProvider normalizes the user, persists the full session, and sets context state.
 
 ## Persistence
 
-- On load, AuthProvider treats the user as logged out and marks `isReady=true`.
-- Axios client attaches `Authorization: Bearer <token>` only when an in-memory token is present.
+- On load, AuthProvider hydrates the session from storage and validates all required fields; invalid persisted auth is cleared and the user is redirected to `/login`.
+- Axios client attaches `Authorization: Bearer <access_token>` only when a complete in-memory session exists.
 
 ## Refresh / Remaining Time
 
 - Every 60s, AuthProvider calls `GET /api/v1/session/remaining?session_token_id=...`.
 - If `remaining_seconds` is returned and <= 0 → logout.
-- If `token`/`refresh_token`/`session_token_id` are returned → replace in-memory values.
+- If `access_token`/`refresh_token`/`session_token_id` are returned → replace stored values.
 - If a `user` or role flags are returned → merge/normalize in memory.
 - If `remaining_seconds` is absent → keep session but clear the countdown.
 
@@ -28,7 +28,7 @@ This app treats a “session” as the combination of `token`, `refresh_token`, 
 
 ## Storage Keys
 
-- None. Auth artifacts are not stored in `localStorage`.
+- `localStorage["auth.session.v1"]`: JSON `{ access_token, refresh_token, session_token_id, user }`
 
 ## Notes
 

@@ -10,14 +10,14 @@ export const AccountStatusProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const { user, token, isReady } = useAuth();
+  const { user, accessToken, isReady } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
   const [emailVerifiedAt, setEmailVerifiedAt] = useState<string | null>(null);
   const isMounted = useRef(true);
 
-  const isAuthed = Boolean(isReady && user && token);
+  const isAuthed = Boolean(isReady && user && accessToken);
 
   const refresh = useCallback(async () => {
     if (!isAuthed) return;

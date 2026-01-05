@@ -2387,8 +2387,8 @@
           "session_token_id": {
             "type": "integer"
           },
-          "token": {
-            "description": "JWT used for authenticated requests.",
+          "access_token": {
+            "description": "Bearer access token used for authenticated requests.",
             "type": "string"
           },
           "user": {
@@ -2421,7 +2421,7 @@
           }
         },
         "required": [
-          "token",
+          "access_token",
           "refresh_token",
           "session_token_id",
           "session",

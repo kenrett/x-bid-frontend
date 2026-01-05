@@ -8,13 +8,11 @@ import { cable, resetCable } from "@services/cable";
 import { normalizeUser } from "../api/user";
 import { setSentryUser } from "@sentryClient";
 import { showToast } from "@services/toast";
-import { authTokenStore } from "../tokenStore";
+import { authSessionStore } from "../tokenStore";
 
 type SessionRemainingResponse = {
   remaining_seconds?: number;
-  // Backward-compat for one release: some backends used `seconds_remaining`.
-  seconds_remaining?: number;
-  token?: string;
+  access_token?: string;
   refresh_token?: string;
   session_token_id?: string | number;
   user?: User;
@@ -47,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const invalidatingRef = useRef(false);
 
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [sessionTokenId, setSessionTokenId] = useState<string | null>(null);
   const [sessionRemainingSeconds, setSessionRemainingSeconds] = useState<
@@ -60,22 +58,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       invalidatingRef.current = false;
       const normalizedUser = normalizeAuthUser(payload.user as User);
       setUser(normalizedUser);
-      setToken(payload.token);
+      setAccessToken(payload.accessToken);
       setRefreshToken(payload.refreshToken);
       setSessionTokenId(payload.sessionTokenId);
       setSessionRemainingSeconds(null);
 
-      authTokenStore.setSession({
-        token: payload.token,
+      authSessionStore.setSession({
+        accessToken: payload.accessToken,
         refreshToken: payload.refreshToken,
         sessionTokenId: payload.sessionTokenId,
+        user: normalizedUser,
       });
       setSentryUser(normalizedUser);
       resetCable();
 
       if (import.meta.env.VITE_E2E_TESTS === "true") {
         (window as { __lastSessionState?: unknown }).__lastSessionState = {
-          token: payload.token,
+          accessToken: payload.accessToken,
           refreshToken: payload.refreshToken,
           sessionTokenId: payload.sessionTokenId,
           user: normalizedUser,
@@ -86,32 +85,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   useEffect(() => {
-    // Intentionally do not hydrate tokens from localStorage; keeping auth
-    // artifacts out of persistent storage limits blast radius of XSS.
-    if (import.meta.env.VITE_E2E_TESTS === "true") {
-      const bootstrap = (
-        window as unknown as { __e2eAuthBootstrap?: LoginPayload }
-      ).__e2eAuthBootstrap;
-      if (bootstrap) {
-        applyAuthPayload(bootstrap);
-        delete (window as unknown as { __e2eAuthBootstrap?: LoginPayload })
-          .__e2eAuthBootstrap;
+    const hasPersistedSession = authSessionStore.hasPersistedSession();
+    const hydrated = authSessionStore.hydrateFromStorage();
+    if (hydrated && hydrated.user) {
+      applyAuthPayload({
+        accessToken: hydrated.accessToken!,
+        refreshToken: hydrated.refreshToken!,
+        sessionTokenId: hydrated.sessionTokenId!,
+        user: hydrated.user,
+      });
+    } else if (hasPersistedSession) {
+      authSessionStore.clear();
+      const redirectParam = encodeURIComponent(
+        window.location.pathname + window.location.search,
+      );
+      const targetUrl = `/login?redirect=${redirectParam}`;
+      if (!window.location.pathname.startsWith("/login")) {
+        if (import.meta.env.MODE === "test") {
+          (window as { __lastRedirect?: string }).__lastRedirect = targetUrl;
+        } else {
+          window.location.assign(targetUrl);
+        }
       }
     }
     setIsReady(true);
   }, [applyAuthPayload]);
 
   const login = useCallback(
-    ({
-      token: jwt,
-      refreshToken: refresh,
-      sessionTokenId: sessionId,
-      user,
-    }: LoginPayload) => {
+    ({ accessToken, refreshToken, sessionTokenId, user }: LoginPayload) => {
       applyAuthPayload({
-        token: jwt,
-        refreshToken: refresh,
-        sessionTokenId: sessionId,
+        accessToken,
+        refreshToken,
+        sessionTokenId,
         user,
       });
     },
@@ -120,23 +125,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = useCallback(() => {
     setUser(null);
-    setToken(null);
+    setAccessToken(null);
     setRefreshToken(null);
     setSessionTokenId(null);
     setSessionRemainingSeconds(null);
 
-    // Defense-in-depth: clear any legacy persisted auth artifacts, even though
-    // current versions keep tokens in-memory only.
+    // Defense-in-depth: clear any legacy persisted auth artifacts.
     try {
       localStorage.removeItem("user");
       localStorage.removeItem("token");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("sessionTokenId");
+      localStorage.removeItem("auth.session.v1");
     } catch {
       // ignore (no storage in some environments)
     }
 
-    authTokenStore.clear();
+    authSessionStore.clear();
     setSentryUser(null);
     resetCable();
 
@@ -182,7 +187,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser((currentUser) => {
         if (!currentUser) return null;
         const updatedUser = { ...currentUser, bidCredits: newBalance };
-        return normalizeAuthUser(updatedUser);
+        const normalized = normalizeAuthUser(updatedUser);
+        authSessionStore.setUser(normalized);
+        return normalized;
       });
     },
     [normalizeAuthUser],
@@ -194,13 +201,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         if (!currentUser) return null;
         const updated = normalizeAuthUser(updater(currentUser));
         setSentryUser(updated);
+        authSessionStore.setUser(updated);
         return updated;
       });
     },
     [normalizeAuthUser],
   );
   useEffect(() => {
-    if (!token || !sessionTokenId) {
+    if (!accessToken || !sessionTokenId) {
       setSessionRemainingSeconds(null);
       return;
     }
@@ -216,8 +224,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const {
         remaining_seconds,
-        seconds_remaining,
-        token: nextToken,
+        access_token: nextAccessToken,
         refresh_token: nextRefreshToken,
         session_token_id: nextSessionTokenId,
         user: refreshedUser,
@@ -226,11 +233,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       } = data;
 
       const remaining =
-        typeof remaining_seconds === "number"
-          ? remaining_seconds
-          : typeof seconds_remaining === "number"
-            ? seconds_remaining
-            : null;
+        typeof remaining_seconds === "number" ? remaining_seconds : null;
 
       if (typeof remaining === "number") {
         setSessionRemainingSeconds(remaining);
@@ -244,7 +247,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setSessionRemainingSeconds(null);
       }
 
-      const tokenChanged = nextToken && nextToken !== token;
+      const tokenChanged = nextAccessToken && nextAccessToken !== accessToken;
       const sessionChanged =
         nextSessionTokenId &&
         String(nextSessionTokenId) !== String(sessionTokenId);
@@ -254,10 +257,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           ? String(nextSessionTokenId)
           : null;
 
-      if (nextToken && nextRefreshToken && normalizedSessionTokenId) {
-        setToken(nextToken);
-        authTokenStore.setSession({
-          token: nextToken,
+      if (nextAccessToken && nextRefreshToken && normalizedSessionTokenId) {
+        setAccessToken(nextAccessToken);
+        authSessionStore.setTokens({
+          accessToken: nextAccessToken,
           refreshToken: nextRefreshToken,
           sessionTokenId: normalizedSessionTokenId,
         });
@@ -290,13 +293,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               refreshedSuperFlag ??
               currentUser?.is_superuser,
           } as User);
+          authSessionStore.setUser(mergedUser);
           return mergedUser;
         });
       }
 
       if (isE2E) {
         (window as { __lastSessionState?: unknown }).__lastSessionState = {
-          token: nextToken ?? token,
+          accessToken: nextAccessToken ?? accessToken,
           refreshToken: nextRefreshToken ?? refreshToken,
           sessionTokenId: normalizedSessionTokenId ?? sessionTokenId,
           remaining,
@@ -352,7 +356,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           .__triggerSessionPoll;
       }
     };
-  }, [token, sessionTokenId, handleSessionInvalidated, refreshToken, user]);
+  }, [
+    accessToken,
+    sessionTokenId,
+    handleSessionInvalidated,
+    refreshToken,
+    user,
+  ]);
 
   useEffect(() => {
     const onUnauthorized = () => handleSessionInvalidated("unauthorized");
@@ -372,10 +382,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [applyAuthPayload]);
 
   useEffect(() => {
-    if (!token || !sessionTokenId) return;
+    if (!accessToken || !sessionTokenId) return;
 
     const subscription = cable.subscriptions.create(
-      { channel: "SessionChannel", token, session_token_id: sessionTokenId },
+      {
+        channel: "SessionChannel",
+        token: accessToken,
+        session_token_id: sessionTokenId,
+      },
       {
         received: (payload: unknown) => {
           const eventName = getSessionEventName(payload);
@@ -389,13 +403,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [token, sessionTokenId, handleSessionInvalidated]);
+  }, [accessToken, sessionTokenId, handleSessionInvalidated]);
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        token,
+        accessToken,
         refreshToken,
         sessionTokenId,
         sessionRemainingSeconds,

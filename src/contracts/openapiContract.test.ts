@@ -200,13 +200,13 @@ describe("OpenAPI contract drift", () => {
     );
 
     const loginFields = collectPropertyPaths(openapi, login200);
-    expect(loginFields.has("token")).toBe(true);
+    expect(loginFields.has("access_token")).toBe(true);
     expect(loginFields.has("refresh_token")).toBe(true);
     expect(loginFields.has("session_token_id")).toBe(true);
     expect(loginFields.has("user")).toBe(true);
 
     const refreshFields = collectPropertyPaths(openapi, refresh200);
-    expect(refreshFields.has("token")).toBe(true);
+    expect(refreshFields.has("access_token")).toBe(true);
     expect(refreshFields.has("refresh_token")).toBe(true);
     expect(refreshFields.has("session_token_id")).toBe(true);
   });

@@ -25,7 +25,7 @@ describe("AccountRoute", () => {
       {
         user: null,
         isReady: true,
-        token: null,
+        accessToken: null,
         refreshToken: null,
         sessionTokenId: null,
         sessionRemainingSeconds: null,
@@ -52,7 +52,7 @@ describe("AccountRoute", () => {
           is_superuser: false,
         },
         isReady: true,
-        token: "t",
+        accessToken: "t",
         refreshToken: "r",
         sessionTokenId: "s",
         sessionRemainingSeconds: null,

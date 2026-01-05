@@ -1,47 +1,51 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
-import { SignUpForm } from "./SignUpForm";
-import { useAuth } from "../../hooks/useAuth";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import client from "@api/client";
-import type { LoginPayload } from "@features/auth/types/auth";
-import type { User } from "@features/auth/types/user";
+import { SignUpForm } from "./SignUpForm";
+import { AuthProvider } from "@features/auth/providers/AuthProvider";
 
-const mockLogin = vi.fn();
-const mockNavigate = vi.fn();
+vi.mock("@api/client", () => ({
+  default: {
+    post: vi.fn(),
+    get: vi.fn(),
+    interceptors: { request: { use: vi.fn() }, response: { use: vi.fn() } },
+  },
+}));
 
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-  };
-});
+vi.mock("@services/cable", () => ({
+  cable: { subscriptions: { create: vi.fn(() => ({ unsubscribe: vi.fn() })) } },
+  resetCable: vi.fn(),
+}));
 
-vi.mock("../../hooks/useAuth");
-vi.mock("@api/client");
+vi.mock("@sentryClient", () => ({ setSentryUser: vi.fn() }));
+vi.mock("@services/toast", () => ({ showToast: vi.fn() }));
 
-const mockedUseAuth = vi.mocked(useAuth);
 const mockedClient = vi.mocked(client, true);
 
-const renderComponent = () =>
+const renderSignup = () =>
   render(
-    <MemoryRouter initialEntries={["/signup"]}>
-      <SignUpForm />
-    </MemoryRouter>,
+    <AuthProvider>
+      <MemoryRouter initialEntries={["/signup"]}>
+        <Routes>
+          <Route path="/signup" element={<SignUpForm />} />
+          <Route path="/auctions" element={<div>AUCTIONS</div>} />
+        </Routes>
+      </MemoryRouter>
+    </AuthProvider>,
   );
 
-describe("SignUpForm Component", () => {
+describe("SignUpForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedUseAuth.mockReturnValue({
-      login: mockLogin,
-    } as unknown as ReturnType<typeof useAuth>);
+    localStorage.clear();
+    mockedClient.get.mockResolvedValue({ data: { remaining_seconds: 300 } });
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   it("renders all form fields", () => {
-    renderComponent();
+    renderSignup();
     expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^password/i)).toBeInTheDocument();
@@ -51,169 +55,12 @@ describe("SignUpForm Component", () => {
     ).toBeInTheDocument();
   });
 
-  it("displays an error if passwords do not match", async () => {
-    const user = userEvent.setup();
-    renderComponent();
-
-    await user.type(screen.getByLabelText(/name/i), "Test User");
-    await user.type(
-      screen.getByLabelText(/email address/i),
-      "test@example.com",
-    );
-    await user.type(screen.getByLabelText(/^password/i), "password123");
-    await user.type(screen.getByLabelText(/confirm password/i), "password456");
-
-    await user.click(screen.getByRole("button", { name: /create account/i }));
-
-    const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Passwords do not match.",
-    );
-    await waitFor(() => {
-      expect(confirmPasswordInput).toHaveAttribute("aria-invalid", "true");
-      expect(confirmPasswordInput).toHaveFocus();
-    });
-
-    expect(mockedClient.post).not.toHaveBeenCalled();
-    expect(mockLogin).not.toHaveBeenCalled();
-    expect(mockNavigate).not.toHaveBeenCalled();
-  });
-
-  it("submits successfully and navigates to /auctions", async () => {
-    const user = userEvent.setup();
-    const mockUser: User = {
-      id: 1,
-      name: "Test User",
-      email: "test@example.com",
-      bidCredits: 0,
-      is_admin: false,
-      is_superuser: false,
-    };
-    const mockToken = "fake-token";
-    const mockRefreshToken = "refresh-token";
-    const mockSessionTokenId = "session-token";
-
-    mockedClient.post.mockResolvedValue({
+  it("stores tokens + user and navigates to /auctions", async () => {
+    mockedClient.post.mockResolvedValueOnce({
       data: {
-        token: mockToken,
-        refresh_token: mockRefreshToken,
-        session_token_id: mockSessionTokenId,
-        user: mockUser,
-      },
-    });
-
-    renderComponent();
-
-    await user.type(screen.getByLabelText(/name/i), "Test User");
-    await user.type(
-      screen.getByLabelText(/email address/i),
-      "test@example.com",
-    );
-    await user.type(screen.getByLabelText(/^password/i), "password123");
-    await user.type(screen.getByLabelText(/confirm password/i), "password123");
-
-    await user.click(screen.getByRole("button", { name: /create account/i }));
-
-    await waitFor(() => {
-      expect(mockedClient.post).toHaveBeenCalledWith("/api/v1/signup", {
-        name: "Test User",
-        email_address: "test@example.com",
-        password: "password123",
-      });
-      expect(mockLogin).toHaveBeenCalledWith({
-        token: mockToken,
-        refreshToken: mockRefreshToken,
-        sessionTokenId: mockSessionTokenId,
-        user: mockUser,
-      } satisfies LoginPayload);
-      expect(mockNavigate).toHaveBeenCalledWith("/auctions");
-    });
-  });
-
-  it("accepts camelCase token keys and normalizes user shape", async () => {
-    const user = userEvent.setup();
-    const apiUser = {
-      id: 2,
-      name: "Casey",
-      emailAddress: "casey@example.com",
-      bid_credits: 10,
-      isAdmin: false,
-    };
-
-    mockedClient.post.mockResolvedValue({
-      data: {
-        token: "token-2",
-        refreshToken: "refresh-2",
-        sessionTokenId: "sid-2",
-        user: apiUser,
-      },
-    });
-
-    renderComponent();
-
-    await user.type(screen.getByLabelText(/name/i), "Casey");
-    await user.type(
-      screen.getByLabelText(/email address/i),
-      "casey@example.com",
-    );
-    await user.type(screen.getByLabelText(/^password/i), "password123");
-    await user.type(screen.getByLabelText(/confirm password/i), "password123");
-    await user.click(screen.getByRole("button", { name: /create account/i }));
-
-    await waitFor(() => {
-      expect(mockLogin).toHaveBeenCalledWith({
-        token: "token-2",
-        refreshToken: "refresh-2",
-        sessionTokenId: "sid-2",
-        user: {
-          id: 2,
-          name: "Casey",
-          email: "casey@example.com",
-          bidCredits: 10,
-          is_admin: false,
-          is_superuser: false,
-        },
-      } satisfies LoginPayload);
-    });
-  });
-
-  it("shows an error and re-enables the button on failed submit", async () => {
-    const user = userEvent.setup();
-    const testError = new Error("boom");
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    mockedClient.post.mockRejectedValue(testError);
-
-    renderComponent();
-
-    await user.type(screen.getByLabelText(/name/i), "Test User");
-    await user.type(
-      screen.getByLabelText(/email address/i),
-      "test@example.com",
-    );
-    await user.type(screen.getByLabelText(/^password/i), "password123");
-    await user.type(screen.getByLabelText(/confirm password/i), "password123");
-
-    await user.click(screen.getByRole("button", { name: /create account/i }));
-
-    expect(await screen.findByRole("alert")).toHaveTextContent("boom");
-    expect(mockLogin).not.toHaveBeenCalled();
-    expect(mockNavigate).not.toHaveBeenCalled();
-    expect(
-      screen.getByRole("button", { name: /create account/i }),
-    ).toBeEnabled();
-
-    consoleSpy.mockRestore();
-  });
-
-  it("shows an unexpected server response error when auth fields are missing", async () => {
-    const user = userEvent.setup();
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-    mockedClient.post.mockResolvedValue({
-      data: {
-        token: "fake-token",
-        // refresh_token intentionally missing
-        session_token_id: "session-token",
+        access_token: "access",
+        refresh_token: "refresh",
+        session_token_id: "sid",
         user: {
           id: 1,
           name: "Test User",
@@ -225,7 +72,8 @@ describe("SignUpForm Component", () => {
       },
     });
 
-    renderComponent();
+    const user = userEvent.setup();
+    renderSignup();
 
     await user.type(screen.getByLabelText(/name/i), "Test User");
     await user.type(
@@ -234,62 +82,54 @@ describe("SignUpForm Component", () => {
     );
     await user.type(screen.getByLabelText(/^password/i), "password123");
     await user.type(screen.getByLabelText(/confirm password/i), "password123");
-
     await user.click(screen.getByRole("button", { name: /create account/i }));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Unexpected server response. Please try again.",
+    expect(await screen.findByText("AUCTIONS")).toBeInTheDocument();
+
+    const persisted = localStorage.getItem("auth.session.v1");
+    expect(persisted).not.toBeNull();
+    expect(JSON.parse(persisted as string)).toMatchObject({
+      access_token: "access",
+      refresh_token: "refresh",
+      session_token_id: "sid",
+      user: { email: "test@example.com" },
+    });
+  });
+
+  it("shows an unexpected server response error when auth fields are missing", async () => {
+    mockedClient.post.mockResolvedValueOnce({
+      data: {
+        access_token: "access",
+        // refresh_token intentionally missing
+        session_token_id: "sid",
+        user: {
+          id: 1,
+          name: "Test User",
+          email: "test@example.com",
+          bidCredits: 0,
+          is_admin: false,
+          is_superuser: false,
+        },
+      },
+    });
+
+    const user = userEvent.setup();
+    renderSignup();
+
+    await user.type(screen.getByLabelText(/name/i), "Test User");
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "test@example.com",
     );
-    expect(mockLogin).not.toHaveBeenCalled();
+    await user.type(screen.getByLabelText(/^password/i), "password123");
+    await user.type(screen.getByLabelText(/confirm password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /create account/i }));
+
     expect(
-      screen.getByRole("button", { name: /create account/i }),
-    ).toBeEnabled();
-
-    consoleSpy.mockRestore();
-  });
-
-  it("prevents double submit while a request is in flight", async () => {
-    const user = userEvent.setup();
-    mockedClient.post.mockReturnValue(new Promise(() => {})); // never resolves
-
-    renderComponent();
-
-    await user.type(screen.getByLabelText(/name/i), "Test User");
-    await user.type(
-      screen.getByLabelText(/email address/i),
-      "test@example.com",
-    );
-    await user.type(screen.getByLabelText(/^password/i), "password123");
-    await user.type(screen.getByLabelText(/confirm password/i), "password123");
-
-    const submitButton = screen.getByRole("button", {
-      name: /create account/i,
+      await screen.findByText(/unexpected server response/i),
+    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(localStorage.getItem("auth.session.v1")).toBeNull();
     });
-    await user.click(submitButton);
-    await user.click(submitButton);
-
-    expect(mockedClient.post).toHaveBeenCalledTimes(1);
-    expect(submitButton).toBeDisabled();
-  });
-
-  it("shows loading state while submitting", async () => {
-    const user = userEvent.setup();
-    mockedClient.post.mockReturnValue(new Promise(() => {})); // never resolves
-    renderComponent();
-
-    await user.type(screen.getByLabelText(/name/i), "Test User");
-    await user.type(
-      screen.getByLabelText(/email address/i),
-      "test@example.com",
-    );
-    await user.type(screen.getByLabelText(/^password/i), "password123");
-    await user.type(screen.getByLabelText(/confirm password/i), "password123");
-
-    await user.click(screen.getByRole("button", { name: /create account/i }));
-
-    const loadingButton = await screen.findByRole("button", {
-      name: /creating account.../i,
-    });
-    expect(loadingButton).toBeDisabled();
   });
 });

@@ -22,7 +22,7 @@ test("session token refresh updates in-memory session", async ({ page }) => {
     // @ts-expect-error test-only hook set in AuthProvider when VITE_E2E_TESTS=true
     await window.__triggerSessionPoll?.({
       remaining_seconds: 1200,
-      token: "token-refreshed",
+      access_token: "token-refreshed",
       refresh_token: "refresh-refreshed",
       session_token_id: "session-refreshed",
       user: { id: 88, name: "Casey Bidder", email: "casey@example.com" },
@@ -32,21 +32,21 @@ test("session token refresh updates in-memory session", async ({ page }) => {
   });
 
   expect(refreshed).toMatchObject({
-    token: "token-refreshed",
+    accessToken: "token-refreshed",
     refreshToken: "refresh-refreshed",
     sessionTokenId: "session-refreshed",
   });
 
   const stored = await page.evaluate(() => ({
-    token: localStorage.getItem("token"),
-    refresh: localStorage.getItem("refreshToken"),
-    sessionId: localStorage.getItem("sessionTokenId"),
-    user: localStorage.getItem("user"),
+    legacyToken: localStorage.getItem("token"),
+    session: localStorage.getItem("auth.session.v1"),
   }));
-  expect(stored.token).toBeNull();
-  expect(stored.refresh).toBeNull();
-  expect(stored.sessionId).toBeNull();
-  expect(stored.user).toBeNull();
+  expect(stored.legacyToken).toBeNull();
+  expect(JSON.parse(stored.session as string)).toMatchObject({
+    access_token: "token-refreshed",
+    refresh_token: "refresh-refreshed",
+    session_token_id: "session-refreshed",
+  });
 });
 
 test("session expiration logs out", async ({ page }) => {
@@ -69,15 +69,13 @@ test("session expiration logs out", async ({ page }) => {
     // @ts-expect-error test-only hook set in AuthProvider when VITE_E2E_TESTS=true
     await window.__triggerSessionPoll?.({ remaining_seconds: 0 });
     return {
-      token: localStorage.getItem("token"),
-      user: localStorage.getItem("user"),
+      session: localStorage.getItem("auth.session.v1"),
       // @ts-expect-error test-only marker
       state: window.__lastSessionState,
     };
   });
 
-  expect(loggedOut.token).toBeNull();
-  expect(loggedOut.user).toBeNull();
+  expect(loggedOut.session).toBeNull();
   expect(loggedOut.state).toMatchObject({ loggedOut: true });
 });
 
@@ -93,9 +91,7 @@ test("manual logout clears storage", async ({ page }) => {
   await page.getByRole("button", { name: "Log Out" }).click();
 
   const stored = await page.evaluate(() => ({
-    token: localStorage.getItem("token"),
-    user: localStorage.getItem("user"),
+    session: localStorage.getItem("auth.session.v1"),
   }));
-  expect(stored.token).toBeNull();
-  expect(stored.user).toBeNull();
+  expect(stored.session).toBeNull();
 });

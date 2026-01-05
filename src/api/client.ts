@@ -1,8 +1,9 @@
 import axios, { type AxiosError, type AxiosInstance } from "axios";
 import {
-  authTokenStore,
-  getAuthToken,
+  authSessionStore,
+  getAccessToken,
   getRefreshToken,
+  getSessionTokenId,
 } from "@features/auth/tokenStore";
 import { normalizeAuthResponse } from "@features/auth/api/authResponse";
 
@@ -60,17 +61,14 @@ client.interceptors.request.use(
 
 client.interceptors.request.use(
   (config) => {
-    const token = getAuthToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const accessToken = getAccessToken();
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
   },
   (error) => Promise.reject(error),
 );
-
-const shouldAttemptCookieRefresh = () =>
-  import.meta.env.VITE_AUTH_REFRESH_WITH_COOKIE === "true";
 
 const isRefreshRequest = (configUrl: unknown) =>
   typeof configUrl === "string" &&
@@ -110,9 +108,13 @@ const isInvalidSessionError = (error: AxiosError): boolean => {
 };
 
 let sessionInvalidated = false;
-authTokenStore.subscribe(() => {
-  const snapshot = authTokenStore.getSnapshot();
-  if (snapshot.token || snapshot.refreshToken || snapshot.sessionTokenId) {
+authSessionStore.subscribe(() => {
+  const snapshot = authSessionStore.getSnapshot();
+  if (
+    snapshot.accessToken ||
+    snapshot.refreshToken ||
+    snapshot.sessionTokenId
+  ) {
     sessionInvalidated = false;
   }
 });
@@ -125,26 +127,14 @@ const dispatchUnauthorized = (status: number, code?: string) => {
   );
 };
 
-const beginRefresh = ({
-  mode,
-  refreshToken,
-}: {
-  mode: "cookie" | "token";
-  refreshToken?: string;
-}) => {
+const beginRefresh = ({ refreshToken }: { refreshToken?: string }) => {
   refreshPromise ??= (async () => {
     try {
-      const refreshResponse =
-        mode === "cookie"
-          ? await client.post("/api/v1/session/refresh", undefined, {
-              withCredentials: true,
-              headers: { Authorization: undefined },
-            })
-          : await client.post(
-              "/api/v1/session/refresh",
-              { refresh_token: refreshToken },
-              { headers: { Authorization: undefined } },
-            );
+      const refreshResponse = await client.post(
+        "/api/v1/session/refresh",
+        { refresh_token: refreshToken },
+        { headers: { Authorization: undefined } },
+      );
 
       return normalizeAuthResponse(refreshResponse.data);
     } catch (refreshError) {
@@ -154,7 +144,7 @@ const beginRefresh = ({
 
       // Hard stop: refresh failed, so clear in-memory auth artifacts to prevent
       // repeated refresh attempts and partial-auth states.
-      authTokenStore.clear();
+      authSessionStore.clear();
       dispatchUnauthorized(status, code);
       throw refreshError;
     } finally {
@@ -176,7 +166,7 @@ client.interceptors.response.use(
       }
     } else if (status === 401 || status === 403) {
       if (isInvalidSessionError(error)) {
-        authTokenStore.clear();
+        authSessionStore.clear();
         dispatchUnauthorized(status, extractErrorCode(error.response?.data));
         return Promise.reject(error);
       }
@@ -186,17 +176,11 @@ client.interceptors.response.use(
       }
       const originalRequest = error.config;
 
-      const canRefreshWithCookie =
-        status === 401 &&
-        shouldAttemptCookieRefresh() &&
-        originalRequest &&
-        !(originalRequest as { __authRetry?: boolean }).__authRetry &&
-        !isRefreshRequest(originalRequest.url);
-
       const refreshToken = getRefreshToken();
+      const sessionTokenId = getSessionTokenId();
       const canRefreshWithToken =
         status === 401 &&
-        Boolean(refreshToken) &&
+        Boolean(refreshToken && sessionTokenId) &&
         originalRequest &&
         !(originalRequest as { __authRetry?: boolean }).__authRetry &&
         !isRefreshRequest(originalRequest.url);
@@ -204,13 +188,13 @@ client.interceptors.response.use(
       if (canRefreshWithToken) {
         try {
           const next = await beginRefresh({
-            mode: "token",
             refreshToken: refreshToken ?? undefined,
           });
-          authTokenStore.setSession({
-            token: next.token,
+          authSessionStore.setSession({
+            accessToken: next.accessToken,
             refreshToken: next.refreshToken,
             sessionTokenId: next.sessionTokenId,
+            user: next.user,
           });
           window.dispatchEvent(
             new CustomEvent("app:auth:refreshed", { detail: next }),
@@ -223,10 +207,10 @@ client.interceptors.response.use(
               headers as unknown as {
                 set: (key: string, value: string) => void;
               }
-            ).set("Authorization", `Bearer ${next.token}`);
+            ).set("Authorization", `Bearer ${next.accessToken}`);
           } else {
             (headers as Record<string, unknown>).Authorization =
-              `Bearer ${next.token}`;
+              `Bearer ${next.accessToken}`;
           }
           originalRequest.headers = headers;
           return client.request(originalRequest);
@@ -239,42 +223,10 @@ client.interceptors.response.use(
           }
           return Promise.reject(error);
         }
-      } else if (canRefreshWithCookie) {
-        try {
-          const next = await beginRefresh({ mode: "cookie" });
-          authTokenStore.setSession({
-            token: next.token,
-            refreshToken: next.refreshToken,
-            sessionTokenId: next.sessionTokenId,
-          });
-          window.dispatchEvent(
-            new CustomEvent("app:auth:refreshed", { detail: next }),
-          );
-
-          (originalRequest as { __authRetry?: boolean }).__authRetry = true;
-          const headers = originalRequest.headers ?? {};
-          if (typeof (headers as { set?: unknown }).set === "function") {
-            (
-              headers as unknown as {
-                set: (key: string, value: string) => void;
-              }
-            ).set("Authorization", `Bearer ${next.token}`);
-          } else {
-            (headers as Record<string, unknown>).Authorization =
-              `Bearer ${next.token}`;
-          }
-          originalRequest.headers = headers;
-          return client.request(originalRequest);
-        } catch (refreshError) {
-          if (import.meta.env.MODE !== "test") {
-            console.warn("[api client] Cookie refresh failed", refreshError);
-          }
-          return Promise.reject(error);
-        }
       }
 
       // Centralize unauthorized handling via AuthProvider listener.
-      authTokenStore.clear();
+      authSessionStore.clear();
       dispatchUnauthorized(status, extractErrorCode(error.response?.data));
     }
     return Promise.reject(error);

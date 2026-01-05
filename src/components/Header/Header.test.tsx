@@ -39,7 +39,7 @@ describe("Header Component", () => {
     mockedUseAuth.mockReturnValue({
       user: null,
       logout: mockLogout,
-      token: null,
+      accessToken: null,
       isReady: true,
     } as unknown as ReturnType<typeof useAuth>);
     renderComponent();
@@ -63,7 +63,7 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: null,
         logout: mockLogout,
-        token: null,
+        accessToken: null,
         isReady: true,
       } as unknown as ReturnType<typeof useAuth>);
     });
@@ -96,7 +96,7 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockUser,
         logout: mockLogout,
-        token: "token",
+        accessToken: "token",
         isReady: true,
       } as unknown as ReturnType<typeof useAuth>);
     });
@@ -128,7 +128,7 @@ describe("Header Component", () => {
     mockedUseAuth.mockReturnValue({
       user: null,
       logout: mockLogout,
-      token: null,
+      accessToken: null,
       isReady: true,
     } as unknown as ReturnType<typeof useAuth>);
     renderComponent();
@@ -143,7 +143,7 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockAdmin,
         logout: mockLogout,
-        token: "token",
+        accessToken: "token",
         isReady: true,
       } as unknown as ReturnType<typeof useAuth>);
       renderComponent();
@@ -158,7 +158,7 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockSuper,
         logout: mockLogout,
-        token: "token",
+        accessToken: "token",
         isReady: true,
       } as unknown as ReturnType<typeof useAuth>);
       renderComponent();
@@ -174,7 +174,7 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockUser,
         logout: mockLogout,
-        token: "token",
+        accessToken: "token",
         isReady: true,
       } as unknown as ReturnType<typeof useAuth>);
       renderComponent();

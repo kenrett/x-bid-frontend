@@ -4,17 +4,9 @@ import { normalizeAuthResponse } from "./authResponse";
 describe("normalizeAuthResponse", () => {
   it("accepts backend login payload with numeric session_token_id", () => {
     const payload = {
-      token: "token",
+      access_token: "token",
       refresh_token: "refresh",
       session_token_id: 34,
-      session: {
-        session_token_id: 34,
-        session_expires_at: "2025-01-01T00:00:00Z",
-        seconds_remaining: 1799,
-      },
-      is_admin: false,
-      is_superuser: false,
-      redirect_path: null,
       user: {
         id: 3,
         name: "User One",
@@ -26,7 +18,7 @@ describe("normalizeAuthResponse", () => {
     };
 
     expect(normalizeAuthResponse(payload)).toEqual({
-      token: "token",
+      accessToken: "token",
       refreshToken: "refresh",
       sessionTokenId: "34",
       user: {
@@ -40,7 +32,7 @@ describe("normalizeAuthResponse", () => {
     });
   });
 
-  it("accepts camelCase token keys", () => {
+  it("fails loudly when v1 fields are missing", () => {
     const payload = {
       token: "token",
       refreshToken: "refresh",
@@ -48,12 +40,9 @@ describe("normalizeAuthResponse", () => {
       user: { id: 1, name: "Casey", email: "casey@example.com", bidCredits: 0 },
     };
 
-    expect(normalizeAuthResponse(payload)).toMatchObject({
-      token: "token",
-      refreshToken: "refresh",
-      sessionTokenId: "99",
-      user: { email: "casey@example.com" },
-    });
+    expect(() => normalizeAuthResponse(payload)).toThrow(
+      /Unexpected auth response/i,
+    );
   });
 
   it("does not report missing session_token_id for non-JSON payloads", () => {

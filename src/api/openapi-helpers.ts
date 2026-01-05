@@ -114,7 +114,7 @@ type OverrideResponses = {
   };
   "/api/v1/login": {
     post: {
-      token: string;
+      access_token: string;
       refresh_token: string;
       session_token_id: string;
       user: User;
@@ -124,7 +124,7 @@ type OverrideResponses = {
   };
   "/api/v1/signup": {
     post: {
-      token: string;
+      access_token: string;
       refresh_token: string;
       session_token_id: string;
       user: User;

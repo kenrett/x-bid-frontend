@@ -20,7 +20,7 @@ describe("useAuth", () => {
         is_admin: false,
         is_superuser: false,
       },
-      token: "token",
+      accessToken: "token",
       refreshToken: "refresh",
       sessionTokenId: "session",
       sessionRemainingSeconds: 100,

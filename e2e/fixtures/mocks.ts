@@ -76,7 +76,7 @@ export const adminUser = {
 };
 
 export const loginResponse = {
-  token: "token-login",
+  access_token: "token-login",
   refresh_token: "refresh-login",
   session_token_id: "session-login",
   user: authedUser,
@@ -160,19 +160,13 @@ export const isDocumentRequest = (route: Route) =>
 export const seedAuthState = async (page: Page, user = authedUser) => {
   await page.addInitScript(
     (auth) => {
-      // Auth tokens are in-memory only; seed a bootstrap payload consumed by AuthProvider
-      // when `VITE_E2E_TESTS=true`.
-      (
-        window as unknown as {
-          __e2eAuthBootstrap?: typeof auth;
-        }
-      ).__e2eAuthBootstrap = auth;
+      localStorage.setItem("auth.session.v1", JSON.stringify(auth));
     },
     {
       user,
-      token: "token-authed",
-      refreshToken: "refresh-authed",
-      sessionTokenId: "session-authed",
+      access_token: "token-authed",
+      refresh_token: "refresh-authed",
+      session_token_id: "session-authed",
     },
   );
 };
@@ -181,7 +175,7 @@ export const mockSessionRemaining = async (page: Page, user = authedUser) => {
   await page.route("**/api/v1/session/remaining", (route) =>
     fulfillJson(route, {
       remaining_seconds: 1800,
-      token: "token-authed",
+      access_token: "token-authed",
       refresh_token: "refresh-authed",
       session_token_id: "session-authed",
       user,

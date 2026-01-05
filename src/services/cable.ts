@@ -1,7 +1,7 @@
 import * as ActionCable from "@rails/actioncable";
-import { getAuthToken } from "@features/auth/tokenStore";
+import { getAccessToken } from "@features/auth/tokenStore";
 
-const getStoredToken = () => getAuthToken();
+const getStoredToken = () => getAccessToken();
 
 const buildCableUrl = (
   tokenOverride?: string | null,

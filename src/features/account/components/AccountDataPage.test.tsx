@@ -32,7 +32,7 @@ const authValue = (overrides: Partial<AuthContextType> = {}): AuthContextType =>
       is_superuser: false,
     },
     isReady: true,
-    token: "t",
+    accessToken: "t",
     refreshToken: "r",
     sessionTokenId: "s",
     sessionRemainingSeconds: null,
