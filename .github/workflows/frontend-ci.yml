@@ -107,7 +107,16 @@ jobs:
 
       - name: Fail on generated type diffs (PR only)
         if: ${{ github.event_name == 'pull_request' }}
-        run: git diff --exit-code -- src/api/openapi-types.ts
+        run: |
+          if git diff --quiet -- src/api/openapi-types.ts; then
+            exit 0
+          fi
+          echo "Generated OpenAPI types changed:"
+          git --no-pager diff --stat -- src/api/openapi-types.ts
+          echo ""
+          echo "First 200 lines of diff:"
+          git --no-pager diff -- src/api/openapi-types.ts | head -n 200
+          exit 1
 
       - name: Contract drift tests (CT-2) (PR only)
         if: ${{ github.event_name == 'pull_request' }}
