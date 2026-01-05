@@ -1,9 +1,16 @@
 import { useEffect } from "react";
-import { initFlowbite } from "flowbite";
 
 export function FlowbiteInitializer() {
   useEffect(() => {
-    initFlowbite();
+    let cancelled = false;
+    void (async () => {
+      const { initFlowbite } = await import("flowbite");
+      if (cancelled) return;
+      initFlowbite();
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return null;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { router } from "./router";
+import { routes as routerRoutes } from "./router";
 import { ADMIN_PATHS } from "@features/admin/components/Admin/adminPaths";
 
 type RouteLike = {
@@ -7,9 +7,10 @@ type RouteLike = {
   children?: RouteLike[];
   element?: unknown;
   errorElement?: unknown;
+  lazy?: unknown;
 };
 
-const routes = router.routes as unknown as RouteLike[];
+const routes = routerRoutes as unknown as RouteLike[];
 
 const hasPath = (routes: readonly RouteLike[] | undefined, path: string) =>
   routes?.some((route) => route.path === path) ?? false;
@@ -50,7 +51,7 @@ describe("router configuration", () => {
     const adminLayout = adminRoute?.children?.[0];
     const adminChildren = adminLayout?.children;
 
-    expect(adminRoute?.element).toBeTruthy();
+    expect(adminRoute?.lazy).toBeTruthy();
     expect(hasPath(adminChildren, ADMIN_PATHS.auctions)).toBe(true);
     expect(hasPath(adminChildren, `${ADMIN_PATHS.auctions}/new`)).toBe(true);
     expect(hasPath(adminChildren, `${ADMIN_PATHS.auctions}/:id`)).toBe(true);

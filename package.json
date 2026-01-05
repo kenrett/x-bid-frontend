@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:analyze": "ANALYZE=true tsc -b && BUNDLE_ANALYZE_OUT=docs/bundle/stats.json vite build",
     "lint": "eslint .",
     "format": "prettier --write .",
     "gen:api-types": "node scripts/gen-api-types.mjs --snapshot src/contracts/openapi.json",
@@ -58,6 +59,7 @@
     "openapi-typescript": "^7.10.1",
     "postcss": "^8.5.6",
     "prettier": "^3.4.2",
+    "rollup-plugin-visualizer": "^6.0.5",
     "tailwindcss": "^4.1.13",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.43.0",

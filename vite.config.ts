@@ -5,9 +5,22 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "path";
 import type { UserConfig as VitestUserConfig } from "vitest/config";
+import { visualizer } from "rollup-plugin-visualizer";
 
 const config: UserConfig & { test: VitestUserConfig["test"] } = {
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    process.env.ANALYZE === "true"
+      ? visualizer({
+          filename: process.env.BUNDLE_ANALYZE_OUT ?? "docs/bundle/stats.json",
+          template: "raw-data",
+          gzipSize: true,
+          brotliSize: true,
+          open: false,
+        })
+      : undefined,
+  ],
   resolve: {
     alias: {
       "@api": resolve(__dirname, "./src/api"),

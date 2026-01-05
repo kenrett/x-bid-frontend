@@ -3,6 +3,11 @@ import { showToast } from "./toast";
 
 export const UNEXPECTED_RESPONSE_MESSAGE = "Something's off on our end.";
 
+type SentryScope = {
+  setTag: (key: string, value: string) => void;
+  setExtra: (key: string, value: unknown) => void;
+};
+
 export class UnexpectedResponseError extends Error {
   constructor(context: string) {
     super(`Unexpected response shape for ${context}`);
@@ -18,7 +23,7 @@ export const reportUnexpectedResponse = (
 
   try {
     if (typeof Sentry.withScope === "function") {
-      Sentry.withScope((scope) => {
+      Sentry.withScope((scope: SentryScope) => {
         scope.setTag("response_context", context);
         try {
           scope.setExtra("payload", payload);

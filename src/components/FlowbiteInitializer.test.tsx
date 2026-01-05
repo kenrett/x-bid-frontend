@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { FlowbiteInitializer } from "./FlowbiteInitializer";
 
 const initFlowbite = vi.fn();
@@ -8,10 +8,10 @@ vi.mock("flowbite", () => ({
 }));
 
 describe("FlowbiteInitializer", () => {
-  it("calls initFlowbite on mount and renders nothing", () => {
+  it("calls initFlowbite on mount and renders nothing", async () => {
     const { container } = render(<FlowbiteInitializer />);
 
-    expect(initFlowbite).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(initFlowbite).toHaveBeenCalledTimes(1));
     expect(container).toBeEmptyDOMElement();
   });
 });

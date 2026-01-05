@@ -1,142 +1,328 @@
-import { createBrowserRouter } from "react-router-dom";
+import type { ComponentType } from "react";
 import { Layout } from "./components/Layout";
-import { About } from "./components/About/About";
-import { HowItWorks } from "./components/HowItWorks";
-import { PrivacyPolicy } from "./components/PrivacyPolicy";
-import { TermsAndConditions } from "./components/TermsAndConditions";
 import { RouteErrorBoundary } from "./components/ErrorBoundary/RouteErrorBoundary";
-import AuctionList from "@features/auctions/components/AuctionList/AuctionList";
-import { AuctionDetail } from "@features/auctions/components/AuctionDetail";
-import { BuyBids } from "@features/auctions/components/BuyBids/BuyBids";
-import { PurchaseStatus } from "@features/auctions/components/BuyBids/PurchaseStatus";
-import { LoginForm } from "@features/auth/components/LoginForm/LoginForm";
-import { SignUpForm } from "@features/auth/components/SignUpForm/SignUpForm";
-import { AdminRoute } from "@features/admin/components/AdminRoute";
-import { AdminDashboard } from "@features/admin/components/Admin/AdminDashboard";
-import { AdminLayout } from "@features/admin/components/Admin/AdminLayout";
 import { ADMIN_PATHS } from "@features/admin/components/Admin/adminPaths";
-import { AdminAuctionsList } from "@features/admin/components/Admin/Auctions/AdminAuctionsList";
-import { AdminAuctionCreate } from "@features/admin/components/Admin/Auctions/AdminAuctionCreate";
-import { AdminAuctionEdit } from "@features/admin/components/Admin/Auctions/AdminAuctionEdit";
-import { AdminAuctionDetail } from "@features/admin/components/Admin/Auctions/AdminAuctionDetail";
-import { AdminBidPacksList } from "@features/admin/components/Admin/BidPacks/AdminBidPacksList";
-import { AdminBidPackCreate } from "@features/admin/components/Admin/BidPacks/AdminBidPackCreate";
-import { AdminBidPackEdit } from "@features/admin/components/Admin/BidPacks/AdminBidPackEdit";
-import { AdminUsersPage } from "@features/admin/components/Admin/Users/AdminUsersPage";
-import { AdminSettings } from "@features/admin/components/Admin/Settings/AdminSettings";
-import { AdminPaymentsPage } from "@features/admin/components/Admin/Users/AdminPaymentsPage";
-import { AdminPaymentDetailPage } from "@features/admin/components/Admin/Users/AdminPaymentDetailPage";
-import { ForgotPassword } from "@features/auth/components/Auth/ForgotPassword";
-import { ResetPassword } from "@features/auth/components/Auth/ResetPassword";
-import { MaintenanceMode } from "./components/MaintenanceMode";
-import { BidHistoryPage } from "@features/wallet/components/BidHistoryPage";
-import { PurchasesListPage } from "@features/purchases/components/PurchasesListPage";
-import { PurchaseDetailPage } from "@features/purchases/components/PurchaseDetailPage";
-import { AccountRoute } from "@features/account/components/AccountRoute";
-import { AccountLayout } from "@features/account/components/AccountLayout";
-import { AccountOverviewPage } from "@features/account/components/AccountOverviewPage";
-import { AccountProfilePage } from "@features/account/components/AccountProfilePage";
-import { AccountSecurityPage } from "@features/account/components/AccountSecurityPage";
-import { AccountSessionsPage } from "@features/account/components/AccountSessionsPage";
-import { AccountNotificationsPage } from "@features/account/components/AccountNotificationsPage";
-import { AccountDataPage } from "@features/account/components/AccountDataPage";
-import { ActivityPage } from "@features/activity/components/ActivityPage";
-import { WinsListPage } from "@features/wins/components/WinsListPage";
-import { WinDetailPage } from "@features/wins/components/WinDetailPage";
 
-export const router = createBrowserRouter([
+const lazy =
+  (importer: () => Promise<unknown>, exportName?: string) => async () => {
+    const mod = (await importer()) as Record<string, unknown>;
+    const Component = (exportName ? mod[exportName] : mod.default) as
+      | ComponentType
+      | undefined;
+    if (!Component) throw new Error("Lazy route component missing export");
+    return { Component };
+  };
+
+export const routes = [
   {
     element: <Layout />,
     errorElement: <RouteErrorBoundary />,
     children: [
-      { path: "/", element: <AuctionList /> },
-      { path: "/auctions", element: <AuctionList /> },
-      { path: "/auctions/:id", element: <AuctionDetail /> },
-      { path: "/login", element: <LoginForm /> },
-      { path: "/signup", element: <SignUpForm /> },
-      { path: "/forgot-password", element: <ForgotPassword /> },
-      { path: "/reset-password", element: <ResetPassword /> },
-      { path: "/about", element: <About /> },
-      { path: "/how-it-works", element: <HowItWorks /> },
-      { path: "/buy-bids", element: <BuyBids /> },
-      { path: "/purchase-status", element: <PurchaseStatus /> },
+      {
+        path: "/",
+        lazy: lazy(
+          () => import("@features/auctions/components/AuctionList/AuctionList"),
+          "default",
+        ),
+      },
+      {
+        path: "/auctions",
+        lazy: lazy(
+          () => import("@features/auctions/components/AuctionList/AuctionList"),
+          "default",
+        ),
+      },
+      {
+        path: "/auctions/:id",
+        lazy: lazy(
+          () => import("@features/auctions/components/AuctionDetail"),
+          "AuctionDetail",
+        ),
+      },
+      {
+        path: "/login",
+        lazy: lazy(
+          () => import("@features/auth/components/LoginForm/LoginForm"),
+          "LoginForm",
+        ),
+      },
+      {
+        path: "/signup",
+        lazy: lazy(
+          () => import("@features/auth/components/SignUpForm/SignUpForm"),
+          "SignUpForm",
+        ),
+      },
+      {
+        path: "/forgot-password",
+        lazy: lazy(
+          () => import("@features/auth/components/Auth/ForgotPassword"),
+          "ForgotPassword",
+        ),
+      },
+      {
+        path: "/reset-password",
+        lazy: lazy(
+          () => import("@features/auth/components/Auth/ResetPassword"),
+          "ResetPassword",
+        ),
+      },
+      {
+        path: "/about",
+        lazy: lazy(() => import("./components/About/About"), "About"),
+      },
+      {
+        path: "/how-it-works",
+        lazy: lazy(() => import("./components/HowItWorks"), "HowItWorks"),
+      },
+      {
+        path: "/buy-bids",
+        lazy: lazy(
+          () => import("@features/auctions/components/BuyBids/BuyBids"),
+          "BuyBids",
+        ),
+      },
+      {
+        path: "/purchase-status",
+        lazy: lazy(
+          () => import("@features/auctions/components/BuyBids/PurchaseStatus"),
+          "PurchaseStatus",
+        ),
+      },
       {
         path: "/account",
-        element: <AccountRoute />,
+        lazy: lazy(
+          () => import("@features/account/components/AccountRoute"),
+          "AccountRoute",
+        ),
         children: [
           {
-            element: <AccountLayout />,
+            lazy: lazy(
+              () => import("@features/account/components/AccountLayout"),
+              "AccountLayout",
+            ),
             children: [
-              { index: true, element: <AccountOverviewPage /> },
-              { path: "wallet", element: <BidHistoryPage /> },
-              { path: "purchases", element: <PurchasesListPage /> },
-              { path: "purchases/:id", element: <PurchaseDetailPage /> },
-              { path: "wins", element: <WinsListPage /> },
-              { path: "wins/:auction_id", element: <WinDetailPage /> },
-              { path: "activity", element: <ActivityPage /> },
-              { path: "profile", element: <AccountProfilePage /> },
-              { path: "security", element: <AccountSecurityPage /> },
-              { path: "sessions", element: <AccountSessionsPage /> },
-              { path: "notifications", element: <AccountNotificationsPage /> },
-              { path: "data", element: <AccountDataPage /> },
+              {
+                index: true,
+                lazy: lazy(
+                  () =>
+                    import("@features/account/components/AccountOverviewPage"),
+                  "AccountOverviewPage",
+                ),
+              },
+              {
+                path: "wallet",
+                lazy: lazy(
+                  () => import("@features/wallet/components/BidHistoryPage"),
+                  "BidHistoryPage",
+                ),
+              },
+              {
+                path: "purchases",
+                lazy: lazy(
+                  () =>
+                    import("@features/purchases/components/PurchasesListPage"),
+                  "PurchasesListPage",
+                ),
+              },
+              {
+                path: "purchases/:id",
+                lazy: lazy(
+                  () =>
+                    import("@features/purchases/components/PurchaseDetailPage"),
+                  "PurchaseDetailPage",
+                ),
+              },
+              {
+                path: "wins",
+                lazy: lazy(
+                  () => import("@features/wins/components/WinsListPage"),
+                  "WinsListPage",
+                ),
+              },
+              {
+                path: "wins/:auction_id",
+                lazy: lazy(
+                  () => import("@features/wins/components/WinDetailPage"),
+                  "WinDetailPage",
+                ),
+              },
+              {
+                path: "activity",
+                lazy: lazy(
+                  () => import("@features/activity/components/ActivityPage"),
+                  "ActivityPage",
+                ),
+              },
+              {
+                path: "profile",
+                lazy: lazy(
+                  () =>
+                    import("@features/account/components/AccountProfilePage"),
+                  "AccountProfilePage",
+                ),
+              },
+              {
+                path: "security",
+                lazy: lazy(
+                  () =>
+                    import("@features/account/components/AccountSecurityPage"),
+                  "AccountSecurityPage",
+                ),
+              },
+              {
+                path: "sessions",
+                lazy: lazy(
+                  () =>
+                    import("@features/account/components/AccountSessionsPage"),
+                  "AccountSessionsPage",
+                ),
+              },
+              {
+                path: "notifications",
+                lazy: lazy(
+                  () =>
+                    import("@features/account/components/AccountNotificationsPage"),
+                  "AccountNotificationsPage",
+                ),
+              },
+              {
+                path: "data",
+                lazy: lazy(
+                  () => import("@features/account/components/AccountDataPage"),
+                  "AccountDataPage",
+                ),
+              },
             ],
           },
         ],
       },
-      { path: "/privacy-policy", element: <PrivacyPolicy /> },
-      { path: "/terms-and-conditions", element: <TermsAndConditions /> },
-      { path: "/maintenance", element: <MaintenanceMode /> },
+      {
+        path: "/privacy-policy",
+        lazy: lazy(() => import("./components/PrivacyPolicy"), "PrivacyPolicy"),
+      },
+      {
+        path: "/terms-and-conditions",
+        lazy: lazy(
+          () => import("./components/TermsAndConditions"),
+          "TermsAndConditions",
+        ),
+      },
+      {
+        path: "/maintenance",
+        lazy: lazy(
+          () => import("./components/MaintenanceMode"),
+          "MaintenanceMode",
+        ),
+      },
       {
         path: "/admin",
-        element: <AdminRoute />,
+        lazy: lazy(
+          () => import("@features/admin/components/AdminRoute"),
+          "AdminRoute",
+        ),
         children: [
           {
-            element: <AdminLayout />,
+            lazy: lazy(
+              () => import("@features/admin/components/Admin/AdminLayout"),
+              "AdminLayout",
+            ),
             children: [
-              { index: true, element: <AdminDashboard /> },
+              {
+                index: true,
+                lazy: lazy(
+                  () =>
+                    import("@features/admin/components/Admin/AdminDashboard"),
+                  "AdminDashboard",
+                ),
+              },
               {
                 path: ADMIN_PATHS.auctions,
-                element: <AdminAuctionsList />,
+                lazy: lazy(
+                  () =>
+                    import("@features/admin/components/Admin/Auctions/AdminAuctionsList"),
+                  "AdminAuctionsList",
+                ),
               },
               {
                 path: `${ADMIN_PATHS.auctions}/:id`,
-                element: <AdminAuctionDetail />,
+                lazy: lazy(
+                  () =>
+                    import("@features/admin/components/Admin/Auctions/AdminAuctionDetail"),
+                  "AdminAuctionDetail",
+                ),
               },
               {
                 path: `${ADMIN_PATHS.auctions}/new`,
-                element: <AdminAuctionCreate />,
+                lazy: lazy(
+                  () =>
+                    import("@features/admin/components/Admin/Auctions/AdminAuctionCreate"),
+                  "AdminAuctionCreate",
+                ),
               },
               {
                 path: `${ADMIN_PATHS.auctions}/:id/edit`,
-                element: <AdminAuctionEdit />,
+                lazy: lazy(
+                  () =>
+                    import("@features/admin/components/Admin/Auctions/AdminAuctionEdit"),
+                  "AdminAuctionEdit",
+                ),
               },
               {
                 path: ADMIN_PATHS.bidPacks,
-                element: <AdminBidPacksList />,
+                lazy: lazy(
+                  () =>
+                    import("@features/admin/components/Admin/BidPacks/AdminBidPacksList"),
+                  "AdminBidPacksList",
+                ),
               },
               {
                 path: `${ADMIN_PATHS.bidPacks}/new`,
-                element: <AdminBidPackCreate />,
+                lazy: lazy(
+                  () =>
+                    import("@features/admin/components/Admin/BidPacks/AdminBidPackCreate"),
+                  "AdminBidPackCreate",
+                ),
               },
               {
                 path: `${ADMIN_PATHS.bidPacks}/:id/edit`,
-                element: <AdminBidPackEdit />,
+                lazy: lazy(
+                  () =>
+                    import("@features/admin/components/Admin/BidPacks/AdminBidPackEdit"),
+                  "AdminBidPackEdit",
+                ),
               },
               {
                 path: ADMIN_PATHS.users,
-                element: <AdminUsersPage />,
+                lazy: lazy(
+                  () =>
+                    import("@features/admin/components/Admin/Users/AdminUsersPage"),
+                  "AdminUsersPage",
+                ),
               },
               {
                 path: ADMIN_PATHS.payments,
-                element: <AdminPaymentsPage />,
+                lazy: lazy(
+                  () =>
+                    import("@features/admin/components/Admin/Users/AdminPaymentsPage"),
+                  "AdminPaymentsPage",
+                ),
               },
               {
                 path: `${ADMIN_PATHS.payments}/:id`,
-                element: <AdminPaymentDetailPage />,
+                lazy: lazy(
+                  () =>
+                    import("@features/admin/components/Admin/Users/AdminPaymentDetailPage"),
+                  "AdminPaymentDetailPage",
+                ),
               },
               {
                 path: ADMIN_PATHS.settings,
-                element: <AdminSettings />,
+                lazy: lazy(
+                  () =>
+                    import("@features/admin/components/Admin/Settings/AdminSettings"),
+                  "AdminSettings",
+                ),
               },
             ],
           },
@@ -144,4 +330,4 @@ export const router = createBrowserRouter([
       },
     ],
   },
-]);
+] as const;

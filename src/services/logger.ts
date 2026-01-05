@@ -1,6 +1,10 @@
 import { ErrorInfo } from "react";
 import { Sentry, SENTRY_ENABLED } from "@sentryClient";
 
+type SentryScope = {
+  setExtras: (extras: Record<string, unknown>) => void;
+};
+
 /**
  * A stub for a remote error logging service.
  *
@@ -27,7 +31,7 @@ export const logError = (error: Error, errorInfo: ErrorInfo): void => {
 
   if (sentryEnabled) {
     try {
-      sentryClient.withScope((scope) => {
+      sentryClient.withScope((scope: SentryScope) => {
         scope.setExtras({ componentStack: errorInfo.componentStack });
         sentryClient.captureException(error);
       });

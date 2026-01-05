@@ -8,6 +8,11 @@ vi.mock("@sentry/react", () => ({
     integration: "replayIntegration",
     options,
   })),
+  withScope: vi.fn((cb) =>
+    cb({ setExtras: vi.fn(), setTag: vi.fn(), setExtra: vi.fn() }),
+  ),
+  captureException: vi.fn(),
+  captureMessage: vi.fn(),
 }));
 
 const originalEnv = { ...import.meta.env };
@@ -47,6 +52,7 @@ describe("sentryClient", () => {
     const module = await loadSentryClient({
       VITE_SENTRY_DSN: "",
       MODE: "development",
+      PROD: false,
     });
 
     expect(module.SENTRY_ENABLED).toBe(false);
@@ -61,6 +67,7 @@ describe("sentryClient", () => {
     const module = await loadSentryClient({
       VITE_SENTRY_DSN: "https://dsn.example",
       MODE: "test",
+      PROD: true,
     });
 
     expect(module.SENTRY_ENABLED).toBe(false);
@@ -72,6 +79,7 @@ describe("sentryClient", () => {
     const module = await loadSentryClient({
       VITE_SENTRY_DSN: "https://dsn.example",
       MODE: "production",
+      PROD: true,
       VITE_SENTRY_ENVIRONMENT: "staging",
       VITE_SENTRY_RELEASE: "release-123",
       VITE_APP_VERSION: "9.9.9",
@@ -81,6 +89,7 @@ describe("sentryClient", () => {
     });
 
     expect(module.SENTRY_ENABLED).toBe(true);
+    await module.initSentry();
     expect(sentry.init).toHaveBeenCalledTimes(1);
     expect(sentry.init).toHaveBeenCalledWith({
       dsn: "https://dsn.example",
