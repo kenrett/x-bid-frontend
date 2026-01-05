@@ -140,10 +140,7 @@ export function Header() {
       )}
       <div className={variants.container({ compact: isScrolled })}>
         <Link to="/" className={variants.logoLink()}>
-          <div
-            className={variants.logoSpotlight()}
-            style={{ transform: "scale(3)" }}
-          ></div>
+          <div className={`${variants.logoSpotlight()} scale-[3]`} />
           <img
             src={LOGO_SRC}
             alt="X-Bid Logo"

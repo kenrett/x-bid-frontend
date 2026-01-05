@@ -57,8 +57,7 @@ describe("Auction Component", () => {
     render(<Auction {...mockAuctionProps} index={3} />);
     const component = screen.getByTestId(`auction-card-${mockAuctionProps.id}`);
 
-    expect(component).toHaveStyle(
-      "animation: fadeInUp 0.5s 0.3s ease-out both",
-    );
+    expect(component).toHaveClass("animate-[fadeInUp_0.5s_ease-out_both]");
+    expect(component).toHaveClass("[animation-delay:0.3s]");
   });
 });
