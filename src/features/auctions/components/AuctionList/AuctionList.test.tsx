@@ -103,7 +103,7 @@ describe("AuctionList", () => {
     // Make this promise never resolve to test the initial loading state in isolation
     mockedGetAuctions.mockReturnValue(new Promise(() => {}));
     render(<AuctionList />);
-    expect(screen.getByText("Loading auctions...")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(/loading auctions/i);
   });
 
   it("should display a list of auctions on successful fetch", async () => {
@@ -116,8 +116,8 @@ describe("AuctionList", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/Art Painting\s*-\s*300/)).toBeInTheDocument();
 
-    // Ensure loading message is gone
-    expect(screen.queryByText("Loading auctions...")).not.toBeInTheDocument();
+    // Ensure loading state is gone
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("should display an error message if the fetch fails", async () => {
@@ -130,7 +130,7 @@ describe("AuctionList", () => {
     expect(errorElement).toBeInTheDocument();
 
     // Ensure loading message and auction list are not present
-    expect(screen.queryByText("Loading auctions...")).not.toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(screen.queryByText("Vintage Watch")).not.toBeInTheDocument();
   });
 

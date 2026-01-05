@@ -7,11 +7,45 @@
       type="image/svg+xml"
       href="/src/assets/x-bid-alt-logo.png"
     />
+    <link
+      rel="preload"
+      as="image"
+      href="/assets/nav-logo.svg"
+      fetchpriority="high"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Xbid</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <nav
+        aria-label="Primary navigation"
+        style="
+          background: #0d0d1a;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          position: sticky;
+          top: 0;
+          z-index: 50;
+        "
+      >
+        <div style="max-width: 1280px; margin: 0 auto; padding: 20px 16px">
+          <a
+            href="/"
+            aria-label="Home"
+            style="display: inline-flex; align-items: center"
+          >
+            <img
+              src="/assets/nav-logo.svg"
+              alt="X-Bid Logo"
+              width="240"
+              height="64"
+              fetchpriority="high"
+              decoding="async"
+            />
+          </a>
+        </div>
+      </nav>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

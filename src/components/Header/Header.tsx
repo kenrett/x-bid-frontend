@@ -1,4 +1,3 @@
-import logo from "../../assets/biddersweet_logo.png";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { useAccountStatus } from "@features/account/hooks/useAccountStatus";
 import { Bars3Icon } from "@heroicons/react/24/outline";
@@ -7,6 +6,8 @@ import { Link, useLocation } from "react-router-dom";
 import { cva } from "class-variance-authority";
 import { useEffect, useMemo, useState } from "react";
 import { Skeleton } from "../Skeleton";
+
+const LOGO_SRC = "/assets/nav-logo.svg";
 
 const STRINGS = {
   GREETING: "Hello",
@@ -55,12 +56,12 @@ const variants = {
       },
     },
   ),
-  logoLink: cva("relative flex items-center justify-center w-60 h-34"),
+  logoLink: cva("relative flex items-center justify-center w-60 h-16"),
   logoSpotlight: cva(
     "absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.15)_0%,rgba(255,255,255,0)_50%)] -z-0",
   ),
   logoImage: cva(
-    "relative h-65 drop-shadow-[0_0_25px_rgba(255,105,180,0.8)] transition-transform duration-300 hover:scale-105",
+    "relative w-60 h-auto drop-shadow-[0_0_25px_rgba(255,105,180,0.8)] transition-transform duration-300 hover:scale-105",
   ),
   mobileMenuButton: cva(
     "inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-400 rounded-lg md:hidden hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500",
@@ -144,8 +145,13 @@ export function Header() {
             style={{ transform: "scale(3)" }}
           ></div>
           <img
-            src={logo}
+            src={LOGO_SRC}
             alt="X-Bid Logo"
+            width={240}
+            height={64}
+            fetchPriority="high"
+            decoding="async"
+            loading="eager"
             className={`${variants.logoImage()} ${isScrolled ? "scale-90" : ""}`}
           />
         </Link>
