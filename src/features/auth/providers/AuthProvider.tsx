@@ -151,9 +151,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     (reason?: string) => {
       if (invalidatingRef.current) return;
       invalidatingRef.current = true;
-      console.warn(
-        `[AuthProvider] Session invalidated${reason ? ` (${reason})` : ""}`,
-      );
+      if (import.meta.env.MODE !== "test") {
+        console.warn(
+          `[AuthProvider] Session invalidated${reason ? ` (${reason})` : ""}`,
+        );
+      }
 
       // Clear local auth state immediately to avoid partial-auth UI and prevent
       // any new requests from attaching stale tokens.
@@ -317,7 +319,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         );
         handleRemainingResponse(response.data);
       } catch (error) {
-        console.error("Failed to fetch session remaining time", error);
+        if (import.meta.env.MODE !== "test") {
+          console.error("Failed to fetch session remaining time", error);
+        }
         if (isAxiosError(error) && error.response?.status === 401) {
           handleSessionInvalidated("unauthorized");
         }

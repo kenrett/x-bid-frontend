@@ -231,7 +231,12 @@ client.interceptors.response.use(
           originalRequest.headers = headers;
           return client.request(originalRequest);
         } catch (refreshError) {
-          console.warn("[api client] Refresh token flow failed", refreshError);
+          if (import.meta.env.MODE !== "test") {
+            console.warn(
+              "[api client] Refresh token flow failed",
+              refreshError,
+            );
+          }
           return Promise.reject(error);
         }
       } else if (canRefreshWithCookie) {
@@ -261,7 +266,9 @@ client.interceptors.response.use(
           originalRequest.headers = headers;
           return client.request(originalRequest);
         } catch (refreshError) {
-          console.warn("[api client] Cookie refresh failed", refreshError);
+          if (import.meta.env.MODE !== "test") {
+            console.warn("[api client] Cookie refresh failed", refreshError);
+          }
           return Promise.reject(error);
         }
       }
