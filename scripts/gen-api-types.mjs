@@ -3,6 +3,7 @@ import path from "node:path";
 import process from "node:process";
 import openapiTS from "openapi-typescript";
 import ts from "typescript";
+import prettier from "prettier";
 
 const DEFAULT_OUT_FILE = "src/api/openapi-types.ts";
 const DEFAULT_SPEC_SNAPSHOT_FILE = "docs/api/openapi.json";
@@ -153,11 +154,19 @@ const main = async () => {
 
   if (snapshot) {
     await ensureDir(snapshot);
-    await fs.writeFile(
-      snapshot,
-      `${JSON.stringify(rawSchema, null, 2)}\n`,
-      "utf8",
-    );
+    const snapshotRaw = `${JSON.stringify(rawSchema, null, 2)}\n`;
+    const formattedSnapshot = await (async () => {
+      try {
+        const config = (await prettier.resolveConfig(process.cwd())) ?? {};
+        return await prettier.format(snapshotRaw, {
+          ...config,
+          filepath: snapshot,
+        });
+      } catch {
+        return snapshotRaw;
+      }
+    })();
+    await fs.writeFile(snapshot, formattedSnapshot, "utf8");
   }
 
   const schemaForTypes = sanitizeOpenApiSchema(cloneJson(rawSchema));
@@ -182,8 +191,17 @@ const main = async () => {
             source,
           );
         })();
+
+  const formatted = await (async () => {
+    try {
+      const config = (await prettier.resolveConfig(process.cwd())) ?? {};
+      return await prettier.format(output, { ...config, filepath: out });
+    } catch {
+      return output;
+    }
+  })();
   await ensureDir(out);
-  await fs.writeFile(out, output, "utf8");
+  await fs.writeFile(out, formatted, "utf8");
 };
 
 main().catch((err) => {
