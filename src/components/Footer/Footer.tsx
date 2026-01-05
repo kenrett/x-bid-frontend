@@ -23,7 +23,7 @@ const variants = {
   bottomSection: cva(
     "mt-8 pt-8 border-t border-white/10 sm:flex sm:items-center sm:justify-between",
   ),
-  copyright: cva("text-sm text-gray-500 sm:text-center"),
+  copyright: cva("text-sm text-gray-300 sm:text-center"),
 };
 
 export function Footer() {
