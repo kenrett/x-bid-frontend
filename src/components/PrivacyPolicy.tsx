@@ -60,7 +60,8 @@ export const PrivacyPolicy = () => {
                 <strong>Financial Information:</strong> When you purchase Bids
                 or win an auction, we collect payment information, such as
                 credit card details or other payment account information. This
-                information is processed by our secure payment partners.
+                information is processed by our secure payment partners (for
+                example, Stripe).
               </li>
               <li>
                 <strong>Transactional Information:</strong> We collect
@@ -152,6 +153,13 @@ export const PrivacyPolicy = () => {
               cookies or to indicate when a cookie is being sent. However, if
               you do not accept cookies, you may not be able to use some
               portions of our Service.
+            </p>
+            <p className="mt-2">
+              <strong>Stripe:</strong> If you enter a checkout flow, Stripe may
+              set cookies or similar identifiers for fraud prevention and
+              payment processing, and load resources from Stripe domains (such
+              as <span className="font-mono">js.stripe.com</span>). We do not
+              intentionally load Stripe on the homepage.
             </p>
           </section>
 
