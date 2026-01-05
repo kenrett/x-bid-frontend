@@ -62,7 +62,9 @@ test("admin can create auction with schedule and image; shows on public feed", a
     .getByLabel("Description")
     .fill("Full-frame camera with two lenses.");
   await page.getByLabel("Image URL").fill("https://example.com/sunset.jpg");
-  await page.getByLabel("Status").selectOption("scheduled");
+  await page
+    .locator('label:has-text("Status") select')
+    .selectOption("scheduled");
   await page.getByLabel("Start Date").fill("2025-06-01T12:00:00Z");
   await page.getByLabel("End Time").fill("2025-06-02T12:00:00Z");
   await page.getByRole("button", { name: "Create auction" }).click();
@@ -143,7 +145,9 @@ test("admin edits auction status/date and update appears on public feed", async 
   page.on("dialog", (dialog) => dialog.accept());
 
   await page.goto(`/admin/auctions/${editableAuction.id}/edit`);
-  await page.getByLabel("Status").selectOption("inactive");
+  await page
+    .locator('label:has-text("Status") select')
+    .selectOption("inactive");
   await page.getByLabel("End Time").fill("2025-02-03T12:00:00Z");
   await page.getByRole("button", { name: "Save changes" }).click();
 

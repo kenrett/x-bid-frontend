@@ -207,7 +207,7 @@ export function Header() {
                   {isAccountStatusLoading ? (
                     <Skeleton
                       className="h-6 w-24 rounded-full"
-                      aria-label="Loading email verification status"
+                      aria-label="Loading email verification"
                     />
                   ) : emailVerified === true ? (
                     <span className="inline-flex items-center rounded-full border border-green-300/30 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-50">
