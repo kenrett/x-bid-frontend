@@ -162,6 +162,18 @@ const seedAuthState = async (page: Page, user = authedUser) => {
       session_token_id: "session-authed",
     },
   );
+
+  const emailVerified = Boolean(
+    (user as { email_verified?: unknown }).email_verified,
+  );
+  const emailVerifiedAt =
+    (user as { email_verified_at?: unknown }).email_verified_at ?? null;
+  await page.route("**/api/v1/account/security", (route) =>
+    fulfillJson(route, {
+      email_verified: emailVerified,
+      email_verified_at: emailVerifiedAt,
+    }),
+  );
 };
 
 const mockSessionRemaining = async (page: Page, user = authedUser) => {

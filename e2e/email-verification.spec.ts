@@ -93,7 +93,7 @@ test("403 email_unverified routes to verify-email with guidance", async ({
   await page.goto("/buy-bids");
   await page.getByRole("button", { name: /acquire pack/i }).click();
 
-  await expect(page).toHaveURL(/\/account\/verify-email$/);
+  await expect(page).toHaveURL(/\/account\/verify-email(\?|$)/);
   await expect(
     page.getByRole("heading", { name: /verify your email/i }),
   ).toBeVisible();

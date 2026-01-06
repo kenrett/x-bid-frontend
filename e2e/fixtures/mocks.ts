@@ -159,6 +159,21 @@ export const fulfillJson = (route: Route, data: unknown, status = 200) =>
 export const isDocumentRequest = (route: Route) =>
   route.request().resourceType() === "document";
 
+export const mockAccountSecurity = async (page: Page, user = authedUser) => {
+  const emailVerified = Boolean(
+    (user as { email_verified?: unknown }).email_verified,
+  );
+  const emailVerifiedAt =
+    (user as { email_verified_at?: unknown }).email_verified_at ?? null;
+
+  await page.route("**/api/v1/account/security", (route) =>
+    fulfillJson(route, {
+      email_verified: emailVerified,
+      email_verified_at: emailVerifiedAt,
+    }),
+  );
+};
+
 export const seedAuthState = async (page: Page, user = authedUser) => {
   await page.addInitScript(
     (auth) => {
@@ -171,6 +186,11 @@ export const seedAuthState = async (page: Page, user = authedUser) => {
       session_token_id: "session-authed",
     },
   );
+
+  // AccountStatusProvider calls this on boot; default to a verified response
+  // matching the seeded user so we don't accidentally lock tests behind the
+  // email-verification gate when the SPA falls back to HTML.
+  await mockAccountSecurity(page, user);
 };
 
 export const mockSessionRemaining = async (page: Page, user = authedUser) => {
