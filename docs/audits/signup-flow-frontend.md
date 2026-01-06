@@ -140,12 +140,12 @@ Notes:
 The frontend **calls** `POST /api/v1/signup` (`src/features/auth/components/SignUpForm/SignUpForm.tsx`), and the FE type layer models signup as the same auth-session response contract as login.
 
 To keep signup/login aligned, `ApiJsonResponse<"/api/v1/signup","post">` is overridden to return the auth-session fields:
-`token`, `refresh_token`, `session_token_id`, `user`, and optional `is_admin`/`is_superuser`.
+`access_token`, `refresh_token`, `session_token_id`, `user`, and optional `is_admin`/`is_superuser`.
 
 ### Notes on OpenAPI generation
 
 - The generated OpenAPI types in `src/api/openapi-types.ts` may not include `/api/v1/signup` yet. The FE adds a local module-augmentation shim in `src/api/openapi-signup.d.ts` so `/api/v1/signup` is a valid `paths` key for `ApiJsonResponse`.
-- When the backend OpenAPI spec exposes `/api/v1/signup`, regenerate with `npm run gen:api-types` and the shim can be deleted.
+- When the backend OpenAPI spec exposes `/api/v1/signup`, regenerate with `OPENAPI_SPEC_PATH=../x-bid-backend/docs/api/openapi.json npm run gen:api-types` and the shim can be deleted.
 
 ## Common drift points (what must stay consistent)
 

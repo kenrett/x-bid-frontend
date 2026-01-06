@@ -6,7 +6,13 @@ import ts from "typescript";
 import prettier from "prettier";
 
 const DEFAULT_OUT_FILE = "src/api/openapi-types.ts";
-const DEFAULT_SPEC_SNAPSHOT_FILE = "docs/api/openapi.json";
+const DEFAULT_BACKEND_SPEC_PATH = path.join(
+  "..",
+  "x-bid-backend",
+  "docs",
+  "api",
+  "openapi.json",
+);
 
 const isUrl = (value) => /^https?:\/\//i.test(value);
 
@@ -50,13 +56,13 @@ const readJsonUrl = async (url) => {
 
 const findDefaultSpec = async () => {
   const candidates = [
+    process.env.OPENAPI_SPEC_PATH,
     process.env.OPENAPI_SPEC,
-    path.join("..", "x-bid-backend", "docs", "api", "openapi.json"),
-    DEFAULT_SPEC_SNAPSHOT_FILE,
+    DEFAULT_BACKEND_SPEC_PATH,
     process.env.OPENAPI_URL,
-    "http://localhost:3000/docs.json",
-    "http://localhost:3000/api-docs.json",
-  ].filter(Boolean);
+  ]
+    .map((value) => (typeof value === "string" ? value.trim() : ""))
+    .filter(Boolean);
 
   for (const candidate of candidates) {
     if (isUrl(candidate)) return candidate;
@@ -144,7 +150,7 @@ const main = async () => {
   const resolvedSpec = spec ?? (await findDefaultSpec());
   if (!resolvedSpec) {
     throw new Error(
-      "OpenAPI spec not found. Provide `--spec <path|url>` or set OPENAPI_SPEC/OPENAPI_URL.",
+      "OpenAPI spec not found. Set OPENAPI_SPEC_PATH (recommended) or provide `--spec <path|url>`.",
     );
   }
 

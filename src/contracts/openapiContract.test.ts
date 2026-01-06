@@ -5,11 +5,30 @@ import path from "node:path";
 
 type JsonObject = Record<string, unknown>;
 
+const DEFAULT_BACKEND_SPEC_PATH = path.resolve(
+  process.cwd(),
+  "..",
+  "x-bid-backend",
+  "docs",
+  "api",
+  "openapi.json",
+);
+
+const resolveOpenApiPath = (): string | null => {
+  const fromEnv = process.env.OPENAPI_SPEC_PATH?.trim();
+  if (fromEnv) return path.resolve(process.cwd(), fromEnv);
+  if (fs.existsSync(DEFAULT_BACKEND_SPEC_PATH))
+    return DEFAULT_BACKEND_SPEC_PATH;
+  return null;
+};
+
 const readOpenApi = (): JsonObject => {
-  const filePath = path.resolve(
-    process.cwd(),
-    process.env.BACKEND_OPENAPI_PATH?.trim() || "src/contracts/openapi.json",
-  );
+  const filePath = resolveOpenApiPath();
+  if (!filePath) {
+    throw new Error(
+      "OpenAPI spec not found. Set OPENAPI_SPEC_PATH (e.g. ../x-bid-backend/docs/api/openapi.json).",
+    );
+  }
   return JSON.parse(fs.readFileSync(filePath, "utf8")) as JsonObject;
 };
 
@@ -131,8 +150,19 @@ const getResponseSchema = (
   return deref(openapi, appJson?.schema);
 };
 
-describe("OpenAPI contract drift", () => {
-  const openapi = readOpenApi();
+let openapi: JsonObject | null = null;
+let hasOpenApi = false;
+try {
+  openapi = readOpenApi();
+  hasOpenApi = true;
+} catch (error) {
+  if (process.env.CI) throw error;
+}
+
+const describeContract = hasOpenApi ? describe : describe.skip;
+
+describeContract("OpenAPI contract drift", () => {
+  const openapiSchema = openapi as JsonObject;
 
   it("covers required FE endpoints", () => {
     const requiredPaths = [
@@ -144,7 +174,7 @@ describe("OpenAPI contract drift", () => {
       "/api/v1/auctions/{auction_id}/bids",
     ];
 
-    const paths = openapi.paths as JsonObject | undefined;
+    const paths = openapiSchema.paths as JsonObject | undefined;
     expect(paths).toBeTruthy();
 
     for (const apiPath of requiredPaths) {
@@ -153,15 +183,23 @@ describe("OpenAPI contract drift", () => {
   });
 
   it("auth request payloads include canonical field names", () => {
-    const loginSchema = getRequestSchema(openapi, "/api/v1/login", "post");
-    const signupSchema = getRequestSchema(openapi, "/api/v1/signup", "post");
+    const loginSchema = getRequestSchema(
+      openapiSchema,
+      "/api/v1/login",
+      "post",
+    );
+    const signupSchema = getRequestSchema(
+      openapiSchema,
+      "/api/v1/signup",
+      "post",
+    );
     const refreshSchema = getRequestSchema(
-      openapi,
+      openapiSchema,
       "/api/v1/session/refresh",
       "post",
     );
 
-    const loginFields = collectPropertyPaths(openapi, loginSchema);
+    const loginFields = collectPropertyPaths(openapiSchema, loginSchema);
     expect(
       loginFields.has("email_address") ||
         loginFields.has("session.email_address"),
@@ -170,7 +208,7 @@ describe("OpenAPI contract drift", () => {
       loginFields.has("password") || loginFields.has("session.password"),
     ).toBe(true);
 
-    const signupFields = collectPropertyPaths(openapi, signupSchema);
+    const signupFields = collectPropertyPaths(openapiSchema, signupSchema);
     expect(
       signupFields.has("email_address") ||
         signupFields.has("user.email_address"),
@@ -182,7 +220,7 @@ describe("OpenAPI contract drift", () => {
       true,
     );
 
-    const refreshFields = collectPropertyPaths(openapi, refreshSchema);
+    const refreshFields = collectPropertyPaths(openapiSchema, refreshSchema);
     expect(
       refreshFields.has("refresh_token") ||
         refreshFields.has("session.refresh_token") ||
@@ -191,21 +229,26 @@ describe("OpenAPI contract drift", () => {
   });
 
   it("auth responses include canonical token fields (snake_case)", () => {
-    const login200 = getResponseSchema(openapi, "/api/v1/login", "post", "200");
+    const login200 = getResponseSchema(
+      openapiSchema,
+      "/api/v1/login",
+      "post",
+      "200",
+    );
     const refresh200 = getResponseSchema(
-      openapi,
+      openapiSchema,
       "/api/v1/session/refresh",
       "post",
       "200",
     );
 
-    const loginFields = collectPropertyPaths(openapi, login200);
+    const loginFields = collectPropertyPaths(openapiSchema, login200);
     expect(loginFields.has("access_token")).toBe(true);
     expect(loginFields.has("refresh_token")).toBe(true);
     expect(loginFields.has("session_token_id")).toBe(true);
     expect(loginFields.has("user")).toBe(true);
 
-    const refreshFields = collectPropertyPaths(openapi, refresh200);
+    const refreshFields = collectPropertyPaths(openapiSchema, refresh200);
     expect(refreshFields.has("access_token")).toBe(true);
     expect(refreshFields.has("refresh_token")).toBe(true);
     expect(refreshFields.has("session_token_id")).toBe(true);
@@ -213,24 +256,24 @@ describe("OpenAPI contract drift", () => {
 
   it("checkout success response includes required fields", () => {
     const schema = getResponseSchema(
-      openapi,
+      openapiSchema,
       "/api/v1/checkout/success",
       "get",
       "200",
     );
-    const fields = collectPropertyPaths(openapi, schema);
+    const fields = collectPropertyPaths(openapiSchema, schema);
     expect(fields.has("status")).toBe(true);
     expect(fields.has("updated_bid_credits")).toBe(true);
   });
 
   it("bid placement response includes bid and auction objects", () => {
     const schema = getResponseSchema(
-      openapi,
+      openapiSchema,
       "/api/v1/auctions/{auction_id}/bids",
       "post",
       "200",
     );
-    const fields = collectPropertyPaths(openapi, schema);
+    const fields = collectPropertyPaths(openapiSchema, schema);
     expect(fields.has("bid")).toBe(true);
     expect(fields.has("bidCredits")).toBe(true);
     expect(fields.has("success")).toBe(true);
