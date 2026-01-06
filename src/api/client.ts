@@ -84,6 +84,7 @@ const INVALID_SESSION_CODES = new Set([
 ]);
 
 const EMAIL_UNVERIFIED_CODES = new Set(["email_unverified"]);
+const MAINTENANCE_CODES = new Set(["maintenance_mode"]);
 
 const extractErrorCode = (data: unknown): string | undefined => {
   if (!data || typeof data !== "object") return undefined;
@@ -101,6 +102,25 @@ const extractErrorCode = (data: unknown): string | undefined => {
     return undefined;
   const normalized = String(maybeCode).trim();
   return normalized ? normalized : undefined;
+};
+
+const isMaintenanceHeader = (headers: unknown): boolean => {
+  if (!headers || typeof headers !== "object") return false;
+  const record = headers as Record<string, unknown>;
+  const value =
+    record["x-maintenance"] ??
+    record["X-Maintenance"] ??
+    record["x-maintenance-mode"] ??
+    record["X-Maintenance-Mode"];
+  if (typeof value !== "string" && typeof value !== "number") return false;
+  const normalized = String(value).trim().toLowerCase();
+  return normalized === "true" || normalized === "1" || normalized === "on";
+};
+
+const isMaintenanceError = (error: AxiosError): boolean => {
+  const code = extractErrorCode(error.response?.data);
+  if (!code) return false;
+  return MAINTENANCE_CODES.has(code.toLowerCase());
 };
 
 const isInvalidSessionError = (error: AxiosError): boolean => {
@@ -170,10 +190,22 @@ const beginRefresh = ({ refreshToken }: { refreshToken?: string }) => {
 };
 
 client.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (isMaintenanceHeader(response?.headers)) {
+      const currentPath = window.location.pathname;
+      if (!currentPath.startsWith("/maintenance")) {
+        window.location.assign("/maintenance");
+      }
+    }
+    return response;
+  },
   async (error: AxiosError) => {
     const status = error?.response?.status;
-    if (status === 503) {
+    if (
+      status === 503 ||
+      isMaintenanceHeader(error.response?.headers) ||
+      isMaintenanceError(error)
+    ) {
       const currentPath = window.location.pathname;
       if (!currentPath.startsWith("/maintenance")) {
         window.location.assign("/maintenance");

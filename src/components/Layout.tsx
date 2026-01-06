@@ -17,7 +17,8 @@ export const Layout = () => {
       redirectingRef.current = true;
       showToast("Verify your email to continue.", "error");
       if (!location.pathname.startsWith("/account/verify-email")) {
-        navigate("/account/verify-email");
+        const next = encodeURIComponent(location.pathname + location.search);
+        navigate(`/account/verify-email?reason=email_unverified&next=${next}`);
       }
       window.setTimeout(() => {
         redirectingRef.current = false;

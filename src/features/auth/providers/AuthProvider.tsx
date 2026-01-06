@@ -99,7 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const redirectParam = encodeURIComponent(
         window.location.pathname + window.location.search,
       );
-      const targetUrl = `/login?redirect=${redirectParam}`;
+      const targetUrl = `/login?next=${redirectParam}&redirect=${redirectParam}`;
       if (!window.location.pathname.startsWith("/login")) {
         if (import.meta.env.MODE === "test") {
           (window as { __lastRedirect?: string }).__lastRedirect = targetUrl;
@@ -171,11 +171,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const redirectParam = encodeURIComponent(
           window.location.pathname + window.location.search,
         );
-        const targetUrl = `/login?redirect=${redirectParam}`;
+        const targetUrl = `/login?next=${redirectParam}&redirect=${redirectParam}&reason=session_expired`;
         if (import.meta.env.MODE === "test") {
           (window as { __lastRedirect?: string }).__lastRedirect = targetUrl;
         } else {
-          window.location.assign(targetUrl);
+          try {
+            window.history.pushState({}, "", targetUrl);
+            window.dispatchEvent(new PopStateEvent("popstate"));
+          } catch {
+            window.location.assign(targetUrl);
+          }
         }
       }
     },

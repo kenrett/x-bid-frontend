@@ -14,6 +14,7 @@ const isUnexpectedAuthResponseError = (err: unknown) =>
 export const LoginForm = () => {
   const [email_address, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
+  const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
@@ -23,6 +24,15 @@ export const LoginForm = () => {
   const { login } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const reason = searchParams.get("reason");
+    if (reason === "session_expired") {
+      setNotice("Your session expired, please log in again.");
+    } else {
+      setNotice(null);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!submitAttemptedRef.current) return;
@@ -47,6 +57,7 @@ export const LoginForm = () => {
     setLoading(true);
     setError(null);
     setFieldErrors({});
+    setNotice(null);
 
     try {
       const response = await client.post<
@@ -56,7 +67,8 @@ export const LoginForm = () => {
         password,
       });
       login(normalizeAuthResponse(response.data));
-      const redirectTo = searchParams.get("redirect") || "/auctions";
+      const redirectTo =
+        searchParams.get("next") || searchParams.get("redirect") || "/auctions";
       navigate(redirectTo); // Redirect on successful login
     } catch (err) {
       if (isUnexpectedAuthResponseError(err)) {
@@ -234,6 +246,15 @@ export const LoginForm = () => {
                   </p>
                 ) : null}
               </div>
+
+              {notice && (
+                <p
+                  className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-200"
+                  role="alert"
+                >
+                  {notice}
+                </p>
+              )}
 
               {error && (
                 <p

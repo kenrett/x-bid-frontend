@@ -185,7 +185,7 @@ describe("AuthProvider", () => {
 
     await waitFor(() => {
       expect((window as { __lastRedirect?: string }).__lastRedirect).toMatch(
-        /^\/login\?redirect=/,
+        /^\/login\?next=/,
       );
     });
     expect(localStorage.getItem("auth.session.v1")).toBeNull();
@@ -395,7 +395,7 @@ describe("AuthProvider", () => {
       "error",
     );
     expect((window as { __lastRedirect?: string }).__lastRedirect).toBe(
-      `/login?redirect=${encodeURIComponent("/auctions?from=test")}`,
+      `/login?next=${encodeURIComponent("/auctions?from=test")}&redirect=${encodeURIComponent("/auctions?from=test")}&reason=session_expired`,
     );
   });
 
