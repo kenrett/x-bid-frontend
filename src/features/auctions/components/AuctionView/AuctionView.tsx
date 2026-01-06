@@ -211,7 +211,7 @@ const AuctionViewComponent = ({
                           : "Verify your email to place bids."
                         : undefined
                     }
-                    className="mt-4 w-full text-lg bg-[#ff69b4] text-[#1a0d2e] px-10 py-4 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20 disabled:bg-gray-500 disabled:cursor-not-allowed disabled:shadow-none disabled:scale-100"
+                    className="mt-4 w-full text-lg bg-[#ff69b4] text-[#1a0d2e] px-10 py-4 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a] disabled:bg-gray-500 disabled:cursor-not-allowed disabled:shadow-none disabled:scale-100"
                   >
                     {isBidding
                       ? "Placing Bid..."
@@ -229,7 +229,7 @@ const AuctionViewComponent = ({
                       <button
                         type="button"
                         onClick={() => navigate("/account/verify-email")}
-                        className="font-semibold underline underline-offset-2 hover:text-white"
+                        className="font-semibold underline underline-offset-2 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a] rounded"
                       >
                         Verify now
                       </button>

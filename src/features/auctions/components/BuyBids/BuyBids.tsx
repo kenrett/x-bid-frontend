@@ -208,7 +208,7 @@ export const BuyBids = () => {
         </p>
         <Link
           to="/login"
-          className="inline-block text-lg bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20"
+          className="inline-block text-lg bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a]"
         >
           Log In to Continue
         </Link>
@@ -237,7 +237,7 @@ export const BuyBids = () => {
         </p>
         <Link
           to="/account/verify-email"
-          className="inline-block text-lg bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20"
+          className="inline-block text-lg bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a]"
         >
           Verify email
         </Link>
@@ -406,7 +406,7 @@ export const BuyBids = () => {
                   onClick={() => handleBuy(pack.id)}
                   disabled={isPurchasingPackId !== null}
                   aria-busy={isPurchasingPackId === pack.id}
-                  className={`mt-auto w-full font-bold py-3 px-6 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed ${
+                  className={`mt-auto w-full font-bold py-3 px-6 rounded-full transition-all duration-300 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a] disabled:opacity-50 disabled:cursor-not-allowed ${
                     pack.highlight
                       ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white transform hover:scale-105"
                       : "bg-white/10 text-white hover:bg-white/20 transform hover:-translate-y-0.5"

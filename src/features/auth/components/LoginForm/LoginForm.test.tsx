@@ -54,6 +54,22 @@ describe("LoginForm", () => {
     ).toBeInTheDocument();
   });
 
+  it("has accessible form controls and tab order", async () => {
+    const user = userEvent.setup();
+    renderLogin();
+
+    const emailInput = screen.getByLabelText(/email address/i);
+    const passwordInput = screen.getByLabelText(/password/i);
+    const submitButton = screen.getByRole("button", { name: /sign in/i });
+
+    await user.tab();
+    expect(emailInput).toHaveFocus();
+    await user.tab();
+    expect(passwordInput).toHaveFocus();
+    await user.tab();
+    expect(submitButton).toHaveFocus();
+  });
+
   it("stores tokens + user and navigates to /auctions", async () => {
     mockedClient.post.mockResolvedValueOnce({
       data: {

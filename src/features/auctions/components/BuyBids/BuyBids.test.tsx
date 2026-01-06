@@ -131,6 +131,17 @@ describe("BuyBids Component", () => {
       expect(mockedClient.get).not.toHaveBeenCalled();
       expect(mockedClient.post).not.toHaveBeenCalled();
     });
+
+    it("supports keyboard navigation to the login CTA", async () => {
+      const user = userEvent.setup();
+      mockedUseAuth.mockReturnValue(createMockAuthReturn(null));
+      renderComponent();
+
+      await user.tab();
+      expect(
+        screen.getByRole("link", { name: /log in to continue/i }),
+      ).toHaveFocus();
+    });
   });
 
   it("shows a Stripe error when the publishable key is missing", async () => {
