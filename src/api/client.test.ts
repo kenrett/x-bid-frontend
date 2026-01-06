@@ -129,7 +129,7 @@ describe("api client response interceptor", () => {
     const error = {
       response: { status: 401 },
       config: { url: "/api/v1/protected", headers: {}, __authRetry: true },
-    } as AxiosError;
+    } as unknown as AxiosError;
 
     await expect(rejected(error)).rejects.toBe(error);
 

@@ -74,6 +74,7 @@ const mockUserLoggedIn = {
   email: "test@example.com",
   is_admin: false,
   email_verified: true,
+  email_verified_at: null,
 };
 
 // Helper to create a full mock UseAuthReturn object

@@ -12,17 +12,11 @@ const BidHistory = lazy(() =>
 import type { AuctionDetail } from "../../types/auction";
 import type { Bid } from "../../types/bid";
 import type { AuctionConnectionState } from "@features/auctions/hooks/useAuctionChannel";
+import type { User as AuthUser } from "@features/auth/types/user";
 
 interface AuctionViewProps {
   auction: AuctionDetail;
-  user: {
-    id: number;
-    name: string;
-    is_admin?: boolean;
-    is_superuser?: boolean;
-    email_verified?: boolean;
-    email_verified_at?: string | null;
-  } | null;
+  user: AuthUser | null;
   isBidding: boolean;
   bidError: string | null;
   highestBidderUsername: string | null;

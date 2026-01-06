@@ -61,6 +61,8 @@ const TestConsumer = () => {
     name: "User",
     bidCredits: 0,
     is_admin: false,
+    email_verified: true,
+    email_verified_at: null,
   };
   return (
     <div>

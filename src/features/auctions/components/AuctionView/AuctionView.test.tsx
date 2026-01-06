@@ -56,7 +56,16 @@ const mockAuction: AuctionDetail = {
   bids: [],
 };
 
-const mockUser = { id: 1, name: "Test User", email_verified: true };
+const mockUser = {
+  id: 1,
+  name: "Test User",
+  email: "test@example.com",
+  bidCredits: 100,
+  is_admin: false,
+  is_superuser: false,
+  email_verified: true,
+  email_verified_at: null,
+};
 
 const defaultProps = {
   auction: mockAuction,

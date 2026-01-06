@@ -23,7 +23,7 @@ describe("ResetPassword", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockedUseAuth.mockReturnValue({
-      token: null,
+      accessToken: null,
       refreshToken: null,
       sessionTokenId: null,
       sessionRemainingSeconds: 0,

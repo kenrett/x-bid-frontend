@@ -19,6 +19,8 @@ describe("useAuth", () => {
         bidCredits: 0,
         is_admin: false,
         is_superuser: false,
+        email_verified: true,
+        email_verified_at: null,
       },
       accessToken: "token",
       refreshToken: "refresh",

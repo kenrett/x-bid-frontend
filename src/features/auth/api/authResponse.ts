@@ -50,7 +50,7 @@ export const normalizeAuthResponse = (raw: unknown): LoginPayload => {
     );
   }
 
-  const user = normalizeUser(userRecord);
+  const user = normalizeUser(userRecord!);
 
   return {
     accessToken: accessToken!,
