@@ -73,6 +73,10 @@ export const routes: RouteObject[] = [
         lazy: lazy(() => import("./components/About/About"), "About"),
       },
       {
+        path: "/goodbye",
+        lazy: lazy(() => import("./components/GoodbyePage"), "GoodbyePage"),
+      },
+      {
         path: "/how-it-works",
         lazy: lazy(() => import("./components/HowItWorks"), "HowItWorks"),
       },
@@ -200,6 +204,22 @@ export const routes: RouteObject[] = [
                 lazy: lazy(
                   () => import("@features/account/components/AccountDataPage"),
                   "AccountDataPage",
+                ),
+              },
+              {
+                path: "data/export",
+                lazy: lazy(
+                  () =>
+                    import("@features/account/components/AccountExportPage"),
+                  "AccountExportPage",
+                ),
+              },
+              {
+                path: "data/delete",
+                lazy: lazy(
+                  () =>
+                    import("@features/account/components/AccountDeletePage"),
+                  "AccountDeletePage",
                 ),
               },
             ],
