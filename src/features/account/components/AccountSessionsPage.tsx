@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { accountApi } from "../api/accountApi";
 import { normalizeApiError } from "@api/normalizeApiError";
 import { showToast } from "@services/toast";
+import { useAuth } from "@features/auth/hooks/useAuth";
 import type { AccountSession } from "../types/account";
+import { ConfirmModal } from "@components/ConfirmModal";
 
 const formatDateTime = (value: string | undefined) => {
   if (!value) return "—";
@@ -11,12 +14,22 @@ const formatDateTime = (value: string | undefined) => {
   return parsed.toLocaleString();
 };
 
+type PendingConfirm =
+  | { kind: "revoke_one"; session: AccountSession }
+  | { kind: "revoke_others" }
+  | { kind: "revoke_current"; session: AccountSession };
+
 export const AccountSessionsPage = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sessions, setSessions] = useState<AccountSession[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [revokingOthers, setRevokingOthers] = useState(false);
+  const [pendingConfirm, setPendingConfirm] = useState<PendingConfirm | null>(
+    null,
+  );
 
   const currentSession = useMemo(
     () => sessions.find((s) => s.isCurrent) ?? null,
@@ -40,18 +53,18 @@ export const AccountSessionsPage = () => {
     void load();
   }, []);
 
-  const handleRevoke = async (session: AccountSession) => {
+  const revokeOne = async (session: AccountSession) => {
     setError(null);
-    if (session.isCurrent) return;
-    const confirmed = window.confirm(
-      `Revoke this session?\n\n${session.deviceLabel}${session.ip ? ` (${session.ip})` : ""}`,
-    );
-    if (!confirmed) return;
-
     setBusyId(session.id);
     try {
       await accountApi.revokeSession(session.id);
-      showToast("Session revoked.", "success");
+      if (session.isCurrent) {
+        showToast("Session ended. Please log in again.", "error");
+        logout();
+        navigate("/login");
+        return;
+      }
+      showToast("Signed out of device.", "success");
       await load();
     } catch (err) {
       setError(normalizeApiError(err).message);
@@ -60,13 +73,8 @@ export const AccountSessionsPage = () => {
     }
   };
 
-  const handleRevokeOthers = async () => {
+  const revokeOthers = async () => {
     setError(null);
-    const confirmed = window.confirm(
-      "Sign out other devices? This will revoke all sessions except your current one.",
-    );
-    if (!confirmed) return;
-
     setRevokingOthers(true);
     try {
       await accountApi.revokeOtherSessions();
@@ -78,6 +86,24 @@ export const AccountSessionsPage = () => {
       setRevokingOthers(false);
     }
   };
+
+  const confirmTitle = (() => {
+    if (!pendingConfirm) return "";
+    if (pendingConfirm.kind === "revoke_others")
+      return "Sign out other devices?";
+    if (pendingConfirm.kind === "revoke_current")
+      return "Sign out of this device?";
+    return "Sign out of device?";
+  })();
+
+  const confirmDescription = (() => {
+    if (!pendingConfirm) return undefined;
+    if (pendingConfirm.kind === "revoke_others") {
+      return "This will revoke all sessions except your current one.";
+    }
+    const { session } = pendingConfirm;
+    return `${session.deviceLabel}${session.ip ? ` (${session.ip})` : ""}`;
+  })();
 
   if (loading) {
     return <p className="text-gray-400 text-lg">Loading sessions…</p>;
@@ -108,14 +134,33 @@ export const AccountSessionsPage = () => {
             {currentSession?.deviceLabel ?? "—"}
           </span>
         </div>
-        <button
-          type="button"
-          onClick={handleRevokeOthers}
-          disabled={revokingOthers}
-          className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10 disabled:opacity-50"
-        >
-          {revokingOthers ? "Signing out…" : "Sign out other devices"}
-        </button>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <button
+            type="button"
+            onClick={() =>
+              currentSession
+                ? setPendingConfirm({
+                    kind: "revoke_current",
+                    session: currentSession,
+                  })
+                : undefined
+            }
+            disabled={!currentSession || busyId === currentSession?.id}
+            className="rounded-lg border border-red-400/40 bg-red-900/20 px-4 py-2 text-sm font-semibold text-red-100 hover:bg-red-900/30 disabled:opacity-50"
+          >
+            {busyId === currentSession?.id
+              ? "Signing out…"
+              : "Sign out of this device"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setPendingConfirm({ kind: "revoke_others" })}
+            disabled={revokingOthers}
+            className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10 disabled:opacity-50"
+          >
+            {revokingOthers ? "Signing out…" : "Sign out of other devices"}
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-3">
@@ -125,6 +170,7 @@ export const AccountSessionsPage = () => {
           sessions.map((session) => (
             <div
               key={session.id}
+              data-testid={`session-card-${session.id}`}
               className="rounded-2xl border border-white/10 bg-white/5 p-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -148,17 +194,43 @@ export const AccountSessionsPage = () => {
 
                 <button
                   type="button"
-                  onClick={() => void handleRevoke(session)}
-                  disabled={session.isCurrent || busyId === session.id}
+                  onClick={() =>
+                    setPendingConfirm({ kind: "revoke_one", session })
+                  }
+                  disabled={busyId === session.id}
                   className="rounded-lg border border-red-400/40 bg-red-900/20 px-4 py-2 text-sm font-semibold text-red-100 hover:bg-red-900/30 disabled:opacity-50"
                 >
-                  {busyId === session.id ? "Revoking…" : "Revoke"}
+                  {busyId === session.id
+                    ? "Signing out…"
+                    : session.isCurrent
+                      ? "Sign out"
+                      : "Sign out"}
                 </button>
               </div>
             </div>
           ))
         )}
       </div>
+
+      <ConfirmModal
+        open={pendingConfirm !== null}
+        title={confirmTitle}
+        description={confirmDescription}
+        confirmLabel="Sign out"
+        cancelLabel="Cancel"
+        danger
+        onCancel={() => setPendingConfirm(null)}
+        onConfirm={() => {
+          const next = pendingConfirm;
+          setPendingConfirm(null);
+          if (!next) return;
+          if (next.kind === "revoke_others") {
+            void revokeOthers();
+            return;
+          }
+          void revokeOne(next.session);
+        }}
+      />
     </div>
   );
 };
