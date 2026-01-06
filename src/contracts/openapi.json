@@ -2371,6 +2371,10 @@
       "UserSession": {
         "description": "Session details and tokens returned after login/refresh.",
         "properties": {
+          "access_token": {
+            "description": "JWT used for authenticated requests.",
+            "type": "string"
+          },
           "is_admin": {
             "type": "boolean"
           },
@@ -2407,10 +2411,6 @@
           "session_token_id": {
             "type": "integer"
           },
-          "token": {
-            "description": "JWT used for authenticated requests.",
-            "type": "string"
-          },
           "user": {
             "properties": {
               "bidCredits": {
@@ -2441,7 +2441,7 @@
           }
         },
         "required": [
-          "token",
+          "access_token",
           "refresh_token",
           "session_token_id",
           "session",

@@ -9,7 +9,7 @@
     "build:analyze": "ANALYZE=true tsc -b && BUNDLE_ANALYZE_OUT=docs/bundle/stats.json vite build",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "gen:api-types": "node scripts/gen-api-types.mjs --snapshot src/contracts/openapi.json",
+    "gen:api-types": "node scripts/gen-api-types.mjs --spec src/contracts/openapi.json --out src/api/openapi-types.ts",
     "check:api-types": "node scripts/check-api-types.mjs",
     "openapi:types": "node scripts/openapi-types.mjs",
     "ct-2": "node scripts/ct-2.mjs",

@@ -1911,6 +1911,8 @@ export interface components {
         };
     /** @description Session details and tokens returned after login/refresh. */
     UserSession: {
+      /** @description JWT used for authenticated requests. */
+      access_token: string;
       is_admin: boolean;
       is_superuser: boolean;
       redirect_path: string | null;
@@ -1922,8 +1924,6 @@ export interface components {
         session_token_id: number;
       };
       session_token_id: number;
-      /** @description JWT used for authenticated requests. */
-      token: string;
       user: {
         bidCredits: number;
         /** Format: email */
