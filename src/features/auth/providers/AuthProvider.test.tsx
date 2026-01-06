@@ -358,6 +358,45 @@ describe("AuthProvider", () => {
     );
   });
 
+  it("redirects to /login and shows session-expired toast on unauthorized", async () => {
+    Object.defineProperty(window, "location", {
+      value: {
+        ...window.location,
+        pathname: "/auctions",
+        search: "?from=test",
+      },
+      writable: true,
+    });
+
+    render(
+      <Wrapper>
+        <TestConsumer />
+      </Wrapper>,
+    );
+
+    await act(async () => {
+      await screen.getByText("login").click();
+    });
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent("app:unauthorized", { detail: { status: 401 } }),
+      );
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("token")).toHaveTextContent("none"),
+    );
+
+    expect(toastMocks.showToast).toHaveBeenCalledWith(
+      "Your session expired, please log in again.",
+      "error",
+    );
+    expect((window as { __lastRedirect?: string }).__lastRedirect).toBe(
+      `/login?redirect=${encodeURIComponent("/auctions?from=test")}`,
+    );
+  });
+
   it("handles repeated unauthorized events without looping or double-toasting", async () => {
     render(
       <Wrapper>

@@ -115,6 +115,30 @@ describe("api client response interceptor", () => {
     expect(authSessionStore.getSnapshot().accessToken).toBe("old-token");
   });
 
+  it("does not refresh a request more than once (retry guard)", async () => {
+    setPath("/auctions");
+    const dispatchSpy = vi.spyOn(window, "dispatchEvent");
+    const postSpy = vi.spyOn(client, "post");
+
+    authSessionStore.setTokens({
+      accessToken: "old-token",
+      refreshToken: "refresh-1",
+      sessionTokenId: "sid-1",
+    });
+
+    const error = {
+      response: { status: 401 },
+      config: { url: "/api/v1/protected", headers: {}, __authRetry: true },
+    } as AxiosError;
+
+    await expect(rejected(error)).rejects.toBe(error);
+
+    expect(postSpy).not.toHaveBeenCalled();
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "app:unauthorized" }),
+    );
+  });
+
   it("refreshes on 401 with in-memory refreshToken and retries once", async () => {
     const dispatchSpy = vi.spyOn(window, "dispatchEvent");
     const postSpy = vi.spyOn(client, "post");
