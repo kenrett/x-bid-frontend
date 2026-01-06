@@ -4,8 +4,31 @@ import { defineConfig, type UserConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "path";
+import fs from "node:fs";
 import type { UserConfig as VitestUserConfig } from "vitest/config";
 import { visualizer } from "rollup-plugin-visualizer";
+
+const readVercelCspHeader = (): string | null => {
+  try {
+    const raw = fs.readFileSync(resolve(__dirname, "vercel.json"), "utf8");
+    const parsed = JSON.parse(raw) as {
+      headers?: Array<{
+        source?: string;
+        headers?: Array<{ key?: string; value?: string }>;
+      }>;
+    };
+    const allHeaders = parsed.headers ?? [];
+    for (const entry of allHeaders) {
+      const header = entry.headers?.find(
+        (h) => h.key === "Content-Security-Policy",
+      );
+      if (header?.value) return header.value;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
 
 const config: UserConfig & { test: VitestUserConfig["test"] } = {
   plugins: [
@@ -38,6 +61,15 @@ const config: UserConfig & { test: VitestUserConfig["test"] } = {
   build: {
     sourcemap: true,
   },
+  preview:
+    process.env.VITE_E2E_TESTS === "true"
+      ? {
+          headers: (() => {
+            const csp = readVercelCspHeader();
+            return csp ? { "Content-Security-Policy": csp } : undefined;
+          })(),
+        }
+      : undefined,
   test: {
     globals: true,
     environment: "jsdom",

@@ -1,27 +1,60 @@
 import { expect, test } from "@playwright/test";
-import { fulfillJson, isDocumentRequest } from "./fixtures/mocks";
+import {
+  auction101BidHistory,
+  auctionDetail101,
+  auctionList,
+  fulfillJson,
+  isDocumentRequest,
+  setupMockCable,
+} from "./fixtures/mocks";
 
-test("no CSP violations on primary pages", async ({ page }) => {
-  const cspViolations: string[] = [];
+test("no CSP console violations on key routes", async ({ page }) => {
+  const violations: string[] = [];
+  const pageErrors: string[] = [];
 
   page.on("console", (msg) => {
-    if (msg.type() !== "error") return;
     const text = msg.text();
-    if (
-      /content security policy/i.test(text) ||
-      /csp/i.test(text) ||
-      /refused to (load|execute)/i.test(text)
-    ) {
-      cspViolations.push(text);
-    }
+    if (text.includes("Content-Security-Policy")) violations.push(text);
+    if (text.includes("violates the following directive"))
+      violations.push(text);
+  });
+  page.on("pageerror", (err) => {
+    pageErrors.push(err.message);
   });
 
+  await setupMockCable(page);
+
   await page.route("**/api/v1/auctions", (route) =>
-    isDocumentRequest(route) ? route.continue() : fulfillJson(route, []),
+    isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, auctionList),
+  );
+  await page.route("**/api/v1/auctions/101", (route) =>
+    isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, auctionDetail101),
+  );
+  await page.route("**/api/v1/auctions/101/bid_history", (route) =>
+    isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, auction101BidHistory),
   );
 
-  await page.goto("/auctions");
-  await expect(page).toHaveURL(/\/auctions$/);
+  const homeResponse = await page.goto("/");
+  const cspHeader =
+    homeResponse?.headers()["content-security-policy"] ??
+    homeResponse?.headers()["Content-Security-Policy"];
+  expect(cspHeader, "CSP header missing on homepage response").toBeTruthy();
 
-  expect(cspViolations, cspViolations.join("\n")).toEqual([]);
+  await expect(page.getByText("Your Next Obsession")).toBeVisible();
+
+  await page.goto("/auctions/101");
+  await expect(page.getByText("Vintage Camera")).toBeVisible();
+
+  expect(
+    [...pageErrors, ...violations],
+    [...pageErrors, ...violations].length
+      ? `Errors:\n${[...pageErrors, ...violations].join("\n")}`
+      : undefined,
+  ).toEqual([]);
 });
