@@ -7,23 +7,24 @@ This repo does **not** check in a copy of the backend OpenAPI spec. Instead, the
 
 ## Local development
 
-1. Ensure the backend repo is available (default expected location):
-   - `../x-bid-backend/docs/api/openapi.json`
+You must provide the backend OpenAPI spec via one of:
 
-2. Set `OPENAPI_SPEC_PATH` to the backend spec and run:
-   - Generate types:
-     - `OPENAPI_SPEC_PATH=../x-bid-backend/docs/api/openapi.json npm run gen:api-types`
-   - Verify types are up to date:
-     - `OPENAPI_SPEC_PATH=../x-bid-backend/docs/api/openapi.json npm run check:api-types`
-   - Run the contract drift test:
-     - `OPENAPI_SPEC_PATH=../x-bid-backend/docs/api/openapi.json npm run ct-2`
+- `OPENAPI_SPEC_PATH=/path/to/openapi.json` (preferred)
+- `OPENAPI_URL=https://…/openapi.json` (URL source)
 
-If `OPENAPI_SPEC_PATH` is not set and the default backend path is not present, contract drift tests are skipped locally.
+Then run:
+
+- Generate types:
+  - `OPENAPI_SPEC_PATH=../x-bid-backend/docs/api/openapi.json npm run gen:api-types`
+- Verify types are up to date:
+  - `OPENAPI_SPEC_PATH=../x-bid-backend/docs/api/openapi.json npm run check:api-types`
+- Run the contract drift test:
+  - `OPENAPI_SPEC_PATH=../x-bid-backend/docs/api/openapi.json npm run ct-2`
 
 ## CI
 
 CI must provide the backend spec (for example by downloading the backend build artifact) and set:
 
-- `OPENAPI_SPEC_PATH=/path/to/openapi.json`
+- `OPENAPI_SPEC_PATH=/path/to/openapi.json` (preferred) or `OPENAPI_URL=https://…/openapi.json`
 
-In CI, missing `OPENAPI_SPEC_PATH` should be treated as a failure (contract drift must not be skipped).
+Missing OpenAPI source must be treated as a failure (contract drift must not be skipped).

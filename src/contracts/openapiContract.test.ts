@@ -1,35 +1,53 @@
 // @vitest-environment node
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 
 type JsonObject = Record<string, unknown>;
 
-const DEFAULT_BACKEND_SPEC_PATH = path.resolve(
-  process.cwd(),
-  "..",
-  "x-bid-backend",
-  "docs",
-  "api",
-  "openapi.json",
-);
+const isUrl = (value: string): boolean => /^https?:\/\//i.test(value);
 
-const resolveOpenApiPath = (): string | null => {
-  const fromEnv = process.env.OPENAPI_SPEC_PATH?.trim();
-  if (fromEnv) return path.resolve(process.cwd(), fromEnv);
-  if (fs.existsSync(DEFAULT_BACKEND_SPEC_PATH))
-    return DEFAULT_BACKEND_SPEC_PATH;
-  return null;
-};
+const specPath = process.env.OPENAPI_SPEC_PATH?.trim();
+const specUrl = process.env.OPENAPI_URL?.trim();
 
-const readOpenApi = (): JsonObject => {
-  const filePath = resolveOpenApiPath();
-  if (!filePath) {
+if (specPath && isUrl(specPath)) {
+  throw new Error(
+    "OPENAPI_SPEC_PATH looks like a URL. Set OPENAPI_URL for URLs, or provide a local file path in OPENAPI_SPEC_PATH.",
+  );
+}
+
+if (specPath && specUrl) {
+  throw new Error(
+    "Both OPENAPI_SPEC_PATH and OPENAPI_URL are set. Set only one to avoid ambiguity.",
+  );
+}
+
+if (!specPath && !specUrl) {
+  throw new Error(
+    "Missing OpenAPI source. Set OPENAPI_SPEC_PATH=/path/to/openapi.json (preferred) or OPENAPI_URL=https://…/openapi.json.\n\nExample:\n  OPENAPI_SPEC_PATH=../x-bid-backend/docs/api/openapi.json npm run ct-2",
+  );
+}
+
+const readOpenApi = async (): Promise<JsonObject> => {
+  if (specUrl) {
+    const response = await fetch(specUrl, {
+      headers: { Accept: "application/json" },
+    });
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch OpenAPI schema (${response.status}) ${specUrl}`,
+      );
+    }
+    return (await response.json()) as JsonObject;
+  }
+
+  const resolved = path.resolve(process.cwd(), specPath as string);
+  if (!fs.existsSync(resolved)) {
     throw new Error(
-      "OpenAPI spec not found. Set OPENAPI_SPEC_PATH (e.g. ../x-bid-backend/docs/api/openapi.json).",
+      `OpenAPI spec not found at OPENAPI_SPEC_PATH: ${resolved}\n\nExample:\n  OPENAPI_SPEC_PATH=../x-bid-backend/docs/api/openapi.json npm run ct-2`,
     );
   }
-  return JSON.parse(fs.readFileSync(filePath, "utf8")) as JsonObject;
+  return JSON.parse(fs.readFileSync(resolved, "utf8")) as JsonObject;
 };
 
 const resolvePointer = (root: unknown, pointer: string): unknown => {
@@ -150,19 +168,12 @@ const getResponseSchema = (
   return deref(openapi, appJson?.schema);
 };
 
-let openapi: JsonObject | null = null;
-let hasOpenApi = false;
-try {
-  openapi = readOpenApi();
-  hasOpenApi = true;
-} catch (error) {
-  if (process.env.CI) throw error;
-}
+describe("OpenAPI contract drift", () => {
+  let openapiSchema: JsonObject;
 
-const describeContract = hasOpenApi ? describe : describe.skip;
-
-describeContract("OpenAPI contract drift", () => {
-  const openapiSchema = openapi as JsonObject;
+  beforeAll(async () => {
+    openapiSchema = await readOpenApi();
+  });
 
   it("covers required FE endpoints", () => {
     const requiredPaths = [

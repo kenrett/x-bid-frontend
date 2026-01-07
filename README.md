@@ -98,10 +98,22 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
 
 - HTTP requests send `Authorization: Bearer <token>` only when an in-memory token exists. ActionCable/WebSocket auth uses `?token=...` (browsers can’t set custom headers in the WebSocket handshake).
 - Optional cookie-based refresh (when enabled) uses `withCredentials: true` only for `POST /api/v1/session/refresh`.
-- Login (example): `POST /api/v1/login` with `{ "session": { "email_address": "...", "password": "..." } }` returns `token`, `refresh_token`, `session` (`session_token_id`, `session_expires_at`, `seconds_remaining`), `is_admin`, `is_superuser`, optional `redirect_path`, and `user`.
+- Login (example): `POST /api/v1/login` with `{ "session": { "email_address": "...", "password": "..." } }` returns `access_token`, `refresh_token`, `session_token_id`, and `user` (plus optional flags depending on backend contract).
 - Error shapes tolerated: `{error_code, message, details?}` (preferred), `{error: "text"}`, or `{error: {code, message}}` (rack-attack/throttling). Use `message` for user feedback when present.
 
 ### Maintenance Mode
 
 - Superadmin can toggle maintenance in Admin Settings; uses `/api/v1/admin/maintenance` behind the scenes.
 - When the backend returns 503, the app redirects to `/maintenance` and polls until maintenance is cleared, then returns to `/auctions`.
+
+## OpenAPI types generation
+
+This repo generates `src/api/openapi-types.ts` from a backend-provided OpenAPI spec. You must provide the spec via one of:
+
+- `OPENAPI_SPEC_PATH=/path/to/openapi.json` (preferred)
+- `OPENAPI_URL=https://…/openapi.json`
+
+Commands:
+
+- Generate types: `npm run gen:api-types`
+- Verify types are up to date (CI uses this): `npm run check:api-types`

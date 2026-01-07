@@ -7,7 +7,7 @@
 
 The frontend does not check in the backend OpenAPI spec. CI must supply the backend `openapi.json` (artifact) and set:
 
-- `OPENAPI_SPEC_PATH=/path/to/openapi.json`
+- `OPENAPI_SPEC_PATH=/path/to/openapi.json` (preferred) or `OPENAPI_URL=https://…/openapi.json`
 
 Then run:
 

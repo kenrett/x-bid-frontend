@@ -1,30 +1,19 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import os from "node:os";
 import openapiTS from "openapi-typescript";
 import ts from "typescript";
 import prettier from "prettier";
 
 const DEFAULT_OUT_FILE = "src/api/openapi-types.ts";
-const DEFAULT_BACKEND_SPEC_PATH = path.join(
-  "..",
-  "x-bid-backend",
-  "docs",
-  "api",
-  "openapi.json",
-);
 
 const isUrl = (value) => /^https?:\/\//i.test(value);
 
 const parseArgs = (argv) => {
-  const args = { spec: undefined, out: DEFAULT_OUT_FILE, snapshot: undefined };
+  const args = { out: DEFAULT_OUT_FILE, snapshot: undefined };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
-    if (arg === "--spec") {
-      args.spec = argv[i + 1];
-      i += 1;
-      continue;
-    }
     if (arg === "--out") {
       args.out = argv[i + 1];
       i += 1;
@@ -52,29 +41,6 @@ const readJsonUrl = async (url) => {
     throw new Error(`Failed to fetch OpenAPI schema (${response.status}) ${url}`);
   }
   return response.json();
-};
-
-const findDefaultSpec = async () => {
-  const candidates = [
-    process.env.OPENAPI_SPEC_PATH,
-    process.env.OPENAPI_SPEC,
-    DEFAULT_BACKEND_SPEC_PATH,
-    process.env.OPENAPI_URL,
-  ]
-    .map((value) => (typeof value === "string" ? value.trim() : ""))
-    .filter(Boolean);
-
-  for (const candidate of candidates) {
-    if (isUrl(candidate)) return candidate;
-    try {
-      await fs.access(candidate);
-      return candidate;
-    } catch {
-      // keep searching
-    }
-  }
-
-  return undefined;
 };
 
 const ensureDir = async (filePath) => {
@@ -146,17 +112,39 @@ const sanitizeOpenApiSchema = (schema) => {
 };
 
 const main = async () => {
-  const { spec, out, snapshot } = parseArgs(process.argv.slice(2));
-  const resolvedSpec = spec ?? (await findDefaultSpec());
-  if (!resolvedSpec) {
+  const { out, snapshot } = parseArgs(process.argv.slice(2));
+  const specPath = process.env.OPENAPI_SPEC_PATH?.trim();
+  const specUrl = process.env.OPENAPI_URL?.trim();
+
+  if (specPath && isUrl(specPath)) {
     throw new Error(
-      "OpenAPI spec not found. Set OPENAPI_SPEC_PATH (recommended) or provide `--spec <path|url>`.",
+      "OPENAPI_SPEC_PATH looks like a URL. Set OPENAPI_URL for URLs, or provide a local file path in OPENAPI_SPEC_PATH.",
     );
   }
 
-  const rawSchema = isUrl(resolvedSpec)
-    ? await readJsonUrl(resolvedSpec)
-    : await readJsonFile(resolvedSpec);
+  if (specPath && specUrl) {
+    throw new Error(
+      "Both OPENAPI_SPEC_PATH and OPENAPI_URL are set. Set only one to avoid ambiguity.",
+    );
+  }
+
+  if (!specPath && !specUrl) {
+    throw new Error(
+      "Missing OpenAPI source. Set OPENAPI_SPEC_PATH=/path/to/openapi.json (preferred) or OPENAPI_URL=https://…/openapi.json.",
+    );
+  }
+
+  const rawSchema = specUrl
+    ? await (async () => {
+        // Fetch then write the raw JSON to a temp file for easier debugging/repro.
+        const tmpDirPrefix = path.join(os.tmpdir(), "x-bid-openapi-");
+        const dir = await fs.mkdtemp(tmpDirPrefix);
+        const tmpFile = path.join(dir, "openapi.json");
+        const json = await readJsonUrl(specUrl);
+        await fs.writeFile(tmpFile, `${JSON.stringify(json, null, 2)}\n`, "utf8");
+        return json;
+      })()
+    : await readJsonFile(specPath);
 
   if (snapshot) {
     await ensureDir(snapshot);

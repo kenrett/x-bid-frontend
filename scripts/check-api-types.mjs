@@ -9,21 +9,23 @@ const runCapture = (cmd, args) =>
     .toString()
     .trim();
 
-const defaultSpecPath = "../x-bid-backend/docs/api/openapi.json";
-const specPath = process.env.OPENAPI_SPEC_PATH?.trim() || defaultSpecPath;
-if (process.env.CI && !process.env.OPENAPI_SPEC_PATH?.trim()) {
-  console.error("Missing `OPENAPI_SPEC_PATH` env var in CI.");
+const specPath = process.env.OPENAPI_SPEC_PATH?.trim();
+const specUrl = process.env.OPENAPI_URL?.trim();
+
+if (!specPath && !specUrl) {
+  console.error(
+    "Missing OpenAPI source. Set OPENAPI_SPEC_PATH=/path/to/openapi.json (preferred) or OPENAPI_URL=https://…/openapi.json.",
+  );
+  console.error(
+    "Example: OPENAPI_SPEC_PATH=../x-bid-backend/docs/api/openapi.json npm run check:api-types",
+  );
   process.exit(1);
 }
 
 const main = () => {
-  run("node", [
-    "scripts/gen-api-types.mjs",
-    "--spec",
-    specPath,
-    "--out",
-    "src/api/openapi-types.ts",
-  ]);
+  run("node", ["scripts/gen-api-types.mjs", "--out", "src/api/openapi-types.ts"], {
+    env: { ...process.env, OPENAPI_SPEC_PATH: specPath, OPENAPI_URL: specUrl },
+  });
 
   const changed = runCapture("git", [
     "--no-pager",
@@ -49,7 +51,7 @@ try {
   main();
 } catch {
   console.error(
-    "\nOpenAPI types are out of date. Run `OPENAPI_SPEC_PATH=../x-bid-backend/docs/api/openapi.json npm run gen:api-types` and commit the result.",
+    "\nOpenAPI types are out of date. Run `OPENAPI_SPEC_PATH=../x-bid-backend/docs/api/openapi.json npm run gen:api-types` (or set OPENAPI_URL) and commit the result.",
   );
   process.exit(1);
 }
