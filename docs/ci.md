@@ -9,6 +9,8 @@ The frontend does not check in the backend OpenAPI spec. CI must supply the back
 
 - `OPENAPI_SPEC_PATH=/path/to/openapi.json` (preferred) or `OPENAPI_URL=https://…/openapi.json`
 
+In this repo’s GitHub Actions workflow, pull requests download the backend artifact (`openapi-json`) and export `OPENAPI_SPEC_PATH` automatically. For non-PR runs, set `OPENAPI_URL` (URL) or `OPENAPI_SPEC_PATH` (file path) as GitHub repository variables (`Settings → Secrets and variables → Actions → Variables`).
+
 Then run:
 
 - `npm run check:api-types` (ensures `src/api/openapi-types.ts` matches the backend spec)

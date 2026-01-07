@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CI: true
+      OPENAPI_SPEC_PATH: ${{ vars.OPENAPI_SPEC_PATH }}
+      OPENAPI_URL: ${{ vars.OPENAPI_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -84,7 +86,7 @@ jobs:
           name: openapi-json
           path: openapi-artifact
 
-      - name: Set BACKEND_OPENAPI_PATH (PR only)
+      - name: Set OPENAPI_SPEC_PATH from backend artifact (PR only)
         if: ${{ github.event_name == 'pull_request' }}
         run: |
           OPENAPI_PATH="$(find openapi-artifact -name openapi.json -print -quit)"
@@ -93,7 +95,7 @@ jobs:
             find openapi-artifact -maxdepth 4 -type f -print
             exit 1
           fi
-          echo "BACKEND_OPENAPI_PATH=$OPENAPI_PATH" >> "$GITHUB_ENV"
+          echo "OPENAPI_SPEC_PATH=$OPENAPI_PATH" >> "$GITHUB_ENV"
 
       - name: Typecheck
         run: npm run typecheck --if-present
@@ -101,22 +103,9 @@ jobs:
       - name: Lint
         run: npm run lint --if-present
 
-      - name: Generate OpenAPI types from backend artifact (PR only)
+      - name: Check generated API types (PR only)
         if: ${{ github.event_name == 'pull_request' }}
-        run: npm run openapi:types
-
-      - name: Fail on generated type diffs (PR only)
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          if git diff --quiet -- src/api/openapi-types.ts; then
-            exit 0
-          fi
-          echo "Generated OpenAPI types changed:"
-          git --no-pager diff --stat -- src/api/openapi-types.ts
-          echo ""
-          echo "First 200 lines of diff:"
-          git --no-pager diff -- src/api/openapi-types.ts | head -n 200
-          exit 1
+        run: npm run check:api-types
 
       - name: Contract drift tests (CT-2) (PR only)
         if: ${{ github.event_name == 'pull_request' }}
