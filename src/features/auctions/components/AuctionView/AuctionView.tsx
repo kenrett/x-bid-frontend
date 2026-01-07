@@ -110,7 +110,7 @@ const AuctionViewComponent = ({
         <div className="grid md:grid-cols-2 gap-12 items-start">
           <div className="rounded-2xl overflow-hidden shadow-2xl shadow-[#a020f0]/10">
             <img
-              src={auction.image_url || "/assets/nav-logo.svg"}
+              src={auction.image_url || "/assets/BidderSweet.svg"}
               alt={auction.title}
               loading="eager"
               fetchPriority="high"

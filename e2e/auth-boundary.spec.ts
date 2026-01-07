@@ -179,7 +179,9 @@ test("401 invalid_session logs out and redirects to login with next param (no re
     acquireButton.click({ force: true }),
   ]);
 
-  await expect(page.getByRole("alert")).toContainText(/session expired/i);
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    /session expired/i,
+  );
   expect(refreshCalls).toBe(0);
 
   const hasSession = await page.evaluate(() =>

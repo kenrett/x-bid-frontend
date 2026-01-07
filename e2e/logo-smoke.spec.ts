@@ -21,7 +21,7 @@ test("smoke: logo loads fast and is sized", async ({ page }) => {
   });
 
   const logoResponsePromise = page.waitForResponse((response) =>
-    response.url().includes("/assets/nav-logo.svg"),
+    response.url().includes("/assets/BidderSweet.svg"),
   );
 
   await stubStripe(page);
@@ -35,7 +35,9 @@ test("smoke: logo loads fast and is sized", async ({ page }) => {
 
   await page.goto("/");
 
-  await expect(page.getByAltText("X-Bid Logo")).toBeVisible({ timeout: 1_000 });
+  await expect(page.getByAltText("BidderSweet")).toBeVisible({
+    timeout: 1_000,
+  });
 
   const logoResponse = await logoResponsePromise;
   const contentType = logoResponse.headers()["content-type"] ?? "";

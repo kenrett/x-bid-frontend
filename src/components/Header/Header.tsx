@@ -7,7 +7,7 @@ import { cva } from "class-variance-authority";
 import { useEffect, useMemo, useState } from "react";
 import { Skeleton } from "../Skeleton";
 
-const LOGO_SRC = "/assets/nav-logo.svg";
+const LOGO_SRC = "/assets/BidderSweet.svg";
 const MOBILE_LOGO_SRC = "/assets/BidderSweet.svg";
 
 const STRINGS = {
@@ -146,7 +146,7 @@ export function Header() {
             <source media="(max-width: 767px)" srcSet={MOBILE_LOGO_SRC} />
             <img
               src={LOGO_SRC}
-              alt="X-Bid Logo"
+              alt="BidderSweet"
               width={240}
               height={64}
               fetchPriority="high"

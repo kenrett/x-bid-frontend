@@ -45,7 +45,7 @@ describe("Header Component", () => {
     renderComponent();
 
     // Check for logo linking to home
-    const logoLink = screen.getByAltText("X-Bid Logo").closest("a");
+    const logoLink = screen.getByAltText("BidderSweet").closest("a");
     expect(logoLink).toBeInTheDocument();
     expect(logoLink).toHaveAttribute("href", "/");
 

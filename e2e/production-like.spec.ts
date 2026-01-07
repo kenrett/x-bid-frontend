@@ -35,7 +35,7 @@ test("production-like: / has no console/CSP errors and CLS <= 0.1", async ({
 
   page.on("response", async (response) => {
     const url = response.url();
-    if (!url.includes("/assets/nav-logo.svg")) return;
+    if (!url.includes("/assets/BidderSweet.svg")) return;
     try {
       const body = await response.body();
       navLogoBytes = body.byteLength;
@@ -105,7 +105,7 @@ test("production-like: / has no console/CSP errors and CLS <= 0.1", async ({
   ).toEqual([]);
 
   // Optional: assert the preloaded nav logo stays lightweight.
-  expect(navLogoBytes, "nav-logo.svg was not fetched").not.toBeNull();
+  expect(navLogoBytes, "BidderSweet.svg was not fetched").not.toBeNull();
   expect(navLogoBytes ?? 0).toBeLessThanOrEqual(10 * 1024);
 
   // Optional: fail on CLS regression.
