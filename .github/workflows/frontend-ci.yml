@@ -11,8 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CI: true
-      OPENAPI_SPEC_PATH: ${{ vars.OPENAPI_SPEC_PATH }}
-      OPENAPI_URL: ${{ vars.OPENAPI_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,9 +28,9 @@ jobs:
       - name: Audit production dependencies
         run: npm audit --omit=dev
 
-      - name: Download backend OpenAPI artifact (PR only)
+      - name: Find backend OpenAPI artifact run (PR)
         if: ${{ github.event_name == 'pull_request' }}
-        id: backend-openapi
+        id: backend-run
         uses: actions/github-script@v7
         env:
           BACKEND_REPO: ${{ vars.BACKEND_REPO || format('{0}/{1}', github.repository_owner, 'x-bid-backend') }}
@@ -74,28 +72,81 @@ jobs:
             }
             core.setOutput("run_id", String(run.id));
 
-      - name: Download artifact openapi-json (PR only)
-        if: ${{ github.event_name == 'pull_request' }}
+      - name: Find backend OpenAPI artifact run (main)
+        if: ${{ github.event_name != 'pull_request' }}
+        id: backend-run-main
+        uses: actions/github-script@v7
+        env:
+          BACKEND_REPO: ${{ vars.BACKEND_REPO || format('{0}/{1}', github.repository_owner, 'x-bid-backend') }}
+          GH_TOKEN: ${{ secrets.BACKEND_CI_TOKEN || github.token }}
+        with:
+          script: |
+            const [owner, repo] = process.env.BACKEND_REPO.split("/");
+            const token = process.env.GH_TOKEN;
+
+            const runs = await github.request("GET /repos/{owner}/{repo}/actions/runs", {
+              owner,
+              repo,
+              branch: "main",
+              status: "completed",
+              per_page: 50,
+              headers: { authorization: `Bearer ${token}` },
+            });
+
+            const run = runs.data.workflow_runs?.find((r) => r.conclusion === "success");
+            if (!run) {
+              core.setFailed(`No successful backend workflow run found on branch=main in ${process.env.BACKEND_REPO}`);
+              return;
+            }
+
+            const artifacts = await github.request(
+              "GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts",
+              {
+                owner,
+                repo,
+                run_id: run.id,
+                per_page: 100,
+                headers: { authorization: `Bearer ${token}` },
+              },
+            );
+            const artifact = artifacts.data.artifacts?.find((a) => a.name === "openapi-json");
+            if (!artifact) {
+              core.setFailed(`Backend run ${run.id} on main has no artifact named openapi-json`);
+              return;
+            }
+            core.setOutput("run_id", String(run.id));
+
+      - name: Download backend OpenAPI artifact
+        id: download-openapi
         uses: dawidd6/action-download-artifact@v6
         env:
           BACKEND_REPO: ${{ vars.BACKEND_REPO || format('{0}/{1}', github.repository_owner, 'x-bid-backend') }}
         with:
           github_token: ${{ secrets.BACKEND_CI_TOKEN || github.token }}
           repo: ${{ env.BACKEND_REPO }}
-          run_id: ${{ steps.backend-openapi.outputs.run_id }}
+          run_id: ${{ steps.backend-run.outputs.run_id || steps.backend-run-main.outputs.run_id }}
           name: openapi-json
           path: openapi-artifact
 
-      - name: Set OPENAPI_SPEC_PATH from backend artifact (PR only)
-        if: ${{ github.event_name == 'pull_request' }}
+      - name: Export OPENAPI_SPEC_PATH from artifact
         run: |
-          OPENAPI_PATH="$(find openapi-artifact -name openapi.json -print -quit)"
+          set -euo pipefail
+          OPENAPI_PATH="$(find openapi-artifact -name openapi.json -print -quit || true)"
           if [ -z "$OPENAPI_PATH" ]; then
-            echo "openapi.json not found in downloaded artifact"
+            echo "::error::openapi.json not found in downloaded artifact"
             find openapi-artifact -maxdepth 4 -type f -print
             exit 1
           fi
-          echo "OPENAPI_SPEC_PATH=$OPENAPI_PATH" >> "$GITHUB_ENV"
+          echo "OPENAPI_SPEC_PATH=$(realpath "$OPENAPI_PATH")" >> "$GITHUB_ENV"
+
+      - name: Preflight OpenAPI source
+        run: |
+          set -euo pipefail
+          RUN_ID="${{ steps.backend-run.outputs.run_id || steps.backend-run-main.outputs.run_id }}"
+          echo "Using backend OpenAPI artifact:"
+          echo "- repo: ${{ env.BACKEND_REPO }}"
+          echo "- run_id: ${RUN_ID}"
+          echo "- openapi: ${OPENAPI_SPEC_PATH}"
 
       - name: Typecheck
         run: npm run typecheck --if-present
@@ -103,23 +154,11 @@ jobs:
       - name: Lint
         run: npm run lint --if-present
 
-      - name: Check generated API types (PR only)
-        if: ${{ github.event_name == 'pull_request' }}
+      - name: Check generated API types
         run: npm run check:api-types
 
-      - name: Contract drift tests (CT-2) (PR only)
-        if: ${{ github.event_name == 'pull_request' }}
+      - name: Contract drift tests (CT-2)
         run: npm run ct-2
-
-      - name: Check generated API types
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-          set -euo pipefail
-          if [[ -z "${OPENAPI_SPEC_PATH:-}" && -z "${OPENAPI_URL:-}" ]]; then
-            echo "::error::Missing OpenAPI source for check:api-types. Set Actions variable OPENAPI_URL=https://…/openapi.json (recommended) or OPENAPI_SPEC_PATH=/path/to/openapi.json."
-            exit 1
-          fi
-          npm run check:api-types
 
       - name: Test
         run: npm test --if-present
