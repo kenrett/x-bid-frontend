@@ -59,7 +59,7 @@ const AuctionViewComponent = ({
         <div className="mb-8">
           <button
             onClick={() => navigate("/auctions")}
-            className="flex items-center text-gray-400 hover:text-pink-400 transition-colors duration-300 group"
+            className="flex items-center text-gray-400 hover:text-pink-400 transition-colors duration-300 group rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a]"
           >
             <ChevronLeftIcon className="w-5 h-5 mr-2 transition-transform duration-300 group-hover:-translate-x-1" />
             Back to Auctions

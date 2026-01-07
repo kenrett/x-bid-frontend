@@ -160,4 +160,40 @@ describe("LoginForm", () => {
       expect(localStorage.getItem("auth.session.v1")).toBeNull();
     });
   });
+
+  it("links validation errors via aria-describedby and focuses the first invalid field", async () => {
+    mockedClient.post.mockRejectedValueOnce({
+      isAxiosError: true,
+      response: {
+        status: 422,
+        data: {
+          details: {
+            field_errors: {
+              email_address: ["Email is invalid."],
+            },
+          },
+        },
+      },
+    });
+
+    const user = userEvent.setup();
+    renderLogin();
+
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "nope@example.com",
+    );
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
+
+    expect(
+      await screen.findByText(/check the highlighted fields/i),
+    ).toBeInTheDocument();
+
+    const emailInput = screen.getByLabelText(/email address/i);
+    expect(emailInput).toHaveFocus();
+    expect(emailInput).toHaveAttribute("aria-invalid", "true");
+    expect(emailInput).toHaveAttribute("aria-describedby", "login-email-error");
+    expect(screen.getByText("Email is invalid.")).toBeInTheDocument();
+  });
 });

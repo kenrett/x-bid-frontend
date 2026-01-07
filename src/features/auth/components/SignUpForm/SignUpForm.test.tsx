@@ -132,4 +132,28 @@ describe("SignUpForm", () => {
       expect(localStorage.getItem("auth.session.v1")).toBeNull();
     });
   });
+
+  it("links local validation errors via aria-describedby and focuses the first invalid field", async () => {
+    const user = userEvent.setup();
+    renderSignup();
+
+    await user.type(screen.getByLabelText(/name/i), "Test User");
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "test@example.com",
+    );
+    await user.type(screen.getByLabelText(/^password/i), "password123");
+    await user.type(screen.getByLabelText(/confirm password/i), "nope");
+    await user.click(screen.getByRole("button", { name: /create account/i }));
+
+    const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
+    expect(confirmPasswordInput).toHaveFocus();
+    expect(confirmPasswordInput).toHaveAttribute("aria-invalid", "true");
+    expect(confirmPasswordInput).toHaveAttribute(
+      "aria-describedby",
+      "signup-confirm-password-error",
+    );
+    expect(screen.getByText("Passwords do not match.")).toBeInTheDocument();
+    expect(mockedClient.post).not.toHaveBeenCalled();
+  });
 });

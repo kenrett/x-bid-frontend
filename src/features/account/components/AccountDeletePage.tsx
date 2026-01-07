@@ -152,7 +152,7 @@ export const AccountDeletePage = () => {
             type="button"
             onClick={handleOpenConfirm}
             disabled={deleting}
-            className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-black disabled:opacity-50"
+            className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-black disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a]"
           >
             {deleting ? "Deleting…" : "Delete account"}
           </button>
