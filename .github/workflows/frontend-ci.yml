@@ -113,7 +113,13 @@ jobs:
 
       - name: Check generated API types
         if: ${{ github.event_name != 'pull_request' }}
-        run: npm run check:api-types
+        run: |
+          set -euo pipefail
+          if [[ -z "${OPENAPI_SPEC_PATH:-}" && -z "${OPENAPI_URL:-}" ]]; then
+            echo "::error::Missing OpenAPI source for check:api-types. Set Actions variable OPENAPI_URL=https://…/openapi.json (recommended) or OPENAPI_SPEC_PATH=/path/to/openapi.json."
+            exit 1
+          fi
+          npm run check:api-types
 
       - name: Test
         run: npm test --if-present
