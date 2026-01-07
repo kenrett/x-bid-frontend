@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Skeleton } from "../Skeleton";
 
 const LOGO_SRC = "/assets/nav-logo.svg";
+const MOBILE_LOGO_SRC = "/assets/BidderSweet.svg";
 
 const STRINGS = {
   GREETING: "Hello",
@@ -141,16 +142,19 @@ export function Header() {
       <div className={variants.container({ compact: isScrolled })}>
         <Link to="/" className={variants.logoLink()}>
           <div className={`${variants.logoSpotlight()} scale-[3]`} />
-          <img
-            src={LOGO_SRC}
-            alt="X-Bid Logo"
-            width={240}
-            height={64}
-            fetchPriority="high"
-            decoding="async"
-            loading="eager"
-            className={`${variants.logoImage()} ${isScrolled ? "scale-90" : ""}`}
-          />
+          <picture>
+            <source media="(max-width: 767px)" srcSet={MOBILE_LOGO_SRC} />
+            <img
+              src={LOGO_SRC}
+              alt="X-Bid Logo"
+              width={240}
+              height={64}
+              fetchPriority="high"
+              decoding="async"
+              loading="eager"
+              className={`${variants.logoImage()} ${isScrolled ? "scale-90" : ""}`}
+            />
+          </picture>
         </Link>
         <button
           data-collapse-toggle="navbar-default"
