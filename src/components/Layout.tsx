@@ -27,7 +27,7 @@ export const Layout = () => {
     window.addEventListener("app:email_unverified", onEmailUnverified);
     return () =>
       window.removeEventListener("app:email_unverified", onEmailUnverified);
-  }, [navigate, location.pathname]);
+  }, [navigate, location.pathname, location.search]);
 
   return (
     <div className="flex min-h-screen flex-col bg-[#0d0d1a]">
