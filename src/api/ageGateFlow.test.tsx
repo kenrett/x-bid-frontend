@@ -39,7 +39,7 @@ describe("AGE_GATE_REQUIRED flow", () => {
     const error = {
       response: { status: 403, data: { error_code: "AGE_GATE_REQUIRED" } },
       config: { url: "/api/v1/afterdark/content", headers: {} },
-    } as AxiosError;
+    } as unknown as AxiosError;
 
     let flow!: Promise<unknown>;
     act(() => {
@@ -66,7 +66,7 @@ describe("AGE_GATE_REQUIRED flow", () => {
     const error = {
       response: { status: 403, data: { error_code: "AGE_GATE_REQUIRED" } },
       config: { url: "/api/v1/afterdark/content", __ageGateRetry: true },
-    } as AxiosError;
+    } as unknown as AxiosError;
 
     await expect(rejected(error)).rejects.toBe(error);
     expect(screen.queryByRole("dialog")).toBeNull();
