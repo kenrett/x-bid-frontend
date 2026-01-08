@@ -66,31 +66,31 @@ const signedAmountForKind = (amount: number, direction: TxDirection) => {
 };
 
 const SummarySkeleton = () => (
-  <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl animate-pulse">
-    <div className="h-4 w-32 bg-white/10 rounded mb-3" />
-    <div className="h-9 w-48 bg-white/20 rounded mb-2" />
-    <div className="h-3 w-40 bg-white/10 rounded" />
+  <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-[var(--sf-radius)] p-6 shadow-[var(--sf-shadow)] animate-pulse">
+    <div className="h-4 w-32 bg-black/5 rounded mb-3" />
+    <div className="h-9 w-48 bg-black/10 rounded mb-2" />
+    <div className="h-3 w-40 bg-black/5 rounded" />
   </div>
 );
 
 const TableSkeleton = () => (
-  <tbody className="divide-y divide-white/10">
+  <tbody className="divide-y divide-[color:var(--sf-border)]">
     {Array.from({ length: 4 }).map((_, index) => (
       <tr key={index} className="animate-pulse">
         <td className="px-4 py-3">
-          <div className="h-3 w-24 bg-white/10 rounded" />
+          <div className="h-3 w-24 bg-black/5 rounded" />
         </td>
         <td className="px-4 py-3">
-          <div className="h-3 w-20 bg-white/10 rounded" />
+          <div className="h-3 w-20 bg-black/5 rounded" />
         </td>
         <td className="px-4 py-3">
-          <div className="h-3 w-16 bg-white/10 rounded" />
+          <div className="h-3 w-16 bg-black/5 rounded" />
         </td>
         <td className="px-4 py-3">
-          <div className="h-3 w-32 bg-white/10 rounded" />
+          <div className="h-3 w-32 bg-black/5 rounded" />
         </td>
         <td className="px-4 py-3">
-          <div className="h-3 w-28 bg-white/10 rounded" />
+          <div className="h-3 w-28 bg-black/5 rounded" />
         </td>
       </tr>
     ))}
@@ -132,7 +132,7 @@ const LinksCell = ({
             href={link.href}
             target="_blank"
             rel="noreferrer"
-            className="text-pink-200 hover:text-pink-100 underline underline-offset-2"
+            className="text-[color:var(--sf-primary)] hover:brightness-95 underline underline-offset-2"
           >
             {link.label}
           </a>
@@ -140,7 +140,7 @@ const LinksCell = ({
           <Link
             key={link.href}
             to={link.href}
-            className="text-pink-200 hover:text-pink-100 underline underline-offset-2"
+            className="text-[color:var(--sf-primary)] hover:brightness-95 underline underline-offset-2"
           >
             {link.label}
           </Link>
@@ -246,7 +246,9 @@ export const BidHistoryPage = () => {
   if (!isReady) {
     return (
       <Page centered>
-        <p className="text-gray-400 text-lg">Loading your wallet...</p>
+        <p className="text-[color:var(--sf-mutedText)] text-lg">
+          Loading your wallet...
+        </p>
       </Page>
     );
   }
@@ -254,15 +256,15 @@ export const BidHistoryPage = () => {
   if (!user) {
     return (
       <Page centered>
-        <h2 className="font-serif text-4xl font-bold mb-3 text-white">
+        <h2 className="text-4xl font-bold mb-3 text-[color:var(--sf-text)]">
           Your Bid History Awaits
         </h2>
-        <p className="mb-6 text-lg text-gray-400">
+        <p className="mb-6 text-lg text-[color:var(--sf-mutedText)]">
           Sign in to see your credits and activity.
         </p>
         <Link
           to="/login?redirect=/account/wallet"
-          className="inline-block text-lg bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20"
+          className="inline-flex items-center justify-center text-lg bg-[color:var(--sf-primary)] text-[color:var(--sf-onPrimary)] px-8 py-3 rounded-[var(--sf-radius)] font-semibold shadow-[var(--sf-shadow)] transition hover:brightness-95 active:brightness-90"
         >
           Log In
         </Link>
@@ -274,15 +276,15 @@ export const BidHistoryPage = () => {
     <Page>
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex flex-col gap-2">
-          <p className="text-xs uppercase tracking-[0.2em] text-pink-400">
+          <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--sf-mutedText)]">
             Account
           </p>
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="space-y-2">
-              <h1 className="font-serif text-4xl font-bold text-white">
+              <h1 className="text-4xl font-bold text-[color:var(--sf-text)]">
                 Bid History
               </h1>
-              <p className="text-gray-400">
+              <p className="text-[color:var(--sf-mutedText)]">
                 Track your credits balance and the activity behind every change.
               </p>
             </div>
@@ -290,7 +292,7 @@ export const BidHistoryPage = () => {
               <Link
                 to="/account/purchases"
                 data-testid="wallet-purchases-link"
-                className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-white transition-colors"
+                className="text-sm font-semibold bg-[color:var(--sf-surface)] hover:brightness-95 border border-[color:var(--sf-border)] rounded-[var(--sf-radius)] px-4 py-2 text-[color:var(--sf-text)] transition"
               >
                 Purchases
               </Link>

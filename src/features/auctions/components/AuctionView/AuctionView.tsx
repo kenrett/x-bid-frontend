@@ -53,19 +53,19 @@ const AuctionViewComponent = ({
   );
 
   return (
-    <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen py-12 md:py-20 px-4">
+    <div className="font-sans bg-[color:var(--sf-background)] text-[color:var(--sf-text)] antialiased min-h-screen py-12 md:py-20 px-4">
       <div className="container mx-auto">
         {/* Back Button */}
         <div className="mb-8">
           <button
             onClick={() => navigate("/auctions")}
-            className="flex items-center text-gray-400 hover:text-pink-400 transition-colors duration-300 group rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a]"
+            className="flex items-center text-[color:var(--sf-mutedText)] hover:text-[color:var(--sf-primary)] transition-colors duration-300 group rounded-[var(--sf-radius)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sf-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--sf-background)]"
           >
             <ChevronLeftIcon className="w-5 h-5 mr-2 transition-transform duration-300 group-hover:-translate-x-1" />
             Back to Auctions
           </button>
         </div>
-        <div className="flex items-center justify-between mb-4 text-sm text-gray-300">
+        <div className="flex items-center justify-between mb-4 text-sm text-[color:var(--sf-mutedText)]">
           <div className="flex items-center gap-2">
             <span
               className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold tracking-wide uppercase ${
@@ -122,25 +122,25 @@ const AuctionViewComponent = ({
           </div>
 
           <div className="flex flex-col space-y-6">
-            <h1 className="font-serif text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
+            <h1 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-[color:var(--sf-primary)] to-[color:var(--sf-accent)] bg-clip-text text-transparent">
               {auction.title}
             </h1>
-            <p className="text-lg text-gray-400 leading-relaxed">
+            <p className="text-lg text-[color:var(--sf-mutedText)] leading-relaxed">
               {auction.description}
             </p>
 
             {/* Price + Highest Bidder */}
-            <div className="p-6 bg-white/5 rounded-2xl border border-white/10">
+            <div className="p-6 bg-[color:var(--sf-surface)] rounded-[var(--sf-radius)] border border-[color:var(--sf-border)] shadow-[var(--sf-shadow)]">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center sm:text-left">
                 <div>
                   <div
                     id="current-price-label"
-                    className="text-sm text-gray-400 uppercase tracking-wider"
+                    className="text-sm text-[color:var(--sf-mutedText)] uppercase tracking-wider"
                   >
                     Current Price
                   </div>
                   <div
-                    className="text-3xl font-bold text-pink-400"
+                    className="text-3xl font-bold text-[color:var(--sf-primary)]"
                     aria-labelledby="current-price-label"
                     aria-live="polite"
                   >
@@ -148,7 +148,7 @@ const AuctionViewComponent = ({
                   </div>
                 </div>
                 <div className="sm:text-right">
-                  <div className="text-sm text-gray-400 uppercase tracking-wider">
+                  <div className="text-sm text-[color:var(--sf-mutedText)] uppercase tracking-wider">
                     Time Remaining
                   </div>
                   <Countdown
@@ -161,12 +161,12 @@ const AuctionViewComponent = ({
                 </div>
               </div>
               <div
-                className="mt-4 pt-4 border-t border-white/10 text-gray-300 text-center sm:text-left"
+                className="mt-4 pt-4 border-t border-[color:var(--sf-border)] text-[color:var(--sf-mutedText)] text-center sm:text-left"
                 data-testid="highest-bidder-info"
               >
                 <span aria-live="polite">Highest Bidder: </span>
                 {highestBidderUsername ? (
-                  <span className="font-semibold text-purple-400">
+                  <span className="font-semibold text-[color:var(--sf-text)]">
                     {highestBidderUsername}
                   </span>
                 ) : (
@@ -211,7 +211,7 @@ const AuctionViewComponent = ({
                           : "Verify your email to place bids."
                         : undefined
                     }
-                    className="mt-4 w-full text-lg bg-[#ff69b4] text-[#1a0d2e] px-10 py-4 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a] disabled:bg-gray-500 disabled:cursor-not-allowed disabled:shadow-none disabled:scale-100"
+                    className="mt-4 w-full text-lg bg-[color:var(--sf-primary)] text-[color:var(--sf-onPrimary)] px-10 py-4 rounded-[var(--sf-radius)] font-bold shadow-[var(--sf-shadow)] transition hover:brightness-95 active:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sf-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--sf-background)] disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none"
                   >
                     {isBidding
                       ? "Placing Bid..."

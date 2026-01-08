@@ -180,10 +180,10 @@ export const TypedConfirmModal = ({
             type="button"
             disabled={!matches}
             onClick={onConfirm}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/60 ${
+            className={`rounded-[var(--sf-radius)] px-4 py-2 text-sm font-semibold shadow-[var(--sf-shadow)] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sf-primary)] ${
               danger
                 ? "border border-red-400/40 bg-red-900/30 text-red-100 hover:bg-red-900/40"
-                : "bg-[#ff69b4] text-[#1a0d2e] hover:bg-[#a020f0] hover:text-white"
+                : "bg-[color:var(--sf-primary)] text-[color:var(--sf-onPrimary)] hover:brightness-95 active:brightness-90"
             }`}
           >
             {confirmLabel}

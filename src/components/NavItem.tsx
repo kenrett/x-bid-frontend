@@ -12,8 +12,9 @@ const navLink = cva(
   {
     variants: {
       isActive: {
-        true: "text-[#1a0d2e] -translate-y-[5px]",
-        false: "text-gray-300 hover:text-pink-400",
+        true: "text-[color:var(--sf-onPrimary)] -translate-y-[2px] drop-shadow-sm",
+        false:
+          "text-[color:var(--sf-mutedText)] hover:text-[color:var(--sf-text)]",
       },
     },
   },
@@ -30,7 +31,7 @@ export const NavItem = ({ to, children }: NavItemProps) => {
           <>
             {children}
             {isActive && (
-              <div className="absolute inset-0 bg-[#ff69b4] rounded-md -z-10" />
+              <div className="absolute inset-0 bg-[color:var(--sf-primary)] rounded-[var(--sf-radius)] -z-10 shadow-[var(--sf-shadow)]" />
             )}
           </>
         )}

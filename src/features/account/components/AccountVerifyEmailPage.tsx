@@ -101,7 +101,7 @@ export const AccountVerifyEmailPage = () => {
         type="button"
         onClick={() => void resend()}
         disabled={isSending}
-        className="inline-flex items-center justify-center rounded-full bg-[#ff69b4] px-8 py-3 text-lg font-bold text-[#1a0d2e] transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a] disabled:cursor-not-allowed disabled:bg-gray-500"
+        className="inline-flex items-center justify-center rounded-[var(--sf-radius)] bg-[color:var(--sf-primary)] px-8 py-3 text-lg font-bold text-[color:var(--sf-onPrimary)] shadow-[var(--sf-shadow)] transition hover:brightness-95 active:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sf-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--sf-background)] disabled:cursor-not-allowed disabled:bg-gray-400 disabled:shadow-none"
       >
         {isSending ? "Sending..." : "Resend verification email"}
       </button>

@@ -13,6 +13,6 @@ describe("Footer", () => {
 
     const copyright = screen.getByText(/all rights reserved\./i);
     expect(copyright).not.toHaveClass("text-gray-500");
-    expect(copyright).toHaveClass("text-gray-300");
+    expect(copyright).toHaveClass("text-[color:var(--sf-mutedText)]");
   });
 });

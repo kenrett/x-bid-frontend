@@ -8,7 +8,7 @@ interface PageProps {
 export const Page: React.FC<PageProps> = ({ children, centered = false }) => (
   <div
     className={clsx(
-      "font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased min-h-screen px-4 py-12 md:py-20",
+      "font-sans bg-[color:var(--sf-background)] text-[color:var(--sf-text)] antialiased min-h-screen px-4 py-12 md:py-20",
       { "text-center": centered },
     )}
   >

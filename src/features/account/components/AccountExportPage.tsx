@@ -98,7 +98,6 @@ export const AccountExportPage = () => {
   useEffect(() => {
     void load();
     return () => stopPolling();
-     
   }, []);
 
   const handleRequestAndDownload = async () => {
@@ -171,7 +170,7 @@ export const AccountExportPage = () => {
             type="button"
             onClick={handleRequestAndDownload}
             disabled={requesting || polling}
-            className="rounded-lg bg-[#ff69b4] px-4 py-2 text-sm font-semibold text-[#1a0d2e] hover:bg-[#a020f0] hover:text-white disabled:opacity-50"
+            className="rounded-[var(--sf-radius)] bg-[color:var(--sf-primary)] px-4 py-2 text-sm font-semibold text-[color:var(--sf-onPrimary)] shadow-[var(--sf-shadow)] transition hover:brightness-95 active:brightness-90 disabled:opacity-50 disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sf-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--sf-background)]"
           >
             {requesting
               ? "Requesting…"

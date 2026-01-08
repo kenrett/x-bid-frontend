@@ -200,15 +200,15 @@ export const BuyBids = () => {
   if (!user) {
     return (
       <Page centered>
-        <h2 className="font-serif text-4xl font-bold mb-4 text-white">
+        <h2 className="text-4xl font-bold mb-4 text-[color:var(--sf-text)]">
           Your Arsenal Awaits
         </h2>
-        <p className="mb-6 text-lg text-gray-400">
+        <p className="mb-6 text-lg text-[color:var(--sf-mutedText)]">
           Log in to arm yourself for the auction floor.
         </p>
         <Link
           to="/login"
-          className="inline-block text-lg bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a]"
+          className="inline-flex items-center justify-center text-lg bg-[color:var(--sf-primary)] text-[color:var(--sf-onPrimary)] px-8 py-3 rounded-[var(--sf-radius)] font-semibold shadow-[var(--sf-shadow)] transition hover:brightness-95 active:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sf-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--sf-background)]"
         >
           Log In to Continue
         </Link>
@@ -229,15 +229,15 @@ export const BuyBids = () => {
   if (!isEmailVerified) {
     return (
       <Page centered>
-        <h2 className="font-serif text-4xl font-bold mb-4 text-white">
+        <h2 className="text-4xl font-bold mb-4 text-[color:var(--sf-text)]">
           Verify your email to buy bids
         </h2>
-        <p className="mb-6 text-lg text-gray-400">
+        <p className="mb-6 text-lg text-[color:var(--sf-mutedText)]">
           Email verification is required before you can start checkout.
         </p>
         <Link
           to="/account/verify-email"
-          className="inline-block text-lg bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a]"
+          className="inline-flex items-center justify-center text-lg bg-[color:var(--sf-primary)] text-[color:var(--sf-onPrimary)] px-8 py-3 rounded-[var(--sf-radius)] font-semibold shadow-[var(--sf-shadow)] transition hover:brightness-95 active:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sf-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--sf-background)]"
         >
           Verify email
         </Link>

@@ -2,9 +2,15 @@ export type StorefrontKey = "main" | "afterdark" | "artisan";
 
 export type StorefrontThemeTokens = {
   primary: string;
+  accent: string;
+  surface: string;
+  border: string;
+  mutedText: string;
+  onPrimary: string;
   background: string;
   text: string;
   radius: string;
+  shadow: string;
 };
 
 export type StorefrontConfig = {
@@ -61,10 +67,16 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
     name: "BidderSweet",
     shortName: "BidderSweet",
     themeTokens: {
-      primary: "#ff69b4",
-      background: "#0d0d1a",
-      text: "#ffffff",
-      radius: "9999px",
+      primary: "#ff4d4f",
+      accent: "#f6c177",
+      background: "#f6f5f1",
+      surface: "#ffffff",
+      border: "rgba(15, 23, 42, 0.12)",
+      text: "#0f172a",
+      mutedText: "#475569",
+      onPrimary: "#ffffff",
+      radius: "14px",
+      shadow: "0 16px 40px rgba(15, 23, 42, 0.10)",
     },
     logoPath: "/assets/BidderSweet.svg",
   },
@@ -74,9 +86,15 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
     shortName: "Afterdark",
     themeTokens: {
       primary: "#a855f7",
+      accent: "#f59e0b",
       background: "#0b0b10",
+      surface: "rgba(255, 255, 255, 0.06)",
+      border: "rgba(255, 255, 255, 0.10)",
       text: "#f8fafc",
-      radius: "9999px",
+      mutedText: "rgba(248, 250, 252, 0.70)",
+      onPrimary: "#0b0b10",
+      radius: "16px",
+      shadow: "0 18px 50px rgba(0, 0, 0, 0.55)",
     },
     logoPath: "/assets/BidderSweet.svg",
   },
@@ -86,9 +104,15 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
     shortName: "Artisan",
     themeTokens: {
       primary: "#f59e0b",
+      accent: "#22c55e",
       background: "#0d0d1a",
+      surface: "rgba(255, 255, 255, 0.06)",
+      border: "rgba(255, 255, 255, 0.10)",
       text: "#ffffff",
-      radius: "9999px",
+      mutedText: "rgba(255, 255, 255, 0.70)",
+      onPrimary: "#0d0d1a",
+      radius: "16px",
+      shadow: "0 18px 50px rgba(0, 0, 0, 0.55)",
     },
     logoPath: "/assets/BidderSweet.svg",
   },

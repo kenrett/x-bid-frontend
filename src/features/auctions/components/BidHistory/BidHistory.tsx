@@ -5,14 +5,17 @@ interface BidItemProps {
 }
 
 const BidItem = ({ bid }: BidItemProps) => (
-  <li className="py-2 px-3 bg-white/5 rounded-lg flex justify-between items-center text-sm">
+  <li className="py-2 px-3 bg-[color:var(--sf-surface)] rounded-[var(--sf-radius)] border border-[color:var(--sf-border)] flex justify-between items-center text-sm shadow-[var(--sf-shadow)]">
     <span>
-      <span className="font-semibold text-pink-400">{bid.username}</span> bid{" "}
-      <span className="font-bold text-white">
+      <span className="font-semibold text-[color:var(--sf-mutedText)]">
+        {bid.username}
+      </span>{" "}
+      bid{" "}
+      <span className="font-bold text-[color:var(--sf-primary)]">
         ${Number(bid.amount).toFixed(2)}
       </span>
     </span>
-    <span className="text-gray-500 text-xs">
+    <span className="text-[color:var(--sf-mutedText)] text-xs">
       {new Date(bid.created_at).toLocaleString(undefined, {
         month: "short",
         day: "numeric",
@@ -37,12 +40,18 @@ export const BidHistory = ({ bids }: BidHistoryProps) => {
   });
 
   if (sortedBids.length === 0) {
-    return <div className="text-center text-gray-500 py-4">No bids yet.</div>;
+    return (
+      <div className="text-center text-[color:var(--sf-mutedText)] py-4">
+        No bids yet.
+      </div>
+    );
   }
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-4 text-white">Bid History</h2>
+      <h2 className="text-2xl font-bold mb-4 text-[color:var(--sf-text)]">
+        Bid History
+      </h2>
       <ul className="space-y-2 max-h-60 overflow-y-auto pr-2">
         {sortedBids.map((bid) => (
           <BidItem key={bid.id} bid={bid} />

@@ -14,7 +14,7 @@ export const GoodbyePage = () => {
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-lg bg-[#ff69b4] px-4 py-2 text-sm font-semibold text-[#1a0d2e] hover:bg-[#a020f0] hover:text-white"
+            className="inline-flex items-center justify-center rounded-[var(--sf-radius)] bg-[color:var(--sf-primary)] px-4 py-2 text-sm font-semibold text-[color:var(--sf-onPrimary)] shadow-[var(--sf-shadow)] transition hover:brightness-95 active:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sf-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--sf-background)]"
           >
             Back to home
           </Link>

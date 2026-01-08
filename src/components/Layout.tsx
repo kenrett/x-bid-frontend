@@ -76,9 +76,15 @@ export const Layout = () => {
       style={
         {
           ["--sf-primary"]: themeTokens.primary,
+          ["--sf-accent"]: themeTokens.accent,
           ["--sf-background"]: themeTokens.background,
+          ["--sf-surface"]: themeTokens.surface,
+          ["--sf-border"]: themeTokens.border,
           ["--sf-text"]: themeTokens.text,
+          ["--sf-mutedText"]: themeTokens.mutedText,
+          ["--sf-onPrimary"]: themeTokens.onPrimary,
           ["--sf-radius"]: themeTokens.radius,
+          ["--sf-shadow"]: themeTokens.shadow,
         } as CSSProperties
       }
     >

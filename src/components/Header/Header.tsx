@@ -19,17 +19,20 @@ const STRINGS = {
 };
 
 const variants = {
-  nav: cva("border-b border-white/10 sticky top-0 z-50", {
-    variants: {
-      admin: {
-        true: "bg-pink-600 top-0",
-        false: "bg-[var(--sf-background)]",
+  nav: cva(
+    "border-b border-[color:var(--sf-border)] sticky top-0 z-50 backdrop-blur supports-[backdrop-filter]:bg-[color:var(--sf-background)]/80",
+    {
+      variants: {
+        admin: {
+          true: "bg-pink-600 top-0",
+          false: "bg-[color:var(--sf-background)]",
+        },
+      },
+      defaultVariants: {
+        admin: false,
       },
     },
-    defaultVariants: {
-      admin: false,
-    },
-  }),
+  ),
   adminBanner: cva("text-center text-sm py-2 px-4 sticky top-0 z-[60]", {
     variants: {
       super: {
@@ -61,19 +64,19 @@ const variants = {
     "absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.15)_0%,rgba(255,255,255,0)_50%)] -z-0",
   ),
   logoImage: cva(
-    "relative w-60 h-auto drop-shadow-[0_0_25px_rgba(255,105,180,0.8)] transition-transform duration-300 hover:scale-105",
+    "relative w-60 h-auto drop-shadow-[0_10px_22px_rgba(15,23,42,0.16)] transition-transform duration-300 hover:scale-[1.02]",
   ),
   mobileMenuButton: cva(
-    "inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-400 rounded-lg md:hidden hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500",
+    "inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-[color:var(--sf-mutedText)] rounded-[var(--sf-radius)] hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-primary)]",
   ),
   navList: cva(
-    "font-medium flex flex-col p-4 md:p-0 mt-4 border border-white/10 rounded-lg bg-[var(--sf-background)] md:flex-row md:items-center md:space-x-2 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-[var(--sf-background)]",
+    "font-medium flex flex-col p-3 md:p-0 mt-4 border border-[color:var(--sf-border)] rounded-[var(--sf-radius)] bg-[color:var(--sf-surface)] md:flex-row md:items-center md:space-x-2 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-transparent",
   ),
   logoutButton: cva(
-    "flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-300 bg-white/10 border border-white/10 rounded-lg hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors duration-300",
+    "flex items-center gap-2 px-3 py-2 text-sm font-semibold text-[color:var(--sf-text)] bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-[var(--sf-radius)] hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-primary)] transition",
   ),
   signInLink: cva(
-    "inline-block text-sm bg-[#ff69b4] text-[#1a0d2e] px-4 py-2 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20",
+    "inline-flex items-center justify-center text-sm bg-[color:var(--sf-primary)] text-[color:var(--sf-onPrimary)] px-4 py-2 rounded-[var(--sf-radius)] font-semibold shadow-[var(--sf-shadow)] transition hover:brightness-95 active:brightness-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-primary)]",
   ),
 };
 
@@ -164,10 +167,7 @@ export function Header() {
               className={`${variants.logoImage()} ${isScrolled ? "scale-90" : ""}`}
             />
           </picture>
-          <span
-            className="absolute -bottom-2 right-2 rounded-[var(--sf-radius)] border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-white/90"
-            style={{ color: "var(--sf-text)" }}
-          >
+          <span className="absolute -bottom-2 right-2 rounded-[var(--sf-radius)] border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-2 py-0.5 text-[10px] font-semibold tracking-wide text-[color:var(--sf-mutedText)] shadow-[var(--sf-shadow)]">
             {storefront.name}
           </span>
         </Link>
@@ -219,7 +219,7 @@ export function Header() {
                         </span>
                       )}
                     </span>
-                    <span className="text-xs text-pink-400">
+                    <span className="text-xs text-[color:var(--sf-mutedText)]">
                       {user.bidCredits} Bids
                     </span>
                   </div>

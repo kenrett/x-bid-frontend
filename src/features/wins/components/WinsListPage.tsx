@@ -154,13 +154,13 @@ export const WinsListPage = () => {
     <Page>
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex flex-col gap-2">
-          <p className="text-xs uppercase tracking-[0.2em] text-pink-400">
+          <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--sf-mutedText)]">
             Account
           </p>
-          <h1 className="font-serif text-4xl font-bold text-white">
+          <h1 className="text-4xl font-bold text-[color:var(--sf-text)]">
             Won Auctions
           </h1>
-          <p className="text-gray-400">
+          <p className="text-[color:var(--sf-mutedText)]">
             Review your auction wins and fulfillment status.
           </p>
         </div>

@@ -108,15 +108,15 @@ const AuctionList = () => {
       <Page>
         <div className="container mx-auto p-4" role="status">
           <div className="text-center mb-12">
-            <h1 className="font-serif text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
+            <h1 className="text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[color:var(--sf-primary)] to-[color:var(--sf-accent)] bg-clip-text text-transparent">
               Your Next Obsession
             </h1>
-            <p className="text-lg md:text-xl text-gray-400">
+            <p className="text-lg md:text-xl text-[color:var(--sf-mutedText)]">
               The chase is on. Find your prize and make your move.
             </p>
             <div className="flex justify-center mt-3">
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-gray-800 text-gray-300">
-                <span className="h-2 w-2 rounded-full bg-gray-500" />
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-[color:var(--sf-surface)] text-[color:var(--sf-mutedText)] border border-[color:var(--sf-border)] shadow-[var(--sf-shadow)]">
+                <span className="h-2 w-2 rounded-full bg-[color:var(--sf-accent)]" />
                 Loading auctions…
               </span>
             </div>
@@ -125,7 +125,7 @@ const AuctionList = () => {
             {Array.from({ length: 8 }).map((_, index) => (
               <div
                 key={index}
-                className="w-full bg-[#1a0d2e]/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-lg"
+                className="w-full bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-[var(--sf-radius)] overflow-hidden shadow-[var(--sf-shadow)]"
               >
                 <Skeleton className="block h-56 w-full rounded-none" />
                 <div className="p-5 space-y-3">
@@ -156,10 +156,10 @@ const AuctionList = () => {
       ) : (
         <div className="container mx-auto p-4">
           <div className="text-center mb-12">
-            <h1 className="font-serif text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
+            <h1 className="text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[color:var(--sf-primary)] to-[color:var(--sf-accent)] bg-clip-text text-transparent">
               Your Next Obsession
             </h1>
-            <p className="text-lg md:text-xl text-gray-400">
+            <p className="text-lg md:text-xl text-[color:var(--sf-mutedText)]">
               The chase is on. Find your prize and make your move.
             </p>
             <div className="flex justify-center mt-3">
@@ -167,16 +167,16 @@ const AuctionList = () => {
                 data-testid="live-status"
                 className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
                   connectionState === "connected"
-                    ? "bg-green-900 text-green-100"
-                    : "bg-gray-800 text-gray-300"
+                    ? "bg-green-500/10 text-green-700 border border-green-500/20"
+                    : "bg-[color:var(--sf-surface)] text-[color:var(--sf-mutedText)] border border-[color:var(--sf-border)]"
                 }`}
                 aria-live="polite"
               >
                 <span
                   className={`h-2 w-2 rounded-full ${
                     connectionState === "connected"
-                      ? "bg-green-400"
-                      : "bg-gray-500"
+                      ? "bg-green-500"
+                      : "bg-[color:var(--sf-mutedText)]"
                   }`}
                 />
                 Live updates {connectionState === "connected" ? "on" : "paused"}

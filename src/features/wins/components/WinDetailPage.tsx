@@ -313,7 +313,7 @@ export const WinDetailPage = () => {
         </p>
         <Link
           to={loginRedirect}
-          className="inline-block text-lg bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-bold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105 shadow-lg shadow-[#ff69b4]/20"
+          className="inline-flex items-center justify-center text-lg bg-[color:var(--sf-primary)] text-[color:var(--sf-onPrimary)] px-8 py-3 rounded-[var(--sf-radius)] font-semibold shadow-[var(--sf-shadow)] transition hover:brightness-95 active:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sf-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--sf-background)]"
         >
           Log In
         </Link>
@@ -361,23 +361,25 @@ export const WinDetailPage = () => {
           <div className="flex flex-col gap-1">
             <Link
               to="/account/wins"
-              className="text-xs text-gray-400 hover:text-white transition-colors"
+              className="text-xs text-[color:var(--sf-mutedText)] hover:text-[color:var(--sf-text)] transition-colors"
             >
               ← Back to wins
             </Link>
-            <p className="text-xs uppercase tracking-[0.2em] text-pink-400">
+            <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--sf-mutedText)]">
               Auction #{win.auctionId}
             </p>
-            <h1 className="font-serif text-4xl font-bold text-white">
+            <h1 className="text-4xl font-bold text-[color:var(--sf-text)]">
               {win.auctionTitle || "Won auction"}
             </h1>
-            <p className="text-gray-400">Ended {formatDate(win.endedAt)}</p>
+            <p className="text-[color:var(--sf-mutedText)]">
+              Ended {formatDate(win.endedAt)}
+            </p>
           </div>
           <div className="flex flex-col items-end gap-3">
             <StatusBadge status={win.fulfillmentStatus} />
             <Link
               to={`/auctions/${win.auctionId}`}
-              className="text-sm text-pink-200 hover:text-pink-100 underline underline-offset-2"
+              className="text-sm text-[color:var(--sf-primary)] hover:brightness-95 underline underline-offset-2"
             >
               View auction
             </Link>
