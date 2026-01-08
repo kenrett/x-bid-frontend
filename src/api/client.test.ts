@@ -9,6 +9,8 @@ vi.mock("@services/toast", () => ({
   },
 }));
 
+import * as storefront from "../storefront/storefront";
+
 // Import after mocks so interceptors use the mocked toast
 import client from "./client";
 
@@ -78,6 +80,25 @@ describe("api client response interceptor", () => {
     );
 
     expect(getItemSpy).not.toHaveBeenCalled();
+  });
+
+  it("attaches X-Storefront-Key equal to getStorefrontKey()", () => {
+    const spy = vi.spyOn(storefront, "getStorefrontKey");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const env = import.meta.env as unknown as Record<string, unknown>;
+    const originalStorefrontKey = env.VITE_STOREFRONT_KEY;
+    env.VITE_STOREFRONT_KEY = "not-a-key";
+
+    const baseConfig = { url: "/api/v1/example", headers: {} };
+    const config = applyRequestInterceptors({ ...baseConfig });
+
+    expect(spy).toHaveBeenCalled();
+    expect(
+      (config.headers as Record<string, unknown>)["X-Storefront-Key"],
+    ).toBe(storefront.getStorefrontKey());
+    expect(warn).toHaveBeenCalled();
+
+    env.VITE_STOREFRONT_KEY = originalStorefrontKey;
   });
 
   it("handles 401/403 by dispatching unauthorized and toasting", async () => {

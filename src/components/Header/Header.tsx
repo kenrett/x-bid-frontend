@@ -6,9 +6,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cva } from "class-variance-authority";
 import { useEffect, useMemo, useState } from "react";
 import { Skeleton } from "../Skeleton";
-
-const LOGO_SRC = "/assets/BidderSweet.svg";
-const MOBILE_LOGO_SRC = "/assets/BidderSweet.svg";
+import { useStorefront } from "../../storefront/useStorefront";
 
 const STRINGS = {
   GREETING: "Hello",
@@ -24,7 +22,7 @@ const variants = {
     variants: {
       admin: {
         true: "bg-pink-600 top-0",
-        false: "bg-[#0d0d1a]",
+        false: "bg-[var(--sf-background)]",
       },
     },
     defaultVariants: {
@@ -68,7 +66,7 @@ const variants = {
     "inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-400 rounded-lg md:hidden hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500",
   ),
   navList: cva(
-    "font-medium flex flex-col p-4 md:p-0 mt-4 border border-white/10 rounded-lg bg-[#0d0d1a] md:flex-row md:items-center md:space-x-2 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-[#0d0d1a]",
+    "font-medium flex flex-col p-4 md:p-0 mt-4 border border-white/10 rounded-lg bg-[var(--sf-background)] md:flex-row md:items-center md:space-x-2 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-[var(--sf-background)]",
   ),
   logoutButton: cva(
     "flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-300 bg-white/10 border border-white/10 rounded-lg hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors duration-300",
@@ -86,6 +84,7 @@ const NAV_ITEMS = [
 ];
 
 export function Header() {
+  const { config: storefront } = useStorefront();
   const { user, logout, accessToken, isReady } = useAuth();
   const { isLoading: isAccountStatusLoading, emailVerified } =
     useAccountStatus();
@@ -143,10 +142,10 @@ export function Header() {
         <Link to="/" className={variants.logoLink()}>
           <div className={`${variants.logoSpotlight()} scale-[3]`} />
           <picture>
-            <source media="(max-width: 767px)" srcSet={MOBILE_LOGO_SRC} />
+            <source media="(max-width: 767px)" srcSet={storefront.logoPath} />
             <img
-              src={LOGO_SRC}
-              alt="BidderSweet"
+              src={storefront.logoPath}
+              alt={storefront.shortName}
               width={240}
               height={64}
               fetchPriority="high"
@@ -155,6 +154,12 @@ export function Header() {
               className={`${variants.logoImage()} ${isScrolled ? "scale-90" : ""}`}
             />
           </picture>
+          <span
+            className="absolute -bottom-2 right-2 rounded-[var(--sf-radius)] border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-white/90"
+            style={{ color: "var(--sf-text)" }}
+          >
+            {storefront.name}
+          </span>
         </Link>
         <button
           data-collapse-toggle="navbar-default"

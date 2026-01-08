@@ -6,6 +6,7 @@ import {
   getSessionTokenId,
 } from "@features/auth/tokenStore";
 import { normalizeAuthResponse } from "@features/auth/api/authResponse";
+import { getStorefrontKey } from "../storefront/storefront";
 
 const rawBaseURL =
   typeof import.meta.env.VITE_API_URL === "string"
@@ -54,6 +55,15 @@ client.interceptors.request.use(
       config.url = buildApiUrl(config.url);
       config.baseURL = undefined;
     }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+client.interceptors.request.use(
+  (config) => {
+    config.headers ??= {};
+    config.headers["X-Storefront-Key"] = getStorefrontKey();
     return config;
   },
   (error) => Promise.reject(error),

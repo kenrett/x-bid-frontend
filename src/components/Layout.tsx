@@ -1,15 +1,18 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import { Header } from "./Header/Header";
 import { Footer } from "./Footer/Footer";
 import { AccountStatusProvider } from "@features/account/providers/AccountStatusProvider";
 import { AccountCompletionBanner } from "./AccountCompletionBanner";
 import { showToast } from "@services/toast";
+import { useStorefront } from "../storefront/useStorefront";
 
 export const Layout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const redirectingRef = useRef(false);
+  const { config } = useStorefront();
+  const { themeTokens } = config;
 
   useEffect(() => {
     const onEmailUnverified = () => {
@@ -30,7 +33,17 @@ export const Layout = () => {
   }, [navigate, location.pathname, location.search]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#0d0d1a]">
+    <div
+      className="flex min-h-screen flex-col bg-[var(--sf-background)] text-[var(--sf-text)]"
+      style={
+        {
+          ["--sf-primary"]: themeTokens.primary,
+          ["--sf-background"]: themeTokens.background,
+          ["--sf-text"]: themeTokens.text,
+          ["--sf-radius"]: themeTokens.radius,
+        } as CSSProperties
+      }
+    >
       <AccountStatusProvider>
         <Header />
         <AccountCompletionBanner />
