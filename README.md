@@ -84,6 +84,19 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
 
 ## 🧱 Architecture
 
+### App Modes (Storefront vs Account)
+
+This frontend can be built in two modes via `VITE_APP_MODE`:
+
+- `VITE_APP_MODE=storefront` (default): full auction storefront experience.
+- `VITE_APP_MODE=account`: restricted experience intended for `account.biddersweet.app` (login/signup + wallet + basic profile).
+
+Build example:
+
+- `VITE_APP_MODE=account npm run build`
+
+Note: Vite `VITE_*` env vars are baked at build time, so production typically builds separate artifacts/images per mode. There is a hostname-based runtime fallback intended for local/dev only.
+
 ### Admin & Access Control
 
 - Admin screens require `is_admin` or `is_superuser` from the auth payload; superadmin-only actions (admin user management, maintenance) are gated in the UI.

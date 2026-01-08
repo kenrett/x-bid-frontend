@@ -25,6 +25,7 @@ describe("router configuration", () => {
     expect(hasPath(children, "/auctions")).toBe(true);
     expect(hasPath(children, "/auctions/:id")).toBe(true);
     expect(hasPath(children, "/login")).toBe(true);
+    expect(hasPath(children, "/wallet")).toBe(true);
     expect(hasPath(children, "/signup")).toBe(true);
     expect(hasPath(children, "/account")).toBe(true);
     const accountRoute = children?.find((route) => route.path === "/account");

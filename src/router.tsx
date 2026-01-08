@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import type { RouteObject } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { RouteErrorBoundary } from "./components/ErrorBoundary/RouteErrorBoundary";
 import { ADMIN_PATHS } from "@features/admin/components/Admin/adminPaths";
@@ -46,6 +47,10 @@ export const routes: RouteObject[] = [
           () => import("@features/auth/components/LoginForm/LoginForm"),
           "LoginForm",
         ),
+      },
+      {
+        path: "/wallet",
+        element: <Navigate to="/account/wallet" replace />,
       },
       {
         path: "/signup",

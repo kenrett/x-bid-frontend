@@ -7,6 +7,7 @@ import { cva } from "class-variance-authority";
 import { useEffect, useMemo, useState } from "react";
 import { Skeleton } from "../Skeleton";
 import { useStorefront } from "../../storefront/useStorefront";
+import { getAppMode } from "../../appMode/appMode";
 
 const STRINGS = {
   GREETING: "Hello",
@@ -85,12 +86,20 @@ const NAV_ITEMS = [
 
 export function Header() {
   const { config: storefront } = useStorefront();
+  const appMode = getAppMode();
   const { user, logout, accessToken, isReady } = useAuth();
   const { isLoading: isAccountStatusLoading, emailVerified } =
     useAccountStatus();
   const isSuperAdmin = Boolean(user?.is_superuser);
   const isAdmin = Boolean(user?.is_admin || isSuperAdmin);
   const apiBase = import.meta.env.VITE_API_URL;
+  const isAccountMode = appMode === "account";
+  const navItems = isAccountMode
+    ? [
+        { name: "Wallet", href: "/account/wallet" },
+        { name: "Profile", href: "/account/profile" },
+      ]
+    : NAV_ITEMS;
 
   const apiDocsHref = useMemo(() => {
     try {
@@ -108,17 +117,18 @@ export function Header() {
 
   const adminNavItems = useMemo(
     () =>
-      isAdmin
+      isAdmin && !isAccountMode
         ? [
             { name: "Admin", href: "/admin/auctions" },
             { name: "API Docs", href: apiDocsHref },
           ]
         : [],
-    [isAdmin, apiDocsHref],
+    [isAdmin, isAccountMode, apiDocsHref],
   );
   const accountNavItems = useMemo(
-    () => (user ? [{ name: "Account", href: "/account" }] : []),
-    [user],
+    () =>
+      !isAccountMode && user ? [{ name: "Account", href: "/account" }] : [],
+    [user, isAccountMode],
   );
 
   const location = useLocation();
@@ -176,7 +186,7 @@ export function Header() {
           id="navbar-default"
         >
           <ul className={variants.navList()}>
-            {NAV_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <NavItem key={item.name} to={item.href}>
                 {item.name}
               </NavItem>

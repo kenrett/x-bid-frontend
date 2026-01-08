@@ -6,13 +6,50 @@ import { AccountStatusProvider } from "@features/account/providers/AccountStatus
 import { AccountCompletionBanner } from "./AccountCompletionBanner";
 import { showToast } from "@services/toast";
 import { useStorefront } from "../storefront/useStorefront";
+import { getAppMode } from "../appMode/appMode";
+import { useAuth } from "@features/auth/hooks/useAuth";
 
 export const Layout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const redirectingRef = useRef(false);
+  const { user, isReady } = useAuth();
   const { config } = useStorefront();
   const { themeTokens } = config;
+
+  useEffect(() => {
+    if (getAppMode() !== "account") return;
+    if (!isReady) return;
+
+    const pathname = location.pathname;
+
+    if (pathname === "/wallet") {
+      navigate("/account/wallet", { replace: true });
+      return;
+    }
+
+    const allowedExact = new Set<string>([
+      "/login",
+      "/signup",
+      "/maintenance",
+      "/goodbye",
+    ]);
+    const allowedPrefixes = [
+      "/account/wallet",
+      "/account/profile",
+      "/account/verify-email",
+    ];
+    const allowed =
+      allowedExact.has(pathname) ||
+      allowedPrefixes.some(
+        (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+      );
+
+    if (allowed) return;
+
+    const target = user ? "/account/wallet" : "/login";
+    if (pathname !== target) navigate(target, { replace: true });
+  }, [isReady, user, location.pathname, navigate]);
 
   useEffect(() => {
     const onEmailUnverified = () => {
