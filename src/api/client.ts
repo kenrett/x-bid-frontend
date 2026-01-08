@@ -1,4 +1,8 @@
-import axios, { type AxiosError, type AxiosInstance } from "axios";
+import axios, {
+  AxiosHeaders,
+  type AxiosError,
+  type AxiosInstance,
+} from "axios";
 import {
   authSessionStore,
   getAccessToken,
@@ -7,6 +11,25 @@ import {
 } from "@features/auth/tokenStore";
 import { normalizeAuthResponse } from "@features/auth/api/authResponse";
 import { getStorefrontKey } from "../storefront/storefront";
+
+const setHeader = (
+  config: { headers?: unknown },
+  key: string,
+  value: string | undefined,
+) => {
+  const headers = config.headers;
+  if (headers instanceof AxiosHeaders) {
+    if (value === undefined) headers.delete(key);
+    else headers.set(key, value);
+    return;
+  }
+
+  if (!headers || typeof headers !== "object") {
+    (config as { headers: Record<string, unknown> }).headers = {};
+  }
+
+  (config.headers as Record<string, unknown>)[key] = value;
+};
 
 const rawBaseURL =
   typeof import.meta.env.VITE_API_URL === "string"
@@ -62,8 +85,7 @@ client.interceptors.request.use(
 
 client.interceptors.request.use(
   (config) => {
-    config.headers ??= {};
-    config.headers["X-Storefront-Key"] = getStorefrontKey();
+    setHeader(config, "X-Storefront-Key", getStorefrontKey());
     return config;
   },
   (error) => Promise.reject(error),
@@ -73,7 +95,7 @@ client.interceptors.request.use(
   (config) => {
     const accessToken = getAccessToken();
     if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+      setHeader(config, "Authorization", `Bearer ${accessToken}`);
     }
     return config;
   },
