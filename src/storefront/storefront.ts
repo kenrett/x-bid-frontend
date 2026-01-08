@@ -70,7 +70,7 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
   },
   afterdark: {
     key: "afterdark",
-    name: "BidderSweet Afterdark",
+    name: "BidderSweet After Dark",
     shortName: "Afterdark",
     themeTokens: {
       primary: "#a855f7",

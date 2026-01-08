@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { getStorefrontKey } from "./storefront";
+import { getStorefrontConfig, getStorefrontKey } from "./storefront";
 
 const originalEnv = { ...import.meta.env };
 
@@ -61,5 +61,10 @@ describe("getStorefrontKey", () => {
 
     expect(getStorefrontKey()).toBe("main");
     expect(warn).toHaveBeenCalled();
+  });
+
+  it('uses "BidderSweet After Dark" for afterdark storefront name', () => {
+    applyEnv({ VITE_STOREFRONT_KEY: "afterdark" });
+    expect(getStorefrontConfig().name).toBe("BidderSweet After Dark");
   });
 });
