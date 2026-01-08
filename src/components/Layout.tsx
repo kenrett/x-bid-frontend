@@ -8,6 +8,7 @@ import { showToast } from "@services/toast";
 import { useStorefront } from "../storefront/useStorefront";
 import { getAppMode } from "../appMode/appMode";
 import { useAuth } from "@features/auth/hooks/useAuth";
+import { AgeGateModal } from "./AgeGateModal";
 
 export const Layout = () => {
   const navigate = useNavigate();
@@ -88,6 +89,7 @@ export const Layout = () => {
           <Outlet />
         </main>
       </AccountStatusProvider>
+      <AgeGateModal />
       <Footer />
     </div>
   );

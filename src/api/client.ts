@@ -2,6 +2,7 @@ import axios, {
   AxiosHeaders,
   type AxiosError,
   type AxiosInstance,
+  type AxiosRequestConfig,
 } from "axios";
 import {
   authSessionStore,
@@ -11,6 +12,7 @@ import {
 } from "@features/auth/tokenStore";
 import { normalizeAuthResponse } from "@features/auth/api/authResponse";
 import { getStorefrontKey } from "../storefront/storefront";
+import { requestAgeGateAcceptance } from "../ageGate/ageGateStore";
 
 const setHeader = (
   config: { headers?: unknown },
@@ -117,6 +119,7 @@ const INVALID_SESSION_CODES = new Set([
 
 const EMAIL_UNVERIFIED_CODES = new Set(["email_unverified"]);
 const MAINTENANCE_CODES = new Set(["maintenance_mode"]);
+const AGE_GATE_CODES = new Set(["age_gate_required"]);
 
 const extractErrorCode = (data: unknown): string | undefined => {
   if (!data || typeof data !== "object") return undefined;
@@ -166,6 +169,16 @@ const isEmailUnverifiedError = (error: AxiosError): boolean => {
   if (!code) return false;
   return EMAIL_UNVERIFIED_CODES.has(code.toLowerCase());
 };
+
+const isAgeGateRequiredError = (error: AxiosError): boolean => {
+  const code = extractErrorCode(error.response?.data);
+  if (!code) return false;
+  return AGE_GATE_CODES.has(code.toLowerCase());
+};
+
+const isAgeGateAcceptRequest = (configUrl: unknown) =>
+  typeof configUrl === "string" &&
+  configUrl.includes("/api/v1/age_gate/accept");
 
 let sessionInvalidated = false;
 authSessionStore.subscribe(() => {
@@ -233,6 +246,28 @@ client.interceptors.response.use(
   },
   async (error: AxiosError) => {
     const status = error?.response?.status;
+    const originalRequest = error.config;
+
+    if (
+      isAgeGateRequiredError(error) &&
+      originalRequest &&
+      !(originalRequest as { __ageGateRetry?: boolean }).__ageGateRetry &&
+      !(originalRequest as { __skipAgeGate?: boolean }).__skipAgeGate &&
+      !isAgeGateAcceptRequest(originalRequest.url)
+    ) {
+      try {
+        await requestAgeGateAcceptance();
+        await client.post("/api/v1/age_gate/accept", {}, {
+          __skipAgeGate: true,
+        } as unknown as AxiosRequestConfig);
+
+        (originalRequest as { __ageGateRetry?: boolean }).__ageGateRetry = true;
+        return client.request(originalRequest);
+      } catch {
+        return Promise.reject(error);
+      }
+    }
+
     if (
       status === 503 ||
       isMaintenanceHeader(error.response?.headers) ||
@@ -256,7 +291,6 @@ client.interceptors.response.use(
       if (isRefreshRequest(error.config?.url)) {
         return Promise.reject(error);
       }
-      const originalRequest = error.config;
 
       const refreshToken = getRefreshToken();
       const sessionTokenId = getSessionTokenId();
