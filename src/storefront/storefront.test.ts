@@ -94,6 +94,10 @@ describe("afterdark storefront styling", () => {
       onPrimary: "#0b0b10",
       radius: "16px",
       shadow: "0 18px 50px rgba(0, 0, 0, 0.55)",
+      headingFont:
+        '"Zalando Sans Expanded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      bodyFont:
+        '"Zalando Sans Expanded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     });
   });
 

@@ -13,8 +13,25 @@
 :root {
   scrollbar-gutter: stable;
   --font-sans: "Zalando Sans Expanded", ui-sans-serif, system-ui, sans-serif;
+  --sf-heading-font: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  --sf-body-font: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
 }
 
 body {
-  font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  font-family: var(
+    --sf-body-font,
+    var(--font-sans, ui-sans-serif, system-ui, sans-serif)
+  );
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(
+    --sf-heading-font,
+    var(--font-sans, ui-sans-serif, system-ui, sans-serif)
+  );
 }

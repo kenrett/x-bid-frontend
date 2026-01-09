@@ -11,6 +11,8 @@ export type StorefrontThemeTokens = {
   text: string;
   radius: string;
   shadow: string;
+  headingFont: string;
+  bodyFont: string;
 };
 
 export type StorefrontConfig = {
@@ -81,6 +83,8 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
       onPrimary: "#ffffff",
       radius: "14px",
       shadow: "0 16px 40px rgba(15, 23, 42, 0.10)",
+      headingFont: `"Zalando Sans Expanded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
+      bodyFont: `"Zalando Sans Expanded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
     },
     logoPath: "/assets/BidderSweet.svg",
   },
@@ -101,6 +105,8 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
       onPrimary: "#0b0b10",
       radius: "16px",
       shadow: "0 18px 50px rgba(0, 0, 0, 0.55)",
+      headingFont: `"Zalando Sans Expanded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
+      bodyFont: `"Zalando Sans Expanded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
     },
     logoPath: "/assets/BidderSweet.svg",
   },
@@ -111,16 +117,18 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
     badgeLabel: "Artisan",
     domain: "artisan.biddersweet.app",
     themeTokens: {
-      primary: "#f59e0b",
-      accent: "#22c55e",
-      background: "#0d0d1a",
-      surface: "rgba(255, 255, 255, 0.06)",
-      border: "rgba(255, 255, 255, 0.10)",
-      text: "#ffffff",
-      mutedText: "rgba(255, 255, 255, 0.70)",
-      onPrimary: "#0d0d1a",
-      radius: "16px",
-      shadow: "0 18px 50px rgba(0, 0, 0, 0.55)",
+      primary: "#3c5e45",
+      accent: "#c57c37",
+      background: "#f6efe2",
+      surface: "#fffaf4",
+      border: "rgba(141, 114, 91, 0.45)",
+      text: "#352b1f",
+      mutedText: "#705e4b",
+      onPrimary: "#fff8ef",
+      radius: "18px",
+      shadow: "0 18px 55px rgba(56, 53, 44, 0.35)",
+      headingFont: `"Cormorant Garamond", "Times New Roman", "Noto Serif", serif`,
+      bodyFont: `"Zalando Sans Expanded", "Segoe UI", system-ui, sans-serif`,
     },
     logoPath: "/assets/BidderSweet.svg",
   },

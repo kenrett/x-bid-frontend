@@ -85,6 +85,9 @@ export const Layout = () => {
           ["--sf-onPrimary"]: themeTokens.onPrimary,
           ["--sf-radius"]: themeTokens.radius,
           ["--sf-shadow"]: themeTokens.shadow,
+          ["--sf-heading-font"]: themeTokens.headingFont,
+          ["--sf-body-font"]: themeTokens.bodyFont,
+          fontFamily: themeTokens.bodyFont,
         } as CSSProperties
       }
     >
