@@ -1,4 +1,4 @@
-import { useStorefront } from "../../../storefront/useStorefront";
+import { useStorefront } from "../../../../storefront/useStorefront";
 
 interface AuctionProps {
   id: number;
