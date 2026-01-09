@@ -200,6 +200,12 @@ const dispatchUnauthorized = (status: number, code?: string) => {
   );
 };
 
+const dispatchForbidden = (status: number, code?: string) => {
+  window.dispatchEvent(
+    new CustomEvent("app:forbidden", { detail: { status, code } }),
+  );
+};
+
 const dispatchEmailUnverified = (status: number, code?: string) => {
   window.dispatchEvent(
     new CustomEvent("app:email_unverified", { detail: { status, code } }),
@@ -234,119 +240,125 @@ const beginRefresh = ({ refreshToken }: { refreshToken?: string }) => {
   return refreshPromise;
 };
 
-client.interceptors.response.use(
-  (response) => {
-    if (isMaintenanceHeader(response?.headers)) {
-      const currentPath = window.location.pathname;
-      if (!currentPath.startsWith("/maintenance")) {
-        window.location.assign("/maintenance");
-      }
+export const handleResponseError = async (error: AxiosError) => {
+  const status = error?.response?.status;
+  const originalRequest = error.config;
+
+  if (
+    isAgeGateRequiredError(error) &&
+    originalRequest &&
+    !(originalRequest as { __ageGateRetry?: boolean }).__ageGateRetry &&
+    !(originalRequest as { __skipAgeGate?: boolean }).__skipAgeGate &&
+    !isAgeGateAcceptRequest(originalRequest.url)
+  ) {
+    try {
+      await requestAgeGateAcceptance();
+      await client.post("/api/v1/age_gate/accept", {}, {
+        __skipAgeGate: true,
+      } as unknown as AxiosRequestConfig);
+
+      (originalRequest as { __ageGateRetry?: boolean }).__ageGateRetry = true;
+      return client.request(originalRequest);
+    } catch {
+      return Promise.reject(error);
     }
-    return response;
-  },
-  async (error: AxiosError) => {
-    const status = error?.response?.status;
-    const originalRequest = error.config;
+  }
 
-    if (
-      isAgeGateRequiredError(error) &&
-      originalRequest &&
-      !(originalRequest as { __ageGateRetry?: boolean }).__ageGateRetry &&
-      !(originalRequest as { __skipAgeGate?: boolean }).__skipAgeGate &&
-      !isAgeGateAcceptRequest(originalRequest.url)
-    ) {
-      try {
-        await requestAgeGateAcceptance();
-        await client.post("/api/v1/age_gate/accept", {}, {
-          __skipAgeGate: true,
-        } as unknown as AxiosRequestConfig);
-
-        (originalRequest as { __ageGateRetry?: boolean }).__ageGateRetry = true;
-        return client.request(originalRequest);
-      } catch {
-        return Promise.reject(error);
-      }
-    }
-
-    if (
-      status === 503 ||
-      isMaintenanceHeader(error.response?.headers) ||
-      isMaintenanceError(error)
-    ) {
-      const currentPath = window.location.pathname;
-      if (!currentPath.startsWith("/maintenance")) {
-        window.location.assign("/maintenance");
-      }
-    } else if (status === 401 || status === 403) {
-      if (status === 403 && isEmailUnverifiedError(error)) {
-        dispatchEmailUnverified(status, extractErrorCode(error.response?.data));
-        return Promise.reject(error);
-      }
-      if (isInvalidSessionError(error)) {
-        authSessionStore.clear();
-        dispatchUnauthorized(status, extractErrorCode(error.response?.data));
-        return Promise.reject(error);
-      }
-
-      if (isRefreshRequest(error.config?.url)) {
-        return Promise.reject(error);
-      }
-
-      const refreshToken = getRefreshToken();
-      const sessionTokenId = getSessionTokenId();
-      const canRefreshWithToken =
-        status === 401 &&
-        Boolean(refreshToken && sessionTokenId) &&
-        originalRequest &&
-        !(originalRequest as { __authRetry?: boolean }).__authRetry &&
-        !isRefreshRequest(originalRequest.url);
-
-      if (canRefreshWithToken) {
-        try {
-          const next = await beginRefresh({
-            refreshToken: refreshToken ?? undefined,
-          });
-          authSessionStore.setSession({
-            accessToken: next.accessToken,
-            refreshToken: next.refreshToken,
-            sessionTokenId: next.sessionTokenId,
-            user: next.user,
-          });
-          window.dispatchEvent(
-            new CustomEvent("app:auth:refreshed", { detail: next }),
-          );
-
-          (originalRequest as { __authRetry?: boolean }).__authRetry = true;
-          const headers = originalRequest.headers ?? {};
-          if (typeof (headers as { set?: unknown }).set === "function") {
-            (
-              headers as unknown as {
-                set: (key: string, value: string) => void;
-              }
-            ).set("Authorization", `Bearer ${next.accessToken}`);
-          } else {
-            (headers as Record<string, unknown>).Authorization =
-              `Bearer ${next.accessToken}`;
-          }
-          originalRequest.headers = headers;
-          return client.request(originalRequest);
-        } catch (refreshError) {
-          if (import.meta.env.MODE !== "test") {
-            console.warn(
-              "[api client] Refresh token flow failed",
-              refreshError,
-            );
-          }
-          return Promise.reject(error);
-        }
-      }
-
-      // Centralize unauthorized handling via AuthProvider listener.
-      authSessionStore.clear();
-      dispatchUnauthorized(status, extractErrorCode(error.response?.data));
+  if (
+    status === 503 ||
+    isMaintenanceHeader(error.response?.headers) ||
+    isMaintenanceError(error)
+  ) {
+    const currentPath = window.location.pathname;
+    if (!currentPath.startsWith("/maintenance")) {
+      window.location.assign("/maintenance");
     }
     return Promise.reject(error);
-  },
-);
+  }
+
+  if (status === 401 || status === 403) {
+    const code = extractErrorCode(error.response?.data);
+    if (status === 403 && isEmailUnverifiedError(error)) {
+      dispatchEmailUnverified(status, code);
+      return Promise.reject(error);
+    }
+
+    if (isInvalidSessionError(error)) {
+      authSessionStore.clear();
+      dispatchUnauthorized(status, code);
+      return Promise.reject(error);
+    }
+
+    if (status === 403) {
+      dispatchForbidden(status, code);
+      return Promise.reject(error);
+    }
+
+    if (isRefreshRequest(error.config?.url)) {
+      return Promise.reject(error);
+    }
+
+    const refreshToken = getRefreshToken();
+    const sessionTokenId = getSessionTokenId();
+    const canRefreshWithToken =
+      status === 401 &&
+      Boolean(refreshToken && sessionTokenId) &&
+      originalRequest &&
+      !(originalRequest as { __authRetry?: boolean }).__authRetry &&
+      !isRefreshRequest(originalRequest.url);
+
+    if (canRefreshWithToken) {
+      try {
+        const next = await beginRefresh({
+          refreshToken: refreshToken ?? undefined,
+        });
+        authSessionStore.setSession({
+          accessToken: next.accessToken,
+          refreshToken: next.refreshToken,
+          sessionTokenId: next.sessionTokenId,
+          user: next.user,
+        });
+        window.dispatchEvent(
+          new CustomEvent("app:auth:refreshed", { detail: next }),
+        );
+
+        (originalRequest as { __authRetry?: boolean }).__authRetry = true;
+        const headers = originalRequest.headers ?? {};
+        if (typeof (headers as { set?: unknown }).set === "function") {
+          (
+            headers as unknown as {
+              set: (key: string, value: string) => void;
+            }
+          ).set("Authorization", `Bearer ${next.accessToken}`);
+        } else {
+          (headers as Record<string, unknown>).Authorization =
+            `Bearer ${next.accessToken}`;
+        }
+        originalRequest.headers = headers;
+        return client.request(originalRequest);
+      } catch (refreshError) {
+        if (import.meta.env.MODE !== "test") {
+          console.warn("[api client] Refresh token flow failed", refreshError);
+        }
+        return Promise.reject(error);
+      }
+    }
+
+    authSessionStore.clear();
+    dispatchUnauthorized(status, code);
+  }
+
+  return Promise.reject(error);
+};
+
+client.interceptors.response.use((response) => {
+  if (isMaintenanceHeader(response?.headers)) {
+    const currentPath = window.location.pathname;
+    if (!currentPath.startsWith("/maintenance")) {
+      window.location.assign("/maintenance");
+    }
+  }
+  return response;
+}, handleResponseError);
 
 export default client;
