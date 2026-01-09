@@ -4,6 +4,8 @@ export type WalletSummary = {
   currency?: string | null;
 };
 
+import type { StorefrontKey } from "../../../storefront/storefront";
+
 export type WalletTransaction = {
   id: string;
   occurredAt: string;
@@ -12,6 +14,7 @@ export type WalletTransaction = {
   reason?: string | null;
   purchaseUrl?: string | null;
   auctionUrl?: string | null;
+  storefrontKey?: StorefrontKey | null;
 };
 
 export type WalletTransactionsPage = {

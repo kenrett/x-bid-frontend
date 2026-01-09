@@ -5,6 +5,10 @@ import type {
   WalletTransaction,
   WalletTransactionsPage,
 } from "../types/wallet";
+import {
+  isStorefrontKey,
+  type StorefrontKey,
+} from "../../../storefront/storefront";
 
 type PageParams = {
   page?: number;
@@ -166,6 +170,17 @@ const normalizeTransaction = (raw: unknown): WalletTransaction => {
     coerceString((data as { auctionUrl?: unknown }).auctionUrl) ??
     (auctionUrlFromId !== null ? `/auctions/${auctionUrlFromId}` : null);
 
+  const storefrontCandidate =
+    coerceString((data as { storefront_key?: unknown }).storefront_key) ??
+    coerceString((data as { storefrontKey?: unknown }).storefrontKey) ??
+    coerceString((ledger as { storefront_key?: unknown }).storefront_key) ??
+    coerceString((ledger as { storefrontKey?: unknown }).storefrontKey);
+
+  const storefrontKey: StorefrontKey | undefined =
+    storefrontCandidate && isStorefrontKey(storefrontCandidate)
+      ? storefrontCandidate
+      : undefined;
+
   return {
     id: idValue,
     occurredAt,
@@ -187,6 +202,7 @@ const normalizeTransaction = (raw: unknown): WalletTransaction => {
       null,
     purchaseUrl,
     auctionUrl,
+    storefrontKey,
   };
 };
 

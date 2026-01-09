@@ -4,6 +4,7 @@ import { Page } from "@components/Page";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { walletApi } from "../api/walletApi";
 import type { WalletSummary, WalletTransaction } from "../types/wallet";
+import { StorefrontBadge } from "@components/StorefrontBadge";
 import {
   UNEXPECTED_RESPONSE_MESSAGE,
   UnexpectedResponseError,
@@ -79,6 +80,9 @@ const TableSkeleton = () => (
       <tr key={index} className="animate-pulse">
         <td className="px-4 py-3">
           <div className="h-3 w-24 bg-black/5 rounded" />
+        </td>
+        <td className="px-4 py-3">
+          <div className="h-3 w-20 bg-black/5 rounded" />
         </td>
         <td className="px-4 py-3">
           <div className="h-3 w-20 bg-black/5 rounded" />
@@ -349,6 +353,7 @@ export const BidHistoryPage = () => {
               <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-gray-400">
                 <tr>
                   <th className="px-4 py-3">Date</th>
+                  <th className="px-4 py-3">Storefront</th>
                   <th className="px-4 py-3">Kind</th>
                   <th className="px-4 py-3">Amount</th>
                   <th className="px-4 py-3">Reason</th>
@@ -361,7 +366,7 @@ export const BidHistoryPage = () => {
                 <tbody>
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={6}
                       className="px-4 py-6 text-center text-gray-400"
                     >
                       No transactions yet
@@ -382,6 +387,11 @@ export const BidHistoryPage = () => {
                           <>
                             <td className="px-4 py-3 text-gray-200">
                               {formatDate(tx.occurredAt)}
+                            </td>
+                            <td className="px-4 py-3">
+                              <StorefrontBadge
+                                storefrontKey={tx.storefrontKey}
+                              />
                             </td>
                             <td className="px-4 py-3">{label}</td>
                             <td

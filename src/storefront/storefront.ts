@@ -17,6 +17,8 @@ export type StorefrontConfig = {
   key: StorefrontKey;
   name: string;
   shortName: string;
+  badgeLabel: string;
+  domain: string;
   themeTokens: StorefrontThemeTokens;
   logoPath: string;
 };
@@ -27,7 +29,7 @@ const VALID_STOREFRONT_KEYS = new Set<StorefrontKey>([
   "artisan",
 ]);
 
-const isStorefrontKey = (value: unknown): value is StorefrontKey =>
+export const isStorefrontKey = (value: unknown): value is StorefrontKey =>
   typeof value === "string" &&
   VALID_STOREFRONT_KEYS.has(value as StorefrontKey);
 
@@ -66,6 +68,8 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
     key: "main",
     name: "BidderSweet",
     shortName: "BidderSweet",
+    badgeLabel: "Main",
+    domain: "biddersweet.app",
     themeTokens: {
       primary: "#ff4d4f",
       accent: "#f6c177",
@@ -84,6 +88,8 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
     key: "afterdark",
     name: "BidderSweet After Dark",
     shortName: "Afterdark",
+    badgeLabel: "After Dark",
+    domain: "afterdark.biddersweet.app",
     themeTokens: {
       primary: "#a855f7",
       accent: "#f59e0b",
@@ -102,6 +108,8 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
     key: "artisan",
     name: "BidderSweet Artisan",
     shortName: "Artisan",
+    badgeLabel: "Artisan",
+    domain: "artisan.biddersweet.app",
     themeTokens: {
       primary: "#f59e0b",
       accent: "#22c55e",

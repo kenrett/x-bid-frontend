@@ -5,6 +5,10 @@ import type {
   PurchaseStatus,
   PurchaseSummary,
 } from "../types/purchase";
+import {
+  isStorefrontKey,
+  type StorefrontKey,
+} from "../../../storefront/storefront";
 
 const toNumber = (value: unknown): number | null => {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -13,6 +17,21 @@ const toNumber = (value: unknown): number | null => {
     return Number.isFinite(parsed) ? parsed : null;
   }
   return null;
+};
+
+const coerceString = (value: unknown): string | null =>
+  typeof value === "string" ? value : null;
+
+const extractStorefrontKey = (
+  record?: Record<string, unknown>,
+): StorefrontKey | null => {
+  if (!record) return null;
+  const candidate =
+    coerceString(record.storefront_key) ??
+    coerceString((record as { storefrontKey?: unknown }).storefrontKey) ??
+    coerceString(record.storefront);
+  if (!candidate) return null;
+  return isStorefrontKey(candidate) ? candidate : null;
 };
 
 const normalizeStatus = (value: unknown): PurchaseStatus => {
@@ -56,6 +75,7 @@ const extractPurchasesArray = (payload: unknown): unknown[] | null => {
 
 const normalizePurchase = (raw: unknown): PurchaseDetail => {
   const data = (raw ?? {}) as Record<string, unknown>;
+  const storefrontKey = extractStorefrontKey(data);
   const bidPack =
     (data.bid_pack && typeof data.bid_pack === "object"
       ? (data.bid_pack as Record<string, unknown>)
@@ -224,6 +244,7 @@ const normalizePurchase = (raw: unknown): PurchaseDetail => {
     stripeCustomerId,
     stripeInvoiceId,
     stripeEventId,
+    storefrontKey,
   };
 };
 
@@ -240,6 +261,7 @@ const toSummary = (purchase: PurchaseDetail): PurchaseSummary => ({
   paymentStatus: purchase.paymentStatus ?? null,
   ledgerGrantEntryId: purchase.ledgerGrantEntryId ?? null,
   receiptUrl: purchase.receiptUrl ?? null,
+  storefrontKey: purchase.storefrontKey ?? null,
 });
 
 const list = async (): Promise<PurchaseSummary[]> => {

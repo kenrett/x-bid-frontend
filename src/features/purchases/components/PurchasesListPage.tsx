@@ -5,6 +5,7 @@ import { useAuth } from "@features/auth/hooks/useAuth";
 import { purchasesApi } from "../api/purchasesApi";
 import type { PurchaseSummary } from "../types/purchase";
 import { normalizeApiError } from "@api/normalizeApiError";
+import { StorefrontBadge } from "@components/StorefrontBadge";
 
 const formatDate = (value: string) => {
   if (!value) return "—";
@@ -69,7 +70,7 @@ const TableSkeleton = () => (
   <tbody className="divide-y divide-white/10">
     {Array.from({ length: 4 }).map((_, index) => (
       <tr key={index} className="animate-pulse">
-        {Array.from({ length: 6 }).map((__, cellIdx) => (
+        {Array.from({ length: 7 }).map((__, cellIdx) => (
           <td key={cellIdx} className="px-4 py-3">
             <div className="h-3 w-28 bg-white/10 rounded" />
           </td>
@@ -192,6 +193,7 @@ export const PurchasesListPage = () => {
               <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-gray-400">
                 <tr>
                   <th className="px-4 py-3">Date</th>
+                  <th className="px-4 py-3">Storefront</th>
                   <th className="px-4 py-3">Bid pack</th>
                   <th className="px-4 py-3">Credits</th>
                   <th className="px-4 py-3">Amount</th>
@@ -206,7 +208,7 @@ export const PurchasesListPage = () => {
                   <tr>
                     <td
                       className="px-4 py-6 text-center text-gray-400"
-                      colSpan={6}
+                      colSpan={7}
                     >
                       No purchases yet.
                     </td>
@@ -222,6 +224,11 @@ export const PurchasesListPage = () => {
                     >
                       <td className="px-4 py-3 whitespace-nowrap">
                         {formatDate(purchase.createdAt)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StorefrontBadge
+                          storefrontKey={purchase.storefrontKey}
+                        />
                       </td>
                       <td className="px-4 py-3">
                         {purchase.bidPackName || (

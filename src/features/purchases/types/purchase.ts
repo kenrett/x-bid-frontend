@@ -1,3 +1,5 @@
+import type { StorefrontKey } from "../../../storefront/storefront";
+
 export type PurchaseStatus = "pending" | "succeeded" | "failed" | "refunded";
 
 export type PurchaseSummary = {
@@ -13,6 +15,7 @@ export type PurchaseSummary = {
   paymentStatus?: string | null;
   ledgerGrantEntryId?: number | null;
   receiptUrl?: string | null;
+  storefrontKey?: StorefrontKey | null;
 };
 
 export type PurchaseDetail = PurchaseSummary & {

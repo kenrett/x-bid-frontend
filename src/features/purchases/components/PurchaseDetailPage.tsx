@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
   useCallback,
   useEffect,
@@ -8,10 +9,18 @@ import {
 import { Link, useLocation, useParams } from "react-router-dom";
 import { Page } from "@components/Page";
 import { LoadingScreen } from "@components/LoadingScreen";
+import { StorefrontBadge } from "@components/StorefrontBadge";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { purchasesApi } from "../api/purchasesApi";
 import type { PurchaseDetail } from "../types/purchase";
 import { normalizeApiError } from "@api/normalizeApiError";
+import { useStorefront } from "../../../storefront/useStorefront";
+import {
+  STOREFRONT_CONFIGS,
+  isStorefrontKey,
+  type StorefrontConfig,
+  type StorefrontKey,
+} from "../../../storefront/storefront";
 
 const formatDate = (value: string) => {
   if (!value) return "—";
@@ -111,6 +120,38 @@ const CopyButton = ({
   );
 };
 
+const coerceString = (value: unknown): string | null =>
+  typeof value === "string" ? value : null;
+
+const asRecord = (value: unknown): Record<string, unknown> | undefined =>
+  value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : undefined;
+
+const extractStorefrontKeyFromRecord = (
+  record?: Record<string, unknown>,
+): StorefrontKey | null => {
+  if (!record) return null;
+  const candidate =
+    coerceString(record.storefront_key) ??
+    coerceString((record as { storefrontKey?: unknown }).storefrontKey) ??
+    coerceString(record.storefront);
+  if (!candidate) return null;
+  return isStorefrontKey(candidate) ? candidate : null;
+};
+
+const extractStorefrontKeyFromError = (
+  error: unknown,
+): StorefrontKey | null => {
+  if (!axios.isAxiosError(error)) return null;
+  const body = asRecord(error.response?.data);
+  const fromBody = extractStorefrontKeyFromRecord(body);
+  if (fromBody) return fromBody;
+  const details = asRecord(body?.details);
+  const fromDetails = extractStorefrontKeyFromRecord(details);
+  return fromDetails;
+};
+
 const SummaryItem = ({ label, value }: { label: string; value: ReactNode }) => (
   <div className="bg-white/5 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/10 space-y-1">
     <p className="text-xs uppercase tracking-wide text-gray-400">{label}</p>
@@ -122,11 +163,14 @@ export const PurchaseDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const { isReady, user } = useAuth();
+  const { key: currentStorefrontKey } = useStorefront();
   const userId = user?.id ?? null;
   const [purchase, setPurchase] = useState<PurchaseDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showTechnical, setShowTechnical] = useState(false);
+  const [blockedStorefront, setBlockedStorefront] =
+    useState<StorefrontConfig | null>(null);
 
   const loginRedirect = useMemo(
     () =>
@@ -143,10 +187,22 @@ export const PurchaseDetailPage = () => {
     }
     setIsLoading(true);
     setError(null);
+    setBlockedStorefront(null);
     try {
       const data = await purchasesApi.get(id);
       setPurchase(data);
     } catch (err) {
+      const storefrontKey = extractStorefrontKeyFromError(err);
+      if (
+        storefrontKey &&
+        storefrontKey !== currentStorefrontKey &&
+        STOREFRONT_CONFIGS[storefrontKey]
+      ) {
+        const targetConfig = STOREFRONT_CONFIGS[storefrontKey];
+        setBlockedStorefront(targetConfig);
+        setError(`This item belongs to ${targetConfig.name}. Open it there.`);
+        return;
+      }
       const parsed = normalizeApiError(err);
       if (parsed.status === 404) {
         setError("Purchase not found.");
@@ -158,13 +214,14 @@ export const PurchaseDetailPage = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [id]);
+  }, [id, currentStorefrontKey]);
 
   useEffect(() => {
     if (!isReady) return;
     if (!userId) {
       setPurchase(null);
       setError(null);
+      setBlockedStorefront(null);
       return;
     }
     void handleLoad();
@@ -200,6 +257,19 @@ export const PurchaseDetailPage = () => {
           <p className="text-lg text-red-200 font-semibold" role="alert">
             {error}
           </p>
+          {blockedStorefront && (
+            <p className="text-sm text-white/70">
+              This item belongs to {blockedStorefront.name}.{" "}
+              <a
+                href={`https://${blockedStorefront.domain}`}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="font-semibold text-white underline underline-offset-2"
+              >
+                Open it there.
+              </a>
+            </p>
+          )}
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => void handleLoad()}
@@ -238,6 +308,9 @@ export const PurchaseDetailPage = () => {
             <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--sf-mutedText)]">
               Purchase #{purchase.id}
             </p>
+            <div>
+              <StorefrontBadge storefrontKey={purchase.storefrontKey} />
+            </div>
             <h1 className="text-4xl font-bold text-[color:var(--sf-text)]">
               {purchase.bidPackName || "Bid pack purchase"}
             </h1>

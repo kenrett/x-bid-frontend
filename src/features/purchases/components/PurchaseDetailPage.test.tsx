@@ -32,11 +32,14 @@ const createAuthReturn = () =>
     sessionRemainingSeconds: 900,
   }) as unknown as ReturnType<typeof useAuth>;
 
-const makeAxiosError = (status?: number, message?: string) =>
+const makeAxiosError = (status?: number, data?: unknown) =>
   Object.assign(new Error("axios"), {
     isAxiosError: true,
     response: status
-      ? { status, data: message ? { error: message } : {} }
+      ? {
+          status,
+          data: typeof data === "string" ? { error: data } : (data ?? {}),
+        }
       : undefined,
   });
 
@@ -148,5 +151,32 @@ describe("PurchaseDetailPage", () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: /retry/i }));
     expect(mockedPurchasesApi.get).toHaveBeenCalledTimes(2);
+  });
+
+  it("shows a storefront redirect hint when blocked by policy", async () => {
+    mockedPurchasesApi.get.mockRejectedValue(
+      makeAxiosError(403, { storefront_key: "afterdark" }),
+    );
+
+    render(
+      <MemoryRouter initialEntries={["/account/purchases/14"]}>
+        <Routes>
+          <Route
+            path="/account/purchases/:id"
+            element={<PurchaseDetailPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(
+      /This item belongs to BidderSweet After Dark/i,
+    );
+    const redirectLink = screen.getByRole("link", { name: /open it there/i });
+    expect(redirectLink).toHaveAttribute(
+      "href",
+      "https://afterdark.biddersweet.app",
+    );
   });
 });
