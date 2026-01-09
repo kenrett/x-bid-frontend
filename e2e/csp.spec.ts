@@ -29,12 +29,16 @@ test("no CSP console violations on key routes", async ({ page }) => {
       ? route.continue()
       : fulfillJson(route, auctionList),
   );
-  await page.route("**/api/v1/auctions/101", (route) =>
+  await page.route("**/api/v1/auctions/3", (route) =>
     isDocumentRequest(route)
       ? route.continue()
-      : fulfillJson(route, auctionDetail101),
+      : fulfillJson(route, {
+          ...auctionDetail101,
+          id: 3,
+          title: "Artisan Lamp",
+        }),
   );
-  await page.route("**/api/v1/auctions/101/bid_history", (route) =>
+  await page.route("**/api/v1/auctions/3/bid_history", (route) =>
     isDocumentRequest(route)
       ? route.continue()
       : fulfillJson(route, auction101BidHistory),
@@ -48,8 +52,8 @@ test("no CSP console violations on key routes", async ({ page }) => {
 
   await expect(page.getByText("Your Next Obsession")).toBeVisible();
 
-  await page.goto("/auctions/101");
-  await expect(page.getByText("Vintage Camera")).toBeVisible();
+  await page.goto("/auctions/3");
+  await expect(page.getByText("Artisan Lamp")).toBeVisible();
 
   expect(
     [...pageErrors, ...violations],
