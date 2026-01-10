@@ -6,7 +6,7 @@ import {
 } from "../storefront/storefront";
 
 describe("StorefrontBadge", () => {
-  const storefrontKeys: StorefrontKey[] = ["main", "afterdark", "artisan"];
+  const storefrontKeys: StorefrontKey[] = ["main", "afterdark", "marketplace"];
 
   it.each(storefrontKeys)("renders the badge label for %s", (key) => {
     render(<StorefrontBadge storefrontKey={key} />);

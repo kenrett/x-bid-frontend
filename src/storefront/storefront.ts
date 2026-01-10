@@ -1,4 +1,4 @@
-export type StorefrontKey = "main" | "afterdark" | "artisan";
+export type StorefrontKey = "main" | "afterdark" | "marketplace";
 
 export type StorefrontThemeTokens = {
   primary: string;
@@ -28,7 +28,7 @@ export type StorefrontConfig = {
 const VALID_STOREFRONT_KEYS = new Set<StorefrontKey>([
   "main",
   "afterdark",
-  "artisan",
+  "marketplace",
 ]);
 
 export const isStorefrontKey = (value: unknown): value is StorefrontKey =>
@@ -61,7 +61,7 @@ const readRuntimeKey = (): StorefrontKey => {
 
   // Dev-only fallback: production uses separate builds per storefront.
   if (hostname.includes("afterdark")) return "afterdark";
-  if (hostname.includes("artisan")) return "artisan";
+  if (hostname.includes("marketplace")) return "marketplace";
   return "main";
 };
 
@@ -110,12 +110,12 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
     },
     logoPath: "/assets/BidderSweet.svg",
   },
-  artisan: {
-    key: "artisan",
+  marketplace: {
+    key: "marketplace",
     name: "BidderSweet Artisan",
     shortName: "Artisan",
     badgeLabel: "Artisan",
-    domain: "artisan.biddersweet.app",
+    domain: "marketplace.biddersweet.app",
     themeTokens: {
       primary: "#3c5e45",
       accent: "#c57c37",

@@ -43,9 +43,9 @@ describe("getStorefrontKey", () => {
   });
 
   it("uses build-time VITE_STOREFRONT_KEY over hostname", () => {
-    applyEnv({ VITE_STOREFRONT_KEY: "artisan" });
+    applyEnv({ VITE_STOREFRONT_KEY: "marketplace" });
     setHostname("afterdark.localhost");
-    expect(getStorefrontKey()).toBe("artisan");
+    expect(getStorefrontKey()).toBe("marketplace");
   });
 
   it("derives storefront from hostname when env var is unset", () => {
@@ -63,7 +63,7 @@ describe("getStorefrontKey", () => {
   it("defaults to main and warns on invalid VITE_STOREFRONT_KEY", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     applyEnv({ VITE_STOREFRONT_KEY: "nope" });
-    setHostname("artisan.localhost");
+    setHostname("marketplace.localhost");
 
     expect(getStorefrontKey()).toBe("main");
     expect(warn).toHaveBeenCalled();
@@ -74,9 +74,9 @@ describe("getStorefrontKey", () => {
     expect(getStorefrontConfig().name).toBe("BidderSweet After Dark");
   });
 
-  it('uses "BidderSweet Artisan" for artisan storefront name', () => {
-    applyEnv({ VITE_STOREFRONT_KEY: "artisan" });
-    expect(getStorefrontKey()).toBe("artisan");
+  it('uses "BidderSweet Artisan" for marketplace storefront name', () => {
+    applyEnv({ VITE_STOREFRONT_KEY: "marketplace" });
+    expect(getStorefrontKey()).toBe("marketplace");
     expect(getStorefrontConfig().name).toBe("BidderSweet Artisan");
   });
 });

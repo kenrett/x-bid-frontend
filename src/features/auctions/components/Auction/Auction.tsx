@@ -49,7 +49,7 @@ export function Auction({
   const fetchPriority = index < 2 ? "high" : "low";
 
   const { key: storefrontKey } = useStorefront();
-  const isArtisan = storefrontKey === "artisan";
+  const isArtisan = storefrontKey === "marketplace";
 
   return (
     <button

@@ -27,7 +27,7 @@ const applyEnv = (overrides: Record<string, unknown>) => {
   }
 };
 
-describe("artisan storefront smoke", () => {
+describe("marketplace storefront smoke", () => {
   beforeEach(() => {
     mockedUseAccountStatus.mockReturnValue({
       isLoading: false,
@@ -43,7 +43,10 @@ describe("artisan storefront smoke", () => {
       isReady: true,
     } as unknown as ReturnType<typeof useAuth>);
 
-    applyEnv({ VITE_STOREFRONT_KEY: "artisan", VITE_APP_MODE: "storefront" });
+    applyEnv({
+      VITE_STOREFRONT_KEY: "marketplace",
+      VITE_APP_MODE: "storefront",
+    });
   });
 
   afterEach(() => {
