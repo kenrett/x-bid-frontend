@@ -86,7 +86,7 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
       headingFont: `"Zalando Sans Expanded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
       bodyFont: `"Zalando Sans Expanded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
     },
-    logoPath: "/assets/BidderSweet.svg",
+    logoPath: "/assets/BidderSweet.png",
   },
   afterdark: {
     key: "afterdark",
@@ -108,7 +108,7 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
       headingFont: `"Zalando Sans Expanded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
       bodyFont: `"Zalando Sans Expanded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
     },
-    logoPath: "/assets/BidderSweet.svg",
+    logoPath: "/assets/AfterDark.png",
   },
   marketplace: {
     key: "marketplace",
@@ -130,7 +130,7 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
       headingFont: `"Cormorant Garamond", "Times New Roman", "Noto Serif", serif`,
       bodyFont: `"Zalando Sans Expanded", "Segoe UI", system-ui, sans-serif`,
     },
-    logoPath: "/assets/BidderSweet.svg",
+    logoPath: "/assets/Marketplace.png",
   },
 };
 
