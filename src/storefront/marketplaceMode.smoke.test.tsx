@@ -61,7 +61,7 @@ describe("marketplace storefront smoke", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("BidderSweet Marketplace")).toBeInTheDocument();
+    expect(screen.getByAltText("Marketplace")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /auctions/i })).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: /sell/i }),
