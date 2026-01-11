@@ -167,9 +167,6 @@ export function Header() {
               className={`${variants.logoImage()} ${isScrolled ? "scale-90" : ""}`}
             />
           </picture>
-          <span className="absolute -bottom-2 right-2 rounded-[var(--sf-radius)] border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-2 py-0.5 text-[10px] font-semibold tracking-wide text-[color:var(--sf-mutedText)] shadow-[var(--sf-shadow)]">
-            {storefront.name}
-          </span>
         </Link>
         <button
           data-collapse-toggle="navbar-default"
