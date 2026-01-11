@@ -112,9 +112,9 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
   },
   marketplace: {
     key: "marketplace",
-    name: "BidderSweet Artisan",
-    shortName: "Artisan",
-    badgeLabel: "Artisan",
+    name: "BidderSweet Marketplace",
+    shortName: "Marketplace",
+    badgeLabel: "Marketplace",
     domain: "marketplace.biddersweet.app",
     themeTokens: {
       primary: "#3c5e45",

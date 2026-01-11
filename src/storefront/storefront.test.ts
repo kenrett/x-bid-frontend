@@ -74,10 +74,10 @@ describe("getStorefrontKey", () => {
     expect(getStorefrontConfig().name).toBe("BidderSweet After Dark");
   });
 
-  it('uses "BidderSweet Artisan" for marketplace storefront name', () => {
+  it('uses "BidderSweet Marketplace" for marketplace storefront name', () => {
     applyEnv({ VITE_STOREFRONT_KEY: "marketplace" });
     expect(getStorefrontKey()).toBe("marketplace");
-    expect(getStorefrontConfig().name).toBe("BidderSweet Artisan");
+    expect(getStorefrontConfig().name).toBe("BidderSweet Marketplace");
   });
 });
 

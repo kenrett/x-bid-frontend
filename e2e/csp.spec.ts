@@ -35,7 +35,7 @@ test("no CSP console violations on key routes", async ({ page }) => {
       : fulfillJson(route, {
           ...auctionDetail101,
           id: 3,
-          title: "Artisan Lamp",
+          title: "Marketplace Lamp",
         }),
   );
   await page.route("**/api/v1/auctions/3/bid_history", (route) =>
@@ -53,7 +53,7 @@ test("no CSP console violations on key routes", async ({ page }) => {
   await expect(page.getByText("Your Next Obsession")).toBeVisible();
 
   await page.goto("/auctions/3");
-  await expect(page.getByText("Artisan Lamp")).toBeVisible();
+  await expect(page.getByText("Marketplace Lamp")).toBeVisible();
 
   expect(
     [...pageErrors, ...violations],
