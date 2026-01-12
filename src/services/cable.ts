@@ -4,6 +4,9 @@ import { authSessionStore } from "@features/auth/tokenStore";
 const buildCableUrl = (baseOverride?: string) => {
   const explicit = baseOverride ?? import.meta.env.VITE_CABLE_URL;
   if (explicit) return String(explicit);
+  if (import.meta.env.MODE === "development") {
+    return "ws://localhost:3000/cable";
+  }
   const apiBase =
     typeof import.meta.env.VITE_API_URL === "string"
       ? import.meta.env.VITE_API_URL
