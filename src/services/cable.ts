@@ -1,8 +1,24 @@
 import * as ActionCable from "@rails/actioncable";
 import { authSessionStore } from "@features/auth/tokenStore";
 
-const buildCableUrl = (baseOverride?: string) =>
-  String(baseOverride ?? import.meta.env.VITE_CABLE_URL ?? "/cable");
+const buildCableUrl = (baseOverride?: string) => {
+  const explicit = baseOverride ?? import.meta.env.VITE_CABLE_URL;
+  if (explicit) return String(explicit);
+  const apiBase =
+    typeof import.meta.env.VITE_API_URL === "string"
+      ? import.meta.env.VITE_API_URL
+      : undefined;
+  if (apiBase) {
+    try {
+      const url = new URL(apiBase);
+      const protocol = url.protocol === "https:" ? "wss:" : "ws:";
+      return `${protocol}//${url.host}/cable`;
+    } catch {
+      // fall through to default
+    }
+  }
+  return "/cable";
+};
 
 type CreateConsumerFn = typeof ActionCable.createConsumer;
 

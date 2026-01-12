@@ -20,6 +20,8 @@ type SessionRemainingResponse = {
 type LoggedInResponse = {
   logged_in?: boolean;
   user?: User;
+  access_token?: string;
+  refresh_token?: string;
   is_admin?: boolean;
   is_superuser?: boolean;
 };
@@ -86,6 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const pendingBalanceRef = useRef<number | null>(null);
 
   const [user, setUser] = useState<User | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [sessionRemainingSeconds, setSessionRemainingSeconds] = useState<
     number | null
   >(null);
@@ -106,7 +109,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(nextUser);
       setSessionRemainingSeconds(null);
 
-      authSessionStore.setUser(nextUser);
+      authSessionStore.setSession({
+        user: nextUser,
+        accessToken: payload.accessToken ?? null,
+        refreshToken: payload.refreshToken ?? null,
+      });
+      setAccessToken(payload.accessToken ?? null);
       setSentryUser(nextUser);
       resetCable();
 
@@ -144,7 +152,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               : nextUser;
           pendingBalanceRef.current = null;
           setUser(resolvedUser);
+          const accessTokenFromResponse =
+            typeof response.data?.access_token === "string"
+              ? response.data.access_token
+              : null;
+          const refreshTokenFromResponse =
+            typeof response.data?.refresh_token === "string"
+              ? response.data.refresh_token
+              : null;
+          setAccessToken(accessTokenFromResponse);
           authSessionStore.setUser(resolvedUser);
+          authSessionStore.setTokens({
+            accessToken: accessTokenFromResponse,
+            refreshToken: refreshTokenFromResponse,
+          });
           setSentryUser(resolvedUser);
           resetCable();
         }
@@ -174,9 +195,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [normalizeAuthUser]);
 
   const login = useCallback(
-    ({ user }: LoginPayload) => {
+    ({ user, accessToken, refreshToken }: LoginPayload) => {
       applyAuthPayload({
         user,
+        accessToken,
+        refreshToken,
       });
     },
     [applyAuthPayload],
@@ -185,6 +208,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = useCallback(() => {
     pendingBalanceRef.current = null;
     setUser(null);
+    setAccessToken(null);
     setSessionRemainingSeconds(null);
 
     // Defense-in-depth: clear any legacy persisted auth artifacts.
@@ -388,7 +412,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           .__triggerSessionPoll;
       }
     };
-  }, [user, handleSessionInvalidated]);
+  }, [user, accessToken, handleSessionInvalidated]);
 
   useEffect(() => {
     const onUnauthorized = () => handleSessionInvalidated("unauthorized");
@@ -433,6 +457,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     <AuthContext.Provider
       value={{
         user,
+        accessToken,
         sessionRemainingSeconds,
         isReady,
         login,

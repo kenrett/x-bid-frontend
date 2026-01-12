@@ -37,6 +37,7 @@ describe("AccountSessionsPage", () => {
     mockedUseAuth.mockReturnValue({
       logout: vi.fn(),
       user: null,
+      accessToken: null,
       sessionRemainingSeconds: null,
       login: vi.fn(),
       updateUser: vi.fn(),
@@ -226,6 +227,7 @@ describe("AccountSessionsPage", () => {
     mockedUseAuth.mockReturnValue({
       logout: logoutSpy,
       user: null,
+      accessToken: null,
       sessionRemainingSeconds: null,
       login: vi.fn(),
       updateUser: vi.fn(),

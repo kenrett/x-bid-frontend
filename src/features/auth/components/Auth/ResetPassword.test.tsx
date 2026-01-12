@@ -25,6 +25,7 @@ describe("ResetPassword", () => {
     mockedUseAuth.mockReturnValue({
       sessionRemainingSeconds: 0,
       user: null,
+      accessToken: null,
       login: vi.fn(),
       logout: vi.fn(),
       isReady: true,

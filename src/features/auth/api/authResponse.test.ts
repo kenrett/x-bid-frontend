@@ -18,6 +18,7 @@ describe("normalizeAuthResponse", () => {
     };
 
     expect(normalizeAuthResponse(payload)).toEqual({
+      accessToken: "token",
       user: {
         id: 3,
         name: "User One",
@@ -28,14 +29,14 @@ describe("normalizeAuthResponse", () => {
         email_verified: null,
         email_verified_at: null,
       },
+      refreshToken: "refresh",
     });
   });
 
   it("fails loudly when user data is missing", () => {
     const payload = {
-      token: "token",
-      refreshToken: "refresh",
-      sessionTokenId: "99",
+      access_token: "token",
+      refresh_token: "refresh",
     };
 
     expect(() => normalizeAuthResponse(payload)).toThrow(

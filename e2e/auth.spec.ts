@@ -73,6 +73,8 @@ test("login persists across storefront subdomains", async ({ page }) => {
   await page.route("**/api/v1/logged_in", (route) =>
     fulfillJson(route, {
       logged_in: true,
+      access_token: "token-authed",
+      refresh_token: "refresh-authed",
       user: authedUser,
       is_admin: false,
       is_superuser: false,

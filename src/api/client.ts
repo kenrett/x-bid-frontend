@@ -4,8 +4,12 @@ import axios, {
   type AxiosInstance,
   type AxiosRequestConfig,
 } from "axios";
-import { authSessionStore } from "@features/auth/tokenStore";
-import { normalizeUser } from "@features/auth/api/user";
+import {
+  authSessionStore,
+  getAccessToken,
+  getRefreshToken,
+} from "@features/auth/tokenStore";
+import { normalizeAuthResponse } from "@features/auth/api/authResponse";
 import { getStorefrontKey } from "../storefront/storefront";
 import { requestAgeGateAcceptance } from "../ageGate/ageGateStore";
 
@@ -46,12 +50,22 @@ const getWindowOrigin = () => {
   return window.location?.origin;
 };
 
-const isCrossOrigin = (baseUrl: string | undefined): boolean => {
-  if (!baseUrl) return false;
-  const origin = getWindowOrigin();
+const isApiRequestUrl = (configUrl: unknown): boolean => {
+  if (typeof configUrl !== "string") return false;
+  if (!/^https?:\/\//i.test(configUrl)) {
+    return configUrl.startsWith("/api/");
+  }
+
   try {
-    const resolved = new URL(baseUrl, origin ?? "http://localhost");
-    return origin ? resolved.origin !== origin : false;
+    const origin = getWindowOrigin();
+    const requestUrl = new URL(configUrl, origin ?? "http://localhost");
+    if (normalizedBaseURL) {
+      const apiUrl = new URL(normalizedBaseURL, origin ?? "http://localhost");
+      if (requestUrl.origin !== apiUrl.origin) return false;
+    } else if (origin && requestUrl.origin !== origin) {
+      return false;
+    }
+    return requestUrl.pathname.startsWith("/api/");
   } catch {
     return false;
   }
@@ -82,7 +96,7 @@ const client = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: isCrossOrigin(normalizedBaseURL),
+  withCredentials: true,
 }) as AxiosInstance;
 
 client.interceptors.request.use(
@@ -104,11 +118,23 @@ client.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+client.interceptors.request.use(
+  (config) => {
+    const accessToken = getAccessToken();
+    if (accessToken && isApiRequestUrl(config.url)) {
+      setHeader(config, "Authorization", `Bearer ${accessToken}`);
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
 const isRefreshRequest = (configUrl: unknown) =>
   typeof configUrl === "string" &&
   configUrl.includes("/api/v1/session/refresh");
 
-let refreshPromise: Promise<ReturnType<typeof normalizeUser>> | null = null;
+let refreshPromise: Promise<ReturnType<typeof normalizeAuthResponse>> | null =
+  null;
 
 const INVALID_SESSION_CODES = new Set([
   "invalid_session",
@@ -207,37 +233,22 @@ const dispatchEmailUnverified = (status: number, code?: string) => {
   );
 };
 
-const beginRefresh = () => {
+const beginRefresh = ({ refreshToken }: { refreshToken: string }) => {
   refreshPromise ??= (async () => {
     try {
-      await client.post(
+      const refreshResponse = await client.post(
         "/api/v1/session/refresh",
-        {},
+        { refresh_token: refreshToken },
         { headers: { Authorization: undefined } },
       );
-      const loggedInResponse = await client.get("/api/v1/logged_in", {
-        headers: { Authorization: undefined },
+      const normalized = normalizeAuthResponse(refreshResponse.data);
+      authSessionStore.setSession({
+        user: normalized.user,
+        accessToken: normalized.accessToken ?? null,
+        refreshToken: normalized.refreshToken ?? null,
       });
-      const record = loggedInResponse.data as {
-        logged_in?: boolean;
-        user?: unknown;
-        is_admin?: boolean;
-        is_superuser?: boolean;
-      };
-      if (!record?.logged_in || !record?.user) {
-        throw new Error("Refresh succeeded without an active session");
-      }
-      const normalized = normalizeUser({
-        ...(record.user as object),
-        is_admin:
-          record.is_admin ?? (record.user as { is_admin?: boolean }).is_admin,
-        is_superuser:
-          record.is_superuser ??
-          (record.user as { is_superuser?: boolean }).is_superuser,
-      });
-      authSessionStore.setUser(normalized);
       window.dispatchEvent(
-        new CustomEvent("app:auth:refreshed", { detail: { user: normalized } }),
+        new CustomEvent("app:auth:refreshed", { detail: normalized }),
       );
       return normalized;
     } catch (refreshError) {
@@ -316,15 +327,17 @@ export const handleResponseError = async (error: AxiosError) => {
       return Promise.reject(error);
     }
 
-    const canRefreshWithCookie =
+    const refreshToken = getRefreshToken();
+    const canRefreshWithToken =
       status === 401 &&
+      Boolean(refreshToken) &&
       originalRequest &&
       !(originalRequest as { __authRetry?: boolean }).__authRetry &&
       !isRefreshRequest(originalRequest.url);
 
-    if (canRefreshWithCookie) {
+    if (canRefreshWithToken) {
       try {
-        await beginRefresh();
+        await beginRefresh({ refreshToken: refreshToken as string });
         (originalRequest as { __authRetry?: boolean }).__authRetry = true;
         return client.request(originalRequest);
       } catch (refreshError) {
