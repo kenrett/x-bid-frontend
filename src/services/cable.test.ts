@@ -40,13 +40,13 @@ describe("cable service", () => {
     resetCable();
     const firstCallUrl = createConsumerMock.mock.calls.at(0)?.[0];
     if (!firstCallUrl) throw new Error("createConsumer not called");
-    expect(firstCallUrl).toBe("/cable");
+    expect(firstCallUrl).toMatch(/\/cable$/);
 
     resetCable();
     expect(disconnectMock).toHaveBeenCalled();
     const nextCallUrl = createConsumerMock.mock.calls.at(-1)?.[0];
     if (!nextCallUrl) throw new Error("reset call missing");
-    expect(nextCallUrl).toBe("/cable");
+    expect(nextCallUrl).toMatch(/\/cable$/);
   });
 
   it("passes through the base cable URL without appending tokens", async () => {

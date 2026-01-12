@@ -41,6 +41,15 @@ test("checkout posts selected pack and updates balance on success", async ({
   await page.route("**/api/v1/checkout/success**", (route) =>
     fulfillJson(route, { status: "success", updated_bid_credits: 180 }),
   );
+  await page.route("**/api/v1/session/remaining", (route) =>
+    fulfillJson(route, {
+      remaining_seconds: 1800,
+      user: {
+        ...authedUser,
+        bidCredits: 180,
+      },
+    }),
+  );
 
   await page.goto("/purchase-status?session_id=sess_123");
   await expect(page.getByText("Payment Successful")).toBeVisible();
@@ -83,6 +92,15 @@ test("successful purchase flow shows updated balance and returns to auctions", a
       status: "success",
       updated_bid_credits: updatedBidCredits,
       purchaseId: "purchase_123",
+    }),
+  );
+  await page.route("**/api/v1/session/remaining", (route) =>
+    fulfillJson(route, {
+      remaining_seconds: 1800,
+      user: {
+        ...authedUser,
+        bidCredits: updatedBidCredits,
+      },
     }),
   );
 

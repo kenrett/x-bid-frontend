@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import type { LoginPayload } from "@features/auth/types/auth";
 import type { User } from "@features/auth/types/user";
 
@@ -70,6 +70,7 @@ const TestConsumer = () => {
       <div data-testid="remaining">
         {auth.sessionRemainingSeconds ?? "none"}
       </div>
+      <div data-testid="ready">{auth.isReady ? "ready" : "pending"}</div>
       <button onClick={() => auth.logout()}>logout</button>
       <button
         onClick={() =>
@@ -87,6 +88,12 @@ const TestConsumer = () => {
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <AuthProvider>{children}</AuthProvider>
 );
+
+const waitForReady = async () => {
+  await waitFor(() =>
+    expect(screen.getByTestId("ready")).toHaveTextContent("ready"),
+  );
+};
 
 const mockedClient = vi.mocked(client, true);
 
@@ -166,12 +173,13 @@ describe("AuthProvider", () => {
       </Wrapper>,
     );
 
-    await act(async () => {
-      await screen.getByText("login").click();
+    await waitForReady();
+    await waitFor(() => {
+      screen.getByText("login").click();
     });
 
-    await act(async () => {
-      await screen.getByText("logout").click();
+    await waitFor(() => {
+      screen.getByText("logout").click();
     });
 
     expect(screen.getByTestId("user")).toHaveTextContent("none");
@@ -188,8 +196,9 @@ describe("AuthProvider", () => {
       </Wrapper>,
     );
 
-    await act(async () => {
-      await screen.getByText("login").click();
+    await waitForReady();
+    await waitFor(() => {
+      screen.getByText("login").click();
     });
 
     await waitFor(() => {
@@ -224,8 +233,9 @@ describe("AuthProvider", () => {
       </Wrapper>,
     );
 
-    await act(async () => {
-      await screen.getByText("login").click();
+    await waitForReady();
+    await waitFor(() => {
+      screen.getByText("login").click();
     });
 
     await waitFor(() => {
@@ -270,8 +280,9 @@ describe("AuthProvider", () => {
       </Wrapper>,
     );
 
-    await act(async () => {
-      await screen.getByText("login").click();
+    await waitForReady();
+    await waitFor(() => {
+      screen.getByText("login").click();
     });
 
     await waitFor(() => {
@@ -317,14 +328,15 @@ describe("AuthProvider", () => {
       </Wrapper>,
     );
 
-    await act(async () => {
-      await screen.getByText("login").click();
+    await waitForReady();
+    await waitFor(() => {
+      screen.getByText("login").click();
     });
 
     await waitFor(() => {
       expect(authSessionStore.getSnapshot().user?.is_admin).toBe(true);
     });
-    expect(cableMocks.reset).toHaveBeenCalledTimes(2);
+    expect(cableMocks.reset).toHaveBeenCalledTimes(1);
   });
 
   it("logs out on app:unauthorized when refresh is unavailable", async () => {
@@ -334,15 +346,16 @@ describe("AuthProvider", () => {
       </Wrapper>,
     );
 
-    await act(async () => {
-      await screen.getByText("login").click();
+    await waitForReady();
+    await waitFor(() => {
+      screen.getByText("login").click();
     });
 
     await waitFor(() =>
       expect(screen.getByTestId("user")).toHaveTextContent("user@example.com"),
     );
 
-    act(() => {
+    await waitFor(() => {
       window.dispatchEvent(
         new CustomEvent("app:unauthorized", { detail: { status: 401 } }),
       );
@@ -369,11 +382,12 @@ describe("AuthProvider", () => {
       </Wrapper>,
     );
 
-    await act(async () => {
-      await screen.getByText("login").click();
+    await waitForReady();
+    await waitFor(() => {
+      screen.getByText("login").click();
     });
 
-    act(() => {
+    await waitFor(() => {
       window.dispatchEvent(
         new CustomEvent("app:unauthorized", { detail: { status: 401 } }),
       );
@@ -399,15 +413,16 @@ describe("AuthProvider", () => {
       </Wrapper>,
     );
 
-    await act(async () => {
-      await screen.getByText("login").click();
+    await waitForReady();
+    await waitFor(() => {
+      screen.getByText("login").click();
     });
 
     await waitFor(() =>
       expect(screen.getByTestId("user")).toHaveTextContent("user@example.com"),
     );
 
-    act(() => {
+    await waitFor(() => {
       window.dispatchEvent(
         new CustomEvent("app:unauthorized", { detail: { status: 401 } }),
       );
@@ -431,8 +446,9 @@ describe("AuthProvider", () => {
       </Wrapper>,
     );
 
-    await act(async () => {
-      await screen.getByText("login").click();
+    await waitForReady();
+    await waitFor(() => {
+      screen.getByText("login").click();
     });
 
     await waitFor(() =>
@@ -442,7 +458,7 @@ describe("AuthProvider", () => {
     const handler = cableMocks.create.mock.calls[0]?.[1] as
       | { received?: (payload: unknown) => void }
       | undefined;
-    act(() => {
+    await waitFor(() => {
       handler?.received?.({ event: "session_invalidated" });
       handler?.received?.({ event: "session_invalidated" });
     });

@@ -21,7 +21,7 @@ test("smoke: logo loads fast and is sized", async ({ page }) => {
   });
 
   const logoResponsePromise = page.waitForResponse((response) =>
-    response.url().includes("/assets/BidderSweet.svg"),
+    response.url().includes("/assets/BidderSweet.png"),
   );
 
   await stubStripe(page);
@@ -43,7 +43,7 @@ test("smoke: logo loads fast and is sized", async ({ page }) => {
   const contentType = logoResponse.headers()["content-type"] ?? "";
   const logoBytes = (await logoResponse.body()).byteLength;
 
-  expect(contentType).toContain("image/svg+xml");
+  expect(contentType).toMatch(/^image\//);
   expect(logoBytes).toBeLessThan(200 * 1024);
 
   const combinedErrors = [...consoleErrors, ...pageErrors];

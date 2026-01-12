@@ -39,6 +39,15 @@ test("money loop: checkout success updates balance and purchases are discoverabl
       purchaseId: "purchase_123",
     }),
   );
+  await page.route("**/api/v1/session/remaining", (route) =>
+    fulfillJson(route, {
+      remaining_seconds: 1800,
+      user: {
+        ...authedUser,
+        bidCredits: updatedBidCredits,
+      },
+    }),
+  );
 
   await page.goto("/buy-bids");
   await page.getByRole("button", { name: "Acquire Pack" }).first().click();

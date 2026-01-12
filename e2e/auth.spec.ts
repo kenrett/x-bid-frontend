@@ -58,6 +58,11 @@ test("user can log in and land on the auctions feed", async ({ page }) => {
 
 test("login persists across storefront subdomains", async ({ page }) => {
   const base = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:4173";
+  const hostname = new URL(base).hostname;
+  test.skip(
+    hostname === "localhost" || hostname === "127.0.0.1",
+    "SSO cookies are not supported on localhost subdomains.",
+  );
   const afterdarkBase = buildStorefrontUrl(base, "afterdark");
 
   await page.route("**/api/v1/login", (route) =>

@@ -60,12 +60,15 @@ const normalizeLoggedInResponse = (
   }
 
   const normalized = normalizeAuthUser({
-    ...(userRecord as User),
+    ...(userRecord as unknown as User),
     is_admin:
-      (record.is_admin as boolean | undefined) ?? (userRecord as User).is_admin,
+      (record.is_admin as boolean | undefined) ??
+      (userRecord as { is_admin?: boolean }).is_admin ??
+      false,
     is_superuser:
       (record.is_superuser as boolean | undefined) ??
-      (userRecord as User).is_superuser,
+      (userRecord as { is_superuser?: boolean }).is_superuser ??
+      false,
   });
 
   return { loggedIn, user: normalized };
@@ -80,6 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const invalidatingRef = useRef(false);
+  const pendingBalanceRef = useRef<number | null>(null);
 
   const [user, setUser] = useState<User | null>(null);
   const [sessionRemainingSeconds, setSessionRemainingSeconds] = useState<
@@ -91,11 +95,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     (payload: LoginPayload) => {
       invalidatingRef.current = false;
       const normalizedUser = normalizeAuthUser(payload.user as User);
-      setUser(normalizedUser);
+      const nextUser =
+        pendingBalanceRef.current !== null
+          ? normalizeAuthUser({
+              ...normalizedUser,
+              bidCredits: pendingBalanceRef.current,
+            })
+          : normalizedUser;
+      pendingBalanceRef.current = null;
+      setUser(nextUser);
       setSessionRemainingSeconds(null);
 
-      authSessionStore.setUser(normalizedUser);
-      setSentryUser(normalizedUser);
+      authSessionStore.setUser(nextUser);
+      setSentryUser(nextUser);
       resetCable();
 
       if (import.meta.env.VITE_E2E_TESTS === "true") {
@@ -123,9 +135,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           authSessionStore.clear();
           setSentryUser(null);
         } else {
-          setUser(nextUser);
-          authSessionStore.setUser(nextUser);
-          setSentryUser(nextUser);
+          const resolvedUser =
+            pendingBalanceRef.current !== null
+              ? normalizeAuthUser({
+                  ...nextUser,
+                  bidCredits: pendingBalanceRef.current,
+                })
+              : nextUser;
+          pendingBalanceRef.current = null;
+          setUser(resolvedUser);
+          authSessionStore.setUser(resolvedUser);
+          setSentryUser(resolvedUser);
           resetCable();
         }
       } catch (error) {
@@ -163,6 +183,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const logout = useCallback(() => {
+    pendingBalanceRef.current = null;
     setUser(null);
     setSessionRemainingSeconds(null);
 
@@ -226,7 +247,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const updateUserBalance = useCallback(
     (newBalance: number) => {
       setUser((currentUser) => {
-        if (!currentUser) return null;
+        if (!currentUser) {
+          pendingBalanceRef.current = newBalance;
+          return null;
+        }
         const updatedUser = { ...currentUser, bidCredits: newBalance };
         const normalized = normalizeAuthUser(updatedUser);
         authSessionStore.setUser(normalized);

@@ -146,12 +146,31 @@ export const bidPacksResponse = [
   },
 ];
 
-export const fulfillJson = (route: Route, data: unknown, status = 200) =>
-  route.fulfill({
+const buildCorsHeaders = (route: Route) => {
+  const headers = route.request().headers();
+  const origin = headers["origin"];
+  const requestedHeaders = headers["access-control-request-headers"];
+  return {
+    ...(origin ? { "access-control-allow-origin": origin } : {}),
+    "access-control-allow-credentials": "true",
+    "access-control-allow-methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+    "access-control-allow-headers":
+      requestedHeaders ?? "Content-Type,X-Storefront-Key",
+  };
+};
+
+export const fulfillJson = (route: Route, data: unknown, status = 200) => {
+  const headers = buildCorsHeaders(route);
+  if (route.request().method() === "OPTIONS") {
+    return route.fulfill({ status: 204, headers });
+  }
+  return route.fulfill({
     status,
+    headers,
     contentType: "application/json",
     body: JSON.stringify(data),
   });
+};
 
 export const isDocumentRequest = (route: Route) =>
   route.request().resourceType() === "document";
