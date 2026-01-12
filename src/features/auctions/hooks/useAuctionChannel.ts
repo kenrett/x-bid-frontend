@@ -1,6 +1,7 @@
 import { cable } from "@services/cable";
 import { Bid } from "../types/bid";
 import { useRef, useEffect, useState } from "react";
+import { useAuth } from "@features/auth/hooks/useAuth";
 
 export type AuctionConnectionState =
   | "connecting"
@@ -34,6 +35,8 @@ export function useAuctionChannel(
   auctionId: number,
   onData: (data: AuctionChannelData) => void,
 ) {
+  const { accessToken, sessionTokenId } = useAuth();
+  const isAuthenticated = Boolean(accessToken && sessionTokenId);
   const onDataRef = useRef(onData);
   const [connectionState, setConnectionState] =
     useState<AuctionConnectionState>("disconnected");
@@ -44,7 +47,7 @@ export function useAuctionChannel(
 
   useEffect(() => {
     // Do not subscribe if the auctionId is not valid
-    if (!auctionId || auctionId <= 0) {
+    if (!auctionId || auctionId <= 0 || !isAuthenticated) {
       setConnectionState("disconnected");
       return;
     }
@@ -109,7 +112,7 @@ export function useAuctionChannel(
       sub.unsubscribe();
       setSubscription(null);
     };
-  }, [auctionId]);
+  }, [auctionId, isAuthenticated]);
 
   return { subscription, connectionState };
 }

@@ -3,6 +3,7 @@ import { cable } from "@services/cable";
 import type { AuctionSummary } from "../types/auction";
 import type { AuctionConnectionState } from "./useAuctionChannel";
 import { statusFromApi } from "@features/auctions/api/status";
+import { useAuth } from "@features/auth/hooks/useAuth";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === "object";
@@ -59,6 +60,8 @@ export type AuctionListUpdate = Partial<AuctionSummary> & { id: number };
 export const useAuctionListChannel = (
   onUpdate: (data: AuctionListUpdate) => void,
 ) => {
+  const { accessToken, sessionTokenId } = useAuth();
+  const isAuthenticated = Boolean(accessToken && sessionTokenId);
   const onUpdateRef = useRef(onUpdate);
   const [connectionState, setConnectionState] =
     useState<AuctionConnectionState>("disconnected");
@@ -66,6 +69,10 @@ export const useAuctionListChannel = (
   onUpdateRef.current = onUpdate;
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setConnectionState("disconnected");
+      return;
+    }
     setConnectionState("connecting");
     const subscription = cable.subscriptions.create(
       { channel: "AuctionChannel", stream: "list" },
@@ -86,7 +93,7 @@ export const useAuctionListChannel = (
       setConnectionState("disconnected");
       subscription.unsubscribe();
     };
-  }, []);
+  }, [isAuthenticated]);
 
   return { connectionState };
 };

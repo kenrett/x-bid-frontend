@@ -1,24 +1,8 @@
 import * as ActionCable from "@rails/actioncable";
-import { getAccessToken } from "@features/auth/tokenStore";
+import { authSessionStore } from "@features/auth/tokenStore";
 
-const getStoredToken = () => getAccessToken();
-
-const buildCableUrl = (
-  tokenOverride?: string | null,
-  baseOverride?: string,
-) => {
-  const base = String(
-    baseOverride ??
-      import.meta.env.VITE_CABLE_URL ??
-      "ws://localhost:3000/cable",
-  );
-  const url = new URL(base);
-  const token = tokenOverride ?? getStoredToken();
-  if (token) {
-    url.searchParams.set("token", token);
-  }
-  return url.toString();
-};
+const buildCableUrl = (baseOverride?: string) =>
+  String(baseOverride ?? import.meta.env.VITE_CABLE_URL ?? "/cable");
 
 type CreateConsumerFn = typeof ActionCable.createConsumer;
 
@@ -31,50 +15,57 @@ const getCreateConsumer = (): CreateConsumerFn => {
   return maybeMock ?? ActionCable.createConsumer;
 };
 
-const getAdapters = () =>
-  (
-    ActionCable as unknown as {
-      adapters?: { WebSocket?: typeof WebSocket };
-    }
-  ).adapters;
-
-const buildAuthorizedWebSocket = (BaseWebSocket?: typeof WebSocket) => {
-  if (!BaseWebSocket) return undefined;
-
-  return class AuthorizedWebSocket extends BaseWebSocket {
-    constructor(url: string, protocols?: string | string[]) {
-      const token = getStoredToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
-      const args: unknown[] = headers
-        ? [url, protocols as unknown, { headers }]
-        : [url, protocols as unknown];
-      // `ws` (Node) accepts headers as a third argument; browsers ignore extras.
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      super(...args);
-    }
-  };
-};
-
 const createCableConsumer = () => {
-  const adapters = getAdapters();
-  const AuthorizedWebSocket = buildAuthorizedWebSocket(adapters?.WebSocket);
-  if (AuthorizedWebSocket && adapters) {
-    adapters.WebSocket = AuthorizedWebSocket as typeof adapters.WebSocket;
-  }
   return getCreateConsumer()(buildCableUrl());
 };
 
-let cable = createCableConsumer();
+const hasCableSession = () => {
+  const snapshot = authSessionStore.getSnapshot();
+  return Boolean(snapshot.accessToken && snapshot.sessionTokenId);
+};
+
+let consumer: ActionCable.Consumer | null = null;
+
+const ensureConsumer = (): ActionCable.Consumer | null => {
+  if (consumer) return consumer;
+  if (!hasCableSession()) return null;
+  consumer = createCableConsumer();
+  return consumer;
+};
+
+const noopSubscription: ActionCable.Subscription = {
+  unsubscribe: () => {},
+};
 
 export const resetCable = () => {
   try {
-    cable.disconnect();
+    consumer?.disconnect();
   } catch (err) {
     console.warn("[cable] Failed to disconnect existing consumer", err);
   }
-  cable = createCableConsumer();
-  return cable;
+  consumer = null;
+  return ensureConsumer();
+};
+
+const cable: ActionCable.Consumer = {
+  connect: () => {
+    const active = ensureConsumer();
+    if (active) {
+      active.connect();
+    }
+  },
+  disconnect: () => {
+    if (!consumer) return;
+    consumer.disconnect();
+    consumer = null;
+  },
+  subscriptions: {
+    create: (identifier, callbacks) => {
+      const active = ensureConsumer();
+      if (!active) return noopSubscription;
+      return active.subscriptions.create(identifier, callbacks);
+    },
+  },
 };
 
 export { cable, buildCableUrl };

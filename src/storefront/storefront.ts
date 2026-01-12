@@ -1,3 +1,5 @@
+// src/storefront/storefront.ts
+
 export type StorefrontKey = "main" | "afterdark" | "marketplace";
 
 export type StorefrontThemeTokens = {
@@ -73,6 +75,7 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
     badgeLabel: "Main",
     domain: "biddersweet.app",
     themeTokens: {
+      // MAIN = modern, energetic, clean
       primary: "#ff4d4f",
       accent: "#f6c177",
       background: "#f6f5f1",
@@ -88,6 +91,7 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
     },
     logoPath: "/assets/BidderSweet.png",
   },
+
   afterdark: {
     key: "afterdark",
     name: "BidderSweet After Dark",
@@ -95,6 +99,7 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
     badgeLabel: "After Dark",
     domain: "afterdark.biddersweet.app",
     themeTokens: {
+      // AFTER DARK = neon luxe on near-black
       primary: "#a855f7",
       accent: "#f59e0b",
       background: "#0b0b10",
@@ -110,6 +115,7 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
     },
     logoPath: "/assets/AfterDark.png",
   },
+
   marketplace: {
     key: "marketplace",
     name: "BidderSweet Marketplace",
@@ -117,18 +123,40 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
     badgeLabel: "Marketplace",
     domain: "marketplace.biddersweet.app",
     themeTokens: {
-      primary: "#3c5e45",
-      accent: "#c57c37",
-      background: "#f6efe2",
-      surface: "#fffaf4",
-      border: "rgba(141, 114, 91, 0.45)",
-      text: "#352b1f",
-      mutedText: "#705e4b",
-      onPrimary: "#fff8ef",
-      radius: "18px",
-      shadow: "0 18px 55px rgba(56, 53, 44, 0.35)",
-      headingFont: `"Cormorant Garamond", "Times New Roman", "Noto Serif", serif`,
-      bodyFont: `"Zalando Sans Expanded", "Segoe UI", system-ui, sans-serif`,
+      // MARKETPLACE = "Slate Commerce"
+      // Intentionally NOT "paper" / cream. This is a marketplace, not the main brand.
+      //
+      // Goals:
+      // - Visually distinct from Main (light cream) and After Dark (neon glass).
+      // - Color-blind friendly (teal + amber, not red/green).
+      // - High readability with a graphite background and light surfaces.
+      //
+      // Background: graphite
+      background: "#ebe1ba",
+      // Surface: light card on dark background (creates instant differentiation from Main)
+      surface: "#F8FAFC",
+      // Border: subtle dark border to separate paper cards on graphite
+      border: "rgba(148, 163, 184, 0.35)",
+
+      // Text on light surface (ink)
+      text: "#0B1220",
+      mutedText: "#475569",
+
+      // Primary action: teal (very distinct from Main's red and After Dark's purple)
+      primary: "#14B8A6",
+      onPrimary: "#041312",
+
+      // Accent: amber for pricing badges / highlights
+      accent: "#F59E0B",
+
+      radius: "14px",
+      // Shadow: softer because surfaces are light; still pops on dark background
+      shadow: "0 18px 55px rgba(0, 0, 0, 0.45)",
+
+      // Marketplace typography: keep it clean + commerce-first (avoid the same “main” voice)
+      // Use a serif heading only if you want editorial; otherwise go modern.
+      headingFont: `"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
+      bodyFont: `"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
     },
     logoPath: "/assets/Marketplace.png",
   },

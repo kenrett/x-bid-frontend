@@ -7,6 +7,11 @@ const hoisted = vi.hoisted(() => ({
   createMock: vi.fn(),
 }));
 
+const authState = {
+  accessToken: "jwt",
+  sessionTokenId: "sid",
+};
+
 vi.mock("@services/cable", () => ({
   cable: {
     subscriptions: {
@@ -15,11 +20,17 @@ vi.mock("@services/cable", () => ({
   },
 }));
 
+vi.mock("@features/auth/hooks/useAuth", () => ({
+  useAuth: () => authState,
+}));
+
 describe("useAuctionListChannel", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     hoisted.mockSubscription.unsubscribe.mockReset();
     hoisted.createMock.mockReturnValue(hoisted.mockSubscription);
+    authState.accessToken = "jwt";
+    authState.sessionTokenId = "sid";
   });
 
   it("subscribes to the list stream and forwards normalized updates", () => {

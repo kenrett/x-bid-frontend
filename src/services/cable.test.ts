@@ -1,39 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import type { User } from "@features/auth/types/user";
 
 const disconnectMock = vi.fn();
-const socketCalls: Array<{
-  url?: string;
-  protocols?: string | string[];
-  options?: unknown;
-}> = [];
-
-class MockWebSocket {
-  static calls = socketCalls;
-  constructor(
-    public url?: string,
-    public protocols?: string | string[],
-    public options?: unknown,
-  ) {
-    socketCalls.push({ url, protocols, options });
-  }
-}
-
 const createConsumerMock = vi.fn((url?: string) => ({
   disconnect: disconnectMock,
   url,
 }));
 
 vi.mock("@rails/actioncable", () => ({
-  adapters: {
-    WebSocket: MockWebSocket,
-  },
   createConsumer: (url?: string) => createConsumerMock(url),
 }));
 
 describe("cable service", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    socketCalls.length = 0;
     (import.meta as unknown as { env: Record<string, unknown> }).env = {};
     const { authSessionStore } = await import("@features/auth/tokenStore");
     authSessionStore.clear();
@@ -43,55 +23,40 @@ describe("cable service", () => {
     vi.resetModules();
   });
 
-  it("creates consumer with token query param and sets Authorization header on WebSocket", async () => {
+  it("creates consumer without token query param", async () => {
     const { authSessionStore } = await import("@features/auth/tokenStore");
-    authSessionStore.setTokens({
+    const user: User = {
+      id: 1,
+      email: "user@example.com",
+      name: "User",
+      bidCredits: 0,
+      is_admin: false,
+      email_verified: true,
+      email_verified_at: null,
+    };
+    authSessionStore.setSession({
       accessToken: "abc",
       refreshToken: "refresh",
       sessionTokenId: "sid",
+      user,
     });
     const { resetCable } = await import("./cable");
 
+    resetCable();
     const firstCallUrl = createConsumerMock.mock.calls.at(0)?.[0];
     if (!firstCallUrl) throw new Error("createConsumer not called");
-    const url = new URL(firstCallUrl as string);
-    expect(url.searchParams.get("token")).toBe("abc");
-    expect(url.searchParams.get("session_token_id")).toBeNull();
-
-    const module = await import("@rails/actioncable");
-    const AuthorizedWebSocket = (
-      module as unknown as { adapters: { WebSocket: typeof MockWebSocket } }
-    ).adapters.WebSocket;
-    expect(AuthorizedWebSocket).not.toBe(MockWebSocket);
-
-    new AuthorizedWebSocket("ws://example.com/cable", ["actioncable-v1-json"]);
-    const wsCall = MockWebSocket.calls.at(-1);
-    expect(wsCall?.options).toMatchObject({
-      headers: { Authorization: "Bearer abc" },
-    });
+    expect(firstCallUrl).toBe("/cable");
 
     resetCable();
     expect(disconnectMock).toHaveBeenCalled();
     const nextCallUrl = createConsumerMock.mock.calls.at(-1)?.[0];
     if (!nextCallUrl) throw new Error("reset call missing");
-    const nextUrl = new URL(nextCallUrl as string);
-    expect(nextUrl.searchParams.get("token")).toBe("abc");
-    expect(nextUrl.searchParams.get("session_token_id")).toBeNull();
+    expect(nextCallUrl).toBe("/cable");
   });
 
-  it("appends token without clobbering existing query params and encodes token", async () => {
-    const { authSessionStore } = await import("@features/auth/tokenStore");
-    authSessionStore.setTokens({
-      accessToken: "a b",
-      refreshToken: "refresh",
-      sessionTokenId: "sid",
-    });
+  it("passes through the base cable URL without appending tokens", async () => {
     const { buildCableUrl } = await import("./cable");
-    const built = buildCableUrl(undefined, "ws://example.com/cable?foo=bar");
-    const url = new URL(built);
-
-    expect(url.searchParams.get("foo")).toBe("bar");
-    expect(url.searchParams.get("token")).toBe("a b");
-    expect(built).toBe("ws://example.com/cable?foo=bar&token=a+b");
+    const built = buildCableUrl("ws://example.com/cable?foo=bar");
+    expect(built).toBe("ws://example.com/cable?foo=bar");
   });
 });

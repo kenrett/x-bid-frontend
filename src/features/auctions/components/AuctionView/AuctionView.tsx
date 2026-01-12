@@ -41,10 +41,7 @@ const AuctionViewComponent = ({
   const isConnected = connectionState === "connected";
   const isConnecting = connectionState === "connecting";
   const isEmailVerified =
-    user?.email_verified === true || Boolean(user?.email_verified_at);
-  const isEmailVerificationUnknown = Boolean(
-    user && user.email_verified === null && !user.email_verified_at,
-  );
+    user?.email_verified !== false || Boolean(user?.email_verified_at);
   const isBiddingBlockedByEmail = Boolean(
     auction.status === "active" &&
     user &&
@@ -206,9 +203,7 @@ const AuctionViewComponent = ({
                     }
                     title={
                       isBiddingBlockedByEmail
-                        ? isEmailVerificationUnknown
-                          ? "Checking email verification status..."
-                          : "Verify your email to place bids."
+                        ? "Verify your email to place bids."
                         : undefined
                     }
                     className="mt-4 w-full text-lg bg-[color:var(--sf-primary)] text-[color:var(--sf-onPrimary)] px-10 py-4 rounded-[var(--sf-radius)] font-bold shadow-[var(--sf-shadow)] transition hover:brightness-95 active:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sf-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--sf-background)] disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none"
@@ -216,14 +211,12 @@ const AuctionViewComponent = ({
                     {isBidding
                       ? "Placing Bid..."
                       : isBiddingBlockedByEmail
-                        ? isEmailVerificationUnknown
-                          ? "Checking verification..."
-                          : "Verify email to bid"
+                        ? "Verify email to bid"
                         : Number(user?.id) === Number(auction.highest_bidder_id)
                           ? "You are the highest bidder"
                           : "Place Your Bid"}
                   </button>
-                  {isBiddingBlockedByEmail && user?.email_verified === false ? (
+                  {isBiddingBlockedByEmail ? (
                     <div className="mt-3 rounded-xl border border-amber-300/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
                       Verify your email to place bids.{" "}
                       <button

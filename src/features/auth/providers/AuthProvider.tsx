@@ -361,13 +361,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           .__triggerSessionPoll;
       }
     };
-  }, [
-    accessToken,
-    sessionTokenId,
-    handleSessionInvalidated,
-    refreshToken,
-    user,
-  ]);
+  }, [accessToken, sessionTokenId, handleSessionInvalidated]);
 
   useEffect(() => {
     const onUnauthorized = () => handleSessionInvalidated("unauthorized");

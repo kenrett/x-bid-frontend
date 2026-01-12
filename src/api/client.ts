@@ -46,6 +46,22 @@ const normalizeBase = (value: string | undefined): string | undefined => {
 
 const normalizedBaseURL = normalizeBase(rawBaseURL);
 
+const getWindowOrigin = () => {
+  if (typeof window === "undefined") return undefined;
+  return window.location?.origin;
+};
+
+const isCrossOrigin = (baseUrl: string | undefined): boolean => {
+  if (!baseUrl) return false;
+  const origin = getWindowOrigin();
+  try {
+    const resolved = new URL(baseUrl, origin ?? "http://localhost");
+    return origin ? resolved.origin !== origin : false;
+  } catch {
+    return false;
+  }
+};
+
 const buildApiPath = (path: string): string => {
   const [pathname, ...rest] = path.split("?");
   const normalizedPath = `/${pathname.replace(/^\/+/, "")}`;
@@ -71,7 +87,7 @@ const client = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: false, // Auth uses Bearer tokens; refresh may use cookies per-request.
+  withCredentials: isCrossOrigin(normalizedBaseURL),
 }) as AxiosInstance;
 
 client.interceptors.request.use(

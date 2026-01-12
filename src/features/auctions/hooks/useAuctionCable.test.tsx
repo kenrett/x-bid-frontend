@@ -4,6 +4,10 @@ import { useAuctionChannel } from "./useAuctionCable";
 
 const createMock = vi.fn();
 const unsubscribeMock = vi.fn();
+const authState = {
+  accessToken: "jwt",
+  sessionTokenId: "sid",
+};
 
 vi.mock("@services/cable", () => ({
   cable: {
@@ -11,6 +15,10 @@ vi.mock("@services/cable", () => ({
       create: (...args: unknown[]) => createMock(...args),
     },
   },
+}));
+
+vi.mock("@features/auth/hooks/useAuth", () => ({
+  useAuth: () => authState,
 }));
 
 const TestComponent = ({
@@ -28,6 +36,8 @@ describe("useAuctionChannel (cable)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     createMock.mockReturnValue({ unsubscribe: unsubscribeMock });
+    authState.accessToken = "jwt";
+    authState.sessionTokenId = "sid";
   });
 
   afterEach(() => {
