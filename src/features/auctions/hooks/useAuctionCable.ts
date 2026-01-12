@@ -6,8 +6,8 @@ export function useAuctionChannel<T = unknown>(
   auctionId: number,
   onReceived: (data: T) => void,
 ) {
-  const { accessToken, sessionTokenId } = useAuth();
-  const isAuthenticated = Boolean(accessToken && sessionTokenId);
+  const { user } = useAuth();
+  const isAuthenticated = Boolean(user);
 
   useEffect(() => {
     if (!isAuthenticated) return;

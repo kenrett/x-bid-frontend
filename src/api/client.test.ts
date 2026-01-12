@@ -39,7 +39,11 @@ describe("handleResponseError", () => {
 
     expect(authSessionStore.clear).not.toHaveBeenCalled();
     expect(forbiddenSpy).toHaveBeenCalledTimes(1);
-    expect(forbiddenSpy.mock.calls[0][0].detail).toEqual({
+    const forbiddenEvent = forbiddenSpy.mock.calls[0]?.[0] as CustomEvent<{
+      status: number;
+      code: string;
+    }>;
+    expect(forbiddenEvent.detail).toEqual({
       status: 403,
       code: "forbidden",
     });
@@ -57,7 +61,9 @@ describe("handleResponseError", () => {
 
     expect(authSessionStore.clear).toHaveBeenCalled();
     expect(unauthorizedSpy).toHaveBeenCalledTimes(1);
-    expect(unauthorizedSpy.mock.calls[0][0].detail).toEqual({
+    const unauthorizedEvent = unauthorizedSpy.mock
+      .calls[0]?.[0] as CustomEvent<{ status: number; code: string }>;
+    expect(unauthorizedEvent.detail).toEqual({
       status: 403,
       code: "invalid_session",
     });

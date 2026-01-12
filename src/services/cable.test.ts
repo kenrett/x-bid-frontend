@@ -34,12 +34,7 @@ describe("cable service", () => {
       email_verified: true,
       email_verified_at: null,
     };
-    authSessionStore.setSession({
-      accessToken: "abc",
-      refreshToken: "refresh",
-      sessionTokenId: "sid",
-      user,
-    });
+    authSessionStore.setUser(user);
     const { resetCable } = await import("./cable");
 
     resetCable();

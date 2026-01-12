@@ -60,8 +60,8 @@ export type AuctionListUpdate = Partial<AuctionSummary> & { id: number };
 export const useAuctionListChannel = (
   onUpdate: (data: AuctionListUpdate) => void,
 ) => {
-  const { accessToken, sessionTokenId } = useAuth();
-  const isAuthenticated = Boolean(accessToken && sessionTokenId);
+  const { user } = useAuth();
+  const isAuthenticated = Boolean(user);
   const onUpdateRef = useRef(onUpdate);
   const [connectionState, setConnectionState] =
     useState<AuctionConnectionState>("disconnected");

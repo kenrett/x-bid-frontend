@@ -4,13 +4,8 @@ import axios, {
   type AxiosInstance,
   type AxiosRequestConfig,
 } from "axios";
-import {
-  authSessionStore,
-  getAccessToken,
-  getRefreshToken,
-  getSessionTokenId,
-} from "@features/auth/tokenStore";
-import { normalizeAuthResponse } from "@features/auth/api/authResponse";
+import { authSessionStore } from "@features/auth/tokenStore";
+import { normalizeUser } from "@features/auth/api/user";
 import { getStorefrontKey } from "../storefront/storefront";
 import { requestAgeGateAcceptance } from "../ageGate/ageGateStore";
 
@@ -109,23 +104,11 @@ client.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-client.interceptors.request.use(
-  (config) => {
-    const accessToken = getAccessToken();
-    if (accessToken) {
-      setHeader(config, "Authorization", `Bearer ${accessToken}`);
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
 const isRefreshRequest = (configUrl: unknown) =>
   typeof configUrl === "string" &&
   configUrl.includes("/api/v1/session/refresh");
 
-let refreshPromise: Promise<ReturnType<typeof normalizeAuthResponse>> | null =
-  null;
+let refreshPromise: Promise<ReturnType<typeof normalizeUser>> | null = null;
 
 const INVALID_SESSION_CODES = new Set([
   "invalid_session",
@@ -199,11 +182,7 @@ const isAgeGateAcceptRequest = (configUrl: unknown) =>
 let sessionInvalidated = false;
 authSessionStore.subscribe(() => {
   const snapshot = authSessionStore.getSnapshot();
-  if (
-    snapshot.accessToken ||
-    snapshot.refreshToken ||
-    snapshot.sessionTokenId
-  ) {
+  if (snapshot.user) {
     sessionInvalidated = false;
   }
 });
@@ -228,16 +207,39 @@ const dispatchEmailUnverified = (status: number, code?: string) => {
   );
 };
 
-const beginRefresh = ({ refreshToken }: { refreshToken?: string }) => {
+const beginRefresh = () => {
   refreshPromise ??= (async () => {
     try {
-      const refreshResponse = await client.post(
+      await client.post(
         "/api/v1/session/refresh",
-        { refresh_token: refreshToken },
+        {},
         { headers: { Authorization: undefined } },
       );
-
-      return normalizeAuthResponse(refreshResponse.data);
+      const loggedInResponse = await client.get("/api/v1/logged_in", {
+        headers: { Authorization: undefined },
+      });
+      const record = loggedInResponse.data as {
+        logged_in?: boolean;
+        user?: unknown;
+        is_admin?: boolean;
+        is_superuser?: boolean;
+      };
+      if (!record?.logged_in || !record?.user) {
+        throw new Error("Refresh succeeded without an active session");
+      }
+      const normalized = normalizeUser({
+        ...(record.user as object),
+        is_admin:
+          record.is_admin ?? (record.user as { is_admin?: boolean }).is_admin,
+        is_superuser:
+          record.is_superuser ??
+          (record.user as { is_superuser?: boolean }).is_superuser,
+      });
+      authSessionStore.setUser(normalized);
+      window.dispatchEvent(
+        new CustomEvent("app:auth:refreshed", { detail: { user: normalized } }),
+      );
+      return normalized;
     } catch (refreshError) {
       const refreshAxiosError = refreshError as AxiosError;
       const status = refreshAxiosError?.response?.status ?? 401;
@@ -314,43 +316,16 @@ export const handleResponseError = async (error: AxiosError) => {
       return Promise.reject(error);
     }
 
-    const refreshToken = getRefreshToken();
-    const sessionTokenId = getSessionTokenId();
-    const canRefreshWithToken =
+    const canRefreshWithCookie =
       status === 401 &&
-      Boolean(refreshToken && sessionTokenId) &&
       originalRequest &&
       !(originalRequest as { __authRetry?: boolean }).__authRetry &&
       !isRefreshRequest(originalRequest.url);
 
-    if (canRefreshWithToken) {
+    if (canRefreshWithCookie) {
       try {
-        const next = await beginRefresh({
-          refreshToken: refreshToken ?? undefined,
-        });
-        authSessionStore.setSession({
-          accessToken: next.accessToken,
-          refreshToken: next.refreshToken,
-          sessionTokenId: next.sessionTokenId,
-          user: next.user,
-        });
-        window.dispatchEvent(
-          new CustomEvent("app:auth:refreshed", { detail: next }),
-        );
-
+        await beginRefresh();
         (originalRequest as { __authRetry?: boolean }).__authRetry = true;
-        const headers = originalRequest.headers ?? {};
-        if (typeof (headers as { set?: unknown }).set === "function") {
-          (
-            headers as unknown as {
-              set: (key: string, value: string) => void;
-            }
-          ).set("Authorization", `Bearer ${next.accessToken}`);
-        } else {
-          (headers as Record<string, unknown>).Authorization =
-            `Bearer ${next.accessToken}`;
-        }
-        originalRequest.headers = headers;
         return client.request(originalRequest);
       } catch (refreshError) {
         if (import.meta.env.MODE !== "test") {

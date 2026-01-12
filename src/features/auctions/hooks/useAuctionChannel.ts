@@ -35,8 +35,8 @@ export function useAuctionChannel(
   auctionId: number,
   onData: (data: AuctionChannelData) => void,
 ) {
-  const { accessToken, sessionTokenId } = useAuth();
-  const isAuthenticated = Boolean(accessToken && sessionTokenId);
+  const { user } = useAuth();
+  const isAuthenticated = Boolean(user);
   const onDataRef = useRef(onData);
   const [connectionState, setConnectionState] =
     useState<AuctionConnectionState>("disconnected");

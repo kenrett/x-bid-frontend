@@ -39,7 +39,6 @@ describe("Header Component", () => {
     mockedUseAuth.mockReturnValue({
       user: null,
       logout: mockLogout,
-      accessToken: null,
       isReady: true,
     } as unknown as ReturnType<typeof useAuth>);
     renderComponent();
@@ -63,7 +62,6 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: null,
         logout: mockLogout,
-        accessToken: null,
         isReady: true,
       } as unknown as ReturnType<typeof useAuth>);
     });
@@ -96,7 +94,6 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockUser,
         logout: mockLogout,
-        accessToken: "token",
         isReady: true,
       } as unknown as ReturnType<typeof useAuth>);
     });
@@ -128,7 +125,6 @@ describe("Header Component", () => {
     mockedUseAuth.mockReturnValue({
       user: null,
       logout: mockLogout,
-      accessToken: null,
       isReady: true,
     } as unknown as ReturnType<typeof useAuth>);
     renderComponent();
@@ -143,7 +139,6 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockAdmin,
         logout: mockLogout,
-        accessToken: "token",
         isReady: true,
       } as unknown as ReturnType<typeof useAuth>);
       renderComponent();
@@ -158,7 +153,6 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockSuper,
         logout: mockLogout,
-        accessToken: "token",
         isReady: true,
       } as unknown as ReturnType<typeof useAuth>);
       renderComponent();
@@ -174,7 +168,6 @@ describe("Header Component", () => {
       mockedUseAuth.mockReturnValue({
         user: mockUser,
         logout: mockLogout,
-        accessToken: "token",
         isReady: true,
       } as unknown as ReturnType<typeof useAuth>);
       renderComponent();

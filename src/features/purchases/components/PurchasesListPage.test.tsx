@@ -26,9 +26,6 @@ const createAuthReturn = () =>
     login: vi.fn(),
     logout: vi.fn(),
     updateUserBalance: vi.fn(),
-    accessToken: "token",
-    refreshToken: "refresh",
-    sessionTokenId: "session",
     sessionRemainingSeconds: 900,
   }) as unknown as ReturnType<typeof useAuth>;
 

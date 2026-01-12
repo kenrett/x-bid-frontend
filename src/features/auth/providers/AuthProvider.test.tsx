@@ -67,7 +67,6 @@ const TestConsumer = () => {
   return (
     <div>
       <div data-testid="user">{auth.user?.email ?? "none"}</div>
-      <div data-testid="token">{auth.accessToken ?? "none"}</div>
       <div data-testid="remaining">
         {auth.sessionRemainingSeconds ?? "none"}
       </div>
@@ -75,9 +74,6 @@ const TestConsumer = () => {
       <button
         onClick={() =>
           auth.login({
-            accessToken: "jwt",
-            refreshToken: "refresh",
-            sessionTokenId: "sid",
             user: mockUser,
           } satisfies LoginPayload)
         }
@@ -100,8 +96,14 @@ beforeEach(() => {
   authSessionStore.clear();
   toastMocks.showToast.mockReset();
   mockedClient.get.mockReset();
-  mockedClient.get.mockResolvedValue({
-    data: { remaining_seconds: 300 },
+  mockedClient.get.mockImplementation((url?: string) => {
+    if (typeof url === "string" && url.includes("/api/v1/logged_in")) {
+      return Promise.resolve({ data: { logged_in: false } });
+    }
+    if (typeof url === "string" && url.includes("/api/v1/session/remaining")) {
+      return Promise.resolve({ data: { remaining_seconds: 300 } });
+    }
+    return Promise.resolve({ data: {} });
   });
   cableMocks.subscription.unsubscribe.mockReset();
 });
@@ -111,68 +113,20 @@ afterEach(() => {
 });
 
 describe("AuthProvider", () => {
-  it("persists a complete session and hydrates it on remount", async () => {
-    const setItemSpy = vi.spyOn(Storage.prototype, "setItem");
-    const view = render(
-      <Wrapper>
-        <TestConsumer />
-      </Wrapper>,
-    );
-
-    expect(screen.getByTestId("user")).toHaveTextContent("none");
-
-    await act(async () => {
-      await screen.getByText("login").click();
-    });
-
-    await waitFor(() => {
-      expect(screen.getAllByTestId("user")[0]).toHaveTextContent(
-        "user@example.com",
-      );
-    });
-    expect(localStorage.getItem("token")).toBeNull(); // legacy key should not be used
-    const persisted = localStorage.getItem("auth.session.v1");
-    expect(persisted).not.toBeNull();
-    expect(JSON.parse(persisted as string)).toMatchObject({
-      access_token: "jwt",
-      refresh_token: "refresh",
-      session_token_id: "sid",
-      user: expect.any(Object),
-    });
-    expect(setItemSpy).toHaveBeenCalledWith(
-      "auth.session.v1",
-      expect.any(String),
-    );
-    expect(cableMocks.reset).toHaveBeenCalledTimes(1);
-    expect(authSessionStore.getSnapshot().accessToken).toBe("jwt");
-
-    // Remount to ensure values are restored from storage.
-    view.unmount();
-    render(
-      <Wrapper>
-        <TestConsumer />
-      </Wrapper>,
-    );
-    await waitFor(() => {
-      expect(screen.getByTestId("user")).toHaveTextContent("user@example.com");
-      expect(screen.getByTestId("token")).toHaveTextContent("jwt");
-    });
-  });
-
-  it("clears invalid persisted auth and redirects to /login", async () => {
-    localStorage.setItem(
-      "auth.session.v1",
-      JSON.stringify({
-        access_token: "jwt",
-        // refresh_token intentionally missing
-        session_token_id: "sid",
-        user: {
-          id: 1,
-          email: "user@example.com",
-          name: "User",
-          bidCredits: 0,
-          is_admin: false,
-          is_superuser: false,
+  it("hydrates from /api/v1/logged_in when storage is empty", async () => {
+    mockedClient.get.mockImplementationOnce(() =>
+      Promise.resolve({
+        data: {
+          logged_in: true,
+          user: {
+            id: 1,
+            email: "user@example.com",
+            name: "User",
+            bidCredits: 0,
+            is_admin: false,
+            email_verified: true,
+            email_verified_at: null,
+          },
         },
       }),
     );
@@ -184,13 +138,25 @@ describe("AuthProvider", () => {
     );
 
     await waitFor(() => {
-      expect((window as { __lastRedirect?: string }).__lastRedirect).toMatch(
-        /^\/login\?next=/,
-      );
+      expect(screen.getByTestId("user")).toHaveTextContent("user@example.com");
     });
     expect(localStorage.getItem("auth.session.v1")).toBeNull();
-    expect(screen.getByTestId("user")).toHaveTextContent("none");
-    expect(screen.getByTestId("token")).toHaveTextContent("none");
+  });
+
+  it("shows logged-out state when /api/v1/logged_in returns logged_in false", async () => {
+    mockedClient.get.mockImplementationOnce(() =>
+      Promise.resolve({ data: { logged_in: false } }),
+    );
+
+    render(
+      <Wrapper>
+        <TestConsumer />
+      </Wrapper>,
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("user")).toHaveTextContent("none"),
+    );
   });
 
   it("logs out and clears in-memory auth state", async () => {
@@ -210,7 +176,7 @@ describe("AuthProvider", () => {
 
     expect(screen.getByTestId("user")).toHaveTextContent("none");
     expect(localStorage.getItem("auth.session.v1")).toBeNull();
-    expect(authSessionStore.getSnapshot().accessToken).toBeNull();
+    expect(authSessionStore.getSnapshot().user).toBeNull();
     expect(cableMocks.reset).toHaveBeenCalled();
     expect(cableMocks.subscription.unsubscribe).toHaveBeenCalled();
   });
@@ -232,8 +198,17 @@ describe("AuthProvider", () => {
   });
 
   it("logs out immediately when remaining_seconds is <= 0", async () => {
-    mockedClient.get.mockResolvedValueOnce({
-      data: { remaining_seconds: 0 },
+    mockedClient.get.mockImplementation((url?: string) => {
+      if (typeof url === "string" && url.includes("/api/v1/logged_in")) {
+        return Promise.resolve({ data: { logged_in: false } });
+      }
+      if (
+        typeof url === "string" &&
+        url.includes("/api/v1/session/remaining")
+      ) {
+        return Promise.resolve({ data: { remaining_seconds: 0 } });
+      }
+      return Promise.resolve({ data: {} });
     });
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
@@ -254,7 +229,7 @@ describe("AuthProvider", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId("token")).toHaveTextContent("none");
+      expect(screen.getByTestId("user")).toHaveTextContent("none");
     });
 
     expect(toastMocks.showToast).toHaveBeenCalledWith(
@@ -266,16 +241,27 @@ describe("AuthProvider", () => {
     expect(localStorage.getItem("sessionTokenId")).toBeNull();
     expect(localStorage.getItem("user")).toBeNull();
     expect(localStorage.getItem("auth.session.v1")).toBeNull();
-    expect(authSessionStore.getSnapshot().accessToken).toBeNull();
+    expect(authSessionStore.getSnapshot().user).toBeNull();
     expect(cableMocks.reset).toHaveBeenCalled();
 
     warnSpy.mockRestore();
   });
 
   it("logs out when polling receives 401", async () => {
-    mockedClient.get.mockRejectedValueOnce({
-      isAxiosError: true,
-      response: { status: 401 },
+    mockedClient.get.mockImplementation((url?: string) => {
+      if (typeof url === "string" && url.includes("/api/v1/logged_in")) {
+        return Promise.resolve({ data: { logged_in: false } });
+      }
+      if (
+        typeof url === "string" &&
+        url.includes("/api/v1/session/remaining")
+      ) {
+        return Promise.reject({
+          isAxiosError: true,
+          response: { status: 401 },
+        });
+      }
+      return Promise.resolve({ data: {} });
     });
 
     render(
@@ -289,7 +275,7 @@ describe("AuthProvider", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId("token")).toHaveTextContent("none");
+      expect(screen.getByTestId("user")).toHaveTextContent("none");
     });
 
     expect(toastMocks.showToast).toHaveBeenCalledWith(
@@ -298,23 +284,31 @@ describe("AuthProvider", () => {
     );
   });
 
-  it("refreshes tokens when session remaining returns new token values", async () => {
-    mockedClient.get.mockResolvedValueOnce({
-      data: {
-        remaining_seconds: 100,
-        access_token: "next-jwt",
-        refresh_token: "next-refresh",
-        session_token_id: "next-sid",
-        user: {
-          id: 1,
-          email: "user@example.com",
-          name: "User",
-          bidCredits: 0,
-          is_admin: true,
-        },
-        is_admin: true,
-        is_superuser: false,
-      },
+  it("merges refreshed user data when session remaining returns user updates", async () => {
+    mockedClient.get.mockImplementation((url?: string) => {
+      if (typeof url === "string" && url.includes("/api/v1/logged_in")) {
+        return Promise.resolve({ data: { logged_in: false } });
+      }
+      if (
+        typeof url === "string" &&
+        url.includes("/api/v1/session/remaining")
+      ) {
+        return Promise.resolve({
+          data: {
+            remaining_seconds: 100,
+            user: {
+              id: 1,
+              email: "user@example.com",
+              name: "User",
+              bidCredits: 0,
+              is_admin: true,
+            },
+            is_admin: true,
+            is_superuser: false,
+          },
+        });
+      }
+      return Promise.resolve({ data: {} });
     });
 
     render(
@@ -328,8 +322,7 @@ describe("AuthProvider", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId("token")).toHaveTextContent("next-jwt");
-      expect(authSessionStore.getSnapshot().accessToken).toBe("next-jwt");
+      expect(authSessionStore.getSnapshot().user?.is_admin).toBe(true);
     });
     expect(cableMocks.reset).toHaveBeenCalledTimes(2);
   });
@@ -346,7 +339,7 @@ describe("AuthProvider", () => {
     });
 
     await waitFor(() =>
-      expect(screen.getByTestId("token")).toHaveTextContent("jwt"),
+      expect(screen.getByTestId("user")).toHaveTextContent("user@example.com"),
     );
 
     act(() => {
@@ -356,7 +349,7 @@ describe("AuthProvider", () => {
     });
 
     await waitFor(() =>
-      expect(screen.getByTestId("token")).toHaveTextContent("none"),
+      expect(screen.getByTestId("user")).toHaveTextContent("none"),
     );
   });
 
@@ -387,7 +380,7 @@ describe("AuthProvider", () => {
     });
 
     await waitFor(() =>
-      expect(screen.getByTestId("token")).toHaveTextContent("none"),
+      expect(screen.getByTestId("user")).toHaveTextContent("none"),
     );
 
     expect(toastMocks.showToast).toHaveBeenCalledWith(
@@ -411,7 +404,7 @@ describe("AuthProvider", () => {
     });
 
     await waitFor(() =>
-      expect(screen.getByTestId("token")).toHaveTextContent("jwt"),
+      expect(screen.getByTestId("user")).toHaveTextContent("user@example.com"),
     );
 
     act(() => {
@@ -424,7 +417,7 @@ describe("AuthProvider", () => {
     });
 
     await waitFor(() =>
-      expect(screen.getByTestId("token")).toHaveTextContent("none"),
+      expect(screen.getByTestId("user")).toHaveTextContent("none"),
     );
 
     expect(toastMocks.showToast).toHaveBeenCalledTimes(1);
@@ -443,7 +436,7 @@ describe("AuthProvider", () => {
     });
 
     await waitFor(() =>
-      expect(screen.getByTestId("token")).toHaveTextContent("jwt"),
+      expect(screen.getByTestId("user")).toHaveTextContent("user@example.com"),
     );
 
     const handler = cableMocks.create.mock.calls[0]?.[1] as
@@ -455,7 +448,7 @@ describe("AuthProvider", () => {
     });
 
     await waitFor(() =>
-      expect(screen.getByTestId("token")).toHaveTextContent("none"),
+      expect(screen.getByTestId("user")).toHaveTextContent("none"),
     );
     expect(toastMocks.showToast).toHaveBeenCalledTimes(1);
     warnSpy.mockRestore();

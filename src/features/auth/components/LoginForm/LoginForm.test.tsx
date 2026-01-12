@@ -100,13 +100,7 @@ describe("LoginForm", () => {
     expect(await screen.findByText("AUCTIONS")).toBeInTheDocument();
 
     const persisted = localStorage.getItem("auth.session.v1");
-    expect(persisted).not.toBeNull();
-    expect(JSON.parse(persisted as string)).toMatchObject({
-      access_token: "access",
-      refresh_token: "refresh",
-      session_token_id: "sid",
-      user: { email: "test@example.com" },
-    });
+    expect(persisted).toBeNull();
   });
 
   it("navigates to redirect URL when present", async () => {

@@ -82,7 +82,6 @@ describe("account mode routing", () => {
     applyEnv({ VITE_APP_MODE: "account" });
     mockedUseAuth.mockReturnValue({
       user: null,
-      accessToken: null,
       isReady: true,
       logout: vi.fn(),
     } as unknown as ReturnType<typeof useAuth>);
@@ -95,7 +94,6 @@ describe("account mode routing", () => {
     applyEnv({ VITE_APP_MODE: "account" });
     mockedUseAuth.mockReturnValue({
       user: { id: 1, email: "user@example.com" },
-      accessToken: "token",
       isReady: true,
       logout: vi.fn(),
     } as unknown as ReturnType<typeof useAuth>);
@@ -108,7 +106,6 @@ describe("account mode routing", () => {
     applyEnv({ VITE_APP_MODE: "account" });
     mockedUseAuth.mockReturnValue({
       user: { id: 1, email: "user@example.com" },
-      accessToken: "token",
       isReady: true,
       logout: vi.fn(),
     } as unknown as ReturnType<typeof useAuth>);
@@ -121,7 +118,6 @@ describe("account mode routing", () => {
     applyEnv({ VITE_APP_MODE: "account" });
     mockedUseAuth.mockReturnValue({
       user: { id: 1, email: "user@example.com" },
-      accessToken: "token",
       isReady: true,
       logout: vi.fn(),
     } as unknown as ReturnType<typeof useAuth>);
@@ -134,7 +130,6 @@ describe("account mode routing", () => {
     applyEnv({ VITE_APP_MODE: "storefront" });
     mockedUseAuth.mockReturnValue({
       user: null,
-      accessToken: null,
       isReady: true,
       logout: vi.fn(),
     } as unknown as ReturnType<typeof useAuth>);

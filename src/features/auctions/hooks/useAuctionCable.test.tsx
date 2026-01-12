@@ -5,8 +5,7 @@ import { useAuctionChannel } from "./useAuctionCable";
 const createMock = vi.fn();
 const unsubscribeMock = vi.fn();
 const authState = {
-  accessToken: "jwt",
-  sessionTokenId: "sid",
+  user: { id: 1, email: "user@example.com" },
 };
 
 vi.mock("@services/cable", () => ({
@@ -36,8 +35,7 @@ describe("useAuctionChannel (cable)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     createMock.mockReturnValue({ unsubscribe: unsubscribeMock });
-    authState.accessToken = "jwt";
-    authState.sessionTokenId = "sid";
+    authState.user = { id: 1, email: "user@example.com" };
   });
 
   afterEach(() => {

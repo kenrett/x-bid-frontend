@@ -40,9 +40,6 @@ describe("AccountDeletePage", () => {
     mockedUseAuth.mockReturnValue({
       logout: logoutMock,
       user: null,
-      accessToken: null,
-      refreshToken: null,
-      sessionTokenId: null,
       sessionRemainingSeconds: null,
       login: vi.fn(),
       updateUser: vi.fn(),

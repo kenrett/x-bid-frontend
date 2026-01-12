@@ -21,7 +21,7 @@ const createCableConsumer = () => {
 
 const hasCableSession = () => {
   const snapshot = authSessionStore.getSnapshot();
-  return Boolean(snapshot.accessToken && snapshot.sessionTokenId);
+  return Boolean(snapshot.user);
 };
 
 let consumer: ActionCable.Consumer | null = null;

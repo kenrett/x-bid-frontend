@@ -39,7 +39,6 @@ describe("marketplace storefront smoke", () => {
     mockedUseAuth.mockReturnValue({
       user: null,
       logout: vi.fn(),
-      accessToken: null,
       isReady: true,
     } as unknown as ReturnType<typeof useAuth>);
 

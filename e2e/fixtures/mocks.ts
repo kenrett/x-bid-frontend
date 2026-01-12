@@ -78,9 +78,6 @@ export const adminUser = {
 };
 
 export const loginResponse = {
-  access_token: "token-login",
-  refresh_token: "refresh-login",
-  session_token_id: "session-login",
   user: authedUser,
   is_admin: false,
   is_superuser: false,
@@ -175,16 +172,13 @@ export const mockAccountSecurity = async (page: Page, user = authedUser) => {
 };
 
 export const seedAuthState = async (page: Page, user = authedUser) => {
-  await page.addInitScript(
-    (auth) => {
-      localStorage.setItem("auth.session.v1", JSON.stringify(auth));
-    },
-    {
+  await page.route("**/api/v1/logged_in", (route) =>
+    fulfillJson(route, {
+      logged_in: true,
       user,
-      access_token: "token-authed",
-      refresh_token: "refresh-authed",
-      session_token_id: "session-authed",
-    },
+      is_admin: Boolean(user.is_admin),
+      is_superuser: Boolean(user.is_superuser),
+    }),
   );
 
   // AccountStatusProvider calls this on boot; default to a verified response
@@ -197,9 +191,6 @@ export const mockSessionRemaining = async (page: Page, user = authedUser) => {
   await page.route("**/api/v1/session/remaining", (route) =>
     fulfillJson(route, {
       remaining_seconds: 1800,
-      access_token: "token-authed",
-      refresh_token: "refresh-authed",
-      session_token_id: "session-authed",
       user,
     }),
   );

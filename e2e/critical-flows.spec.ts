@@ -69,9 +69,6 @@ const authedUser = {
 };
 
 const loginResponse = {
-  access_token: "token-login",
-  refresh_token: "refresh-login",
-  session_token_id: "session-login",
   user: authedUser,
   is_admin: false,
   is_superuser: false,
@@ -151,16 +148,13 @@ const isDocumentRequest = (route: Route) =>
   route.request().resourceType() === "document";
 
 const seedAuthState = async (page: Page, user = authedUser) => {
-  await page.addInitScript(
-    (auth) => {
-      localStorage.setItem("auth.session.v1", JSON.stringify(auth));
-    },
-    {
+  await page.route("**/api/v1/logged_in", (route) =>
+    fulfillJson(route, {
+      logged_in: true,
       user,
-      access_token: "token-authed",
-      refresh_token: "refresh-authed",
-      session_token_id: "session-authed",
-    },
+      is_admin: Boolean(user.is_admin),
+      is_superuser: Boolean(user.is_superuser),
+    }),
   );
 
   const emailVerified = Boolean(
@@ -180,9 +174,6 @@ const mockSessionRemaining = async (page: Page, user = authedUser) => {
   await page.route("**/session/remaining", (route) =>
     fulfillJson(route, {
       remaining_seconds: 1800,
-      access_token: "token-authed",
-      refresh_token: "refresh-authed",
-      session_token_id: "session-authed",
       user,
     }),
   );
@@ -283,9 +274,7 @@ test("user can log in and land on the auctions feed", async ({ page }) => {
     return window.__lastSessionState;
   });
   expect(state).toMatchObject({
-    accessToken: loginResponse.access_token,
-    refreshToken: loginResponse.refresh_token,
-    sessionTokenId: loginResponse.session_token_id,
+    user: { email: authedUser.email },
   });
 
   const stored = await page.evaluate(() => ({
@@ -293,12 +282,7 @@ test("user can log in and land on the auctions feed", async ({ page }) => {
     session: localStorage.getItem("auth.session.v1"),
   }));
   expect(stored.legacyToken).toBeNull();
-  expect(JSON.parse(stored.session as string)).toMatchObject({
-    access_token: loginResponse.access_token,
-    refresh_token: loginResponse.refresh_token,
-    session_token_id: loginResponse.session_token_id,
-    user: { email: authedUser.email },
-  });
+  expect(stored.session).toBeNull();
 });
 
 test("authenticated user can place a bid on an active auction", async ({

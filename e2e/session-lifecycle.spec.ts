@@ -6,7 +6,7 @@ import {
   seedAuthState,
 } from "./fixtures/mocks";
 
-test("session token refresh updates in-memory session", async ({ page }) => {
+test("session polling updates in-memory session", async ({ page }) => {
   await seedAuthState(page);
   await page.route("**/api/v1/auctions", (route) =>
     isDocumentRequest(route) ? route.continue() : fulfillJson(route, []),
@@ -22,9 +22,6 @@ test("session token refresh updates in-memory session", async ({ page }) => {
     // @ts-expect-error test-only hook set in AuthProvider when VITE_E2E_TESTS=true
     await window.__triggerSessionPoll?.({
       remaining_seconds: 1200,
-      access_token: "token-refreshed",
-      refresh_token: "refresh-refreshed",
-      session_token_id: "session-refreshed",
       user: { id: 88, name: "Casey Bidder", email: "casey@example.com" },
     });
     // @ts-expect-error test-only marker
@@ -32,9 +29,7 @@ test("session token refresh updates in-memory session", async ({ page }) => {
   });
 
   expect(refreshed).toMatchObject({
-    accessToken: "token-refreshed",
-    refreshToken: "refresh-refreshed",
-    sessionTokenId: "session-refreshed",
+    user: { email: "casey@example.com" },
   });
 
   const stored = await page.evaluate(() => ({
@@ -42,11 +37,7 @@ test("session token refresh updates in-memory session", async ({ page }) => {
     session: localStorage.getItem("auth.session.v1"),
   }));
   expect(stored.legacyToken).toBeNull();
-  expect(JSON.parse(stored.session as string)).toMatchObject({
-    access_token: "token-refreshed",
-    refresh_token: "refresh-refreshed",
-    session_token_id: "session-refreshed",
-  });
+  expect(stored.session).toBeNull();
 });
 
 test("session expiration logs out", async ({ page }) => {

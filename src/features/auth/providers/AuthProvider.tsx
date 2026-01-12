@@ -12,9 +12,13 @@ import { authSessionStore } from "../tokenStore";
 
 type SessionRemainingResponse = {
   remaining_seconds?: number;
-  access_token?: string;
-  refresh_token?: string;
-  session_token_id?: string | number;
+  user?: User;
+  is_admin?: boolean;
+  is_superuser?: boolean;
+};
+
+type LoggedInResponse = {
+  logged_in?: boolean;
   user?: User;
   is_admin?: boolean;
   is_superuser?: boolean;
@@ -34,6 +38,39 @@ const getSessionEventName = (payload: unknown): string | undefined => {
   return undefined;
 };
 
+const asRecord = (value: unknown): Record<string, unknown> | null =>
+  value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : null;
+
+const normalizeLoggedInResponse = (
+  raw: LoggedInResponse | null | undefined,
+  normalizeAuthUser: (user: User) => User,
+): { loggedIn: boolean; user: User | null } => {
+  if (!raw || typeof raw !== "object") {
+    return { loggedIn: false, user: null };
+  }
+  const record = asRecord(raw);
+  if (!record) return { loggedIn: false, user: null };
+
+  const loggedIn = record.logged_in !== false;
+  const userRecord = asRecord(record.user);
+  if (!userRecord) {
+    return { loggedIn, user: null };
+  }
+
+  const normalized = normalizeAuthUser({
+    ...(userRecord as User),
+    is_admin:
+      (record.is_admin as boolean | undefined) ?? (userRecord as User).is_admin,
+    is_superuser:
+      (record.is_superuser as boolean | undefined) ??
+      (userRecord as User).is_superuser,
+  });
+
+  return { loggedIn, user: normalized };
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -45,9 +82,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const invalidatingRef = useRef(false);
 
   const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
-  const [sessionTokenId, setSessionTokenId] = useState<string | null>(null);
   const [sessionRemainingSeconds, setSessionRemainingSeconds] = useState<
     number | null
   >(null);
@@ -58,25 +92,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       invalidatingRef.current = false;
       const normalizedUser = normalizeAuthUser(payload.user as User);
       setUser(normalizedUser);
-      setAccessToken(payload.accessToken);
-      setRefreshToken(payload.refreshToken);
-      setSessionTokenId(payload.sessionTokenId);
       setSessionRemainingSeconds(null);
 
-      authSessionStore.setSession({
-        accessToken: payload.accessToken,
-        refreshToken: payload.refreshToken,
-        sessionTokenId: payload.sessionTokenId,
-        user: normalizedUser,
-      });
+      authSessionStore.setUser(normalizedUser);
       setSentryUser(normalizedUser);
       resetCable();
 
       if (import.meta.env.VITE_E2E_TESTS === "true") {
         (window as { __lastSessionState?: unknown }).__lastSessionState = {
-          accessToken: payload.accessToken,
-          refreshToken: payload.refreshToken,
-          sessionTokenId: payload.sessionTokenId,
           user: normalizedUser,
         };
       }
@@ -85,38 +108,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   useEffect(() => {
-    const hasPersistedSession = authSessionStore.hasPersistedSession();
-    const hydrated = authSessionStore.hydrateFromStorage();
-    if (hydrated && hydrated.user) {
-      applyAuthPayload({
-        accessToken: hydrated.accessToken!,
-        refreshToken: hydrated.refreshToken!,
-        sessionTokenId: hydrated.sessionTokenId!,
-        user: hydrated.user,
-      });
-    } else if (hasPersistedSession) {
-      authSessionStore.clear();
-      const redirectParam = encodeURIComponent(
-        window.location.pathname + window.location.search,
-      );
-      const targetUrl = `/login?next=${redirectParam}&redirect=${redirectParam}`;
-      if (!window.location.pathname.startsWith("/login")) {
-        if (import.meta.env.MODE === "test") {
-          (window as { __lastRedirect?: string }).__lastRedirect = targetUrl;
+    let cancelled = false;
+    const bootstrap = async () => {
+      try {
+        const response =
+          await client.get<LoggedInResponse>("/api/v1/logged_in");
+        if (cancelled) return;
+        const { loggedIn, user: nextUser } = normalizeLoggedInResponse(
+          response.data,
+          normalizeAuthUser,
+        );
+        if (!loggedIn || !nextUser) {
+          setUser(null);
+          authSessionStore.clear();
+          setSentryUser(null);
         } else {
-          window.location.assign(targetUrl);
+          setUser(nextUser);
+          authSessionStore.setUser(nextUser);
+          setSentryUser(nextUser);
+          resetCable();
         }
+      } catch (error) {
+        if (cancelled) return;
+        if (isAxiosError(error)) {
+          const status = error.response?.status;
+          if (status === 401 || status === 403 || status === 404) {
+            setUser(null);
+            authSessionStore.clear();
+            setSentryUser(null);
+          } else if (import.meta.env.MODE !== "test") {
+            console.error("[AuthProvider] Failed to bootstrap session", error);
+          }
+        } else if (import.meta.env.MODE !== "test") {
+          console.error("[AuthProvider] Failed to bootstrap session", error);
+        }
+      } finally {
+        if (!cancelled) setIsReady(true);
       }
-    }
-    setIsReady(true);
-  }, [applyAuthPayload]);
+    };
+
+    void bootstrap();
+    return () => {
+      cancelled = true;
+    };
+  }, [normalizeAuthUser]);
 
   const login = useCallback(
-    ({ accessToken, refreshToken, sessionTokenId, user }: LoginPayload) => {
+    ({ user }: LoginPayload) => {
       applyAuthPayload({
-        accessToken,
-        refreshToken,
-        sessionTokenId,
         user,
       });
     },
@@ -125,9 +164,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = useCallback(() => {
     setUser(null);
-    setAccessToken(null);
-    setRefreshToken(null);
-    setSessionTokenId(null);
     setSessionRemainingSeconds(null);
 
     // Defense-in-depth: clear any legacy persisted auth artifacts.
@@ -213,7 +249,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     [normalizeAuthUser],
   );
   useEffect(() => {
-    if (!accessToken || !sessionTokenId) {
+    if (!user) {
       setSessionRemainingSeconds(null);
       return;
     }
@@ -229,9 +265,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const {
         remaining_seconds,
-        access_token: nextAccessToken,
-        refresh_token: nextRefreshToken,
-        session_token_id: nextSessionTokenId,
         user: refreshedUser,
         is_admin: refreshedAdminFlag,
         is_superuser: refreshedSuperFlag,
@@ -250,31 +283,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         // If the backend doesn't send remaining_seconds, keep the session alive
         // and clear the countdown rather than invalidating/loggin the user out
         setSessionRemainingSeconds(null);
-      }
-
-      const tokenChanged = nextAccessToken && nextAccessToken !== accessToken;
-      const sessionChanged =
-        nextSessionTokenId &&
-        String(nextSessionTokenId) !== String(sessionTokenId);
-
-      const normalizedSessionTokenId =
-        nextSessionTokenId !== undefined && nextSessionTokenId !== null
-          ? String(nextSessionTokenId)
-          : null;
-
-      if (nextAccessToken && nextRefreshToken && normalizedSessionTokenId) {
-        setAccessToken(nextAccessToken);
-        authSessionStore.setTokens({
-          accessToken: nextAccessToken,
-          refreshToken: nextRefreshToken,
-          sessionTokenId: normalizedSessionTokenId,
-        });
-        setRefreshToken(nextRefreshToken);
-        setSessionTokenId(normalizedSessionTokenId);
-
-        if (tokenChanged || sessionChanged) {
-          resetCable();
-        }
       }
 
       if (
@@ -305,9 +313,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (isE2E) {
         (window as { __lastSessionState?: unknown }).__lastSessionState = {
-          accessToken: nextAccessToken ?? accessToken,
-          refreshToken: nextRefreshToken ?? refreshToken,
-          sessionTokenId: normalizedSessionTokenId ?? sessionTokenId,
           remaining,
           user: user ?? null,
         };
@@ -322,9 +327,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
         const response = await client.get<SessionRemainingResponse>(
           "/api/v1/session/remaining",
-          {
-            params: { session_token_id: sessionTokenId },
-          },
+          {},
         );
         handleRemainingResponse(response.data);
       } catch (error) {
@@ -361,7 +364,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           .__triggerSessionPoll;
       }
     };
-  }, [accessToken, sessionTokenId, handleSessionInvalidated]);
+  }, [user, handleSessionInvalidated]);
 
   useEffect(() => {
     const onUnauthorized = () => handleSessionInvalidated("unauthorized");
@@ -381,13 +384,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [applyAuthPayload]);
 
   useEffect(() => {
-    if (!accessToken || !sessionTokenId) return;
+    if (!user) return;
 
     const subscription = cable.subscriptions.create(
       {
         channel: "SessionChannel",
-        token: accessToken,
-        session_token_id: sessionTokenId,
       },
       {
         received: (payload: unknown) => {
@@ -402,15 +403,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [accessToken, sessionTokenId, handleSessionInvalidated]);
+  }, [user, handleSessionInvalidated]);
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        accessToken,
-        refreshToken,
-        sessionTokenId,
         sessionRemainingSeconds,
         isReady,
         login,

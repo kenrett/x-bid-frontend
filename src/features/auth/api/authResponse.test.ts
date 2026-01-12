@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { normalizeAuthResponse } from "./authResponse";
 
 describe("normalizeAuthResponse", () => {
-  it("accepts backend login payload with numeric session_token_id", () => {
+  it("accepts backend login payload and normalizes the user", () => {
     const payload = {
       access_token: "token",
       refresh_token: "refresh",
@@ -18,9 +18,6 @@ describe("normalizeAuthResponse", () => {
     };
 
     expect(normalizeAuthResponse(payload)).toEqual({
-      accessToken: "token",
-      refreshToken: "refresh",
-      sessionTokenId: "34",
       user: {
         id: 3,
         name: "User One",
@@ -34,12 +31,11 @@ describe("normalizeAuthResponse", () => {
     });
   });
 
-  it("fails loudly when v1 fields are missing", () => {
+  it("fails loudly when user data is missing", () => {
     const payload = {
       token: "token",
       refreshToken: "refresh",
       sessionTokenId: "99",
-      user: { id: 1, name: "Casey", email: "casey@example.com", bidCredits: 0 },
     };
 
     expect(() => normalizeAuthResponse(payload)).toThrow(

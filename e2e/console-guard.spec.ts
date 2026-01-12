@@ -5,7 +5,7 @@ import {
   isDocumentRequest,
   setupMockCable,
   stubStripe,
-} from "./fixtures/mocks";
+} from "./fixtures/mocks.js";
 
 test("smoke: no console errors on initial load", async ({ page }) => {
   const consoleErrors: string[] = [];

@@ -8,6 +8,16 @@ import {
   mockSessionRemaining,
 } from "./fixtures/mocks";
 
+const buildStorefrontUrl = (base: string, subdomain: string) => {
+  const url = new URL(base);
+  if (url.hostname === "127.0.0.1" || url.hostname === "localhost") {
+    url.hostname = `${subdomain}.localhost`;
+  } else {
+    url.hostname = `${subdomain}.${url.hostname}`;
+  }
+  return url.toString().replace(/\/+$/, "");
+};
+
 test("user can log in and land on the auctions feed", async ({ page }) => {
   await page.route("**/api/v1/login", (route) =>
     isDocumentRequest(route)
@@ -35,9 +45,7 @@ test("user can log in and land on the auctions feed", async ({ page }) => {
     return window.__lastSessionState;
   });
   expect(state).toMatchObject({
-    accessToken: loginResponse.access_token,
-    refreshToken: loginResponse.refresh_token,
-    sessionTokenId: loginResponse.session_token_id,
+    user: { email: authedUser.email },
   });
 
   const stored = await page.evaluate(() => ({
@@ -45,10 +53,40 @@ test("user can log in and land on the auctions feed", async ({ page }) => {
     session: localStorage.getItem("auth.session.v1"),
   }));
   expect(stored.legacyToken).toBeNull();
-  expect(JSON.parse(stored.session as string)).toMatchObject({
-    access_token: loginResponse.access_token,
-    refresh_token: loginResponse.refresh_token,
-    session_token_id: loginResponse.session_token_id,
-    user: { email: authedUser.email },
-  });
+  expect(stored.session).toBeNull();
+});
+
+test("login persists across storefront subdomains", async ({ page }) => {
+  const base = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:4173";
+  const afterdarkBase = buildStorefrontUrl(base, "afterdark");
+
+  await page.route("**/api/v1/login", (route) =>
+    isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, loginResponse),
+  );
+  await page.route("**/api/v1/logged_in", (route) =>
+    fulfillJson(route, {
+      logged_in: true,
+      user: authedUser,
+      is_admin: false,
+      is_superuser: false,
+    }),
+  );
+  await page.route("**/api/v1/auctions", (route) =>
+    isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, auctionList),
+  );
+  await mockSessionRemaining(page);
+
+  await page.goto("/login");
+  await page.getByLabel("Email address").fill("casey@example.com");
+  await page.getByLabel("Password").fill("password123");
+  await page.getByRole("button", { name: "Sign in" }).click();
+
+  await expect(page.getByText(authedUser.email)).toBeVisible();
+
+  await page.goto(new URL("/auctions", afterdarkBase).toString());
+  await expect(page.getByText(authedUser.email)).toBeVisible();
 });

@@ -87,29 +87,15 @@ describe("SignUpForm", () => {
     expect(await screen.findByText("AUCTIONS")).toBeInTheDocument();
 
     const persisted = localStorage.getItem("auth.session.v1");
-    expect(persisted).not.toBeNull();
-    expect(JSON.parse(persisted as string)).toMatchObject({
-      access_token: "access",
-      refresh_token: "refresh",
-      session_token_id: "sid",
-      user: { email: "test@example.com" },
-    });
+    expect(persisted).toBeNull();
   });
 
-  it("shows an unexpected server response error when auth fields are missing", async () => {
+  it("shows an unexpected server response error when user is missing", async () => {
     mockedClient.post.mockResolvedValueOnce({
       data: {
         access_token: "access",
-        // refresh_token intentionally missing
+        refresh_token: "refresh",
         session_token_id: "sid",
-        user: {
-          id: 1,
-          name: "Test User",
-          email: "test@example.com",
-          bidCredits: 0,
-          is_admin: false,
-          is_superuser: false,
-        },
       },
     });
 

@@ -1,5 +1,4 @@
 import { useAuth } from "../../features/auth/hooks/useAuth";
-import { useAccountStatus } from "@features/account/hooks/useAccountStatus";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { NavItem } from "../NavItem";
 import { Link, useLocation } from "react-router-dom";
@@ -90,9 +89,7 @@ const NAV_ITEMS = [
 export function Header() {
   const { config: storefront } = useStorefront();
   const appMode = getAppMode();
-  const { user, logout, accessToken, isReady } = useAuth();
-  const { isLoading: isAccountStatusLoading, emailVerified } =
-    useAccountStatus();
+  const { user, logout, isReady } = useAuth();
   const isSuperAdmin = Boolean(user?.is_superuser);
   const isAdmin = Boolean(user?.is_admin || isSuperAdmin);
   const apiBase = import.meta.env.VITE_API_URL;
@@ -109,14 +106,11 @@ export function Header() {
       const base = apiBase
         ? new URL("/api-docs", apiBase)
         : new URL("/api-docs", window.location.origin);
-      if (accessToken) base.searchParams.set("token", accessToken);
       return base.toString();
     } catch {
-      return accessToken
-        ? `/api-docs?token=${encodeURIComponent(accessToken)}`
-        : "/api-docs";
+      return "/api-docs";
     }
-  }, [apiBase, accessToken]);
+  }, [apiBase]);
 
   const adminNavItems = useMemo(
     () =>
@@ -202,7 +196,7 @@ export function Header() {
               <>
                 <li className="md:ml-4 flex items-center gap-4">
                   <div className="hidden md:flex flex-col text-right">
-                    <span className="text-sm text-white font-medium flex items-center gap-2">
+                    <span className="text-sm text-red-700 font-medium flex items-center gap-2">
                       {user.email}
                       {isAdmin && (
                         <span
@@ -220,23 +214,6 @@ export function Header() {
                       {user.bidCredits} Bids
                     </span>
                   </div>
-                  {isAccountStatusLoading ? (
-                    <Skeleton
-                      className="h-6 w-24 rounded-full"
-                      aria-label="Loading email verification"
-                    />
-                  ) : emailVerified === true ? (
-                    <span className="inline-flex items-center rounded-full border border-green-300/30 bg-green-500/10 px-2.5 py-1 text-xs font-semibold text-green-50">
-                      Email verified
-                    </span>
-                  ) : emailVerified === false ? (
-                    <Link
-                      to="/account/verify-email"
-                      className="inline-flex items-center rounded-full border border-amber-300/30 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-50 hover:bg-amber-500/15 transition-colors"
-                    >
-                      Email unverified
-                    </Link>
-                  ) : null}
                   <button onClick={logout} className={variants.logoutButton()}>
                     {STRINGS.LOG_OUT}
                   </button>

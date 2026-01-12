@@ -4,8 +4,7 @@ import { useAuctionChannel } from "./useAuctionChannel";
 import { cable } from "@services/cable"; // This will be the mocked version
 
 const authState = {
-  accessToken: "jwt",
-  sessionTokenId: "sid",
+  user: { id: 1, email: "user@example.com" },
 };
 
 // Define mock objects to be used in tests
@@ -38,8 +37,7 @@ describe("useAuctionChannel", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    authState.accessToken = "jwt";
-    authState.sessionTokenId = "sid";
+    authState.user = { id: 1, email: "user@example.com" };
   });
 
   it("should not create a subscription if auctionId is invalid", () => {
@@ -49,8 +47,7 @@ describe("useAuctionChannel", () => {
   });
 
   it("should not create a subscription if not authenticated", () => {
-    authState.accessToken = null as never;
-    authState.sessionTokenId = null as never;
+    authState.user = null as never;
     const { result } = renderHook(() => useAuctionChannel(auctionId, onData));
     expect(vi.mocked(cable.subscriptions.create)).not.toHaveBeenCalled();
     expect(result.current.connectionState).toBe("disconnected");

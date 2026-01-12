@@ -8,8 +8,7 @@ const hoisted = vi.hoisted(() => ({
 }));
 
 const authState = {
-  accessToken: "jwt",
-  sessionTokenId: "sid",
+  user: { id: 1, email: "user@example.com" },
 };
 
 vi.mock("@services/cable", () => ({
@@ -29,8 +28,7 @@ describe("useAuctionListChannel", () => {
     vi.clearAllMocks();
     hoisted.mockSubscription.unsubscribe.mockReset();
     hoisted.createMock.mockReturnValue(hoisted.mockSubscription);
-    authState.accessToken = "jwt";
-    authState.sessionTokenId = "sid";
+    authState.user = { id: 1, email: "user@example.com" };
   });
 
   it("subscribes to the list stream and forwards normalized updates", () => {
