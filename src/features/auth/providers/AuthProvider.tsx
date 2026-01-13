@@ -93,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     number | null
   >(null);
   const [isReady, setIsReady] = useState(false);
+  const userId = user?.id ?? null;
 
   const applyAuthPayload = useCallback(
     (payload: LoginPayload) => {
@@ -297,7 +298,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     [normalizeAuthUser],
   );
   useEffect(() => {
-    if (!user) {
+    if (!userId) {
       setSessionRemainingSeconds(null);
       return;
     }
@@ -362,7 +363,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (isE2E) {
         (window as { __lastSessionState?: unknown }).__lastSessionState = {
           remaining,
-          user: user ?? null,
+          user: authSessionStore.getSnapshot().user,
         };
       }
     };
@@ -412,7 +413,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           .__triggerSessionPoll;
       }
     };
-  }, [user, accessToken, handleSessionInvalidated]);
+  }, [userId, handleSessionInvalidated]);
 
   useEffect(() => {
     const onUnauthorized = () => handleSessionInvalidated("unauthorized");
