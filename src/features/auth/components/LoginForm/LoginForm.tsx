@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import client from "@api/client";
+import client, { buildApiUrl } from "@api/client";
 import { normalizeAuthResponse } from "@features/auth/api/authResponse";
 import { showToast } from "@services/toast";
 import { getApiErrorDetails } from "@utils/apiError";
 import type { FieldErrors } from "@api/normalizeApiError";
 import type { ApiJsonResponse } from "@api/openapi-helpers";
+import {
+  isDebugAuthEnabled,
+  shouldLogLoginDiagnostics,
+} from "../../../debug/authDebug";
 
 const isUnexpectedAuthResponseError = (err: unknown) =>
   err instanceof Error && err.message.startsWith("Unexpected auth response:");
@@ -60,12 +64,29 @@ export const LoginForm = () => {
     setNotice(null);
 
     try {
+      if (isDebugAuthEnabled() && shouldLogLoginDiagnostics()) {
+        const url = buildApiUrl("/api/v1/login");
+        const withCredentials = Boolean(client.defaults.withCredentials);
+        console.info("[auth debug] login submit", {
+          method: "POST",
+          url,
+          withCredentials,
+          headers: ["Content-Type"],
+          note: "X-Storefront-Key may be added by interceptor",
+        });
+      }
       const response = await client.post<
         ApiJsonResponse<"/api/v1/login", "post">
-      >("/api/v1/login", {
-        email_address,
-        password,
-      });
+      >(
+        "/api/v1/login",
+        {
+          email_address,
+          password,
+        },
+        {
+          __debugLogin: true,
+        },
+      );
       login(normalizeAuthResponse(response.data));
       const redirectTo =
         searchParams.get("next") || searchParams.get("redirect") || "/auctions";

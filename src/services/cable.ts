@@ -3,6 +3,11 @@ import { authSessionStore, getAccessToken } from "@features/auth/tokenStore";
 import { getStorefrontKey } from "../storefront/storefront";
 import { getCableConnectionInfo, getCableRuntimeInfo } from "./cableUrl";
 import { showToast } from "./toast";
+import {
+  isDebugAuthEnabled,
+  recordWsAttempt,
+  updateWsAttempt,
+} from "../debug/authDebug";
 
 const redactCableUrl = (url: string): string => {
   try {
@@ -63,6 +68,24 @@ const logStartup = () => {
   if (didLogStartup) return;
   didLogStartup = true;
   const info = getCableRuntimeInfo();
+  const connectionRecord = connection as Record<string, unknown>;
+
+  const wrapHook = (hook: "connected" | "disconnected" | "rejected") => {
+    const original = connectionRecord[hook];
+    if (typeof original !== "function") return;
+    connectionRecord[hook] = (...args: unknown[]) => {
+      if (isDebugAuthEnabled()) {
+        console.info(`[cable debug] ${hook}`, {
+          url: redactCableUrl(connectionUrl),
+        });
+      }
+      return (original as (...inner: unknown[]) => unknown)(...args);
+    };
+  };
+
+  wrapHook("connected");
+  wrapHook("disconnected");
+  wrapHook("rejected");
   console.info("[cable] init", {
     storefront_key: getStorefrontKey(),
     window_origin:
@@ -104,7 +127,11 @@ const logDisconnect = (
   scheduleReconnect();
 };
 
-const attachConnectionLogging = (consumer: ActionCable.Consumer) => {
+const attachConnectionLogging = (
+  consumer: ActionCable.Consumer,
+  debugAttemptId: string | undefined,
+  connectionUrl: string,
+) => {
   const connection = (consumer as { connection?: Record<string, unknown> })
     .connection as
     | (Record<string, unknown> & {
@@ -137,12 +164,27 @@ const attachConnectionLogging = (consumer: ActionCable.Consumer) => {
     if (typeof webSocket.addEventListener === "function") {
       webSocket.addEventListener("open", () => {
         clearReconnect();
+        if (isDebugAuthEnabled()) {
+          console.info("[cable debug] connected", {
+            url: redactCableUrl(connectionUrl),
+          });
+        }
       });
       webSocket.addEventListener("close", (event) => {
         const reconnecting =
           connection.monitor?.reconnecting ??
           (connection.monitor?.reconnectAttempts ?? 0) > 0;
         logDisconnect(info, event, reconnecting);
+        if (debugAttemptId && isDebugAuthEnabled()) {
+          updateWsAttempt(debugAttemptId, {
+            closeCode: event.code,
+            closeReason: event.reason,
+          });
+          console.warn("[cable debug] disconnected", {
+            closeCode: event.code,
+            closeReason: event.reason,
+          });
+        }
       });
     }
   };
@@ -163,8 +205,22 @@ const createCableConsumer = () => {
   const token = getAccessToken();
   const info = getCableConnectionInfo(token);
   logStartup();
+  const debugAttemptId = isDebugAuthEnabled()
+    ? recordWsAttempt({
+        timestamp: Date.now(),
+        url: redactCableUrl(info.connectionUrl),
+        didIncludeTokenParam: info.tokenPresent,
+      })
+    : undefined;
+  if (isDebugAuthEnabled()) {
+    console.info("[cable debug] connect attempt", {
+      url: redactCableUrl(info.connectionUrl),
+      token_param: info.tokenPresent,
+      storefront_key: info.storefrontKey,
+    });
+  }
   const consumer = getCreateConsumer()(info.connectionUrl);
-  attachConnectionLogging(consumer);
+  attachConnectionLogging(consumer, debugAttemptId, info.connectionUrl);
   return consumer;
 };
 

@@ -12,6 +12,14 @@ import {
 import { normalizeAuthResponse } from "@features/auth/api/authResponse";
 import { getStorefrontKey } from "../storefront/storefront";
 import { requestAgeGateAcceptance } from "../ageGate/ageGateStore";
+import {
+  getHeaderValue,
+  isDebugAuthEnabled,
+  listHeaderKeys,
+  recordApiRequest,
+  redactAuthHeader,
+  updateApiRequest,
+} from "../debug/authDebug";
 
 const setHeader = (
   config: { headers?: unknown },
@@ -44,6 +52,7 @@ const normalizeBase = (value: string | undefined): string | undefined => {
 };
 
 const normalizedBaseURL = normalizeBase(rawBaseURL);
+export const getApiBaseUrl = () => normalizedBaseURL;
 
 const getWindowOrigin = () => {
   if (typeof window === "undefined") return undefined;
@@ -99,6 +108,19 @@ const client = axios.create({
   withCredentials: true,
 }) as AxiosInstance;
 
+type AuthDebugMeta = {
+  id: string;
+  didSendAuthHeader: boolean;
+  didSendCookie: boolean;
+  requestOrigin: string | undefined;
+};
+
+type AuthDebugRequestConfig = AxiosRequestConfig & {
+  __authDebug?: AuthDebugMeta;
+  __debugLogin?: boolean;
+  __debugSwitchWhoami?: boolean;
+};
+
 client.interceptors.request.use(
   (config) => {
     if (typeof config.url === "string") {
@@ -124,6 +146,62 @@ client.interceptors.request.use(
     if (accessToken && isApiRequestUrl(config.url)) {
       setHeader(config, "Authorization", `Bearer ${accessToken}`);
     }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+client.interceptors.request.use(
+  (config) => {
+    if (!isDebugAuthEnabled()) return config;
+    const headers = config.headers;
+    const authHeader = getHeaderValue(headers, "Authorization");
+    const requestOrigin = getWindowOrigin();
+    const method = (config.method ?? "get").toUpperCase();
+    const url = typeof config.url === "string" ? config.url : "-";
+    const didSendAuthHeader = Boolean(authHeader);
+    const didSendCookie = Boolean(config.withCredentials);
+    const requestId = recordApiRequest({
+      timestamp: Date.now(),
+      method,
+      url,
+      status: null,
+      didSendAuthHeader,
+      didSendCookie,
+      requestOrigin,
+    });
+
+    (config as AuthDebugRequestConfig).__authDebug = {
+      id: requestId,
+      didSendAuthHeader,
+      didSendCookie,
+      requestOrigin,
+    };
+
+    console.info("[api debug] request", {
+      method,
+      url,
+      baseURL: config.baseURL,
+      origin: requestOrigin,
+      withCredentials: Boolean(config.withCredentials),
+      authHeader: didSendAuthHeader ? redactAuthHeader(authHeader) : undefined,
+    });
+
+    if ((config as AuthDebugRequestConfig).__debugLogin) {
+      const headerKeys = listHeaderKeys(headers);
+      const extraHeaders = headerKeys.filter(
+        (key) =>
+          key.toLowerCase() !== "content-type" &&
+          key.toLowerCase() !== "accept",
+      );
+      console.info("[api debug] login request headers", {
+        header_keys: headerKeys,
+        has_extra_headers: extraHeaders.length > 0,
+        extra_headers: extraHeaders,
+        withCredentials: Boolean(config.withCredentials),
+      });
+    }
+
     return config;
   },
   (error) => Promise.reject(error),
@@ -272,6 +350,42 @@ const beginRefresh = ({ refreshToken }: { refreshToken: string }) => {
 export const handleResponseError = async (error: AxiosError) => {
   const status = error?.response?.status;
   const originalRequest = error.config;
+  if (isDebugAuthEnabled()) {
+    const debugMeta = (originalRequest as AuthDebugRequestConfig)?.__authDebug;
+    if (debugMeta) {
+      const headers = (error.response?.headers ?? {}) as Record<
+        string,
+        string | undefined
+      >;
+      updateApiRequest(debugMeta.id, {
+        status: status ?? null,
+        responseHeaders: {
+          "access-control-allow-origin": headers["access-control-allow-origin"],
+          "access-control-allow-credentials":
+            headers["access-control-allow-credentials"],
+          vary: headers.vary,
+          "set-cookie": headers["set-cookie"],
+        },
+        error: {
+          message: error.message,
+          code: error.code,
+          status: status ?? null,
+        },
+      });
+      console.warn("[api debug] response error", {
+        status,
+        message: error.message,
+        code: error.code,
+        cors: {
+          "access-control-allow-origin": headers["access-control-allow-origin"],
+          "access-control-allow-credentials":
+            headers["access-control-allow-credentials"],
+          vary: headers.vary,
+          "set-cookie": headers["set-cookie"],
+        },
+      });
+    }
+  }
 
   if (
     isAgeGateRequiredError(error) &&
@@ -356,6 +470,35 @@ export const handleResponseError = async (error: AxiosError) => {
 };
 
 client.interceptors.response.use((response) => {
+  if (isDebugAuthEnabled()) {
+    const debugMeta = (response.config as AuthDebugRequestConfig).__authDebug;
+    if (debugMeta) {
+      const headers = (response.headers ?? {}) as Record<
+        string,
+        string | undefined
+      >;
+      updateApiRequest(debugMeta.id, {
+        status: response.status,
+        responseHeaders: {
+          "access-control-allow-origin": headers["access-control-allow-origin"],
+          "access-control-allow-credentials":
+            headers["access-control-allow-credentials"],
+          vary: headers.vary,
+          "set-cookie": headers["set-cookie"],
+        },
+      });
+      console.info("[api debug] response", {
+        status: response.status,
+        cors: {
+          "access-control-allow-origin": headers["access-control-allow-origin"],
+          "access-control-allow-credentials":
+            headers["access-control-allow-credentials"],
+          vary: headers.vary,
+          "set-cookie": headers["set-cookie"],
+        },
+      });
+    }
+  }
   if (isMaintenanceHeader(response?.headers)) {
     const currentPath = window.location.pathname;
     if (!currentPath.startsWith("/maintenance")) {

@@ -14,6 +14,7 @@ import { useAuth } from "@features/auth/hooks/useAuth";
 import { purchasesApi } from "../api/purchasesApi";
 import type { PurchaseDetail } from "../types/purchase";
 import { normalizeApiError } from "@api/normalizeApiError";
+import { getApiBaseUrl } from "@api/client";
 import { useStorefront } from "../../../storefront/useStorefront";
 import {
   STOREFRONT_CONFIGS,
@@ -21,6 +22,7 @@ import {
   type StorefrontConfig,
   type StorefrontKey,
 } from "../../../storefront/storefront";
+import { recordStorefrontSwitchIntent } from "../../../debug/authDebugSwitch";
 
 const formatDate = (value: string) => {
   if (!value) return "—";
@@ -265,6 +267,15 @@ export const PurchaseDetailPage = () => {
                 target="_blank"
                 rel="noreferrer noopener"
                 className="font-semibold text-white underline underline-offset-2"
+                onClick={() =>
+                  recordStorefrontSwitchIntent({
+                    fromOrigin: window.location.origin,
+                    fromStorefrontKey: currentStorefrontKey,
+                    toOrigin: `https://${blockedStorefront.domain}`,
+                    toStorefrontKey: blockedStorefront.key,
+                    apiBaseUrl: getApiBaseUrl(),
+                  })
+                }
               >
                 Open it there.
               </a>

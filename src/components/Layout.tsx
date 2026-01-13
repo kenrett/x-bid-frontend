@@ -9,6 +9,8 @@ import { useStorefront } from "../storefront/useStorefront";
 import { getAppMode } from "../appMode/appMode";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { AgeGateModal } from "./AgeGateModal";
+import { AuthDebugPanel } from "../debug/AuthDebugPanel";
+import { maybeLogStorefrontSwitchLanding } from "../debug/authDebugSwitch";
 
 export const Layout = () => {
   const navigate = useNavigate();
@@ -70,6 +72,10 @@ export const Layout = () => {
       window.removeEventListener("app:email_unverified", onEmailUnverified);
   }, [navigate, location.pathname, location.search]);
 
+  useEffect(() => {
+    void maybeLogStorefrontSwitchLanding();
+  }, []);
+
   return (
     <div
       className="flex min-h-screen flex-col bg-[var(--sf-background)] text-[var(--sf-text)]"
@@ -100,6 +106,7 @@ export const Layout = () => {
       </AccountStatusProvider>
       <AgeGateModal />
       <Footer />
+      <AuthDebugPanel />
     </div>
   );
 };
