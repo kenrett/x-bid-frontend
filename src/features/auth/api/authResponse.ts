@@ -24,18 +24,9 @@ export const normalizeAuthResponse = (raw: unknown): LoginPayload => {
     throw new Error("Unexpected auth response: expected JSON object");
   }
 
-  const accessToken =
-    typeof record.access_token === "string" && record.access_token.trim()
-      ? record.access_token
-      : null;
-  const refreshToken =
-    typeof record.refresh_token === "string" && record.refresh_token.trim()
-      ? record.refresh_token
-      : null;
   const userRecord = asRecord(record.user);
 
   const missing: string[] = [];
-  if (!accessToken) missing.push("access_token");
   if (!userRecord) missing.push("user");
 
   if (missing.length) {
@@ -46,5 +37,5 @@ export const normalizeAuthResponse = (raw: unknown): LoginPayload => {
 
   const user = normalizeUser(userRecord!);
 
-  return { user, accessToken, refreshToken };
+  return { user };
 };

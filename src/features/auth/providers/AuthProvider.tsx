@@ -86,7 +86,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const pendingBalanceRef = useRef<number | null>(null);
 
   const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [sessionRemainingSeconds, setSessionRemainingSeconds] = useState<
     number | null
   >(null);
@@ -108,12 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(nextUser);
       setSessionRemainingSeconds(null);
 
-      authSessionStore.setSession({
-        user: nextUser,
-        accessToken: payload.accessToken ?? null,
-        refreshToken: payload.refreshToken ?? null,
-      });
-      setAccessToken(payload.accessToken ?? null);
+      authSessionStore.setUser(nextUser);
       setSentryUser(nextUser);
       resetCable();
 
@@ -129,7 +123,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const clearAuthState = useCallback(() => {
     pendingBalanceRef.current = null;
     setUser(null);
-    setAccessToken(null);
     setSessionRemainingSeconds(null);
 
     // Defense-in-depth: clear any legacy persisted auth artifacts.
@@ -160,7 +153,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         if (import.meta.env.VITE_DEBUG_AUTH) {
           console.info("[auth debug] bootstrap logged_in start", {
-            hasAccessToken: Boolean(authSessionStore.getSnapshot().accessToken),
+            hasUser: Boolean(authSessionStore.getSnapshot().user),
           });
         }
         const response =
@@ -183,7 +176,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           pendingBalanceRef.current = null;
           setUser(resolvedUser);
           authSessionStore.setUser(resolvedUser);
-          setAccessToken(null);
           setSentryUser(resolvedUser);
           resetCable();
         }
@@ -211,11 +203,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [clearAuthState, normalizeAuthUser]);
 
   const login = useCallback(
-    ({ user, accessToken, refreshToken }: LoginPayload) => {
+    ({ user }: LoginPayload) => {
       applyAuthPayload({
         user,
-        accessToken,
-        refreshToken,
       });
     },
     [applyAuthPayload],
@@ -460,7 +450,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     <AuthContext.Provider
       value={{
         user,
-        accessToken,
         sessionRemainingSeconds,
         isReady,
         login,

@@ -19,6 +19,7 @@ const buildStorefrontUrl = (base: string, subdomain: string) => {
 };
 
 test("user can log in and land on the auctions feed", async ({ page }) => {
+  let auctionsAuthHeader: string | undefined;
   await page.route("**/api/v1/login", (route) =>
     isDocumentRequest(route)
       ? route.continue()
@@ -27,7 +28,8 @@ test("user can log in and land on the auctions feed", async ({ page }) => {
   await page.route("**/api/v1/auctions", (route) =>
     isDocumentRequest(route)
       ? route.continue()
-      : fulfillJson(route, auctionList),
+      : ((auctionsAuthHeader = route.request().headers()["authorization"]),
+        fulfillJson(route, auctionList)),
   );
   await mockSessionRemaining(page);
 
@@ -47,6 +49,7 @@ test("user can log in and land on the auctions feed", async ({ page }) => {
   expect(state).toMatchObject({
     user: { email: authedUser.email },
   });
+  expect(auctionsAuthHeader).toBeUndefined();
 
   const stored = await page.evaluate(() => ({
     legacyToken: localStorage.getItem("token"),
@@ -70,15 +73,18 @@ test("login persists across storefront subdomains", async ({ page }) => {
       ? route.continue()
       : fulfillJson(route, loginResponse),
   );
+  let loggedInAuthHeader: string | undefined;
   await page.route("**/api/v1/logged_in", (route) =>
-    fulfillJson(route, {
-      logged_in: true,
-      access_token: "token-authed",
-      refresh_token: "refresh-authed",
-      user: authedUser,
-      is_admin: false,
-      is_superuser: false,
-    }),
+    fulfillJson(
+      route,
+      ((loggedInAuthHeader = route.request().headers()["authorization"]),
+      {
+        logged_in: true,
+        user: authedUser,
+        is_admin: false,
+        is_superuser: false,
+      }),
+    ),
   );
   await page.route("**/api/v1/auctions", (route) =>
     isDocumentRequest(route)
@@ -96,4 +102,5 @@ test("login persists across storefront subdomains", async ({ page }) => {
 
   await page.goto(new URL("/auctions", afterdarkBase).toString());
   await expect(page.getByText(authedUser.email)).toBeVisible();
+  expect(loggedInAuthHeader).toBeUndefined();
 });

@@ -55,12 +55,9 @@ describe("SignUpForm", () => {
     ).toBeInTheDocument();
   });
 
-  it("stores tokens + user and navigates to /auctions", async () => {
+  it("sets user and navigates to /auctions", async () => {
     mockedClient.post.mockResolvedValueOnce({
       data: {
-        access_token: "access",
-        refresh_token: "refresh",
-        session_token_id: "sid",
         user: {
           id: 1,
           name: "Test User",
@@ -92,11 +89,7 @@ describe("SignUpForm", () => {
 
   it("shows an unexpected server response error when user is missing", async () => {
     mockedClient.post.mockResolvedValueOnce({
-      data: {
-        access_token: "access",
-        refresh_token: "refresh",
-        session_token_id: "sid",
-      },
+      data: {},
     });
 
     const user = userEvent.setup();

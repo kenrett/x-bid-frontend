@@ -17,6 +17,7 @@ test("checkout posts selected pack and updates balance on success", async ({
   await mockSessionRemaining(page);
 
   let checkoutPayload: unknown;
+  let checkoutAuthHeader: string | undefined;
   await page.route("**/api/v1/bid_packs", (route) =>
     isDocumentRequest(route)
       ? route.continue()
@@ -25,6 +26,7 @@ test("checkout posts selected pack and updates balance on success", async ({
   await page.route("**/api/v1/checkouts", (route) => {
     if (route.request().method() === "POST") {
       checkoutPayload = route.request().postDataJSON();
+      checkoutAuthHeader = route.request().headers()["authorization"];
       return fulfillJson(route, { clientSecret: "cs_test_success" });
     }
     return route.continue();
@@ -37,6 +39,7 @@ test("checkout posts selected pack and updates balance on success", async ({
   await expect(page.locator("#checkout")).toBeVisible();
 
   expect(checkoutPayload).toMatchObject({ bid_pack_id: 2 });
+  expect(checkoutAuthHeader).toBeUndefined();
 
   await page.route("**/api/v1/checkout/success**", (route) =>
     fulfillJson(route, { status: "success", updated_bid_credits: 180 }),

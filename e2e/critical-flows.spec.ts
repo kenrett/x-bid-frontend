@@ -69,8 +69,6 @@ const authedUser = {
 };
 
 const loginResponse = {
-  access_token: "token-login",
-  refresh_token: "refresh-login",
   user: authedUser,
   is_admin: false,
   is_superuser: false,
@@ -153,8 +151,6 @@ const seedAuthState = async (page: Page, user = authedUser) => {
   await page.route("**/api/v1/logged_in", (route) =>
     fulfillJson(route, {
       logged_in: true,
-      access_token: "token-authed",
-      refresh_token: "refresh-authed",
       user,
       is_admin: Boolean(user.is_admin),
       is_superuser: Boolean(user.is_superuser),

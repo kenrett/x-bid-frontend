@@ -243,12 +243,8 @@ const ensureConsumer = (): ActionCable.Consumer | null => {
   return consumer;
 };
 
-let lastAccessToken = authSessionStore.getSnapshot().accessToken;
 authSessionStore.subscribe(() => {
-  const nextToken = authSessionStore.getSnapshot().accessToken;
-  if (nextToken === lastAccessToken) return;
-  lastAccessToken = nextToken;
-  if (consumer) {
+  if (consumer && !hasCableSession()) {
     resetCable();
   }
 });

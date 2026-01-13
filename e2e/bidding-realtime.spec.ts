@@ -47,6 +47,7 @@ const liveAuctionHistory = {
 test("user can buy bids, place a bid, and see realtime updates", async ({
   page,
 }) => {
+  let bidAuthHeader: string | undefined;
   await setupMockCable(page);
   await stubStripe(page);
   await seedAuthState(page);
@@ -73,6 +74,7 @@ test("user can buy bids, place a bid, and see realtime updates", async ({
   );
   await page.route(`**/api/v1/auctions/${liveAuctionId}/bids`, (route) => {
     if (route.request().method() === "POST") {
+      bidAuthHeader = route.request().headers()["authorization"];
       return fulfillJson(route, {
         success: true,
         bid: {
@@ -145,4 +147,5 @@ test("user can buy bids, place a bid, and see realtime updates", async ({
   );
   await expect(page.getByLabel("Current Price")).toHaveText("$110.00");
   await expect(page.getByText("Studio Ace bid $110.00")).toBeVisible();
+  expect(bidAuthHeader).toBeUndefined();
 });

@@ -4,8 +4,6 @@ import { normalizeAuthResponse } from "./authResponse";
 describe("normalizeAuthResponse", () => {
   it("accepts backend login payload and normalizes the user", () => {
     const payload = {
-      access_token: "token",
-      refresh_token: "refresh",
       session_token_id: 34,
       user: {
         id: 3,
@@ -18,7 +16,6 @@ describe("normalizeAuthResponse", () => {
     };
 
     expect(normalizeAuthResponse(payload)).toEqual({
-      accessToken: "token",
       user: {
         id: 3,
         name: "User One",
@@ -29,15 +26,11 @@ describe("normalizeAuthResponse", () => {
         email_verified: null,
         email_verified_at: null,
       },
-      refreshToken: "refresh",
     });
   });
 
   it("fails loudly when user data is missing", () => {
-    const payload = {
-      access_token: "token",
-      refresh_token: "refresh",
-    };
+    const payload = {};
 
     expect(() => normalizeAuthResponse(payload)).toThrow(
       /Unexpected auth response/i,

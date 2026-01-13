@@ -82,7 +82,6 @@ const createMockAuthReturn = (
   user: typeof mockUserLoggedIn | null,
 ): UseAuthReturn => ({
   user,
-  accessToken: user ? "token" : null,
   login: vi.fn() as UseAuthReturn["login"],
   logout: vi.fn(),
   updateUser: vi.fn(),

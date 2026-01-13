@@ -4,12 +4,7 @@ import axios, {
   type AxiosInstance,
   type AxiosRequestConfig,
 } from "axios";
-import {
-  authSessionStore,
-  getAccessToken,
-  getRefreshToken,
-} from "@features/auth/tokenStore";
-import { normalizeAuthResponse } from "@features/auth/api/authResponse";
+import { authSessionStore } from "@features/auth/tokenStore";
 import { getStorefrontKey } from "../storefront/storefront";
 import { requestAgeGateAcceptance } from "../ageGate/ageGateStore";
 import {
@@ -84,27 +79,6 @@ const getErrorReason = (data: unknown): string | undefined => {
   if (!error || typeof error !== "object") return undefined;
   const reason = (error as Record<string, unknown>).reason;
   return typeof reason === "string" ? reason : undefined;
-};
-
-const isApiRequestUrl = (configUrl: unknown): boolean => {
-  if (typeof configUrl !== "string") return false;
-  if (!/^https?:\/\//i.test(configUrl)) {
-    return configUrl.startsWith("/api/");
-  }
-
-  try {
-    const origin = getWindowOrigin();
-    const requestUrl = new URL(configUrl, origin ?? "http://localhost");
-    if (normalizedBaseURL) {
-      const apiUrl = new URL(normalizedBaseURL, origin ?? "http://localhost");
-      if (requestUrl.origin !== apiUrl.origin) return false;
-    } else if (origin && requestUrl.origin !== origin) {
-      return false;
-    }
-    return requestUrl.pathname.startsWith("/api/");
-  } catch {
-    return false;
-  }
 };
 
 const buildApiPath = (path: string): string => {
@@ -208,7 +182,6 @@ client.interceptors.request.use(
     ) {
       console.info("[api debug] logged_in request", {
         url: config.url,
-        hasAccessToken: Boolean(getAccessToken()),
         didSendAuthHeader,
         withCredentials: Boolean(config.withCredentials),
         origin: requestOrigin,
@@ -234,17 +207,6 @@ client.interceptors.request.use(
 client.interceptors.request.use(
   (config) => {
     setHeader(config, "X-Storefront-Key", getStorefrontKey());
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
-client.interceptors.request.use(
-  (config) => {
-    const accessToken = getAccessToken();
-    if (accessToken && isApiRequestUrl(config.url)) {
-      setHeader(config, "Authorization", `Bearer ${accessToken}`);
-    }
     return config;
   },
   (error) => Promise.reject(error),
@@ -362,17 +324,11 @@ const logInvalidToken = (
   });
 };
 
-const isRefreshRequest = (configUrl: unknown) =>
-  typeof configUrl === "string" &&
-  configUrl.includes("/api/v1/session/refresh");
-
-let refreshPromise: Promise<ReturnType<typeof normalizeAuthResponse>> | null =
-  null;
-
 const INVALID_SESSION_CODES = new Set([
   "invalid_session",
   "session_invalidated",
   "session_expired",
+  "invalid_token",
 ]);
 
 const EMAIL_UNVERIFIED_CODES = new Set(["email_unverified"]);
@@ -464,42 +420,6 @@ const dispatchEmailUnverified = (status: number, code?: string) => {
   window.dispatchEvent(
     new CustomEvent("app:email_unverified", { detail: { status, code } }),
   );
-};
-
-const beginRefresh = ({ refreshToken }: { refreshToken: string }) => {
-  refreshPromise ??= (async () => {
-    try {
-      const refreshResponse = await client.post(
-        "/api/v1/session/refresh",
-        { refresh_token: refreshToken },
-        { headers: { Authorization: undefined } },
-      );
-      const normalized = normalizeAuthResponse(refreshResponse.data);
-      authSessionStore.setSession({
-        user: normalized.user,
-        accessToken: normalized.accessToken ?? null,
-        refreshToken: normalized.refreshToken ?? null,
-      });
-      window.dispatchEvent(
-        new CustomEvent("app:auth:refreshed", { detail: normalized }),
-      );
-      return normalized;
-    } catch (refreshError) {
-      const refreshAxiosError = refreshError as AxiosError;
-      const status = refreshAxiosError?.response?.status ?? 401;
-      const code = extractErrorCode(refreshAxiosError?.response?.data);
-
-      // Hard stop: refresh failed, so clear in-memory auth artifacts to prevent
-      // repeated refresh attempts and partial-auth states.
-      authSessionStore.clear();
-      dispatchUnauthorized(status, code);
-      throw refreshError;
-    } finally {
-      refreshPromise = null;
-    }
-  })();
-
-  return refreshPromise;
 };
 
 export const handleResponseError = async (error: AxiosError) => {
@@ -606,31 +526,6 @@ export const handleResponseError = async (error: AxiosError) => {
     if (status === 403) {
       dispatchForbidden(status, code);
       return Promise.reject(error);
-    }
-
-    if (isRefreshRequest(error.config?.url)) {
-      return Promise.reject(error);
-    }
-
-    const refreshToken = getRefreshToken();
-    const canRefreshWithToken =
-      status === 401 &&
-      Boolean(refreshToken) &&
-      originalRequest &&
-      !(originalRequest as { __authRetry?: boolean }).__authRetry &&
-      !isRefreshRequest(originalRequest.url);
-
-    if (canRefreshWithToken) {
-      try {
-        await beginRefresh({ refreshToken: refreshToken as string });
-        (originalRequest as { __authRetry?: boolean }).__authRetry = true;
-        return client.request(originalRequest);
-      } catch (refreshError) {
-        if (import.meta.env.MODE !== "test") {
-          console.warn("[api client] Refresh token flow failed", refreshError);
-        }
-        return Promise.reject(error);
-      }
     }
 
     authSessionStore.clear();

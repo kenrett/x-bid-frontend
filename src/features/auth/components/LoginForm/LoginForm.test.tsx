@@ -70,12 +70,9 @@ describe("LoginForm", () => {
     expect(submitButton).toHaveFocus();
   });
 
-  it("stores tokens + user and navigates to /auctions", async () => {
+  it("sets user and navigates to /auctions", async () => {
     mockedClient.post.mockResolvedValueOnce({
       data: {
-        access_token: "access",
-        refresh_token: "refresh",
-        session_token_id: "sid",
         user: {
           id: 1,
           name: "Test User",
@@ -106,9 +103,6 @@ describe("LoginForm", () => {
   it("navigates to redirect URL when present", async () => {
     mockedClient.post.mockResolvedValueOnce({
       data: {
-        access_token: "access",
-        refresh_token: "refresh",
-        session_token_id: "sid",
         user: {
           id: 1,
           name: "Test User",
@@ -134,9 +128,7 @@ describe("LoginForm", () => {
   });
 
   it("shows a friendly error when the server returns an unexpected auth payload", async () => {
-    mockedClient.post.mockResolvedValueOnce({
-      data: { refresh_token: "refresh" },
-    });
+    mockedClient.post.mockResolvedValueOnce({ data: {} });
     const user = userEvent.setup();
     renderLogin();
 

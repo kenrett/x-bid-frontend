@@ -22,7 +22,6 @@ describe("useAuth", () => {
         email_verified: true,
         email_verified_at: null,
       },
-      accessToken: "token",
       sessionRemainingSeconds: 100,
       isReady: true,
       login: vi.fn(),

@@ -22,7 +22,6 @@ const authValue = (overrides: Partial<AuthContextType> = {}): AuthContextType =>
       is_superuser: false,
     },
     isReady: true,
-    accessToken: "t",
     sessionRemainingSeconds: null,
     login: vi.fn(),
     logout: vi.fn(),
