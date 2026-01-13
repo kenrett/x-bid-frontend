@@ -1,6 +1,6 @@
 import * as ActionCable from "@rails/actioncable";
 import { authSessionStore } from "@features/auth/tokenStore";
-import { getStorefrontKey } from "@storefront/storefront";
+import { getStorefrontKey } from "../storefront/storefront";
 import { getCableRuntimeInfo } from "./cableUrl";
 
 type CreateConsumerFn = typeof ActionCable.createConsumer;

@@ -1,4 +1,4 @@
-import { getStorefrontKey } from "@storefront/storefront";
+import { getStorefrontKey } from "../storefront/storefront";
 
 type CableRuntimeInfo = {
   computedCableUrl: string;
