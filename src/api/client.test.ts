@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { handleResponseError } from "./client";
+import client, { handleResponseError } from "./client";
 import { authSessionStore } from "@features/auth/tokenStore";
 import type { AxiosError } from "axios";
 
@@ -69,5 +69,11 @@ describe("handleResponseError", () => {
     });
 
     window.removeEventListener("app:unauthorized", unauthorizedSpy);
+  });
+});
+
+describe("api client defaults", () => {
+  it("always includes credentials", () => {
+    expect(client.defaults.withCredentials).toBe(true);
   });
 });
