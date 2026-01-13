@@ -7,6 +7,12 @@ type CableRuntimeInfo = {
   cableUrl: string | undefined;
 };
 
+export type CableConnectionInfo = CableRuntimeInfo & {
+  connectionUrl: string;
+  tokenPresent: boolean;
+  storefrontKey: string;
+};
+
 let didWarnFallback = false;
 
 const toOrigin = (value: string | undefined): string | null => {
@@ -84,5 +90,38 @@ export const getCableRuntimeInfo = (): CableRuntimeInfo => {
     apiOrigin: toOrigin(apiUrlRaw),
     apiUrl: apiUrlRaw,
     cableUrl: cableUrlRaw,
+  };
+};
+
+const appendQueryParams = (
+  baseUrl: string,
+  params: Record<string, string | undefined>,
+): string => {
+  const [path, query = ""] = baseUrl.split("?");
+  const searchParams = new URLSearchParams(query);
+  for (const [key, value] of Object.entries(params)) {
+    if (!value) continue;
+    searchParams.set(key, value);
+  }
+  const nextQuery = searchParams.toString();
+  return nextQuery ? `${path}?${nextQuery}` : path;
+};
+
+export const getCableConnectionInfo = (
+  accessToken?: string | null,
+  storefrontKeyOverride?: string,
+): CableConnectionInfo => {
+  const runtime = getCableRuntimeInfo();
+  const storefrontKey = storefrontKeyOverride ?? getStorefrontKey();
+  const connectionUrl = appendQueryParams(runtime.computedCableUrl, {
+    token: accessToken ?? undefined,
+    storefront: storefrontKey,
+  });
+
+  return {
+    ...runtime,
+    connectionUrl,
+    storefrontKey,
+    tokenPresent: Boolean(accessToken),
   };
 };

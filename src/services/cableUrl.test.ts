@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { getCableRuntimeInfo } from "./cableUrl";
+import { getCableConnectionInfo, getCableRuntimeInfo } from "./cableUrl";
 
 const setEnv = (env: Record<string, unknown>) => {
   (import.meta as unknown as { env: Record<string, unknown> }).env = env;
@@ -42,6 +42,17 @@ describe("getCableRuntimeInfo", () => {
       expect.objectContaining({
         VITE_API_URL: "not a url",
       }),
+    );
+  });
+
+  it("appends token and storefront to the connection URL", () => {
+    setEnv({
+      VITE_API_URL: "https://api.example.com",
+      VITE_STOREFRONT_KEY: "afterdark",
+    });
+    const info = getCableConnectionInfo("token-abc");
+    expect(info.connectionUrl).toBe(
+      "wss://api.example.com/cable?token=token-abc&storefront=afterdark",
     );
   });
 });
