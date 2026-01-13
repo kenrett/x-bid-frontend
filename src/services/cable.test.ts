@@ -14,7 +14,9 @@ vi.mock("@rails/actioncable", () => ({
 describe("cable service", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    (import.meta as unknown as { env: Record<string, unknown> }).env = {};
+    (import.meta as unknown as { env: Record<string, unknown> }).env = {
+      VITE_API_URL: "http://localhost:3000",
+    };
     const { authSessionStore } = await import("@features/auth/tokenStore");
     authSessionStore.clear();
   });
@@ -49,9 +51,11 @@ describe("cable service", () => {
     expect(nextCallUrl).toMatch(/\/cable$/);
   });
 
-  it("passes through the base cable URL without appending tokens", async () => {
-    const { buildCableUrl } = await import("./cable");
-    const built = buildCableUrl("ws://example.com/cable?foo=bar");
-    expect(built).toBe("ws://example.com/cable?foo=bar");
+  it("connects to the API host cable endpoint without query params", async () => {
+    const { resetCable } = await import("./cable");
+    resetCable();
+    const firstCallUrl = createConsumerMock.mock.calls.at(0)?.[0];
+    if (!firstCallUrl) throw new Error("createConsumer not called");
+    expect(firstCallUrl).toBe("ws://localhost:3000/cable");
   });
 });

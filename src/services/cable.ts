@@ -1,27 +1,7 @@
 import * as ActionCable from "@rails/actioncable";
 import { authSessionStore } from "@features/auth/tokenStore";
-
-const buildCableUrl = (baseOverride?: string) => {
-  const explicit = baseOverride ?? import.meta.env.VITE_CABLE_URL;
-  if (explicit) return String(explicit);
-  if (import.meta.env.MODE === "development") {
-    return "ws://localhost:3000/cable";
-  }
-  const apiBase =
-    typeof import.meta.env.VITE_API_URL === "string"
-      ? import.meta.env.VITE_API_URL
-      : undefined;
-  if (apiBase) {
-    try {
-      const url = new URL(apiBase);
-      const protocol = url.protocol === "https:" ? "wss:" : "ws:";
-      return `${protocol}//${url.host}/cable`;
-    } catch {
-      // fall through to default
-    }
-  }
-  return "/cable";
-};
+import { getStorefrontKey } from "@storefront/storefront";
+import { getCableRuntimeInfo } from "./cableUrl";
 
 type CreateConsumerFn = typeof ActionCable.createConsumer;
 
@@ -34,8 +14,93 @@ const getCreateConsumer = (): CreateConsumerFn => {
   return maybeMock ?? ActionCable.createConsumer;
 };
 
+let didLogStartup = false;
+
+const logStartup = () => {
+  if (didLogStartup) return;
+  didLogStartup = true;
+  const info = getCableRuntimeInfo();
+  console.info("[cable] init", {
+    storefront_key: getStorefrontKey(),
+    window_origin:
+      typeof window === "undefined" ? undefined : window.location?.origin,
+    VITE_API_URL: info.apiUrl,
+    VITE_CABLE_URL: info.cableUrl,
+    computedCableUrl: info.computedCableUrl,
+  });
+};
+
+const logDisconnect = (
+  info: ReturnType<typeof getCableRuntimeInfo>,
+  event?: CloseEvent,
+  reconnecting?: boolean,
+) => {
+  console.warn("[cable] disconnected", {
+    computedCableUrl: info.computedCableUrl,
+    closeCode: event?.code,
+    closeReason: event?.reason,
+    reconnecting: Boolean(reconnecting),
+  });
+};
+
+const attachConnectionLogging = (consumer: ActionCable.Consumer) => {
+  const connection = (consumer as { connection?: Record<string, unknown> })
+    .connection as
+    | (Record<string, unknown> & {
+        webSocket?: WebSocket;
+        monitor?: { reconnectAttempts?: number; reconnecting?: boolean };
+        open?: () => void;
+      })
+    | undefined;
+  if (
+    !connection ||
+    (connection as { __xBidLoggingAttached?: boolean }).__xBidLoggingAttached
+  ) {
+    return;
+  }
+
+  (connection as { __xBidLoggingAttached?: boolean }).__xBidLoggingAttached =
+    true;
+  const info = getCableRuntimeInfo();
+
+  const attachToSocket = () => {
+    const webSocket = connection.webSocket;
+    if (
+      !webSocket ||
+      (webSocket as { __xBidLoggingAttached?: boolean }).__xBidLoggingAttached
+    ) {
+      return;
+    }
+    (webSocket as { __xBidLoggingAttached?: boolean }).__xBidLoggingAttached =
+      true;
+    if (typeof webSocket.addEventListener === "function") {
+      webSocket.addEventListener("close", (event) => {
+        const reconnecting =
+          connection.monitor?.reconnecting ??
+          (connection.monitor?.reconnectAttempts ?? 0) > 0;
+        logDisconnect(info, event, reconnecting);
+      });
+    }
+  };
+
+  const originalOpen = connection.open?.bind(connection);
+  if (originalOpen) {
+    connection.open = () => {
+      const result = originalOpen();
+      attachToSocket();
+      return result;
+    };
+  }
+
+  attachToSocket();
+};
+
 const createCableConsumer = () => {
-  return getCreateConsumer()(buildCableUrl());
+  const info = getCableRuntimeInfo();
+  logStartup();
+  const consumer = getCreateConsumer()(info.computedCableUrl);
+  attachConnectionLogging(consumer);
+  return consumer;
 };
 
 const hasCableSession = () => {
@@ -87,4 +152,4 @@ const cable: ActionCable.Consumer = {
   },
 };
 
-export { cable, buildCableUrl };
+export { cable };

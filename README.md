@@ -62,9 +62,9 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
     cp .env.example .env.development
     ```
 
-    - `VITE_API_URL`: Base URL for the XBid backend API origin (e.g., `http://localhost:3000`). (Frontend requests include `/api/v1/...` in their paths.)
+    - `VITE_API_URL`: Base URL for the XBid backend API origin (e.g., `http://localhost:3000`). (Frontend requests include `/api/v1/...` in their paths.) All storefront builds must point to the same API host for shared sessions.
     - `VITE_STRIPE_PUBLISHABLE_KEY`: Stripe publishable key used for embedded checkout.
-    - `VITE_CABLE_URL` (optional): Action Cable WebSocket endpoint; defaults to `ws://localhost:3000/cable`. The app includes the session token as a `?token=...` query param (and adds an `Authorization` header in Node/WebSocket test environments when supported).
+    - `VITE_CABLE_URL` (optional): Action Cable WebSocket endpoint; if unset, it is derived from `VITE_API_URL` as `ws(s)://<api-host>/cable`. All storefront builds should point at the same cable host to reuse shared cookies.
     - `VITE_AUTH_REFRESH_WITH_COOKIE` (optional): Set to `"true"` to enable cookie-based refresh (`POST /api/v1/session/refresh` with `withCredentials: true`) on `401` responses; otherwise a reload (or `401`) requires re-login.
 
 4.  **Run the development server:**
