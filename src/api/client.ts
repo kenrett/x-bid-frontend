@@ -59,6 +59,31 @@ const getWindowOrigin = () => {
   return window.location?.origin;
 };
 
+const getWindowHost = () => {
+  if (typeof window === "undefined") return undefined;
+  return window.location?.host;
+};
+
+const createRequestId = () => {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    try {
+      return crypto.randomUUID();
+    } catch {
+      // fall through to a stable string generator
+    }
+  }
+  return `req_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+};
+
+const getErrorReason = (data: unknown): string | undefined => {
+  if (!data || typeof data !== "object") return undefined;
+  const record = data as Record<string, unknown>;
+  const error = record.error;
+  if (!error || typeof error !== "object") return undefined;
+  const reason = (error as Record<string, unknown>).reason;
+  return typeof reason === "string" ? reason : undefined;
+};
+
 const isApiRequestUrl = (configUrl: unknown): boolean => {
   if (typeof configUrl !== "string") return false;
   if (!/^https?:\/\//i.test(configUrl)) {
@@ -119,37 +144,8 @@ type AuthDebugRequestConfig = AxiosRequestConfig & {
   __authDebug?: AuthDebugMeta;
   __debugLogin?: boolean;
   __debugSwitchWhoami?: boolean;
+  __requestId?: string;
 };
-
-client.interceptors.request.use(
-  (config) => {
-    if (typeof config.url === "string") {
-      config.url = buildApiUrl(config.url);
-      config.baseURL = undefined;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
-client.interceptors.request.use(
-  (config) => {
-    setHeader(config, "X-Storefront-Key", getStorefrontKey());
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
-client.interceptors.request.use(
-  (config) => {
-    const accessToken = getAccessToken();
-    if (accessToken && isApiRequestUrl(config.url)) {
-      setHeader(config, "Authorization", `Bearer ${accessToken}`);
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
 
 client.interceptors.request.use(
   (config) => {
@@ -219,6 +215,83 @@ client.interceptors.request.use(
   },
   (error) => Promise.reject(error),
 );
+
+client.interceptors.request.use(
+  (config) => {
+    if (typeof config.url === "string") {
+      config.url = buildApiUrl(config.url);
+      config.baseURL = undefined;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+client.interceptors.request.use(
+  (config) => {
+    setHeader(config, "X-Storefront-Key", getStorefrontKey());
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+client.interceptors.request.use(
+  (config) => {
+    const accessToken = getAccessToken();
+    if (accessToken && isApiRequestUrl(config.url)) {
+      setHeader(config, "Authorization", `Bearer ${accessToken}`);
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+client.interceptors.request.use(
+  (config) => {
+    const existingRequestId = getHeaderValue(config.headers, "X-Request-Id");
+    const requestId = existingRequestId ?? createRequestId();
+    setHeader(config, "X-Request-Id", requestId);
+    (config as AuthDebugRequestConfig).__requestId = requestId;
+
+    if (import.meta.env.MODE === "development") {
+      const method = (config.method ?? "get").toUpperCase();
+      const url = typeof config.url === "string" ? config.url : "-";
+      const storefrontKey = getStorefrontKey();
+      const authHeader = getHeaderValue(config.headers, "Authorization");
+      const withCredentials = Boolean(config.withCredentials);
+
+      console.info("[auth net] request", {
+        request_id: requestId,
+        method,
+        url,
+        storefront_key: storefrontKey,
+        has_auth_header: Boolean(authHeader),
+        with_credentials: withCredentials,
+      });
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+const logInvalidToken = (
+  config: AxiosRequestConfig | undefined,
+  data: unknown,
+) => {
+  if (import.meta.env.MODE !== "development") return;
+  const code = extractErrorCode(data);
+  if (!code || code.toLowerCase() !== "invalid_token") return;
+  const requestId =
+    getHeaderValue(config?.headers, "X-Request-Id") ??
+    (config as AuthDebugRequestConfig | undefined)?.__requestId;
+  console.warn("[auth net] invalid_token", {
+    request_id: requestId,
+    reason: getErrorReason(data),
+    origin: getWindowOrigin(),
+    host: getWindowHost(),
+  });
+};
 
 const isRefreshRequest = (configUrl: unknown) =>
   typeof configUrl === "string" &&
@@ -363,6 +436,7 @@ const beginRefresh = ({ refreshToken }: { refreshToken: string }) => {
 export const handleResponseError = async (error: AxiosError) => {
   const status = error?.response?.status;
   const originalRequest = error.config;
+  logInvalidToken(originalRequest, error.response?.data);
   if (isDebugAuthEnabled()) {
     const debugMeta = (originalRequest as AuthDebugRequestConfig)?.__authDebug;
     if (debugMeta) {
@@ -483,6 +557,7 @@ export const handleResponseError = async (error: AxiosError) => {
 };
 
 client.interceptors.response.use((response) => {
+  logInvalidToken(response.config, response.data);
   if (isDebugAuthEnabled()) {
     const debugMeta = (response.config as AuthDebugRequestConfig).__authDebug;
     if (debugMeta) {

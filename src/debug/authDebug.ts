@@ -1,5 +1,3 @@
-import type { AxiosHeaders } from "axios";
-
 type ApiRequestSummary = {
   id: string;
   timestamp: number;
@@ -81,12 +79,17 @@ export const redactAuthHeader = (value: string | null | undefined): string => {
   return redacted ? `Bearer ${redacted}` : "Bearer ***";
 };
 
+const isHeaderLike = (
+  headers: unknown,
+): headers is { get?: (key: string) => unknown; toJSON?: () => unknown } =>
+  Boolean(headers) && typeof headers === "object";
+
 export const getHeaderValue = (
   headers: unknown,
   key: string,
 ): string | undefined => {
-  if (!headers || typeof headers !== "object") return undefined;
-  if (headers instanceof AxiosHeaders) {
+  if (!isHeaderLike(headers)) return undefined;
+  if (typeof headers.get === "function") {
     const value = headers.get(key);
     return typeof value === "string" ? value : undefined;
   }
@@ -99,10 +102,13 @@ export const getHeaderValue = (
 };
 
 export const listHeaderKeys = (headers: unknown): string[] => {
-  if (!headers || typeof headers !== "object") return [];
-  if (headers instanceof AxiosHeaders) {
+  if (!isHeaderLike(headers)) return [];
+  if (typeof headers.toJSON === "function") {
     const raw = headers.toJSON();
-    return Object.keys(raw);
+    if (raw && typeof raw === "object") {
+      return Object.keys(raw as Record<string, unknown>);
+    }
+    return [];
   }
   return Object.keys(headers as Record<string, unknown>);
 };
