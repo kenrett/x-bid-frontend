@@ -202,6 +202,19 @@ client.interceptors.request.use(
       });
     }
 
+    if (
+      typeof config.url === "string" &&
+      config.url.includes("/api/v1/logged_in")
+    ) {
+      console.info("[api debug] logged_in request", {
+        url: config.url,
+        hasAccessToken: Boolean(getAccessToken()),
+        didSendAuthHeader,
+        withCredentials: Boolean(config.withCredentials),
+        origin: requestOrigin,
+      });
+    }
+
     return config;
   },
   (error) => Promise.reject(error),

@@ -132,6 +132,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     let cancelled = false;
     const bootstrap = async () => {
       try {
+        if (import.meta.env.VITE_DEBUG_AUTH) {
+          console.info("[auth debug] bootstrap logged_in start", {
+            hasAccessToken: Boolean(authSessionStore.getSnapshot().accessToken),
+          });
+        }
         const response =
           await client.get<LoggedInResponse>("/api/v1/logged_in");
         if (cancelled) return;
