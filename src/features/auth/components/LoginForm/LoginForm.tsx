@@ -10,7 +10,7 @@ import type { ApiJsonResponse } from "@api/openapi-helpers";
 import {
   isDebugAuthEnabled,
   shouldLogLoginDiagnostics,
-} from "../../../debug/authDebug";
+} from "../../../../debug/authDebug";
 
 const isUnexpectedAuthResponseError = (err: unknown) =>
   err instanceof Error && err.message.startsWith("Unexpected auth response:");
