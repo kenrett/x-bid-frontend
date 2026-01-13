@@ -45,14 +45,14 @@ describe("getCableRuntimeInfo", () => {
     );
   });
 
-  it("appends token and storefront to the connection URL", () => {
+  it("appends storefront to the connection URL", () => {
     setEnv({
       VITE_API_URL: "https://api.example.com",
       VITE_STOREFRONT_KEY: "afterdark",
     });
-    const info = getCableConnectionInfo("token-abc");
+    const info = getCableConnectionInfo();
     expect(info.connectionUrl).toBe(
-      "wss://api.example.com/cable?token=token-abc&storefront=afterdark",
+      "wss://api.example.com/cable?storefront=afterdark",
     );
   });
 });

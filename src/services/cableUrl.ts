@@ -9,7 +9,6 @@ type CableRuntimeInfo = {
 
 export type CableConnectionInfo = CableRuntimeInfo & {
   connectionUrl: string;
-  tokenPresent: boolean;
   storefrontKey: string;
 };
 
@@ -108,13 +107,11 @@ const appendQueryParams = (
 };
 
 export const getCableConnectionInfo = (
-  accessToken?: string | null,
   storefrontKeyOverride?: string,
 ): CableConnectionInfo => {
   const runtime = getCableRuntimeInfo();
   const storefrontKey = storefrontKeyOverride ?? getStorefrontKey();
   const connectionUrl = appendQueryParams(runtime.computedCableUrl, {
-    token: accessToken ?? undefined,
     storefront: storefrontKey,
   });
 
@@ -122,6 +119,5 @@ export const getCableConnectionInfo = (
     ...runtime,
     connectionUrl,
     storefrontKey,
-    tokenPresent: Boolean(accessToken),
   };
 };

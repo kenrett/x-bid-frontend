@@ -60,6 +60,12 @@ You should see a bottom-left **Auth Debug** panel plus extra console logs tagged
   - `vary`
   - `set-cookie`
 
+## ActionCable cookie auth QA
+
+- Connects on page load (console shows `[cable] connected` in dev).
+- Bid updates stream over the websocket after connecting.
+- Switching storefronts reconnects and updates continue to stream.
+
 ## Sample Output Format
 
 ```text

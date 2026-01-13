@@ -1,5 +1,5 @@
 import * as ActionCable from "@rails/actioncable";
-import { authSessionStore, getAccessToken } from "@features/auth/tokenStore";
+import { authSessionStore } from "@features/auth/tokenStore";
 import { getStorefrontKey } from "../storefront/storefront";
 import { getCableConnectionInfo, getCableRuntimeInfo } from "./cableUrl";
 import { showToast } from "./toast";
@@ -16,12 +16,9 @@ const redactCableUrl = (url: string): string => {
         ? "http://localhost"
         : (window.location?.origin ?? "http://localhost");
     const parsed = new URL(url, base);
-    if (parsed.searchParams.has("token")) {
-      parsed.searchParams.set("token", "***");
-    }
     return parsed.toString();
   } catch {
-    return url.replace(/token=[^&]+/gi, "token=***");
+    return url;
   }
 };
 
@@ -95,11 +92,9 @@ const logStartup = () => {
     computedCableUrl: info.computedCableUrl,
   });
   if (import.meta.env.MODE === "development") {
-    const token = getAccessToken();
-    const connectionInfo = getCableConnectionInfo(token);
+    const connectionInfo = getCableConnectionInfo();
     console.debug("[cable] dev", {
       storefront_key: connectionInfo.storefrontKey,
-      token_present: connectionInfo.tokenPresent,
       ws_url: redactCableUrl(connectionInfo.connectionUrl),
     });
   }
@@ -164,6 +159,11 @@ const attachConnectionLogging = (
     if (typeof webSocket.addEventListener === "function") {
       webSocket.addEventListener("open", () => {
         clearReconnect();
+        if (import.meta.env.MODE === "development") {
+          console.info("[cable] connected", {
+            url: redactCableUrl(connectionUrl),
+          });
+        }
         if (isDebugAuthEnabled()) {
           console.info("[cable debug] connected", {
             url: redactCableUrl(connectionUrl),
@@ -175,6 +175,13 @@ const attachConnectionLogging = (
           connection.monitor?.reconnecting ??
           (connection.monitor?.reconnectAttempts ?? 0) > 0;
         logDisconnect(info, event, reconnecting);
+        if (import.meta.env.MODE === "development") {
+          console.info("[cable] closed", {
+            closeCode: event.code,
+            closeReason: event.reason,
+            reconnecting,
+          });
+        }
         if (debugAttemptId && isDebugAuthEnabled()) {
           updateWsAttempt(debugAttemptId, {
             closeCode: event.code,
@@ -202,20 +209,18 @@ const attachConnectionLogging = (
 };
 
 const createCableConsumer = () => {
-  const token = getAccessToken();
-  const info = getCableConnectionInfo(token);
+  const info = getCableConnectionInfo();
   logStartup();
   const debugAttemptId = isDebugAuthEnabled()
     ? recordWsAttempt({
         timestamp: Date.now(),
         url: redactCableUrl(info.connectionUrl),
-        didIncludeTokenParam: info.tokenPresent,
+        didIncludeTokenParam: false,
       })
     : undefined;
   if (isDebugAuthEnabled()) {
     console.info("[cable debug] connect attempt", {
       url: redactCableUrl(info.connectionUrl),
-      token_param: info.tokenPresent,
       storefront_key: info.storefrontKey,
     });
   }
