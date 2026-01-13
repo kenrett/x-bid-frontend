@@ -59,6 +59,8 @@ const getWindowOrigin = () => {
   return window.location?.origin;
 };
 
+const CSRF_ENDPOINT = "/api/v1/csrf";
+
 const getWindowHost = () => {
   if (typeof window === "undefined") return undefined;
   return window.location?.host;
@@ -145,6 +147,8 @@ type AuthDebugRequestConfig = AxiosRequestConfig & {
   __debugLogin?: boolean;
   __debugSwitchWhoami?: boolean;
   __requestId?: string;
+  __skipCsrf?: boolean;
+  __csrfRetry?: boolean;
 };
 
 client.interceptors.request.use(
@@ -240,6 +244,71 @@ client.interceptors.request.use(
     const accessToken = getAccessToken();
     if (accessToken && isApiRequestUrl(config.url)) {
       setHeader(config, "Authorization", `Bearer ${accessToken}`);
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+const isCsrfRequest = (configUrl: unknown) =>
+  typeof configUrl === "string" && configUrl.includes(CSRF_ENDPOINT);
+
+let csrfToken: string | null = null;
+let csrfPromise: Promise<string | null> | null = null;
+
+const storeCsrfToken = (value: unknown) => {
+  if (typeof value !== "string") {
+    csrfToken = null;
+    return null;
+  }
+  const trimmed = value.trim();
+  csrfToken = trimmed ? trimmed : null;
+  return csrfToken;
+};
+
+const fetchCsrfToken = async () => {
+  const response = await client.get(CSRF_ENDPOINT, {
+    __skipCsrf: true,
+  } as AxiosRequestConfig);
+  const token = (response.data as { csrf_token?: unknown })?.csrf_token;
+  return storeCsrfToken(token);
+};
+
+const ensureCsrfToken = async () => {
+  if (csrfToken) return csrfToken;
+  csrfPromise ??= fetchCsrfToken().finally(() => {
+    csrfPromise = null;
+  });
+  return csrfPromise;
+};
+
+const refreshCsrfToken = async () => {
+  csrfToken = null;
+  return ensureCsrfToken();
+};
+
+const isUnsafeMethod = (method: string | undefined) => {
+  const normalized = (method ?? "get").toUpperCase();
+  return !["GET", "HEAD", "OPTIONS"].includes(normalized);
+};
+
+const isCsrfFailure = (error: AxiosError): boolean => {
+  const code = extractErrorCode(error.response?.data);
+  if (!code) return false;
+  return code.toLowerCase().includes("csrf");
+};
+
+client.interceptors.request.use(
+  async (config) => {
+    if (
+      isUnsafeMethod(config.method) &&
+      !(config as AuthDebugRequestConfig).__skipCsrf &&
+      !isCsrfRequest(config.url)
+    ) {
+      const token = await ensureCsrfToken();
+      if (token) {
+        setHeader(config, "X-CSRF-Token", token);
+      }
     }
     return config;
   },
@@ -475,6 +544,21 @@ export const handleResponseError = async (error: AxiosError) => {
   }
 
   if (
+    isCsrfFailure(error) &&
+    originalRequest &&
+    !(originalRequest as AuthDebugRequestConfig).__csrfRetry &&
+    !isCsrfRequest(originalRequest.url)
+  ) {
+    try {
+      await refreshCsrfToken();
+      (originalRequest as AuthDebugRequestConfig).__csrfRetry = true;
+      return client.request(originalRequest);
+    } catch {
+      return Promise.reject(error);
+    }
+  }
+
+  if (
     isAgeGateRequiredError(error) &&
     originalRequest &&
     !(originalRequest as { __ageGateRetry?: boolean }).__ageGateRetry &&
@@ -595,5 +679,12 @@ client.interceptors.response.use((response) => {
   }
   return response;
 }, handleResponseError);
+
+export const __testOnly = {
+  clearCsrfToken: () => {
+    csrfToken = null;
+    csrfPromise = null;
+  },
+};
 
 export default client;
