@@ -20,8 +20,6 @@ type SessionRemainingResponse = {
 type LoggedInResponse = {
   logged_in?: boolean;
   user?: User;
-  access_token?: string;
-  refresh_token?: string;
   is_admin?: boolean;
   is_superuser?: boolean;
 };
@@ -128,90 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     [normalizeAuthUser],
   );
 
-  useEffect(() => {
-    let cancelled = false;
-    const bootstrap = async () => {
-      try {
-        if (import.meta.env.VITE_DEBUG_AUTH) {
-          console.info("[auth debug] bootstrap logged_in start", {
-            hasAccessToken: Boolean(authSessionStore.getSnapshot().accessToken),
-          });
-        }
-        const response =
-          await client.get<LoggedInResponse>("/api/v1/logged_in");
-        if (cancelled) return;
-        const { loggedIn, user: nextUser } = normalizeLoggedInResponse(
-          response.data,
-          normalizeAuthUser,
-        );
-        if (!loggedIn || !nextUser) {
-          setUser(null);
-          authSessionStore.clear();
-          setSentryUser(null);
-        } else {
-          const resolvedUser =
-            pendingBalanceRef.current !== null
-              ? normalizeAuthUser({
-                  ...nextUser,
-                  bidCredits: pendingBalanceRef.current,
-                })
-              : nextUser;
-          pendingBalanceRef.current = null;
-          setUser(resolvedUser);
-          const accessTokenFromResponse =
-            typeof response.data?.access_token === "string"
-              ? response.data.access_token
-              : null;
-          const refreshTokenFromResponse =
-            typeof response.data?.refresh_token === "string"
-              ? response.data.refresh_token
-              : null;
-          setAccessToken(accessTokenFromResponse);
-          authSessionStore.setUser(resolvedUser);
-          authSessionStore.setTokens({
-            accessToken: accessTokenFromResponse,
-            refreshToken: refreshTokenFromResponse,
-          });
-          setSentryUser(resolvedUser);
-          resetCable();
-        }
-      } catch (error) {
-        if (cancelled) return;
-        if (isAxiosError(error)) {
-          const status = error.response?.status;
-          if (status === 401 || status === 403 || status === 404) {
-            setUser(null);
-            authSessionStore.clear();
-            setSentryUser(null);
-          } else if (import.meta.env.MODE !== "test") {
-            console.error("[AuthProvider] Failed to bootstrap session", error);
-          }
-        } else if (import.meta.env.MODE !== "test") {
-          console.error("[AuthProvider] Failed to bootstrap session", error);
-        }
-      } finally {
-        if (!cancelled) setIsReady(true);
-      }
-    };
-
-    void bootstrap();
-    return () => {
-      cancelled = true;
-    };
-  }, [normalizeAuthUser]);
-
-  const login = useCallback(
-    ({ user, accessToken, refreshToken }: LoginPayload) => {
-      applyAuthPayload({
-        user,
-        accessToken,
-        refreshToken,
-      });
-    },
-    [applyAuthPayload],
-  );
-
-  const logout = useCallback(() => {
+  const clearAuthState = useCallback(() => {
     pendingBalanceRef.current = null;
     setUser(null);
     setAccessToken(null);
@@ -238,6 +153,88 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       };
     }
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const bootstrap = async () => {
+      try {
+        if (import.meta.env.VITE_DEBUG_AUTH) {
+          console.info("[auth debug] bootstrap logged_in start", {
+            hasAccessToken: Boolean(authSessionStore.getSnapshot().accessToken),
+          });
+        }
+        const response =
+          await client.get<LoggedInResponse>("/api/v1/logged_in");
+        if (cancelled) return;
+        const { loggedIn, user: nextUser } = normalizeLoggedInResponse(
+          response.data,
+          normalizeAuthUser,
+        );
+        if (!loggedIn || !nextUser) {
+          clearAuthState();
+        } else {
+          const resolvedUser =
+            pendingBalanceRef.current !== null
+              ? normalizeAuthUser({
+                  ...nextUser,
+                  bidCredits: pendingBalanceRef.current,
+                })
+              : nextUser;
+          pendingBalanceRef.current = null;
+          setUser(resolvedUser);
+          authSessionStore.setUser(resolvedUser);
+          setAccessToken(null);
+          setSentryUser(resolvedUser);
+          resetCable();
+        }
+      } catch (error) {
+        if (cancelled) return;
+        if (isAxiosError(error)) {
+          const status = error.response?.status;
+          if (status === 401 || status === 403 || status === 404) {
+            clearAuthState();
+          } else if (import.meta.env.MODE !== "test") {
+            console.error("[AuthProvider] Failed to bootstrap session", error);
+          }
+        } else if (import.meta.env.MODE !== "test") {
+          console.error("[AuthProvider] Failed to bootstrap session", error);
+        }
+      } finally {
+        if (!cancelled) setIsReady(true);
+      }
+    };
+
+    void bootstrap();
+    return () => {
+      cancelled = true;
+    };
+  }, [clearAuthState, normalizeAuthUser]);
+
+  const login = useCallback(
+    ({ user, accessToken, refreshToken }: LoginPayload) => {
+      applyAuthPayload({
+        user,
+        accessToken,
+        refreshToken,
+      });
+    },
+    [applyAuthPayload],
+  );
+
+  const logout = useCallback(() => {
+    const run = async () => {
+      try {
+        await client.delete("/api/v1/logout");
+      } catch (error) {
+        if (import.meta.env.MODE !== "test") {
+          console.warn("[AuthProvider] Failed to logout", error);
+        }
+      } finally {
+        clearAuthState();
+      }
+    };
+    void run();
+  }, [clearAuthState]);
 
   const handleSessionInvalidated = useCallback(
     (reason?: string) => {

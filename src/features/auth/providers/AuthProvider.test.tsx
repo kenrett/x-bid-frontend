@@ -30,9 +30,11 @@ const cableMocks = vi.hoisted(() => {
 
 vi.mock("@api/client", () => {
   const get = vi.fn();
+  const del = vi.fn();
   return {
     default: {
       get,
+      delete: del,
       interceptors: { request: { use: vi.fn() }, response: { use: vi.fn() } },
     },
   };
@@ -103,6 +105,7 @@ beforeEach(() => {
   authSessionStore.clear();
   toastMocks.showToast.mockReset();
   mockedClient.get.mockReset();
+  mockedClient.delete.mockReset();
   mockedClient.get.mockImplementation((url?: string) => {
     if (typeof url === "string" && url.includes("/api/v1/logged_in")) {
       return Promise.resolve({ data: { logged_in: false } });
@@ -164,6 +167,7 @@ describe("AuthProvider", () => {
     await waitFor(() =>
       expect(screen.getByTestId("user")).toHaveTextContent("none"),
     );
+    expect(authSessionStore.getSnapshot().user).toBeNull();
   });
 
   it("logs out and clears in-memory auth state", async () => {
@@ -182,7 +186,13 @@ describe("AuthProvider", () => {
       screen.getByText("logout").click();
     });
 
-    expect(screen.getByTestId("user")).toHaveTextContent("none");
+    await waitFor(() => {
+      expect(mockedClient.delete).toHaveBeenCalledWith("/api/v1/logout");
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("user")).toHaveTextContent("none");
+    });
     expect(localStorage.getItem("auth.session.v1")).toBeNull();
     expect(authSessionStore.getSnapshot().user).toBeNull();
     expect(cableMocks.reset).toHaveBeenCalled();
