@@ -1,4 +1,5 @@
 import { getStorefrontKey } from "../storefront/storefront";
+import { warnIfCookieDomainMismatch } from "../utils/cookieDomainWarning";
 
 type CableRuntimeInfo = {
   computedCableUrl: string;
@@ -56,6 +57,7 @@ export const getCableRuntimeInfo = (): CableRuntimeInfo => {
 
   if (apiUrlRaw) {
     try {
+      warnIfCookieDomainMismatch(apiUrlRaw, "cable-url");
       const apiUrl = new URL(apiUrlRaw);
       const protocol = apiUrl.protocol === "https:" ? "wss:" : "ws:";
       const computedCableUrl = `${protocol}//${apiUrl.host}/cable`;

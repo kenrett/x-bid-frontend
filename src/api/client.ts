@@ -15,6 +15,7 @@ import {
   redactAuthHeader,
   updateApiRequest,
 } from "../debug/authDebug";
+import { warnIfCookieDomainMismatch } from "../utils/cookieDomainWarning";
 
 const setHeader = (
   config: { headers?: unknown },
@@ -47,6 +48,7 @@ const normalizeBase = (value: string | undefined): string | undefined => {
 };
 
 const normalizedBaseURL = normalizeBase(rawBaseURL);
+warnIfCookieDomainMismatch(normalizedBaseURL, "api-client");
 export const getApiBaseUrl = () => normalizedBaseURL;
 
 const getWindowOrigin = () => {
