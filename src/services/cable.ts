@@ -22,6 +22,19 @@ const redactCableUrl = (url: string): string => {
   }
 };
 
+const getHostFromUrl = (url: string | undefined): string | null => {
+  if (!url) return null;
+  try {
+    const base =
+      typeof window === "undefined"
+        ? "http://localhost"
+        : (window.location?.origin ?? "http://localhost");
+    return new URL(url, base).host;
+  } catch {
+    return null;
+  }
+};
+
 type CreateConsumerFn = typeof ActionCable.createConsumer;
 
 const getCreateConsumer = (): CreateConsumerFn => {
@@ -109,11 +122,21 @@ const logDisconnect = (
     suppressNextDisconnectLog = false;
     return;
   }
+  const cableHost = getHostFromUrl(info.computedCableUrl);
+  const apiHost = getHostFromUrl(info.apiUrl);
+  const hint =
+    cableHost && apiHost && cableHost !== apiHost
+      ? "Cable host differs from API host; cookies may not be shared."
+      : undefined;
+
   console.warn("[cable] disconnected", {
     computedCableUrl: info.computedCableUrl,
     closeCode: event?.code,
     closeReason: event?.reason,
     reconnecting: Boolean(reconnecting) || Boolean(reconnectTimeoutId),
+    cableHost,
+    apiHost,
+    hint,
   });
   if (!didShowDisconnectToast && import.meta.env.MODE !== "test") {
     didShowDisconnectToast = true;
