@@ -171,9 +171,6 @@ describe("PurchaseDetailPage", () => {
       /This item belongs to BidderSweet After Dark/i,
     );
     const redirectLink = screen.getByRole("link", { name: /open it there/i });
-    expect(redirectLink).toHaveAttribute(
-      "href",
-      "https://afterdark.biddersweet.app",
-    );
+    expect(redirectLink).toHaveAttribute("href", "http://localhost:4174");
   });
 });

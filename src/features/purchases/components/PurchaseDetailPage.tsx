@@ -18,6 +18,7 @@ import { getApiBaseUrl } from "@api/client";
 import { useStorefront } from "../../../storefront/useStorefront";
 import {
   STOREFRONT_CONFIGS,
+  getStorefrontOrigin,
   isStorefrontKey,
   type StorefrontConfig,
   type StorefrontKey,
@@ -263,19 +264,22 @@ export const PurchaseDetailPage = () => {
             <p className="text-sm text-white/70">
               This item belongs to {blockedStorefront.name}.{" "}
               <a
-                href={`https://${blockedStorefront.domain}`}
+                href={getStorefrontOrigin(blockedStorefront.key)}
                 target="_blank"
                 rel="noreferrer noopener"
                 className="font-semibold text-white underline underline-offset-2"
-                onClick={() =>
+                onClick={() => {
+                  const targetOrigin = getStorefrontOrigin(
+                    blockedStorefront.key,
+                  );
                   recordStorefrontSwitchIntent({
                     fromOrigin: window.location.origin,
                     fromStorefrontKey: currentStorefrontKey,
-                    toOrigin: `https://${blockedStorefront.domain}`,
+                    toOrigin: targetOrigin,
                     toStorefrontKey: blockedStorefront.key,
                     apiBaseUrl: getApiBaseUrl(),
-                  })
-                }
+                  });
+                }}
               >
                 Open it there.
               </a>

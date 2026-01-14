@@ -162,6 +162,33 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
   },
 };
 
+const DEV_LOCALHOST_PORTS: Record<StorefrontKey, number> = {
+  main: 4173,
+  afterdark: 4174,
+  marketplace: 4175,
+};
+
+const DEV_LVH_SUBDOMAINS: Record<StorefrontKey, string> = {
+  main: "app",
+  afterdark: "afterdark",
+  marketplace: "marketplace",
+};
+
+const getHostnameParts = (hostname: string): string[] =>
+  hostname.split(".").filter(Boolean);
+
+const getBaseDomain = (hostname: string): string => {
+  const parts = getHostnameParts(hostname);
+  if (parts.length < 2) return hostname;
+  return parts.slice(-2).join(".");
+};
+
+const isLvhHost = (hostname: string): boolean =>
+  hostname === "lvh.me" || hostname.endsWith(".lvh.me");
+
+const isLocalhostHost = (hostname: string): boolean =>
+  hostname === "localhost" || hostname.endsWith(".localhost");
+
 /**
  * Canonical storefront key derivation (single source of truth).
  *
@@ -177,4 +204,28 @@ export function getStorefrontKey(): StorefrontKey {
 export function getStorefrontConfig(): StorefrontConfig {
   const key = getStorefrontKey();
   return STOREFRONT_CONFIGS[key] ?? STOREFRONT_CONFIGS.main;
+}
+
+export function getStorefrontOrigin(key: StorefrontKey): string {
+  const config = STOREFRONT_CONFIGS[key] ?? STOREFRONT_CONFIGS.main;
+  if (typeof window === "undefined") return `https://${config.domain}`;
+
+  const hostname = window.location?.hostname?.toLowerCase() ?? "";
+  const port = window.location?.port ?? "";
+  if (import.meta.env.MODE !== "production") {
+    if (isLvhHost(hostname)) {
+      const base = getBaseDomain(hostname);
+      const subdomain = DEV_LVH_SUBDOMAINS[key] ?? key;
+      const portSuffix = port ? `:${port}` : "";
+      return `http://${subdomain}.${base}${portSuffix}`;
+    }
+
+    if (isLocalhostHost(hostname)) {
+      const devPort = DEV_LOCALHOST_PORTS[key];
+      const portSuffix = devPort ? `:${devPort}` : "";
+      return `http://localhost${portSuffix}`;
+    }
+  }
+
+  return `https://${config.domain}`;
 }
