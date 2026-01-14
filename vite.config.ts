@@ -61,6 +61,10 @@ const config: UserConfig & { test: VitestUserConfig["test"] } = {
   build: {
     sourcemap: true,
   },
+  server: {
+    host: true,
+    allowedHosts: ["lvh.me", "localhost"],
+  },
   preview:
     process.env.VITE_E2E_TESTS === "true"
       ? {

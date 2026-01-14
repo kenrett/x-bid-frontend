@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:main": "vite --host main.lvh.me --port 5173",
+    "dev:afterdark": "vite --host afterdark.lvh.me --port 5174",
+    "dev:marketplace": "vite --host marketplace.lvh.me --port 5175",
     "build": "tsc -b && vite build",
     "build:analyze": "ANALYZE=true tsc -b && BUNDLE_ANALYZE_OUT=docs/bundle/stats.json vite build",
     "lint": "eslint .",

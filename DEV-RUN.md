@@ -24,11 +24,12 @@ Below are lightweight steps to boot both services in development. Adjust paths a
 
    ```bash
    npm install
-   VITE_API_URL=http://localhost:3000 npm run dev -- --host --port 4173
+   VITE_API_URL=http://api.lvh.me:3000 VITE_CABLE_URL=ws://api.lvh.me:3000/cable npm run dev:main
    ```
 
    - Point `VITE_API_URL` to wherever the backend is listening.
-   - Visit http://localhost:4173.
+   - Optionally set `VITE_CABLE_URL` if ActionCable is on a different origin.
+   - Visit http://main.lvh.me:5173.
 
 ## One-liner helper (optional)
 
@@ -50,7 +51,9 @@ popd >/dev/null
 
 pushd "$FRONTEND_DIR" >/dev/null
 echo "[frontend] starting..."
-VITE_API_URL="${VITE_API_URL:-http://localhost:3000}" npm run dev -- --host --port 4173
+VITE_API_URL="${VITE_API_URL:-http://api.lvh.me:3000}" \
+  VITE_CABLE_URL="${VITE_CABLE_URL:-ws://api.lvh.me:3000/cable}" \
+  npm run dev:main
 popd >/dev/null
 
 trap "kill $BACK_PID >/dev/null 2>&1 || true" EXIT
@@ -62,7 +65,8 @@ Then run `run-xbid-dev` from this repo. It assumes the backend is in `../x-bid-b
 
 ## Environment notes
 
-- `VITE_API_URL` must point to the backend base URL (origin), e.g. `http://localhost:3000` (don’t include `/api/v1`).
+- `VITE_API_URL` must point to the backend base URL (origin), e.g. `http://api.lvh.me:3000` (don’t include `/api/v1`).
+- `VITE_CABLE_URL` (optional) can be set to `ws://api.lvh.me:3000/cable` if the websocket origin differs.
 - If you use websockets, also set `VITE_CABLE_URL` to the ActionCable/websocket endpoint.
 - Stripe checkout uses `VITE_STRIPE_PUBLISHABLE_KEY`; set a test key in `.env.development`.
 - Playwright e2e runs set `VITE_E2E_TESTS=true` to enable test-only hooks (e.g., Stripe loader overrides); you don’t need this for normal development.
