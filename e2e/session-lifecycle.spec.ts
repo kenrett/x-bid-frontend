@@ -56,15 +56,23 @@ test("session expiration logs out", async ({ page }) => {
       // @ts-expect-error test-only hook set in AuthProvider when VITE_E2E_TESTS=true
       typeof window.__triggerSessionPoll === "function",
   );
-  const loggedOut = await page.evaluate(async () => {
+  await page.evaluate(async () => {
     // @ts-expect-error test-only hook set in AuthProvider when VITE_E2E_TESTS=true
     await window.__triggerSessionPoll?.({ remaining_seconds: 0 });
-    return {
-      session: localStorage.getItem("auth.session.v1"),
-      // @ts-expect-error test-only marker
-      state: window.__lastSessionState,
-    };
   });
+
+  await page.waitForFunction(
+    () =>
+      // @ts-expect-error test-only marker
+      window.__lastSessionState?.loggedOut === true &&
+      localStorage.getItem("auth.session.v1") === null,
+  );
+
+  const loggedOut = await page.evaluate(() => ({
+    session: localStorage.getItem("auth.session.v1"),
+    // @ts-expect-error test-only marker
+    state: window.__lastSessionState,
+  }));
 
   expect(loggedOut.session).toBeNull();
   expect(loggedOut.state).toMatchObject({ loggedOut: true });

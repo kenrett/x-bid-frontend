@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import client, { __testOnly, handleResponseError } from "./client";
 import { authSessionStore } from "@features/auth/tokenStore";
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import type {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from "axios";
 
 const makeAxiosError = ({
   status,
@@ -44,13 +49,20 @@ const getHeader = (
 const makeAdapterResponse = (
   config: AxiosRequestConfig,
   data: unknown,
-): AxiosResponse => ({
-  data,
-  status: 200,
-  statusText: "OK",
-  headers: {},
-  config,
-});
+): AxiosResponse => {
+  const normalizedConfig = {
+    ...(config as InternalAxiosRequestConfig),
+    headers: (config.headers as InternalAxiosRequestConfig["headers"]) ?? {},
+  };
+
+  return {
+    data,
+    status: 200,
+    statusText: "OK",
+    headers: {},
+    config: normalizedConfig,
+  };
+};
 
 describe("handleResponseError", () => {
   beforeEach(() => {

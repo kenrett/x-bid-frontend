@@ -78,24 +78,6 @@ const logStartup = () => {
   if (didLogStartup) return;
   didLogStartup = true;
   const info = getCableRuntimeInfo();
-  const connectionRecord = connection as Record<string, unknown>;
-
-  const wrapHook = (hook: "connected" | "disconnected" | "rejected") => {
-    const original = connectionRecord[hook];
-    if (typeof original !== "function") return;
-    connectionRecord[hook] = (...args: unknown[]) => {
-      if (isDebugAuthEnabled()) {
-        console.info(`[cable debug] ${hook}`, {
-          url: redactCableUrl(connectionUrl),
-        });
-      }
-      return (original as (...inner: unknown[]) => unknown)(...args);
-    };
-  };
-
-  wrapHook("connected");
-  wrapHook("disconnected");
-  wrapHook("rejected");
   console.info("[cable] init", {
     storefront_key: getStorefrontKey(),
     window_origin:
