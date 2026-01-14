@@ -1,5 +1,10 @@
 let didWarnCookieDomainMismatch = false;
 
+const isLocalhostRoot = (hostname: string): boolean => hostname === "localhost";
+
+const isLocalhostSubdomain = (hostname: string): boolean =>
+  hostname.endsWith(".localhost");
+
 const getHostname = (value: string | undefined): string | null => {
   if (!value) return null;
   try {
@@ -45,4 +50,40 @@ export const warnIfCookieDomainMismatch = (
       source,
     },
   );
+};
+
+export const enforceLocalhostApiHostMatch = (
+  apiBaseUrl: string | undefined,
+): void => {
+  if (import.meta.env.MODE === "production") return;
+  if (!apiBaseUrl) return;
+  if (typeof window === "undefined") return;
+
+  const appHostname = window.location?.hostname;
+  if (!appHostname) return;
+
+  const apiHostname = getHostname(apiBaseUrl);
+  if (!apiHostname) return;
+
+  const appIsLocalhostRoot = isLocalhostRoot(appHostname);
+  const apiIsLocalhostRoot = isLocalhostRoot(apiHostname);
+  const appIsLocalhostSubdomain = isLocalhostSubdomain(appHostname);
+  const apiIsLocalhostSubdomain = isLocalhostSubdomain(apiHostname);
+
+  const isMismatch =
+    (appIsLocalhostRoot && apiIsLocalhostSubdomain) ||
+    (appIsLocalhostSubdomain && apiIsLocalhostRoot);
+
+  if (!isMismatch) return;
+
+  const message =
+    "[auth] Dev host mismatch: app and API must both use localhost or both use subdomains (prefer lvh.me) to avoid cookie/CSRF issues.";
+
+  console.error(message, {
+    app_hostname: appHostname,
+    api_hostname: apiHostname,
+    api_base_url: apiBaseUrl,
+  });
+
+  throw new Error(message);
 };
