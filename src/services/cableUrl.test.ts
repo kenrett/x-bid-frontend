@@ -20,11 +20,11 @@ const applyEnv = (overrides: Record<string, unknown>) => {
 describe("getCableRuntimeInfo", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    applyEnv({});
+    applyEnv({ VITE_CABLE_URL: "" });
   });
 
   afterEach(() => {
-    applyEnv({});
+    applyEnv({ VITE_CABLE_URL: "" });
   });
 
   it("uses VITE_CABLE_URL when provided", () => {
@@ -37,20 +37,26 @@ describe("getCableRuntimeInfo", () => {
   });
 
   it("derives wss:// from https VITE_API_URL", () => {
-    applyEnv({ VITE_API_URL: "https://api.example.com" });
+    applyEnv({
+      VITE_API_URL: "https://api.example.com",
+      VITE_CABLE_URL: "",
+    });
     const info = getCableRuntimeInfo();
     expect(info.computedCableUrl).toBe("wss://api.example.com/cable");
   });
 
   it("derives ws:// from http VITE_API_URL", () => {
-    applyEnv({ VITE_API_URL: "http://api.example.com" });
+    applyEnv({
+      VITE_API_URL: "http://api.example.com",
+      VITE_CABLE_URL: "",
+    });
     const info = getCableRuntimeInfo();
     expect(info.computedCableUrl).toBe("ws://api.example.com/cable");
   });
 
   it("warns and falls back when VITE_API_URL is invalid", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    applyEnv({ VITE_API_URL: "not a url" });
+    applyEnv({ VITE_API_URL: "not a url", VITE_CABLE_URL: "" });
     const info = getCableRuntimeInfo();
     expect(info.computedCableUrl).toBe("/cable");
     expect(warnSpy).toHaveBeenCalledWith(
@@ -64,6 +70,7 @@ describe("getCableRuntimeInfo", () => {
   it("appends storefront to the connection URL", () => {
     applyEnv({
       VITE_API_URL: "https://api.example.com",
+      VITE_CABLE_URL: "",
       VITE_STOREFRONT_KEY: "afterdark",
     });
     const info = getCableConnectionInfo();

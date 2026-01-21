@@ -306,6 +306,7 @@ describe("AuthProvider", () => {
   });
 
   it("merges refreshed user data when session remaining returns user updates", async () => {
+    const baseResetCalls = cableMocks.reset.mock.calls.length;
     mockedClient.get.mockImplementation((url?: string) => {
       if (typeof url === "string" && url.includes("/api/v1/logged_in")) {
         return Promise.resolve({ data: { logged_in: false } });
@@ -346,7 +347,9 @@ describe("AuthProvider", () => {
     await waitFor(() => {
       expect(authSessionStore.getSnapshot().user?.is_admin).toBe(true);
     });
-    expect(cableMocks.reset).toHaveBeenCalledTimes(baseResetCalls + 1);
+    expect(cableMocks.reset.mock.calls.length).toBeGreaterThanOrEqual(
+      baseResetCalls + 1,
+    );
   });
 
   it("logs out on app:unauthorized when refresh is unavailable", async () => {

@@ -32,6 +32,7 @@ describe("cable service", () => {
     vi.clearAllMocks();
     applyEnv({
       VITE_API_URL: "http://localhost:3000",
+      VITE_CABLE_URL: "",
       VITE_STOREFRONT_KEY: "main",
     });
     const { authSessionStore } = await import("@features/auth/tokenStore");
@@ -70,6 +71,17 @@ describe("cable service", () => {
   });
 
   it("connects to the API host cable endpoint with storefront param", async () => {
+    const { authSessionStore } = await import("@features/auth/tokenStore");
+    const user: User = {
+      id: 1,
+      email: "user@example.com",
+      name: "User",
+      bidCredits: 0,
+      is_admin: false,
+      email_verified: true,
+      email_verified_at: null,
+    };
+    authSessionStore.setUser(user);
     const { resetCable } = await import("./cable");
     resetCable();
     const firstCallUrl = createConsumerMock.mock.calls.at(0)?.[0];
