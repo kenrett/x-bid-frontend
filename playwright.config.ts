@@ -23,7 +23,10 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       ...process.env,
-      VITE_API_URL: process.env.VITE_API_URL ?? "http://127.0.0.1:4173",
+      VITE_API_URL: (() => {
+        const raw = process.env.VITE_API_URL ?? "http://api.lvh.me:3000";
+        return raw.replace(/\/+api\/v1\/?$/i, "");
+      })(),
       VITE_STRIPE_PUBLISHABLE_KEY:
         process.env.VITE_STRIPE_PUBLISHABLE_KEY ??
         "pk_test_123456789012345678901234567890",

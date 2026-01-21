@@ -205,6 +205,22 @@ client.interceptors.request.use(
       config.url = buildApiUrl(config.url);
       config.baseURL = undefined;
     }
+    if (isDebugAuthEnabled() || import.meta.env.DEV) {
+      const method = (config.method ?? "get").toUpperCase();
+      const resolvedUrlForLog =
+        typeof config.url === "string" ? config.url : "-";
+      const headerKeys = listHeaderKeys(config.headers);
+      console.info("[api debug] resolved request", {
+        method,
+        url: resolvedUrlForLog,
+        withCredentials: Boolean(config.withCredentials),
+        headers: headerKeys,
+        storefront_key: getStorefrontKey(),
+        vite_api_url_set:
+          typeof import.meta.env.VITE_API_URL === "string" &&
+          Boolean(import.meta.env.VITE_API_URL.trim()),
+      });
+    }
     return config;
   },
   (error) => Promise.reject(error),
@@ -235,11 +251,54 @@ const storeCsrfToken = (value: unknown) => {
 };
 
 const fetchCsrfToken = async () => {
-  const response = await client.get(CSRF_ENDPOINT, {
-    __skipCsrf: true,
-  } as AxiosRequestConfig);
-  const token = (response.data as { csrf_token?: unknown })?.csrf_token;
-  return storeCsrfToken(token);
+  try {
+    const response = await client.get(CSRF_ENDPOINT, {
+      __skipCsrf: true,
+    } as AxiosRequestConfig);
+    const token = (response.data as { csrf_token?: unknown })?.csrf_token;
+    if ((isDebugAuthEnabled() || import.meta.env.DEV) && !token) {
+      const data = response.data as Record<string, unknown> | undefined;
+      console.warn("[api debug] csrf response missing token", {
+        status: response.status,
+        response_keys: data ? Object.keys(data) : [],
+        has_csrf_probe: Boolean(
+          (response.headers as Record<string, string | undefined>)?.[
+            "x-csrf-probe"
+          ],
+        ),
+      });
+    }
+    return storeCsrfToken(token);
+  } catch (error) {
+    if (isDebugAuthEnabled() || import.meta.env.DEV) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status ?? null;
+        const data = error.response?.data as
+          | Record<string, unknown>
+          | undefined;
+        const responseKeys = data ? Object.keys(data) : [];
+        const corsBlocked = !error.response;
+        const headers = (error.response?.headers ?? {}) as Record<
+          string,
+          string | undefined
+        >;
+        console.warn("[api debug] csrf fetch failed", {
+          status,
+          response_keys: responseKeys,
+          cors_blocked: corsBlocked,
+          has_csrf_probe: Boolean(headers["x-csrf-probe"]),
+        });
+      } else {
+        console.warn("[api debug] csrf fetch failed", {
+          status: null,
+          response_keys: [],
+          cors_blocked: true,
+          has_csrf_probe: false,
+        });
+      }
+    }
+    throw error;
+  }
 };
 
 const ensureCsrfToken = async () => {
@@ -587,5 +646,46 @@ export const __testOnly = {
     csrfPromise = null;
   },
 };
+
+if (import.meta.env.DEV && typeof window !== "undefined") {
+  (
+    window as {
+      __probeCsrf?: () => Promise<void>;
+    }
+  ).__probeCsrf = async () => {
+    const resolvedUrlForLog = buildApiUrl(CSRF_ENDPOINT);
+    try {
+      const response = await client.get(CSRF_ENDPOINT, {
+        __skipCsrf: true,
+      } as AxiosRequestConfig);
+      const token = (response.data as { csrf_token?: unknown })?.csrf_token;
+      console.info("[api debug] csrf probe", {
+        url: resolvedUrlForLog,
+        status: response.status,
+        has_csrf_token: typeof token === "string" && token.trim().length > 0,
+      });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status ?? null;
+        const data = error.response?.data as
+          | Record<string, unknown>
+          | undefined;
+        console.warn("[api debug] csrf probe failed", {
+          url: resolvedUrlForLog,
+          status,
+          response_keys: data ? Object.keys(data) : [],
+          cors_blocked: !error.response,
+        });
+      } else {
+        console.warn("[api debug] csrf probe failed", {
+          url: resolvedUrlForLog,
+          status: null,
+          response_keys: [],
+          cors_blocked: true,
+        });
+      }
+    }
+  };
+}
 
 export default client;

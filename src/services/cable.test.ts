@@ -12,17 +12,34 @@ vi.mock("@rails/actioncable", () => ({
 }));
 
 describe("cable service", () => {
+  const originalEnv = { ...import.meta.env };
+
+  const applyEnv = (overrides: Record<string, unknown>) => {
+    const env = import.meta.env as unknown as Record<string, unknown>;
+    const keys = new Set([
+      ...Object.keys(originalEnv),
+      ...Object.keys(overrides),
+    ]);
+    for (const key of keys) {
+      env[key] =
+        key in overrides
+          ? overrides[key]
+          : (originalEnv as Record<string, unknown>)[key];
+    }
+  };
+
   beforeEach(async () => {
     vi.clearAllMocks();
-    (import.meta as unknown as { env: Record<string, unknown> }).env = {
+    applyEnv({
       VITE_API_URL: "http://localhost:3000",
       VITE_STOREFRONT_KEY: "main",
-    };
+    });
     const { authSessionStore } = await import("@features/auth/tokenStore");
     authSessionStore.clear();
   });
 
   afterEach(() => {
+    applyEnv({});
     vi.resetModules();
   });
 

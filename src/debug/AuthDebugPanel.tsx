@@ -1,5 +1,5 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
-import client, { getApiBaseUrl } from "@api/client";
+import client, { buildApiUrl, getApiBaseUrl } from "@api/client";
 import { useStorefront } from "../storefront/useStorefront";
 import {
   getAuthDebugState,
@@ -40,6 +40,12 @@ export const AuthDebugPanel = () => {
   >("idle");
 
   const apiBase = getApiBaseUrl();
+  const viteApiUrl =
+    typeof import.meta.env.VITE_API_URL === "string" &&
+    import.meta.env.VITE_API_URL.trim()
+      ? import.meta.env.VITE_API_URL.trim()
+      : null;
+  const csrfEndpoint = buildApiUrl("/api/v1/csrf");
   const withCredentials = Boolean(client.defaults.withCredentials);
 
   const storageSnapshot = getAuthStorageSnapshot();
@@ -122,7 +128,9 @@ export const AuthDebugPanel = () => {
           <div>
             storefront: {storefrontKey} ({config.name})
           </div>
+          <div>VITE_API_URL: {viteApiUrl ?? "(unset)"}</div>
           <div>api base: {apiBase ?? "(relative)"}</div>
+          <div>csrf endpoint: {csrfEndpoint}</div>
           <div>
             localStorage auth keys:{" "}
             {storageSnapshot.presentKeys.join(", ") || "(none)"}

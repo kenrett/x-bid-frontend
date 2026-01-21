@@ -346,7 +346,7 @@ describe("AuthProvider", () => {
     await waitFor(() => {
       expect(authSessionStore.getSnapshot().user?.is_admin).toBe(true);
     });
-    expect(cableMocks.reset).toHaveBeenCalledTimes(1);
+    expect(cableMocks.reset).toHaveBeenCalledTimes(baseResetCalls + 1);
   });
 
   it("logs out on app:unauthorized when refresh is unavailable", async () => {
