@@ -117,8 +117,34 @@ describe("handleResponseError", () => {
 });
 
 describe("api client defaults", () => {
-  it("always includes credentials", () => {
-    expect(client.defaults.withCredentials).toBe(true);
+  it("includes credentials for API base requests", async () => {
+    const adapter = vi.fn(async (config: AxiosRequestConfig) =>
+      makeAdapterResponse(config, {}),
+    );
+    const originalAdapter = client.defaults.adapter;
+    client.defaults.adapter = adapter;
+
+    await client.get("/api/v1/example");
+
+    const call = adapter.mock.calls[0]?.[0] as AxiosRequestConfig;
+    expect(call.withCredentials).toBe(true);
+
+    client.defaults.adapter = originalAdapter;
+  });
+
+  it("omits credentials for non-API requests", async () => {
+    const adapter = vi.fn(async (config: AxiosRequestConfig) =>
+      makeAdapterResponse(config, {}),
+    );
+    const originalAdapter = client.defaults.adapter;
+    client.defaults.adapter = adapter;
+
+    await client.get("https://example.com/health");
+
+    const call = adapter.mock.calls[0]?.[0] as AxiosRequestConfig;
+    expect(call.withCredentials).toBe(false);
+
+    client.defaults.adapter = originalAdapter;
   });
 });
 
