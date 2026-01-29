@@ -5,12 +5,14 @@ import client from "@api/client";
 import { PurchaseStatus } from "./PurchaseStatus";
 import { UNEXPECTED_RESPONSE_MESSAGE } from "@services/unexpectedResponse";
 import { useAuth } from "@features/auth/hooks/useAuth";
+import { walletApi } from "@features/wallet/api/walletApi";
 
 vi.mock("@api/client", () => ({
   __esModule: true,
   default: { get: vi.fn(), post: vi.fn() },
 }));
 vi.mock("@features/auth/hooks/useAuth");
+vi.mock("@features/wallet/api/walletApi");
 
 const mockedClient = vi.mocked(
   client as unknown as {
@@ -20,6 +22,7 @@ const mockedClient = vi.mocked(
   { deep: true },
 );
 const mockUpdateUserBalance = vi.fn();
+const mockedWalletApi = vi.mocked(walletApi, true);
 
 let searchParamsValue = "";
 
@@ -52,8 +55,10 @@ describe("PurchaseStatus", () => {
     mockNavigate.mockClear();
     mockedClient.get.mockReset();
     mockUpdateUserBalance.mockReset();
+    mockedWalletApi.getWallet.mockReset();
     vi.mocked(useAuth).mockReturnValue({
       updateUserBalance: mockUpdateUserBalance,
+      user: null,
     } as unknown as ReturnType<typeof useAuth>);
     searchParamsValue = "";
   });
@@ -64,7 +69,7 @@ describe("PurchaseStatus", () => {
   });
 
   it("shows error when session id is missing", async () => {
-    renderWithPath("/purchase-status");
+    renderWithPath();
 
     expect(
       await screen.findByText(
@@ -75,23 +80,23 @@ describe("PurchaseStatus", () => {
     expect(mockUpdateUserBalance).not.toHaveBeenCalled();
   });
 
-  it("handles successful verification, updates balance, and navigates after delay", async () => {
+  it("handles applied status, updates balance, and navigates after delay", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     mockedClient.get.mockResolvedValue({
-      data: { status: "success", updated_bid_credits: 150 },
+      data: { status: "applied" },
+    });
+    mockedWalletApi.getWallet.mockResolvedValue({
+      creditsBalance: 150,
+      asOf: null,
     });
 
     try {
       renderWithPath("?session_id=abc123");
 
       await waitFor(() => expect(mockedClient.get).toHaveBeenCalled());
+      expect(await screen.findByText(/purchase complete/i)).toBeInTheDocument();
       expect(
-        await screen.findByText(/payment successful/i),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          "Your purchase was successful! New balance: 150 credits.",
-        ),
+        screen.getByText("Purchase complete. New balance: 150 credits."),
       ).toBeInTheDocument();
       expect(mockUpdateUserBalance).toHaveBeenCalledWith(150);
 
@@ -104,7 +109,7 @@ describe("PurchaseStatus", () => {
 
   it("renders error message from API response", async () => {
     mockedClient.get.mockResolvedValue({
-      data: { status: "error", error: "Card declined" },
+      data: { status: "failed", error: "Card declined" },
     });
 
     renderWithPath("?session_id=abc123");
@@ -113,26 +118,45 @@ describe("PurchaseStatus", () => {
     expect(screen.getByText("Card declined")).toBeInTheDocument();
   });
 
-  it("shows unexpected response message for malformed payload", async () => {
+  it("shows pending UI and polls until applied", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     mockedClient.get.mockResolvedValue({
       data: { status: "pending" },
     });
+    mockedWalletApi.getWallet.mockResolvedValue({
+      creditsBalance: 200,
+      asOf: null,
+    });
 
-    renderWithPath("?session_id=abc123");
+    try {
+      renderWithPath("?session_id=abc123");
 
-    expect(await screen.findByText(/payment error/i)).toBeInTheDocument();
-    expect(screen.getByText(UNEXPECTED_RESPONSE_MESSAGE)).toBeInTheDocument();
+      expect(
+        await screen.findByText(/finalizing purchase/i),
+      ).toBeInTheDocument();
+
+      mockedClient.get.mockResolvedValueOnce({
+        data: { status: "applied" },
+      });
+
+      vi.advanceTimersByTime(2000);
+      await waitFor(() =>
+        expect(screen.getByText(/purchase complete/i)).toBeInTheDocument(),
+      );
+      expect(mockUpdateUserBalance).toHaveBeenCalledWith(200);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
-  it("shows an error when verification success payload is missing updated credits", async () => {
+  it("shows unexpected response message for malformed payload", async () => {
     mockedClient.get.mockResolvedValue({
-      data: { status: "success" },
+      data: null,
     });
 
     renderWithPath("?session_id=abc123");
 
     expect(await screen.findByText(/payment error/i)).toBeInTheDocument();
-    expect(screen.queryByText(/payment successful/i)).not.toBeInTheDocument();
     expect(screen.getByText(UNEXPECTED_RESPONSE_MESSAGE)).toBeInTheDocument();
   });
 
@@ -149,7 +173,7 @@ describe("PurchaseStatus", () => {
     expect(screen.getByText("Server said no")).toBeInTheDocument();
   });
 
-  it("shows stable error message for forbidden verification failures", async () => {
+  it("prompts login for forbidden verification failures", async () => {
     const axiosError = Object.assign(new Error("forbidden"), {
       isAxiosError: true,
       response: { status: 403, data: { error: "Forbidden" } },
@@ -158,12 +182,9 @@ describe("PurchaseStatus", () => {
 
     renderWithPath("?session_id=abc123");
 
-    expect(await screen.findByText(/payment error/i)).toBeInTheDocument();
-    expect(screen.queryByText(/payment successful/i)).not.toBeInTheDocument();
+    expect(await screen.findByText(/login required/i)).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "We couldn't verify your purchase. Please contact support.",
-      ),
+      screen.getByText("Please log in to verify your purchase."),
     ).toBeInTheDocument();
   });
 

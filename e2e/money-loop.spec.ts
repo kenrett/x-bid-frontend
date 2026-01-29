@@ -34,10 +34,18 @@ test("money loop: checkout success updates balance and purchases are discoverabl
   const updatedBidCredits = authedUser.bidCredits + 60;
   await page.route("**/api/v1/checkout/success**", (route) =>
     fulfillJson(route, {
-      status: "success",
-      updated_bid_credits: updatedBidCredits,
+      status: "applied",
       purchaseId: "purchase_123",
     }),
+  );
+  await page.route("**/api/v1/wallet", (route) =>
+    isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, {
+          credits_balance: updatedBidCredits,
+          as_of: new Date().toISOString(),
+          currency: "credits",
+        }),
   );
   await page.route("**/api/v1/session/remaining", (route) =>
     fulfillJson(route, {
@@ -55,18 +63,9 @@ test("money loop: checkout success updates balance and purchases are discoverabl
   expect(checkoutPayload).toMatchObject({ bid_pack_id: 1 });
 
   await page.goto("/purchase-status?session_id=sess_money_loop");
-  await expect(page.getByText("Payment Successful")).toBeVisible();
+  await expect(page.getByText("Purchase Complete")).toBeVisible();
   await expect(page.getByText(`${updatedBidCredits} Bids`)).toBeVisible();
 
-  await page.route("**/api/v1/wallet", (route) =>
-    isDocumentRequest(route)
-      ? route.continue()
-      : fulfillJson(route, {
-          credits_balance: updatedBidCredits,
-          as_of: new Date().toISOString(),
-          currency: "credits",
-        }),
-  );
   await page.route("**/api/v1/wallet/transactions**", (route) =>
     isDocumentRequest(route)
       ? route.continue()
