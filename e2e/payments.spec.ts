@@ -183,3 +183,84 @@ test("payment failure shows error and keeps balance unchanged", async ({
   await expect(page.getByText("Payment not completed.")).toBeVisible();
   await expect(page.getByText(`${authedUser.bidCredits} Bids`)).toBeVisible();
 });
+
+test("purchase status continues polling after reload and refreshes wallet only after applied", async ({
+  page,
+}) => {
+  await stubStripe(page);
+  await seedAuthState(page);
+  await mockSessionRemaining(page);
+
+  let statusCalls = 0;
+  let walletCalls = 0;
+  await page.route("**/api/v1/checkout/success**", (route) => {
+    statusCalls += 1;
+    if (statusCalls <= 2) {
+      return fulfillJson(route, { status: "pending" });
+    }
+    return fulfillJson(route, { status: "applied" });
+  });
+  await page.route("**/api/v1/wallet", (route) => {
+    walletCalls += 1;
+    return fulfillJson(route, {
+      credits_balance: authedUser.bidCredits + 30,
+      as_of: new Date().toISOString(),
+      currency: "credits",
+    });
+  });
+  await page.route("**/api/v1/session/remaining", (route) =>
+    fulfillJson(route, {
+      remaining_seconds: 1800,
+      user: {
+        ...authedUser,
+        bidCredits: authedUser.bidCredits + 30,
+      },
+    }),
+  );
+
+  await page.goto("/purchase-status?session_id=sess_refresh");
+  await expect(page.getByText("Finalizing purchase")).toBeVisible();
+  expect(walletCalls).toBe(0);
+
+  await page.reload();
+  await expect(page.getByText("Finalizing purchase")).toBeVisible();
+  await expect(page.getByText("Purchase Complete")).toBeVisible();
+  await expect(
+    page.getByText(`${authedUser.bidCredits + 30} Bids`),
+  ).toBeVisible();
+  expect(walletCalls).toBe(1);
+});
+
+test("purchase status shows success immediately when already applied", async ({
+  page,
+}) => {
+  await stubStripe(page);
+  await seedAuthState(page);
+  await mockSessionRemaining(page);
+
+  await page.route("**/api/v1/checkout/success**", (route) =>
+    fulfillJson(route, { status: "applied", idempotent: true }),
+  );
+  await page.route("**/api/v1/wallet", (route) =>
+    fulfillJson(route, {
+      credits_balance: authedUser.bidCredits + 10,
+      as_of: new Date().toISOString(),
+      currency: "credits",
+    }),
+  );
+  await page.route("**/api/v1/session/remaining", (route) =>
+    fulfillJson(route, {
+      remaining_seconds: 1800,
+      user: {
+        ...authedUser,
+        bidCredits: authedUser.bidCredits + 10,
+      },
+    }),
+  );
+
+  await page.goto("/purchase-status?session_id=sess_applied");
+  await expect(page.getByText("Purchase Complete")).toBeVisible();
+  await expect(
+    page.getByText(`${authedUser.bidCredits + 10} Bids`),
+  ).toBeVisible();
+});
