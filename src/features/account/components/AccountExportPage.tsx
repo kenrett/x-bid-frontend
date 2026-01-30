@@ -3,6 +3,8 @@ import { accountApi } from "../api/accountApi";
 import { normalizeApiError } from "@api/normalizeApiError";
 import { showToast } from "@services/toast";
 import type { DataExportStatus } from "../types/account";
+import { ProcessingNotice } from "@components/ProcessingNotice";
+import { logProcessingEvent } from "@services/processingTelemetry";
 
 const EXPORT_POLL_INTERVAL_MS = 2000;
 const EXPORT_POLL_TIMEOUT_MS = 60_000;
@@ -22,8 +24,10 @@ export const AccountExportPage = () => {
   );
   const [requesting, setRequesting] = useState(false);
   const [polling, setPolling] = useState(false);
+  const [stalled, setStalled] = useState(false);
   const pollTimerRef = useRef<number | null>(null);
   const pollDeadlineRef = useRef<number | null>(null);
+  const requestStartRef = useRef<number | null>(null);
 
   const stopPolling = () => {
     if (pollTimerRef.current) window.clearTimeout(pollTimerRef.current);
@@ -68,25 +72,49 @@ export const AccountExportPage = () => {
       setExportStatus(status);
       if (status.status === "ready" && status.downloadUrl) {
         stopPolling();
+        setStalled(false);
         showToast("Download ready.", "success");
         download(status.downloadUrl);
+        if (requestStartRef.current) {
+          logProcessingEvent("account.export.ready", {
+            elapsed_ms: Date.now() - requestStartRef.current,
+          });
+          requestStartRef.current = null;
+        }
         return;
       }
       if (status.status === "failed") {
         stopPolling();
+        setStalled(false);
         setError("Export failed. Please try again.");
+        if (requestStartRef.current) {
+          logProcessingEvent("account.export.failed", {
+            elapsed_ms: Date.now() - requestStartRef.current,
+          });
+          requestStartRef.current = null;
+        }
         return;
       }
       if (pollDeadlineRef.current && Date.now() >= pollDeadlineRef.current) {
         stopPolling();
-        setError(
-          "Export is taking longer than expected. Please refresh later.",
-        );
+        setStalled(true);
+        if (requestStartRef.current) {
+          logProcessingEvent("account.export.timeout", {
+            elapsed_ms: Date.now() - requestStartRef.current,
+          });
+        }
         return;
       }
     } catch (err) {
       stopPolling();
+      setStalled(false);
       setError(normalizeApiError(err).message);
+      if (requestStartRef.current) {
+        logProcessingEvent("account.export.error", {
+          elapsed_ms: Date.now() - requestStartRef.current,
+        });
+        requestStartRef.current = null;
+      }
       return;
     }
 
@@ -103,13 +131,22 @@ export const AccountExportPage = () => {
   const handleRequestAndDownload = async () => {
     setError(null);
     setRequesting(true);
+    setStalled(false);
     stopPolling();
     try {
+      requestStartRef.current = Date.now();
+      logProcessingEvent("account.export.requested", {});
       const status = await accountApi.requestExport();
       setExportStatus(status);
       if (status.status === "ready" && status.downloadUrl) {
         showToast("Download starting…", "success");
         download(status.downloadUrl);
+        if (requestStartRef.current) {
+          logProcessingEvent("account.export.ready", {
+            elapsed_ms: Date.now() - requestStartRef.current,
+          });
+          requestStartRef.current = null;
+        }
         return;
       }
       showToast("Export requested. Preparing download…", "success");
@@ -145,6 +182,20 @@ export const AccountExportPage = () => {
           {error}
         </div>
       )}
+      {stalled ? (
+        <ProcessingNotice
+          message="Export is still processing. It can take a little longer during peak hours."
+          hint="Refresh status in a moment or check back later."
+          actionLabel="Refresh status"
+          onAction={() => {
+            setStalled(false);
+            setError(null);
+            setPolling(true);
+            pollDeadlineRef.current = Date.now() + EXPORT_POLL_TIMEOUT_MS;
+            void pollUntilReady();
+          }}
+        />
+      ) : null}
 
       <section className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-5">
         <h3 className="text-lg font-semibold text-white">Current status</h3>

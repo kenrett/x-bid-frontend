@@ -4,6 +4,7 @@ import client from "@api/client";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { CheckoutSuccessResponse } from "../../types/checkout";
 import { Page } from "@components/Page";
+import { ProcessingNotice } from "@components/ProcessingNotice";
 import { showToast } from "@services/toast";
 import { getApiErrorDetails } from "@utils/apiError";
 import { walletApi } from "@features/wallet/api/walletApi";
@@ -302,19 +303,18 @@ export const PurchaseStatus = () => {
             {message ?? "Finalizing purchase... this can take a moment."}
           </p>
           {status === "timeout" ? (
-            <button
-              type="button"
-              onClick={() => {
+            <ProcessingNotice
+              message="Still processing. Your purchase is being finalized."
+              hint="Refresh in a moment or try again later."
+              actionLabel="Refresh status"
+              onAction={() => {
                 pollStartRef.current = Date.now();
                 clearPollTimer();
                 setStatus("pending");
                 setMessage("Re-checking your purchase status...");
                 void verifyPayment("manual");
               }}
-              className="inline-flex items-center justify-center text-base bg-[color:var(--sf-primary)] text-[color:var(--sf-onPrimary)] px-6 py-2 rounded-[var(--sf-radius)] font-semibold shadow-[var(--sf-shadow)] transition hover:brightness-95 active:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sf-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--sf-background)]"
-            >
-              Refresh status
-            </button>
+            />
           ) : null}
         </div>
       </Page>

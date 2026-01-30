@@ -111,7 +111,7 @@ describe("WinDetailPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("submitting a claim updates the UI to claimed", async () => {
+  it("submitting a claim updates the UI to processing", async () => {
     mockedWinsApi.get.mockResolvedValue(pendingDetail);
     mockedWinsApi.claim.mockResolvedValue({
       ...pendingDetail,
@@ -156,7 +156,9 @@ describe("WinDetailPage", () => {
     await user.click(screen.getByRole("button", { name: /submit claim/i }));
 
     expect(await screen.findByText(/claim submitted/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/preparing shipment/i)[0]).toBeInTheDocument();
+    expect(
+      screen.getAllByText(/preparing your shipment/i)[0],
+    ).toBeInTheDocument();
   });
 
   it("does not allow claiming when already claimed", async () => {

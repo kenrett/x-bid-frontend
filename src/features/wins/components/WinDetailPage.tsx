@@ -12,6 +12,7 @@ import type {
 import { normalizeApiError } from "@api/normalizeApiError";
 import axios from "axios";
 import { showToast } from "@services/toast";
+import { logProcessingEvent } from "@services/processingTelemetry";
 
 const formatDate = (value: string) => {
   if (!value) return "—";
@@ -251,14 +252,24 @@ export const WinDetailPage = () => {
     }
 
     setIsClaiming(true);
+    const claimStart = Date.now();
     try {
       const updated = await winsApi.claim(auction_id, claimAddress);
-      setWin({ ...updated, fulfillmentStatus: "claimed" });
+      const nextStatus =
+        updated.fulfillmentStatus === "claimed"
+          ? "processing"
+          : updated.fulfillmentStatus;
+      setWin({ ...updated, fulfillmentStatus: nextStatus });
       setClaimCompleted(true);
       setShowClaimForm(false);
       setClaimError(null);
       setFieldErrors({});
-      showToast("Claim submitted.", "success");
+      showToast("Claim submitted. We are preparing your shipment.", "success");
+      logProcessingEvent("wins.claim.submitted", {
+        elapsed_ms: Date.now() - claimStart,
+        auction_id,
+        status: nextStatus,
+      });
     } catch (err) {
       const parsed = normalizeApiError(err);
       if (parsed.status === 422) {
@@ -272,6 +283,11 @@ export const WinDetailPage = () => {
           "We couldn't submit your claim right now. Please try again.",
         );
       }
+      logProcessingEvent("wins.claim.error", {
+        elapsed_ms: Date.now() - claimStart,
+        auction_id,
+        status: "error",
+      });
     } finally {
       setIsClaiming(false);
     }
@@ -427,11 +443,14 @@ export const WinDetailPage = () => {
           </div>
         ) : null}
 
-        {claimCompleted || win.fulfillmentStatus === "claimed" ? (
+        {claimCompleted ||
+        win.fulfillmentStatus === "claimed" ||
+        win.fulfillmentStatus === "processing" ? (
           <div className="rounded-2xl border border-green-400/30 bg-green-900/20 p-5 text-green-100 shadow-lg shadow-black/10">
             <p className="font-semibold">Claim submitted.</p>
             <p className="text-sm text-green-100/80 mt-1">
-              We&apos;ll follow up if we need anything else.
+              We&apos;ll follow up if we need anything else. This can take a few
+              minutes.
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <Link
