@@ -122,6 +122,23 @@ describe("PurchaseStatus", () => {
     expect(screen.getByText("Card declined")).toBeInTheDocument();
   });
 
+  it("treats idempotent applied responses as success", async () => {
+    mockedClient.get.mockResolvedValue({
+      data: { idempotent: true, applied: true },
+    });
+    mockedWalletApi.getWallet.mockResolvedValue({
+      creditsBalance: 150,
+      asOf: null,
+    });
+
+    renderWithPath("?session_id=abc123");
+
+    expect(
+      await screen.findByRole("heading", { name: /purchase complete/i }),
+    ).toBeInTheDocument();
+    expect(mockUpdateUserBalance).toHaveBeenCalledWith(150);
+  });
+
   it("shows pending UI and polls until applied", async () => {
     const timeoutSpy = vi.spyOn(window, "setTimeout");
     mockedClient.get.mockResolvedValueOnce({
