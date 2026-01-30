@@ -3,6 +3,9 @@ import type {
   AuctionSummary,
   AuctionStatus,
 } from "@features/auctions/types/auction";
+import { FileUploadField } from "@features/uploads/components/FileUploadField";
+import { useUploadAdapter } from "@features/uploads/useUploadAdapter";
+import type { UploadAdapter, UploadConstraints } from "@features/uploads/types";
 
 type FormPayload = Partial<AuctionSummary> & { title: string };
 
@@ -11,6 +14,7 @@ interface AdminAuctionFormProps {
   onSubmit: (payload: FormPayload) => Promise<void> | void;
   submitLabel: string;
   isSubmitting?: boolean;
+  uploadAdapter?: UploadAdapter | null;
 }
 
 type FormState = {
@@ -29,6 +33,12 @@ const STATUS_OPTIONS: AuctionStatus[] = [
   "active",
   "complete",
 ];
+
+const AUCTION_IMAGE_CONSTRAINTS: UploadConstraints = {
+  accept: ["image/jpeg", "image/png", "image/webp"],
+  maxBytes: 5 * 1024 * 1024,
+  guidance: "Recommended 1200x800px. JPG, PNG, or WebP up to 5 MB.",
+};
 
 const toFormState = (values?: Partial<AuctionSummary>): FormState => ({
   title: values?.title ?? "",
@@ -83,11 +93,14 @@ export const AdminAuctionForm = ({
   onSubmit,
   submitLabel,
   isSubmitting,
+  uploadAdapter,
 }: AdminAuctionFormProps) => {
   const [formState, setFormState] = useState<FormState>(() =>
     toFormState(initialValues),
   );
   const [error, setError] = useState<string | null>(null);
+  const contextUploadAdapter = useUploadAdapter();
+  const resolvedUploadAdapter = uploadAdapter ?? contextUploadAdapter;
 
   const handleChange =
     (key: keyof FormState) =>
@@ -154,16 +167,33 @@ export const AdminAuctionForm = ({
           />
         </label>
 
-        <label className="flex flex-col gap-2 text-sm text-gray-200">
-          <span className="font-semibold">Image URL</span>
-          <input
-            type="url"
-            value={formState.image_url}
-            onChange={handleChange("image_url")}
-            className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
-            placeholder="https://example.com/image.jpg"
-          />
-        </label>
+        <div className="flex flex-col gap-4 text-sm text-gray-200 md:col-span-2">
+          {resolvedUploadAdapter ? (
+            <FileUploadField
+              id="auction-image-upload"
+              label="Upload image"
+              description={AUCTION_IMAGE_CONSTRAINTS.guidance}
+              helperText="Uploads are stored with Active Storage and ready for S3-backed direct uploads."
+              value={formState.image_url}
+              onChange={(nextUrl) =>
+                setFormState((prev) => ({ ...prev, image_url: nextUrl }))
+              }
+              constraints={AUCTION_IMAGE_CONSTRAINTS}
+              adapter={resolvedUploadAdapter}
+            />
+          ) : null}
+
+          <label className="flex flex-col gap-2 text-sm text-gray-200">
+            <span className="font-semibold">Image URL</span>
+            <input
+              type="url"
+              value={formState.image_url}
+              onChange={handleChange("image_url")}
+              className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+              placeholder="https://example.com/image.jpg"
+            />
+          </label>
+        </div>
 
         <label className="flex flex-col gap-2 text-sm text-gray-200">
           <span className="font-semibold">Current Price</span>

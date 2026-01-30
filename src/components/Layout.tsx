@@ -11,6 +11,8 @@ import { useAuth } from "@features/auth/hooks/useAuth";
 import { AgeGateModal } from "./AgeGateModal";
 import { AuthDebugPanel } from "../debug/AuthDebugPanel";
 import { maybeLogStorefrontSwitchLanding } from "../debug/authDebugSwitch";
+import { UploadProvider } from "@features/uploads/UploadProvider";
+import { defaultUploadAdapter } from "@features/uploads/uploadConfig";
 
 export const Layout = () => {
   const navigate = useNavigate();
@@ -97,13 +99,15 @@ export const Layout = () => {
         } as CSSProperties
       }
     >
-      <AccountStatusProvider>
-        <Header />
-        <AccountCompletionBanner />
-        <main className="flex-1">
-          <Outlet />
-        </main>
-      </AccountStatusProvider>
+      <UploadProvider adapter={defaultUploadAdapter}>
+        <AccountStatusProvider>
+          <Header />
+          <AccountCompletionBanner />
+          <main className="flex-1">
+            <Outlet />
+          </main>
+        </AccountStatusProvider>
+      </UploadProvider>
       <AgeGateModal />
       <Footer />
       <AuthDebugPanel />

@@ -87,6 +87,52 @@ test("admin can create auction with schedule and image; shows on public feed", a
   await expect(page.getByText("Sunset Camera Bundle")).toBeVisible();
 });
 
+test("admin can retry image upload", async ({ page }) => {
+  await seedAuthState(page, adminUser);
+  await mockSessionRemaining(page, adminUser);
+
+  await page.route("**/api/v1/auctions", (route) =>
+    isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, auctionList),
+  );
+  await page.route("**/api/v1/admin/auctions", (route) =>
+    isDocumentRequest(route) ? route.continue() : fulfillJson(route, []),
+  );
+
+  let uploadAttempts = 0;
+  await page.route("**/api/v1/uploads", (route) => {
+    uploadAttempts += 1;
+    if (uploadAttempts === 1) {
+      return route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ message: "Upload failed" }),
+      });
+    }
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ url: "https://example.com/uploaded.jpg" }),
+    });
+  });
+
+  await page.goto("/admin/auctions/new");
+  await page.getByLabel("Upload image").setInputFiles({
+    name: "photo.png",
+    mimeType: "image/png",
+    buffer: Buffer.from([137, 80, 78, 71]),
+  });
+
+  await expect(page.getByRole("alert")).toBeVisible();
+
+  await page.getByRole("button", { name: "Retry upload" }).click();
+  await expect(page.getByText("Uploaded")).toBeVisible();
+  await expect(page.getByLabel("Image URL")).toHaveValue(
+    "https://example.com/uploaded.jpg",
+  );
+});
+
 test("admin edits auction status/date and update appears on public feed", async ({
   page,
 }) => {

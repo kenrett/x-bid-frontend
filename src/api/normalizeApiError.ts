@@ -168,6 +168,8 @@ const pickFallbackMessageFromBody = (data: unknown): string | undefined => {
 
 const defaultMessageForStatus = (status: number | undefined) => {
   if (status === 429) return "Too many requests. Please wait and try again.";
+  if (status === 413)
+    return "Upload is too large. Please choose a smaller file.";
   if (status === 401) return "Please sign in again.";
   if (status === 403) return "You do not have permission to do that.";
   if (status === 404) return "Not found.";
