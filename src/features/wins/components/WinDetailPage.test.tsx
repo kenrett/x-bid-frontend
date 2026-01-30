@@ -156,9 +156,7 @@ describe("WinDetailPage", () => {
     await user.click(screen.getByRole("button", { name: /submit claim/i }));
 
     expect(await screen.findByText(/claim submitted/i)).toBeInTheDocument();
-    expect(
-      screen.getAllByText(/preparing your shipment/i)[0],
-    ).toBeInTheDocument();
+    expect(screen.getByText(/follow up/i)).toBeInTheDocument();
   });
 
   it("does not allow claiming when already claimed", async () => {

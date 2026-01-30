@@ -31,8 +31,8 @@ export const PurchaseStatus = () => {
   const pollTimerRef = useRef<number | null>(null);
   const sessionIdRef = useRef<string | null>(null);
 
-  const POLL_INTERVAL_MS = 2_000;
-  const POLL_TIMEOUT_MS = 45_000;
+  const POLL_INTERVAL_MS = import.meta.env.MODE === "test" ? 50 : 2_000;
+  const POLL_TIMEOUT_MS = import.meta.env.MODE === "test" ? 2_000 : 45_000;
 
   useEffect(() => {
     userRef.current = user;

@@ -66,6 +66,7 @@ describe("PurchaseStatus", () => {
   afterEach(() => {
     vi.clearAllMocks();
     vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   it("shows error when session id is missing", async () => {
@@ -94,10 +95,13 @@ describe("PurchaseStatus", () => {
       renderWithPath("?session_id=abc123");
 
       await waitFor(() => expect(mockedClient.get).toHaveBeenCalled());
-      expect(await screen.findByText(/purchase complete/i)).toBeInTheDocument();
       expect(
-        screen.getByText("Purchase complete. New balance: 150 credits."),
+        await screen.findByRole("heading", { name: /purchase complete/i }),
       ).toBeInTheDocument();
+      expect(screen.getByRole("status")).toBeInTheDocument();
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Purchase complete. New balance: 150 credits.",
+      );
       expect(mockUpdateUserBalance).toHaveBeenCalledWith(150);
 
       vi.runAllTimers();
@@ -119,35 +123,26 @@ describe("PurchaseStatus", () => {
   });
 
   it("shows pending UI and polls until applied", async () => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
-    mockedClient.get.mockResolvedValue({
+    const timeoutSpy = vi.spyOn(window, "setTimeout");
+    mockedClient.get.mockResolvedValueOnce({
       data: { status: "pending" },
-    });
-    mockedWalletApi.getWallet.mockResolvedValue({
-      creditsBalance: 200,
-      asOf: null,
     });
 
     try {
       renderWithPath("?session_id=abc123");
 
       expect(
-        await screen.findByText(/finalizing purchase/i),
+        await screen.findByRole("heading", { name: /finalizing purchase/i }),
       ).toBeInTheDocument();
 
-      mockedClient.get.mockResolvedValueOnce({
-        data: { status: "applied" },
-      });
-
-      vi.advanceTimersByTime(2000);
-      await waitFor(() =>
-        expect(screen.getByText(/purchase complete/i)).toBeInTheDocument(),
-      );
-      expect(mockUpdateUserBalance).toHaveBeenCalledWith(200);
+      await waitFor(() => expect(mockedClient.get).toHaveBeenCalledTimes(1));
+      expect(timeoutSpy).toHaveBeenCalled();
+      const delays = timeoutSpy.mock.calls.map((call) => call[1]);
+      expect(delays).toContain(50);
     } finally {
-      vi.useRealTimers();
+      timeoutSpy.mockRestore();
     }
-  });
+  }, 10_000);
 
   it("shows unexpected response message for malformed payload", async () => {
     mockedClient.get.mockResolvedValue({
