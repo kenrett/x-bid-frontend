@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/test";
 import {
   fulfillJson,
   isDocumentRequest,
@@ -87,6 +87,25 @@ test("manual logout clears storage", async ({ page }) => {
   );
 
   await page.goto("/auctions");
+  await page.evaluate(() => {
+    window.dispatchEvent(
+      new CustomEvent("app:auth:refreshed", {
+        detail: {
+          user: {
+            id: 88,
+            name: "Casey Bidder",
+            email: "casey@example.com",
+            bidCredits: 120,
+            is_admin: false,
+            is_superuser: false,
+            email_verified: true,
+            email_verified_at: "2025-01-01T00:00:00Z",
+          },
+        },
+      }),
+    );
+  });
+  await expect(page.getByRole("button", { name: "Log Out" })).toBeVisible();
   await page.getByRole("button", { name: "Log Out" }).click();
 
   const stored = await page.evaluate(() => ({

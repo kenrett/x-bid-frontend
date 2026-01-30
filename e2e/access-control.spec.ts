@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/test";
 import {
   auction101BidHistory,
   auctionDetail101,
@@ -22,12 +22,12 @@ test("guest is prompted to log in on buy-bids", async ({ page }) => {
 test("guest can view auction detail but cannot place a bid", async ({
   page,
 }) => {
-  await page.route("**/api/v1/auctions/101/bid_history", (route) =>
+  await page.route("**/api/v1/auctions/101/bid_history**", (route) =>
     isDocumentRequest(route)
       ? route.continue()
       : fulfillJson(route, auction101BidHistory),
   );
-  await page.route("**/api/v1/auctions/101", (route) =>
+  await page.route("**/api/v1/auctions/101**", (route) =>
     isDocumentRequest(route)
       ? route.continue()
       : fulfillJson(route, auctionDetail101),

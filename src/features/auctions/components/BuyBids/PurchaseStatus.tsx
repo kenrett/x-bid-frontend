@@ -21,16 +21,23 @@ export const PurchaseStatus = () => {
   >("loading");
   const [message, setMessage] = useState<string | null>(null);
   const { updateUserBalance, user } = useAuth();
+  const userRef = useRef(user);
+  const isEmailVerifiedRef = useRef(
+    Boolean(user && (user.email_verified === true || user.email_verified_at)),
+  );
   const hasVerifiedRef = useRef(false);
   const pollStartRef = useRef<number | null>(null);
   const pollTimerRef = useRef<number | null>(null);
   const sessionIdRef = useRef<string | null>(null);
-  const isEmailVerified = Boolean(
-    user && (user.email_verified === true || user.email_verified_at),
-  );
 
   const POLL_INTERVAL_MS = 2_000;
   const POLL_TIMEOUT_MS = 45_000;
+
+  useEffect(() => {
+    userRef.current = user;
+    isEmailVerifiedRef.current =
+      user?.email_verified === true || Boolean(user?.email_verified_at);
+  }, [user]);
 
   const logCheckoutMetric = (
     event: string,
@@ -107,15 +114,17 @@ export const PurchaseStatus = () => {
   const verifyPayment = useCallback(
     async (source: "initial" | "poll" | "manual") => {
       const sessionId = sessionIdRef.current;
+      const currentUser = userRef.current;
+      const hasVerifiedEmail = isEmailVerifiedRef.current;
       if (!sessionId) {
         setStatus("error");
         setMessage("Could not find a payment session. Please try again.");
         return;
       }
       try {
-        if (user && !isEmailVerified) {
+        if (currentUser && !hasVerifiedEmail) {
           setStatus("error");
-          if (user.email_verified === false) {
+          if (currentUser.email_verified === false) {
             setMessage("Verify your email to complete checkout.");
             window.dispatchEvent(
               new CustomEvent("app:email_unverified", {
@@ -246,7 +255,7 @@ export const PurchaseStatus = () => {
         }
       }
     },
-    [isEmailVerified, updateUserBalance, user],
+    [updateUserBalance],
   );
 
   useEffect(() => {

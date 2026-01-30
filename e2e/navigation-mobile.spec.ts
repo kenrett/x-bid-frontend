@@ -1,4 +1,4 @@
-import { expect, test, devices } from "@playwright/test";
+import { expect, test, devices } from "./fixtures/test";
 import { fulfillJson, isDocumentRequest } from "./fixtures/mocks";
 
 test("header and footer links navigate", async ({ page }) => {

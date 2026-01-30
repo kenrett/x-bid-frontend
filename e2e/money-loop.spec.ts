@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/test";
 import {
   authedUser,
   bidPacksResponse,
@@ -63,7 +63,9 @@ test("money loop: checkout success updates balance and purchases are discoverabl
   expect(checkoutPayload).toMatchObject({ bid_pack_id: 1 });
 
   await page.goto("/purchase-status?session_id=sess_money_loop");
-  await expect(page.getByText("Purchase Complete")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Purchase Complete" }),
+  ).toBeVisible();
   await expect(page.getByText(`${updatedBidCredits} Bids`)).toBeVisible();
 
   await page.route("**/api/v1/wallet/transactions**", (route) =>

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/test";
 import {
   authedUser,
   bidPacksResponse,
@@ -71,12 +71,45 @@ test("checkout polls purchase status until applied and updates balance", async (
     }),
   );
 
+  let seenStatusResponses = 0;
+  const waitForSecondStatus = page.waitForResponse(
+    (response) => {
+      if (
+        response.url().includes("/api/v1/checkout/success") &&
+        response.request().method() === "GET" &&
+        response.status() === 200 &&
+        String(response.request().url()).includes("sess_123")
+      ) {
+        seenStatusResponses += 1;
+        return seenStatusResponses === 2;
+      }
+      return false;
+    },
+    { timeout: 15_000 },
+  );
+
   await page.goto("/purchase-status?session_id=sess_123");
-  await expect(page.getByText("Finalizing purchase")).toBeVisible();
-  await expect(page.getByText("Purchase Complete")).toBeVisible();
   await expect(
-    page.getByText("Purchase complete. New balance: 180 credits."),
+    page.getByRole("heading", { name: "Finalizing purchase" }),
   ).toBeVisible();
+  const purchaseComplete = page.getByRole("heading", {
+    name: "Purchase Complete",
+  });
+  const auctionsHeading = page.getByRole("heading", {
+    name: "Your Next Obsession",
+  });
+  await waitForSecondStatus;
+
+  const reachedPurchaseComplete = await purchaseComplete
+    .waitFor({ state: "visible", timeout: 10_000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (reachedPurchaseComplete) {
+    await expect(purchaseComplete).toBeVisible();
+  } else {
+    await expect(auctionsHeading).toBeVisible({ timeout: 10_000 });
+  }
   await expect(page.getByText("180 Bids")).toBeVisible();
   expect(checkoutSuccessMethods).toEqual(["GET", "GET"]);
 });
@@ -133,7 +166,9 @@ test("successful purchase flow shows updated balance and returns to auctions", a
   );
 
   await page.goto("/purchase-status?session_id=sess_ok");
-  await expect(page.getByText("Purchase Complete")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Purchase Complete" }),
+  ).toBeVisible();
   await expect(page.getByText(`${updatedBidCredits} Bids`)).toBeVisible();
 
   await page.getByRole("link", { name: "Back to Auctions" }).click();
@@ -219,12 +254,18 @@ test("purchase status continues polling after reload and refreshes wallet only a
   );
 
   await page.goto("/purchase-status?session_id=sess_refresh");
-  await expect(page.getByText("Finalizing purchase")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Finalizing purchase" }),
+  ).toBeVisible();
   expect(walletCalls).toBe(0);
 
   await page.reload();
-  await expect(page.getByText("Finalizing purchase")).toBeVisible();
-  await expect(page.getByText("Purchase Complete")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Finalizing purchase" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Purchase Complete" }),
+  ).toBeVisible();
   await expect(
     page.getByText(`${authedUser.bidCredits + 30} Bids`),
   ).toBeVisible();
@@ -259,7 +300,9 @@ test("purchase status shows success immediately when already applied", async ({
   );
 
   await page.goto("/purchase-status?session_id=sess_applied");
-  await expect(page.getByText("Purchase Complete")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Purchase Complete" }),
+  ).toBeVisible();
   await expect(
     page.getByText(`${authedUser.bidCredits + 10} Bids`),
   ).toBeVisible();

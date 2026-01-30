@@ -148,19 +148,29 @@ export const bidPacksResponse = [
 
 const buildCorsHeaders = (route: Route) => {
   const headers = route.request().headers();
-  const origin = headers["origin"];
+  const origin = headers["origin"] ?? "http://127.0.0.1:4173";
   const requestedHeaders = headers["access-control-request-headers"];
   return {
-    ...(origin ? { "access-control-allow-origin": origin } : {}),
+    "access-control-allow-origin": origin,
     "access-control-allow-credentials": "true",
     "access-control-allow-methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
     "access-control-allow-headers":
       requestedHeaders ?? "Content-Type,X-Storefront-Key",
+    "access-control-expose-headers":
+      "x-maintenance,x-maintenance-mode,x-request-id",
   };
 };
 
-export const fulfillJson = (route: Route, data: unknown, status = 200) => {
+export const fulfillJson = (
+  route: Route,
+  data: unknown,
+  status = 200,
+  extraHeaders?: Record<string, string>,
+) => {
   const headers = buildCorsHeaders(route);
+  if (extraHeaders) {
+    Object.assign(headers, extraHeaders);
+  }
   if (route.request().method() === "OPTIONS") {
     return route.fulfill({ status: 204, headers });
   }
@@ -175,44 +185,53 @@ export const fulfillJson = (route: Route, data: unknown, status = 200) => {
 export const isDocumentRequest = (route: Route) =>
   route.request().resourceType() === "document";
 
-export const mockAccountSecurity = async (page: Page, user = authedUser) => {
-  const emailVerified = Boolean(
-    (user as { email_verified?: unknown }).email_verified,
-  );
-  const emailVerifiedAt =
-    (user as { email_verified_at?: unknown }).email_verified_at ?? null;
+const authOverrides = new WeakMap<Page, typeof authedUser>();
+const sessionOverrides = new WeakMap<
+  Page,
+  { remaining_seconds: number; user?: typeof authedUser }
+>();
 
-  await page.route("**/api/v1/account/security", (route) =>
-    fulfillJson(route, {
-      email_verified: emailVerified,
-      email_verified_at: emailVerifiedAt,
-    }),
-  );
+export const setAuthOverride = (page: Page, user?: typeof authedUser) => {
+  if (!user) {
+    authOverrides.delete(page);
+    return;
+  }
+  authOverrides.set(page, user);
+};
+
+export const getAuthOverride = (page: Page) => authOverrides.get(page);
+
+export const setSessionOverride = (
+  page: Page,
+  payload?: { remaining_seconds: number; user?: typeof authedUser },
+) => {
+  if (!payload) {
+    sessionOverrides.delete(page);
+    return;
+  }
+  sessionOverrides.set(page, payload);
+};
+
+export const getSessionOverride = (page: Page) => sessionOverrides.get(page);
+
+export const mockAccountSecurity = async (page: Page, user = authedUser) => {
+  setAuthOverride(page, user);
 };
 
 export const seedAuthState = async (page: Page, user = authedUser) => {
-  await page.route("**/api/v1/logged_in", (route) =>
-    fulfillJson(route, {
-      logged_in: true,
-      user,
-      is_admin: Boolean(user.is_admin),
-      is_superuser: Boolean(user.is_superuser),
-    }),
-  );
-
-  // AccountStatusProvider calls this on boot; default to a verified response
-  // matching the seeded user so we don't accidentally lock tests behind the
-  // email-verification gate when the SPA falls back to HTML.
-  await mockAccountSecurity(page, user);
+  setAuthOverride(page, user);
+  setSessionOverride(page, { remaining_seconds: 1800, user });
 };
 
-export const mockSessionRemaining = async (page: Page, user = authedUser) => {
-  await page.route("**/api/v1/session/remaining", (route) =>
-    fulfillJson(route, {
-      remaining_seconds: 1800,
-      user,
-    }),
-  );
+export const mockSessionRemaining = async (
+  page: Page,
+  user = authedUser,
+  remainingSeconds = 1800,
+) => {
+  setSessionOverride(page, {
+    remaining_seconds: remainingSeconds,
+    user,
+  });
 };
 
 export const stubStripe = async (page: Page) => {

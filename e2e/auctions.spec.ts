@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/test";
 import {
   auction101BidHistory,
   auction501BidHistory,

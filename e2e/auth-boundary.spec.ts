@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./fixtures/test";
 import {
   auction101BidHistory,
   auctionDetail101,
@@ -213,13 +213,8 @@ test("503 maintenance_mode routes to /maintenance from account export", async ({
   await page.route("**/api/v1/account/data/export", (route) =>
     isDocumentRequest(route)
       ? route.continue()
-      : route.fulfill({
-          status: 200,
-          headers: {
-            "content-type": "application/json",
-            "X-Maintenance": "true",
-          },
-          body: JSON.stringify({ status: "pending" }),
+      : fulfillJson(route, { error: { code: "maintenance_mode" } }, 503, {
+          "X-Maintenance": "true",
         }),
   );
   await page.route("**/api/v1/maintenance", (route) =>

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/test";
 import {
   auction101BidHistory,
   auctionDetail101,
@@ -52,17 +52,17 @@ test("bidding CTA is keyboard-operable", async ({ page }) => {
   await seedAuthState(page);
   await mockSessionRemaining(page);
 
-  await page.route("**/api/v1/auctions/101", (route) =>
+  await page.route("**/api/v1/auctions/101**", (route) =>
     isDocumentRequest(route)
       ? route.continue()
       : fulfillJson(route, { ...auctionDetail101, highest_bidder_id: 7 }),
   );
-  await page.route("**/api/v1/auctions/101/bid_history", (route) =>
+  await page.route("**/api/v1/auctions/101/bid_history**", (route) =>
     isDocumentRequest(route)
       ? route.continue()
       : fulfillJson(route, auction101BidHistory),
   );
-  await page.route("**/api/v1/auctions/101/bids", (route) => {
+  await page.route("**/api/v1/auctions/101/bids**", (route) => {
     if (route.request().method() === "POST") {
       return fulfillJson(route, {
         success: true,
@@ -97,12 +97,12 @@ test("checkout CTA is keyboard-operable", async ({ page }) => {
   await seedAuthState(page);
   await mockSessionRemaining(page);
 
-  await page.route("**/api/v1/bid_packs", (route) =>
+  await page.route("**/api/v1/bid_packs**", (route) =>
     isDocumentRequest(route)
       ? route.continue()
       : fulfillJson(route, bidPacksResponse),
   );
-  await page.route("**/api/v1/checkouts", (route) => {
+  await page.route("**/api/v1/checkouts**", (route) => {
     if (route.request().method() === "POST") {
       return fulfillJson(route, { clientSecret: "cs_test_fake" });
     }
