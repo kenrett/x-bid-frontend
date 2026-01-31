@@ -32,7 +32,7 @@ export const PurchaseStatus = () => {
   const sessionIdRef = useRef<string | null>(null);
 
   const POLL_INTERVAL_MS = import.meta.env.MODE === "test" ? 50 : 2_000;
-  const POLL_TIMEOUT_MS = import.meta.env.MODE === "test" ? 2_000 : 45_000;
+  const POLL_TIMEOUT_MS = import.meta.env.MODE === "test" ? 2_000 : 60_000;
 
   useEffect(() => {
     userRef.current = user;
@@ -58,7 +58,7 @@ export const PurchaseStatus = () => {
   const normalizeStatus = (
     payload: CheckoutSuccessResponse,
   ): { status: "pending" | "applied" | "failed"; message?: string } => {
-    if (payload.idempotent === true || payload.applied === true) {
+    if (payload.applied === true) {
       return { status: "applied", message: payload.message ?? undefined };
     }
     const rawStatus =
@@ -73,11 +73,7 @@ export const PurchaseStatus = () => {
     if (rawStatus === "pending" || rawStatus === "processing") {
       return { status: "pending", message: payload.message ?? undefined };
     }
-    if (
-      rawStatus === "applied" ||
-      rawStatus === "success" ||
-      rawStatus === "paid"
-    ) {
+    if (rawStatus === "applied") {
       return { status: "applied", message: payload.message ?? undefined };
     }
     if (rawStatus === "failed" || rawStatus === "error") {
@@ -87,8 +83,8 @@ export const PurchaseStatus = () => {
       };
     }
 
-    if (paymentStatus === "paid" || paymentStatus === "succeeded") {
-      return { status: "applied", message: payload.message ?? undefined };
+    if (paymentStatus === "processing") {
+      return { status: "pending", message: payload.message ?? undefined };
     }
     if (
       paymentStatus === "failed" ||
