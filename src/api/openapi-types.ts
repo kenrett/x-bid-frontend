@@ -51,6 +51,66 @@ export interface paths {
     patch: operations["PATCH__api_v1_account"];
     trace?: never;
   };
+  "/api/v1/account/2fa/disable": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Disable 2FA (requires password + code)
+     * @description POST /api/v1/account/2fa/disable
+     */
+    post: operations["POST__api_v1_account_2fa_disable"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/account/2fa/setup": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start 2FA setup and return the provisioning URI
+     * @description POST /api/v1/account/2fa/setup
+     */
+    post: operations["POST__api_v1_account_2fa_setup"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/account/2fa/verify": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Verify 2FA code and enable
+     * @description POST /api/v1/account/2fa/verify
+     */
+    post: operations["POST__api_v1_account_2fa_verify"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/account/data/export": {
     parameters: {
       query?: never;
@@ -103,11 +163,34 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Return an account export (or start async export)
-     * @description GET /api/v1/account/export
-     *     Returns the export JSON when ready; otherwise returns export metadata (202) so clients can poll.
+     * Get the latest account export status
+     * @description GET /api/v1/account/data/export
      */
     get: operations["GET__api_v1_account_export"];
+    put?: never;
+    /**
+     * Request an account export (MVP)
+     * @description POST /api/v1/account/data/export
+     */
+    post: operations["POST__api_v1_account_export"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/account/export/download": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Download an account export payload via signed URL
+     * @description GET /api/v1/account/export/download
+     */
+    get: operations["GET__api_v1_account_export_download"];
     put?: never;
     post?: never;
     delete?: never;
@@ -2926,6 +3009,48 @@ export interface operations {
       500: components["responses"]["resp_021"];
     };
   };
+  POST__api_v1_account_2fa_disable: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      401: components["responses"]["resp_041"];
+      403: components["responses"]["resp_047"];
+      500: components["responses"]["resp_021"];
+    };
+  };
+  POST__api_v1_account_2fa_setup: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      401: components["responses"]["resp_041"];
+      403: components["responses"]["resp_047"];
+      500: components["responses"]["resp_021"];
+    };
+  };
+  POST__api_v1_account_2fa_verify: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      401: components["responses"]["resp_041"];
+      403: components["responses"]["resp_047"];
+      500: components["responses"]["resp_021"];
+    };
+  };
   GET__api_v1_account_data_export: {
     parameters: {
       query?: never;
@@ -2984,8 +3109,39 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_031"];
+      200: components["responses"]["resp_050"];
+      401: components["responses"]["resp_066"];
+      403: components["responses"]["resp_047"];
+      404: components["responses"]["resp_043"];
+      500: components["responses"]["resp_021"];
+    };
+  };
+  POST__api_v1_account_export: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
       202: components["responses"]["resp_030"];
+      401: components["responses"]["resp_066"];
+      403: components["responses"]["resp_047"];
+      422: components["responses"]["resp_049"];
+      500: components["responses"]["resp_021"];
+    };
+  };
+  GET__api_v1_account_export_download: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: components["responses"]["resp_031"];
       401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       500: components["responses"]["resp_021"];
