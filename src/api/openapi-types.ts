@@ -1717,6 +1717,20 @@ export interface components {
     AccountExportResponse: {
       export: components["schemas"]["AccountExport"] | null;
     };
+    AccountExportData: {
+      [key: string]: unknown;
+    };
+    AccountTwoFactorSetupResponse: {
+      otpauth_uri: string;
+      secret: string;
+    };
+    AccountTwoFactorVerifyResponse: {
+      recovery_codes: string[];
+      status: string;
+    };
+    AccountTwoFactorDisableResponse: {
+      status: string;
+    };
     AccountProfile: {
       user: {
         /** Format: date-time */
@@ -2780,6 +2794,42 @@ export interface components {
         "application/json": components["schemas"]["6383e51ee52c0c02bb879720dd1369ff"];
       };
     };
+    /** @description 2FA setup */
+    resp_069: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        "application/json": components["schemas"]["AccountTwoFactorSetupResponse"];
+      };
+    };
+    /** @description 2FA enabled */
+    resp_070: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        "application/json": components["schemas"]["AccountTwoFactorVerifyResponse"];
+      };
+    };
+    /** @description 2FA disabled */
+    resp_071: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        "application/json": components["schemas"]["AccountTwoFactorDisableResponse"];
+      };
+    };
+    /** @description Account export data */
+    resp_072: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        "application/json": components["schemas"]["AccountExportData"];
+      };
+    };
   };
   parameters: {
     /** @description ID of the auction */
@@ -3018,6 +3068,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
+      200: components["responses"]["resp_071"];
       401: components["responses"]["resp_041"];
       403: components["responses"]["resp_047"];
       500: components["responses"]["resp_021"];
@@ -3032,6 +3083,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
+      200: components["responses"]["resp_069"];
       401: components["responses"]["resp_041"];
       403: components["responses"]["resp_047"];
       500: components["responses"]["resp_021"];
@@ -3046,6 +3098,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
+      200: components["responses"]["resp_070"];
       401: components["responses"]["resp_041"];
       403: components["responses"]["resp_047"];
       500: components["responses"]["resp_021"];
@@ -3141,7 +3194,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_031"];
+      200: components["responses"]["resp_072"];
       401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       500: components["responses"]["resp_021"];
