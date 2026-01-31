@@ -53,12 +53,11 @@ test("guest is redirected away from admin", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
 });
 
-test("non-admin user is redirected away from admin", async ({ page }) => {
+test("non-admin user sees access denied on admin", async ({ page }) => {
   await seedAuthState(page);
   await mockSessionRemaining(page);
 
   await page.goto("/admin/auctions");
 
-  await expect(page).toHaveURL(/\/login\?redirect=%2Fadmin%2Fauctions/);
-  await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
+  await expect(page.getByText(/insufficient permissions/i)).toBeVisible();
 });

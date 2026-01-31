@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { accountApi } from "../api/accountApi";
 import { normalizeApiError, type FieldErrors } from "@api/normalizeApiError";
 import { showToast } from "@services/toast";
@@ -395,6 +396,22 @@ export const AccountSecurityPage = () => {
             </p>
           )}
         </div>
+      </section>
+
+      <section className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-5">
+        <h3 className="text-lg font-semibold text-white">
+          Two-factor authentication
+        </h3>
+        <p className="text-sm text-gray-300">
+          Add an extra step during sign-in using an authenticator app and
+          recovery codes.
+        </p>
+        <Link
+          to="/account/security/2fa"
+          className="inline-flex w-fit items-center rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
+        >
+          Manage 2FA
+        </Link>
       </section>
     </div>
   );

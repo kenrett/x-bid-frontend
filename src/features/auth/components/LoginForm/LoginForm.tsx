@@ -11,9 +11,36 @@ import {
   isDebugAuthEnabled,
   shouldLogLoginDiagnostics,
 } from "../../../../debug/authDebug";
+import { saveTwoFactorChallenge } from "@features/auth/twoFactorStorage";
 
 const isUnexpectedAuthResponseError = (err: unknown) =>
   err instanceof Error && err.message.startsWith("Unexpected auth response:");
+
+const extractTwoFactorChallenge = (payload: unknown) => {
+  if (!payload || typeof payload !== "object") return null;
+  const record = payload as Record<string, unknown>;
+  const requires2fa =
+    record.two_factor_required === true ||
+    record.requires_2fa === true ||
+    record.mfa_required === true;
+  const challengeId =
+    typeof record.challenge_id === "string"
+      ? record.challenge_id
+      : typeof record.two_factor_challenge_id === "string"
+        ? record.two_factor_challenge_id
+        : typeof record.otp_challenge_id === "string"
+          ? record.otp_challenge_id
+          : null;
+  if (!challengeId && !requires2fa) return null;
+  if (!challengeId) return null;
+  const email =
+    typeof record.email_address === "string"
+      ? record.email_address
+      : typeof record.email === "string"
+        ? record.email
+        : null;
+  return { challengeId, email };
+};
 
 export const LoginForm = () => {
   const [email_address, setEmailAddress] = useState("");
@@ -62,6 +89,8 @@ export const LoginForm = () => {
     setError(null);
     setFieldErrors({});
     setNotice(null);
+    const redirectTo =
+      searchParams.get("next") || searchParams.get("redirect") || "/auctions";
 
     try {
       if (isDebugAuthEnabled() && shouldLogLoginDiagnostics()) {
@@ -87,11 +116,32 @@ export const LoginForm = () => {
           __debugLogin: true,
         },
       );
+      const challenge = extractTwoFactorChallenge(response.data);
+      if (challenge) {
+        saveTwoFactorChallenge({
+          challengeId: challenge.challengeId,
+          email: challenge.email,
+          redirectTo,
+        });
+        navigate("/login/2fa");
+        return;
+      }
+
       login(normalizeAuthResponse(response.data));
-      const redirectTo =
-        searchParams.get("next") || searchParams.get("redirect") || "/auctions";
       navigate(redirectTo); // Redirect on successful login
     } catch (err) {
+      const challenge = extractTwoFactorChallenge(
+        (err as { response?: { data?: unknown } })?.response?.data,
+      );
+      if (challenge) {
+        saveTwoFactorChallenge({
+          challengeId: challenge.challengeId,
+          email: challenge.email,
+          redirectTo,
+        });
+        navigate("/login/2fa");
+        return;
+      }
       if (isUnexpectedAuthResponseError(err)) {
         setError("Unexpected server response. Please try again.");
         if (import.meta.env.MODE !== "production") {

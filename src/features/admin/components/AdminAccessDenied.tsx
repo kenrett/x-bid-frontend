@@ -1,0 +1,35 @@
+import { Link } from "react-router-dom";
+import { Page } from "@components/Page";
+
+export const AdminAccessDenied = () => {
+  return (
+    <Page centered>
+      <div className="max-w-md rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
+        <p className="text-xs uppercase tracking-wide text-gray-400">
+          Admin access
+        </p>
+        <h1 className="mt-2 text-2xl font-semibold text-white">
+          Insufficient permissions
+        </h1>
+        <p className="mt-3 text-sm text-gray-300">
+          Your account does not have access to the admin console. If you believe
+          this is an error, contact support.
+        </p>
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
+          <Link
+            to="/auctions"
+            className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
+          >
+            Back to auctions
+          </Link>
+          <Link
+            to="/account"
+            className="rounded-lg bg-pink-500 px-4 py-2 text-sm font-semibold text-black"
+          >
+            Go to account
+          </Link>
+        </div>
+      </div>
+    </Page>
+  );
+};

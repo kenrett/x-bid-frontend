@@ -56,7 +56,7 @@ describe("admin navigation smoke", () => {
     vi.clearAllMocks();
   });
 
-  it("blocks non-admin users from /admin routes", () => {
+  it("shows access denied for non-admin users on /admin routes", () => {
     mockUseAuth.mockReturnValue({
       isReady: true,
       user: { is_admin: false, is_superuser: false },
@@ -65,9 +65,7 @@ describe("admin navigation smoke", () => {
 
     renderAdminRoute("/admin/payments");
 
-    expect(
-      screen.getByText("login:/login?redirect=%2Fadmin%2Fpayments"),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/insufficient permissions/i)).toBeInTheDocument();
     expect(showToast).toHaveBeenCalledWith(
       "Admin access only. Please sign in with an admin account.",
       "error",

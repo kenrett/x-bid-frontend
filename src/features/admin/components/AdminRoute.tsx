@@ -2,6 +2,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import { useAuth } from "@features/auth/hooks/useAuth";
 import { showToast } from "@services/toast";
+import { AdminAccessDenied } from "./AdminAccessDenied";
 
 export const AdminRoute = () => {
   const { user: authUser, isReady } = useAuth();
@@ -26,6 +27,9 @@ export const AdminRoute = () => {
   }
 
   if (!isAdmin) {
+    if (authUser) {
+      return <AdminAccessDenied />;
+    }
     const redirectParam = encodeURIComponent(
       location.pathname + location.search,
     );

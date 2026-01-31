@@ -39,8 +39,24 @@ describe("AdminRoute", () => {
     expect(showToast).not.toHaveBeenCalled();
   });
 
-  it("redirects non-admins to login with redirect param and shows toast once", () => {
-    mockUseAuth.mockReturnValue({ isReady: true, user: { is_admin: false } });
+  it("renders access denied for signed-in non-admins and shows toast once", () => {
+    mockUseAuth.mockReturnValue({
+      isReady: true,
+      user: { is_admin: false, email: "user@example.com" },
+    });
+
+    renderRoute("/admin?foo=bar");
+
+    expect(screen.getByText(/insufficient permissions/i)).toBeInTheDocument();
+    expect(showToast).toHaveBeenCalledWith(
+      "Admin access only. Please sign in with an admin account.",
+      "error",
+    );
+    expect(showToast).toHaveBeenCalledTimes(1);
+  });
+
+  it("redirects guests to login with redirect param and shows toast once", () => {
+    mockUseAuth.mockReturnValue({ isReady: true, user: null });
 
     renderRoute("/admin?foo=bar");
 
@@ -49,7 +65,6 @@ describe("AdminRoute", () => {
       "Admin access only. Please sign in with an admin account.",
       "error",
     );
-    // ensure toast isn't re-fired on re-render
     expect(showToast).toHaveBeenCalledTimes(1);
   });
 

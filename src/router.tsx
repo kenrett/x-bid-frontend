@@ -49,6 +49,14 @@ export const routes: RouteObject[] = [
         ),
       },
       {
+        path: "/login/2fa",
+        lazy: lazy(
+          () =>
+            import("@features/auth/components/TwoFactorChallenge/TwoFactorChallenge"),
+          "TwoFactorChallenge",
+        ),
+      },
+      {
         path: "/wallet",
         element: <Navigate to="/account/wallet" replace />,
       },
@@ -178,6 +186,14 @@ export const routes: RouteObject[] = [
                   () =>
                     import("@features/account/components/AccountSecurityPage"),
                   "AccountSecurityPage",
+                ),
+              },
+              {
+                path: "security/2fa",
+                lazy: lazy(
+                  () =>
+                    import("@features/account/components/AccountTwoFactorPage"),
+                  "AccountTwoFactorPage",
                 ),
               },
               {
