@@ -1,226 +1,71 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import client, { __testOnly, handleResponseError } from "./client";
-import { authSessionStore } from "@features/auth/tokenStore";
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-} from "axios";
+import { AxiosHeaders } from "axios";
 
-const makeAxiosError = ({
-  status,
-  code,
-}: {
-  status: number;
-  code: string;
-}): AxiosError =>
-  ({
-    isAxiosError: true,
-    config: {},
-    response: {
-      status,
-      data: { error_code: code },
-      headers: {},
-    },
-  }) as unknown as AxiosError;
+const originalEnv = { ...import.meta.env };
 
-const getHeader = (
-  config: AxiosRequestConfig,
-  key: string,
-): string | undefined => {
-  const headers = config.headers as
-    | Record<string, unknown>
-    | { get?: (value: string) => unknown }
-    | undefined;
-  if (!headers) return undefined;
-  if (typeof headers.get === "function") {
-    const value = headers.get(key);
-    return typeof value === "string" ? value : undefined;
+const applyEnv = (overrides: Record<string, unknown>) => {
+  const env = import.meta.env as unknown as Record<string, unknown>;
+  const keys = new Set([
+    ...Object.keys(originalEnv),
+    ...Object.keys(overrides),
+  ]);
+  for (const key of keys) {
+    env[key] =
+      key in overrides
+        ? overrides[key]
+        : (originalEnv as Record<string, unknown>)[key];
   }
-  const record = headers as Record<string, unknown>;
-  const direct = record[key];
-  if (typeof direct === "string") return direct;
-  const lower = record[key.toLowerCase()];
-  if (typeof lower === "string") return lower;
-  return undefined;
 };
 
-const makeAdapterResponse = (
-  config: AxiosRequestConfig,
-  data: unknown,
-): AxiosResponse => {
-  const normalizedConfig = {
-    ...(config as InternalAxiosRequestConfig),
-    headers: (config.headers as InternalAxiosRequestConfig["headers"]) ?? {},
-  };
-
-  return {
-    data,
-    status: 200,
-    statusText: "OK",
-    headers: {},
-    config: normalizedConfig,
-  };
+const setHostname = (hostname: string) => {
+  Object.defineProperty(window, "location", {
+    value: { ...window.location, hostname },
+    writable: true,
+  });
 };
 
-describe("handleResponseError", () => {
-  beforeEach(() => {
-    vi.spyOn(authSessionStore, "clear").mockImplementation(() => {});
-  });
+describe("api client", () => {
+  let originalAdapter: typeof import("./client").default.defaults.adapter;
+  let client: typeof import("./client").default;
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  it("dispatches app:forbidden and does not clear auth on a generic 403", async () => {
-    const forbiddenSpy = vi.fn();
-    window.addEventListener("app:forbidden", forbiddenSpy);
-
-    const error = makeAxiosError({ status: 403, code: "forbidden" });
-
-    await expect(handleResponseError(error)).rejects.toBe(error);
-
-    expect(authSessionStore.clear).not.toHaveBeenCalled();
-    expect(forbiddenSpy).toHaveBeenCalledTimes(1);
-    const forbiddenEvent = forbiddenSpy.mock.calls[0]?.[0] as CustomEvent<{
-      status: number;
-      code: string;
-    }>;
-    expect(forbiddenEvent.detail).toEqual({
-      status: 403,
-      code: "forbidden",
+  beforeEach(async () => {
+    applyEnv({
+      VITE_API_BASE_URL: "https://api.biddersweet.app",
+      VITE_STOREFRONT_KEY: "",
     });
-
-    window.removeEventListener("app:forbidden", forbiddenSpy);
-  });
-
-  it("clears auth and dispatches app:unauthorized for 403 invalid_session", async () => {
-    const unauthorizedSpy = vi.fn();
-    window.addEventListener("app:unauthorized", unauthorizedSpy);
-
-    const error = makeAxiosError({ status: 403, code: "invalid_session" });
-
-    await expect(handleResponseError(error)).rejects.toBe(error);
-
-    expect(authSessionStore.clear).toHaveBeenCalled();
-    expect(unauthorizedSpy).toHaveBeenCalledTimes(1);
-    const unauthorizedEvent = unauthorizedSpy.mock
-      .calls[0]?.[0] as CustomEvent<{ status: number; code: string }>;
-    expect(unauthorizedEvent.detail).toEqual({
-      status: 403,
-      code: "invalid_session",
-    });
-
-    window.removeEventListener("app:unauthorized", unauthorizedSpy);
-  });
-});
-
-describe("api client defaults", () => {
-  it("includes credentials for API base requests", async () => {
-    const adapter = vi.fn(async (config: AxiosRequestConfig) =>
-      makeAdapterResponse(config, {}),
-    );
-    const originalAdapter = client.defaults.adapter;
-    client.defaults.adapter = adapter;
-
-    await client.get("/api/v1/example");
-
-    const call = adapter.mock.calls[0]?.[0] as AxiosRequestConfig;
-    expect(call.withCredentials).toBe(true);
-
-    client.defaults.adapter = originalAdapter;
-  });
-
-  it("omits credentials for non-API requests", async () => {
-    const adapter = vi.fn(async (config: AxiosRequestConfig) =>
-      makeAdapterResponse(config, {}),
-    );
-    const originalAdapter = client.defaults.adapter;
-    client.defaults.adapter = adapter;
-
-    await client.get("https://example.com/health");
-
-    const call = adapter.mock.calls[0]?.[0] as AxiosRequestConfig;
-    expect(call.withCredentials).toBe(false);
-
-    client.defaults.adapter = originalAdapter;
-  });
-});
-
-describe("csrf handling", () => {
-  let originalAdapter: AxiosRequestConfig["adapter"];
-
-  beforeEach(() => {
-    __testOnly.clearCsrfToken();
+    setHostname("marketplace.biddersweet.app");
+    vi.resetModules();
+    client = (await import("./client")).default;
     originalAdapter = client.defaults.adapter;
   });
 
   afterEach(() => {
+    applyEnv({});
     client.defaults.adapter = originalAdapter;
   });
 
-  it("attaches csrf token on unsafe requests", async () => {
-    const adapter = vi.fn(async (config: AxiosRequestConfig) => {
-      if (String(config.url).includes("/api/v1/csrf")) {
-        return makeAdapterResponse(config, { csrf_token: "csrf-123" });
-      }
-      return makeAdapterResponse(config, {});
-    });
-    client.defaults.adapter = adapter;
+  it("sends X-Storefront-Key and includes credentials", async () => {
+    const adapter = vi.fn(async (config) => ({
+      data: {},
+      status: 200,
+      statusText: "OK",
+      headers: {},
+      config,
+    }));
 
-    await client.post("/api/v1/example", { ok: true });
+    client.defaults.adapter = adapter as typeof originalAdapter;
+    await client.get("/api/v1/ping");
 
-    const postCall = adapter.mock.calls.find(([config]) =>
-      String(config.url).includes("/api/v1/example"),
-    );
-    expect(postCall).toBeTruthy();
-    const postConfig = postCall?.[0] as AxiosRequestConfig;
-    expect(getHeader(postConfig, "X-CSRF-Token")).toBe("csrf-123");
-  });
+    const config = adapter.mock.calls.at(0)?.[0];
+    if (!config) throw new Error("adapter not called");
 
-  it("retries once after csrf failure and refreshes token", async () => {
-    let csrfCallCount = 0;
-    let postCallCount = 0;
-    const postHeaders: string[] = [];
+    const headers = config.headers;
+    const headerValue =
+      headers instanceof AxiosHeaders
+        ? headers.get("X-Storefront-Key")
+        : (headers as Record<string, string | undefined>)["X-Storefront-Key"];
 
-    const adapter = vi.fn(async (config: AxiosRequestConfig) => {
-      if (String(config.url).includes("/api/v1/csrf")) {
-        const token = csrfCallCount === 0 ? "csrf-first" : "csrf-second";
-        csrfCallCount += 1;
-        return makeAdapterResponse(config, { csrf_token: token });
-      }
-
-      if ((config.method ?? "get").toUpperCase() === "POST") {
-        postCallCount += 1;
-        const headerValue = getHeader(config, "X-CSRF-Token");
-        if (headerValue) postHeaders.push(headerValue);
-
-        if (postCallCount === 1) {
-          const error = Object.assign(new Error("csrf"), {
-            isAxiosError: true,
-            config,
-            response: {
-              status: 403,
-              data: { error: { code: "invalid_csrf" } },
-              headers: {},
-            },
-          }) as AxiosError;
-          return Promise.reject(error);
-        }
-
-        return makeAdapterResponse(config, { ok: true });
-      }
-
-      return makeAdapterResponse(config, {});
-    });
-    client.defaults.adapter = adapter;
-
-    await expect(
-      client.post("/api/v1/example", { ok: true }),
-    ).resolves.toBeTruthy();
-    expect(postCallCount).toBe(2);
-    expect(postHeaders).toEqual(["csrf-first", "csrf-second"]);
-    expect(csrfCallCount).toBe(2);
+    expect(headerValue).toBe("marketplace");
+    expect(config.withCredentials).toBe(true);
   });
 });

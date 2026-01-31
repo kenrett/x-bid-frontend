@@ -62,10 +62,11 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
     cp .env.example .env.development
     ```
 
-    - `VITE_API_URL`: Base URL for the XBid backend API origin (e.g., `http://api.lvh.me:3000`). (Frontend requests include `/api/v1/...` in their paths.) All storefront builds must point to the same API host for shared sessions.
+    - `VITE_API_BASE_URL`: Base URL for the XBid backend API origin (e.g., `http://api.lvh.me:3000`). (Frontend requests include `/api/v1/...` in their paths.) All storefronts should point to the same API host for shared sessions.
     - `VITE_STRIPE_PUBLISHABLE_KEY`: Stripe publishable key used for embedded checkout.
-    - `VITE_CABLE_URL` (optional): Action Cable WebSocket endpoint; if unset, it is derived from `VITE_API_URL` as `ws(s)://<api-host>/cable`. The client appends the current JWT and storefront key as query params (`?token=...&storefront=...`). All storefront builds should point at the same cable host.
+    - `VITE_CABLE_URL` (optional): Action Cable WebSocket endpoint; if unset, it is derived from `VITE_API_BASE_URL` as `ws(s)://<api-host>/cable`. The client appends the current JWT and storefront key as query params (`?token=...&storefront=...`). All storefronts should point at the same cable host.
     - `VITE_AUTH_REFRESH_WITH_COOKIE` (optional): Set to `"true"` to enable cookie-based refresh (`POST /api/v1/session/refresh` with `withCredentials: true`) on `401` responses; otherwise a reload (or `401`) requires re-login.
+    - `VITE_STOREFRONT_KEY` (dev-only, optional): Overrides storefront selection in dev/test. Production storefront selection is runtime/hostname-based.
 
 4.  **Run the development server:**
     ```sh
@@ -96,6 +97,18 @@ Build example:
 - `VITE_APP_MODE=account npm run build`
 
 Note: Vite `VITE_*` env vars are baked at build time, so production typically builds separate artifacts/images per mode. There is a hostname-based runtime fallback intended for local/dev only.
+
+### Storefront Selection & Theming
+
+Storefront selection is runtime-only and based on `window.location.hostname`:
+
+- `www.biddersweet.app` → `main`
+- `afterdark.biddersweet.app` → `afterdark`
+- `marketplace.biddersweet.app` → `marketplace`
+
+The app sets `document.documentElement.dataset.storefront` at bootstrap and applies theme tokens from `STOREFRONT_CONFIGS` (see `src/storefront/storefront.ts`). To test locally, use one of the dev scripts (e.g., `npm run dev:afterdark`) or map hosts in `/etc/hosts` and run `vite --host <subdomain>.lvh.me`.
+
+If you need to force a storefront in dev/tests, set `VITE_STOREFRONT_KEY` to `main`, `afterdark`, or `marketplace`. This override is ignored in production.
 
 ### Admin & Access Control
 

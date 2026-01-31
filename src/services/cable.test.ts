@@ -31,7 +31,7 @@ describe("cable service", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     applyEnv({
-      VITE_API_URL: "http://localhost:3000",
+      VITE_API_BASE_URL: "http://localhost:3000",
       VITE_CABLE_URL: "",
       VITE_STOREFRONT_KEY: "main",
     });

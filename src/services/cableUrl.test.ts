@@ -30,46 +30,46 @@ describe("getCableRuntimeInfo", () => {
   it("uses VITE_CABLE_URL when provided", () => {
     applyEnv({
       VITE_CABLE_URL: "wss://ws.example.com/cable?foo=bar",
-      VITE_API_URL: "https://api.example.com",
+      VITE_API_BASE_URL: "https://api.example.com",
     });
     const info = getCableRuntimeInfo();
     expect(info.computedCableUrl).toBe("wss://ws.example.com/cable?foo=bar");
   });
 
-  it("derives wss:// from https VITE_API_URL", () => {
+  it("derives wss:// from https VITE_API_BASE_URL", () => {
     applyEnv({
-      VITE_API_URL: "https://api.example.com",
+      VITE_API_BASE_URL: "https://api.example.com",
       VITE_CABLE_URL: "",
     });
     const info = getCableRuntimeInfo();
     expect(info.computedCableUrl).toBe("wss://api.example.com/cable");
   });
 
-  it("derives ws:// from http VITE_API_URL", () => {
+  it("derives ws:// from http VITE_API_BASE_URL", () => {
     applyEnv({
-      VITE_API_URL: "http://api.example.com",
+      VITE_API_BASE_URL: "http://api.example.com",
       VITE_CABLE_URL: "",
     });
     const info = getCableRuntimeInfo();
     expect(info.computedCableUrl).toBe("ws://api.example.com/cable");
   });
 
-  it("warns and falls back when VITE_API_URL is invalid", () => {
+  it("warns and falls back when VITE_API_BASE_URL is invalid", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    applyEnv({ VITE_API_URL: "not a url", VITE_CABLE_URL: "" });
+    applyEnv({ VITE_API_BASE_URL: "not a url", VITE_CABLE_URL: "" });
     const info = getCableRuntimeInfo();
     expect(info.computedCableUrl).toBe("/cable");
     expect(warnSpy).toHaveBeenCalledWith(
       "[cable] Falling back to default cable URL",
       expect.objectContaining({
-        VITE_API_URL: "not a url",
+        VITE_API_BASE_URL: "not a url",
       }),
     );
   });
 
   it("appends storefront to the connection URL", () => {
     applyEnv({
-      VITE_API_URL: "https://api.example.com",
+      VITE_API_BASE_URL: "https://api.example.com",
       VITE_CABLE_URL: "",
       VITE_STOREFRONT_KEY: "afterdark",
     });

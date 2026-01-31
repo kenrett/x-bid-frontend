@@ -42,8 +42,8 @@ export const getCableRuntimeInfo = (): CableRuntimeInfo => {
       ? env.VITE_CABLE_URL.trim()
       : undefined;
   const apiUrlRaw =
-    typeof env.VITE_API_URL === "string" && env.VITE_API_URL.trim()
-      ? env.VITE_API_URL.trim()
+    typeof env.VITE_API_BASE_URL === "string" && env.VITE_API_BASE_URL.trim()
+      ? env.VITE_API_BASE_URL.trim()
       : undefined;
 
   if (cableUrlRaw) {
@@ -71,7 +71,7 @@ export const getCableRuntimeInfo = (): CableRuntimeInfo => {
       warnFallback({
         storefront_key: getStorefrontKey(),
         window_origin: getWindowOrigin(),
-        VITE_API_URL: apiUrlRaw,
+        VITE_API_BASE_URL: apiUrlRaw,
         VITE_CABLE_URL: cableUrlRaw,
         error: (error as Error).message,
       });
@@ -80,9 +80,9 @@ export const getCableRuntimeInfo = (): CableRuntimeInfo => {
     warnFallback({
       storefront_key: getStorefrontKey(),
       window_origin: getWindowOrigin(),
-      VITE_API_URL: apiUrlRaw,
+      VITE_API_BASE_URL: apiUrlRaw,
       VITE_CABLE_URL: cableUrlRaw,
-      error: "VITE_API_URL missing",
+      error: "VITE_API_BASE_URL missing",
     });
   }
 

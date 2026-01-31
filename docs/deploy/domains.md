@@ -14,11 +14,11 @@ This is required for:
 
 ## Environment variables
 
-- `VITE_API_URL`
+- `VITE_API_BASE_URL`
   - Base API origin. Production should be `https://api.biddersweet.app`.
-  - All storefront builds must point at the same API host to preserve SSO.
+  - All storefronts must point at the same API host to preserve SSO.
 - `VITE_CABLE_URL` (optional)
-  - Overrides the ActionCable endpoint. If unset, derived from `VITE_API_URL`.
+  - Overrides the ActionCable endpoint. If unset, derived from `VITE_API_BASE_URL`.
 
 ## Notes
 

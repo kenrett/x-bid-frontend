@@ -1,6 +1,10 @@
 // src/storefront/storefront.ts
 
-export type StorefrontKey = "main" | "afterdark" | "marketplace";
+import type { StorefrontKey } from "./getStorefrontKey";
+import { getStorefrontKey } from "./getStorefrontKey";
+
+export { getStorefrontKey, isStorefrontKey } from "./getStorefrontKey";
+export type { StorefrontKey } from "./getStorefrontKey";
 
 export type StorefrontThemeTokens = {
   primary: string;
@@ -25,46 +29,6 @@ export type StorefrontConfig = {
   domain: string;
   themeTokens: StorefrontThemeTokens;
   logoPath: string;
-};
-
-const VALID_STOREFRONT_KEYS = new Set<StorefrontKey>([
-  "main",
-  "afterdark",
-  "marketplace",
-]);
-
-export const isStorefrontKey = (value: unknown): value is StorefrontKey =>
-  typeof value === "string" &&
-  VALID_STOREFRONT_KEYS.has(value as StorefrontKey);
-
-const warnInvalidKey = (source: string, value: unknown) => {
-  console.warn(
-    `[storefront] Invalid storefront key from ${source}: ${JSON.stringify(
-      value,
-    )}; defaulting to "main".`,
-  );
-};
-
-const readBuildTimeKey = (): StorefrontKey | null => {
-  const raw = import.meta.env.VITE_STOREFRONT_KEY;
-  if (raw == null || raw === "") return null;
-  if (isStorefrontKey(raw)) return raw;
-  warnInvalidKey("import.meta.env.VITE_STOREFRONT_KEY", raw);
-  return "main";
-};
-
-const readRuntimeKey = (): StorefrontKey => {
-  const hostname =
-    typeof window !== "undefined" &&
-    window.location &&
-    typeof window.location.hostname === "string"
-      ? window.location.hostname.toLowerCase()
-      : "";
-
-  // Dev-only fallback: production uses separate builds per storefront.
-  if (hostname.includes("afterdark")) return "afterdark";
-  if (hostname.includes("marketplace")) return "marketplace";
-  return "main";
 };
 
 export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
@@ -188,18 +152,6 @@ const isLvhHost = (hostname: string): boolean =>
 
 const isLocalhostHost = (hostname: string): boolean =>
   hostname === "localhost" || hostname.endsWith(".localhost");
-
-/**
- * Canonical storefront key derivation (single source of truth).
- *
- * Note: Vite `VITE_*` env vars are baked at build time. Production typically
- * builds one artifact per storefront; hostname derivation is a dev-only fallback.
- */
-export function getStorefrontKey(): StorefrontKey {
-  const buildTime = readBuildTimeKey();
-  if (buildTime) return buildTime;
-  return readRuntimeKey();
-}
 
 export function getStorefrontConfig(): StorefrontConfig {
   const key = getStorefrontKey();

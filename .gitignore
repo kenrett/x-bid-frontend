@@ -36,3 +36,4 @@ vite.config.js
 
 # Test artifacts
 test-results/
+.vercel

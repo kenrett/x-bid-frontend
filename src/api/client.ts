@@ -40,8 +40,8 @@ const setHeader = (
 };
 
 const rawBaseURL =
-  typeof import.meta.env.VITE_API_URL === "string"
-    ? import.meta.env.VITE_API_URL
+  typeof import.meta.env.VITE_API_BASE_URL === "string"
+    ? import.meta.env.VITE_API_BASE_URL
     : undefined;
 
 const normalizeBase = (value: string | undefined): string | undefined => {
@@ -242,8 +242,8 @@ client.interceptors.request.use(
         headers: headerKeys,
         storefront_key: getStorefrontKey(),
         vite_api_url_set:
-          typeof import.meta.env.VITE_API_URL === "string" &&
-          Boolean(import.meta.env.VITE_API_URL.trim()),
+          typeof import.meta.env.VITE_API_BASE_URL === "string" &&
+          Boolean(import.meta.env.VITE_API_BASE_URL.trim()),
       });
     }
     return config;

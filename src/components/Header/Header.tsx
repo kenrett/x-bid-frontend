@@ -92,7 +92,7 @@ export function Header() {
   const { user, logout, isReady } = useAuth();
   const isSuperAdmin = Boolean(user?.is_superuser);
   const isAdmin = Boolean(user?.is_admin || isSuperAdmin);
-  const apiBase = import.meta.env.VITE_API_URL;
+  const apiBase = import.meta.env.VITE_API_BASE_URL;
   const isAccountMode = appMode === "account";
   const navItems = isAccountMode
     ? [

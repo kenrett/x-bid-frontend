@@ -82,7 +82,7 @@ const logStartup = () => {
     storefront_key: getStorefrontKey(),
     window_origin:
       typeof window === "undefined" ? undefined : window.location?.origin,
-    VITE_API_URL: info.apiUrl,
+    VITE_API_BASE_URL: info.apiUrl,
     VITE_CABLE_URL: info.cableUrl,
     computedCableUrl: info.computedCableUrl,
   });

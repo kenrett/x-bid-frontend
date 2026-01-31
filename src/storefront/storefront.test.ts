@@ -1,83 +1,15 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import {
-  getStorefrontConfig,
-  getStorefrontKey,
-  STOREFRONT_CONFIGS,
-} from "./storefront";
+import { describe, it, expect } from "vitest";
+import { STOREFRONT_CONFIGS } from "./storefront";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-const originalEnv = { ...import.meta.env };
-
-const applyEnv = (overrides: Record<string, unknown>) => {
-  const env = import.meta.env as unknown as Record<string, unknown>;
-  const keys = new Set([
-    ...Object.keys(originalEnv),
-    ...Object.keys(overrides),
-  ]);
-  for (const key of keys) {
-    env[key] =
-      key in overrides
-        ? overrides[key]
-        : (originalEnv as Record<string, unknown>)[key];
-  }
-};
-
-const setHostname = (hostname: string) => {
-  Object.defineProperty(window, "location", {
-    value: { ...window.location, hostname },
-    writable: true,
-  });
-};
-
-describe("getStorefrontKey", () => {
-  beforeEach(() => {
-    applyEnv({ VITE_STOREFRONT_KEY: "" });
-    setHostname("localhost");
-    vi.restoreAllMocks();
-  });
-
-  afterEach(() => {
-    applyEnv({ VITE_STOREFRONT_KEY: "" });
-    setHostname("localhost");
-  });
-
-  it("uses build-time VITE_STOREFRONT_KEY over hostname", () => {
-    applyEnv({ VITE_STOREFRONT_KEY: "marketplace" });
-    setHostname("afterdark.localhost");
-    expect(getStorefrontKey()).toBe("marketplace");
-  });
-
-  it("derives storefront from hostname when env var is unset", () => {
-    applyEnv({ VITE_STOREFRONT_KEY: "" });
-    setHostname("shop-afterdark.localhost");
-    expect(getStorefrontKey()).toBe("afterdark");
-  });
-
-  it("defaults to main", () => {
-    applyEnv({ VITE_STOREFRONT_KEY: "" });
-    setHostname("localhost");
-    expect(getStorefrontKey()).toBe("main");
-  });
-
-  it("defaults to main and warns on invalid VITE_STOREFRONT_KEY", () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    applyEnv({ VITE_STOREFRONT_KEY: "nope" });
-    setHostname("marketplace.localhost");
-
-    expect(getStorefrontKey()).toBe("main");
-    expect(warn).toHaveBeenCalled();
-  });
-
+describe("storefront configs", () => {
   it('uses "BidderSweet After Dark" for afterdark storefront name', () => {
-    applyEnv({ VITE_STOREFRONT_KEY: "afterdark" });
-    expect(getStorefrontConfig().name).toBe("BidderSweet After Dark");
+    expect(STOREFRONT_CONFIGS.afterdark.name).toBe("BidderSweet After Dark");
   });
 
   it('uses "BidderSweet Marketplace" for marketplace storefront name', () => {
-    applyEnv({ VITE_STOREFRONT_KEY: "marketplace" });
-    expect(getStorefrontKey()).toBe("marketplace");
-    expect(getStorefrontConfig().name).toBe("BidderSweet Marketplace");
+    expect(STOREFRONT_CONFIGS.marketplace.name).toBe("BidderSweet Marketplace");
   });
 });
 

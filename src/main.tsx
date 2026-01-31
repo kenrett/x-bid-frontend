@@ -8,6 +8,7 @@ import { ToastContainer } from "./components/Toast/ToastContainer";
 import { initSentry, SENTRY_ENABLED } from "./sentryClient";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary";
 import { logError } from "./services/logger";
+import { getStorefrontKey } from "./storefront/getStorefrontKey";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Root element not found");
@@ -21,6 +22,8 @@ if (SENTRY_ENABLED) {
     void initSentry();
   });
 }
+
+document.documentElement.dataset.storefront = getStorefrontKey();
 
 createRoot(rootElement).render(
   <StrictMode>
