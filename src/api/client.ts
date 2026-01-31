@@ -44,13 +44,25 @@ const rawBaseURL =
     ? import.meta.env.VITE_API_BASE_URL
     : undefined;
 
+const resolveRuntimeApiBase = (): string | undefined => {
+  if (typeof window === "undefined") return undefined;
+  const hostname = window.location?.hostname ?? "";
+  if (!hostname) return undefined;
+  if (
+    hostname.endsWith("biddersweet.app") &&
+    hostname !== "api.biddersweet.app"
+  )
+    return "https://api.biddersweet.app";
+  return undefined;
+};
+
 const normalizeBase = (value: string | undefined): string | undefined => {
   if (!value) return undefined;
   const trimmed = value.trim();
   return trimmed.replace(/\/+$/, "") || undefined;
 };
 
-const normalizedBaseURL = normalizeBase(rawBaseURL);
+const normalizedBaseURL = normalizeBase(rawBaseURL) ?? resolveRuntimeApiBase();
 warnIfCookieDomainMismatch(normalizedBaseURL, "api-client");
 enforceLocalhostApiHostMatch(normalizedBaseURL);
 export const getApiBaseUrl = () => normalizedBaseURL;
