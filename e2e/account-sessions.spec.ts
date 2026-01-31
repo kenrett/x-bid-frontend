@@ -42,8 +42,12 @@ test("revoke other sessions removes them from the list", async ({ page }) => {
 
   await page.goto("/account/sessions");
 
-  await expect(page.getByText("Current device")).toBeVisible();
-  await expect(page.getByText("Other device")).toBeVisible();
+  await expect(
+    page.getByTestId("session-card-35").getByText("Current device"),
+  ).toBeVisible();
+  await expect(
+    page.getByTestId("session-card-36").getByText("Other device"),
+  ).toBeVisible();
 
   await page
     .getByRole("button", { name: /sign out of other devices/i })
@@ -53,5 +57,7 @@ test("revoke other sessions removes them from the list", async ({ page }) => {
     .getByRole("button", { name: "Sign out" })
     .click();
 
-  await expect(page.getByText("Other device")).toHaveCount(0);
+  await expect(
+    page.getByTestId("session-card-36").getByText("Other device"),
+  ).toHaveCount(0);
 });

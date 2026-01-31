@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FileUploadField } from "./FileUploadField";
 import type { UploadAdapter } from "../types";
@@ -28,18 +28,16 @@ describe("FileUploadField", () => {
       upload: vi.fn().mockResolvedValue({ url: "https://example.com/file" }),
     };
     renderField(adapter);
-    const user = userEvent.setup();
 
     const input = screen.getByLabelText("Upload image") as HTMLInputElement;
     const badFile = new File(["hello"], "note.txt", {
       type: "text/plain",
     });
 
-    await user.upload(input, badFile);
+    fireEvent.change(input, { target: { files: [badFile] } });
 
-    expect(
-      await screen.findByText(/unsupported file type/i),
-    ).toBeInTheDocument();
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(/unsupported file type/i);
     expect(adapter.upload).not.toHaveBeenCalled();
   });
 
@@ -48,15 +46,15 @@ describe("FileUploadField", () => {
       upload: vi.fn().mockResolvedValue({ url: "https://example.com/file" }),
     };
     renderField(adapter);
-    const user = userEvent.setup();
 
     const input = screen.getByLabelText("Upload image") as HTMLInputElement;
     const bigBlob = new Uint8Array(2 * 1024 * 1024);
     const bigFile = new File([bigBlob], "big.png", { type: "image/png" });
 
-    await user.upload(input, bigFile);
+    fireEvent.change(input, { target: { files: [bigFile] } });
 
-    expect(await screen.findByText(/file is too large/i)).toBeInTheDocument();
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(/file is too large/i);
     expect(adapter.upload).not.toHaveBeenCalled();
   });
 

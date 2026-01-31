@@ -127,7 +127,7 @@ test("admin can retry image upload", async ({ page }) => {
   await expect(page.getByRole("alert")).toBeVisible();
 
   await page.getByRole("button", { name: "Retry upload" }).click();
-  await expect(page.getByText("Uploaded")).toBeVisible();
+  await expect(page.getByText("Uploaded", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Image URL")).toHaveValue(
     "https://example.com/uploaded.jpg",
   );

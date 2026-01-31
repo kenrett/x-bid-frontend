@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { ActivityPage } from "./ActivityPage";
@@ -123,9 +123,10 @@ describe("ActivityPage", () => {
     expect(screen.getByText(/^watching$/i)).toBeInTheDocument();
     expect(screen.getByText(/stopped watching/i)).toBeInTheDocument();
     expect(screen.getByText(/watch removed/i)).toBeInTheDocument();
-    expect(screen.getByText(/won/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/^won$/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/fulfillment update/i)).toBeInTheDocument();
-    expect(screen.getByText(/^fulfillment$/i)).toBeInTheDocument();
+    const feedList = screen.getByRole("list");
+    expect(within(feedList).getByText(/^fulfillment$/i)).toBeInTheDocument();
     expect(
       screen.getByText(/fulfillment:\s*pending\s*→\s*shipped/i),
     ).toBeInTheDocument();

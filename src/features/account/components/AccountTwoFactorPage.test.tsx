@@ -42,7 +42,9 @@ describe("AccountTwoFactorPage", () => {
 
     await user.click(screen.getByRole("button", { name: /enable 2fa/i }));
 
-    expect(await screen.findByText(/scan the qr code/i)).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: /scan the qr code/i }),
+    ).toBeInTheDocument();
     expect(screen.getByText("SECRET123")).toBeInTheDocument();
 
     await user.type(screen.getByLabelText(/enter the 6-digit code/i), "123456");
