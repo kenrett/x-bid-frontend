@@ -53,6 +53,67 @@ const EmptyState = () => (
   </div>
 );
 
+const FilterEmptyState = () => (
+  <div className="text-center text-gray-400 py-10">
+    <p className="text-lg font-semibold text-white mb-2">
+      No activity for this filter
+    </p>
+    <p className="text-sm">Try switching to another activity type.</p>
+  </div>
+);
+
+const ActivitySkeleton = ({ rows = 4 }: { rows?: number }) => (
+  <div className="space-y-3 px-4 py-4">
+    {Array.from({ length: rows }).map((_, index) => (
+      <div
+        key={`skeleton-${index}`}
+        className="flex items-start gap-3 animate-pulse"
+      >
+        <div className="h-8 w-8 rounded-full bg-white/10" />
+        <div className="flex-1 space-y-2">
+          <div className="h-3 w-1/3 rounded bg-white/10" />
+          <div className="h-3 w-2/3 rounded bg-white/10" />
+        </div>
+        <div className="h-3 w-20 rounded bg-white/10" />
+      </div>
+    ))}
+  </div>
+);
+
+const eventBadge = (
+  kind: ActivityKind,
+  options?: { outcome?: "won" | "lost"; watchAction?: "added" | "removed" },
+) => {
+  if (kind === "bid")
+    return { label: "Bid", icon: "🎯", style: "bg-pink-500/20 text-pink-100" };
+  if (kind === "watch") {
+    const action = options?.watchAction;
+    return action === "removed"
+      ? {
+          label: "Watch removed",
+          icon: "🙈",
+          style: "bg-slate-500/20 text-slate-100",
+        }
+      : { label: "Watch", icon: "👀", style: "bg-blue-500/20 text-blue-100" };
+  }
+  if (kind === "outcome") {
+    if (options?.outcome === "won")
+      return {
+        label: "Won",
+        icon: "🏆",
+        style: "bg-emerald-500/20 text-emerald-100",
+      };
+    return { label: "Lost", icon: "❌", style: "bg-rose-500/20 text-rose-100" };
+  }
+  if (kind === "fulfillment")
+    return {
+      label: "Fulfillment",
+      icon: "📦",
+      style: "bg-amber-500/20 text-amber-100",
+    };
+  return { label: "Activity", icon: "📜", style: "bg-white/10 text-gray-100" };
+};
+
 const ActivityRow = ({ item }: { item: ActivityItem }) => {
   const displayTitle = item.title ?? item.auctionTitle;
 
@@ -117,6 +178,11 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
       ? `/account/wins/${item.auctionId}`
       : `/auctions/${item.auctionId}`;
 
+  const badge = eventBadge(item.kind, {
+    outcome: item.kind === "outcome" ? item.outcome : undefined,
+    watchAction: item.kind === "watch" ? item.action : undefined,
+  });
+
   return (
     <li className="flex items-start gap-3 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors">
       <div className="text-lg" aria-hidden>
@@ -126,6 +192,12 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-white">{label}</span>
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${badge.style}`}
+            >
+              <span aria-hidden>{badge.icon}</span>
+              {badge.label}
+            </span>
           </div>
           <span className="text-xs text-gray-400">
             {formatDate(item.occurredAt)}
@@ -181,24 +253,67 @@ export const ActivityPage = () => {
   const [items, setItems] = useState<ActivityItem[]>([]);
   const [filter, setFilter] = useState<ActivityFilter>("all");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const mergeUnique = (nextItems: ActivityItem[]) => {
+    setItems((prev) => {
+      const seen = new Set(prev.map((item) => item.id));
+      const merged = [...prev];
+      nextItems.forEach((item) => {
+        if (!seen.has(item.id)) {
+          seen.add(item.id);
+          merged.push(item);
+        }
+      });
+      return merged;
+    });
+  };
+
+  const loadActivity = async (mode: "reset" | "more") => {
+    if (!userId) return;
+    if (mode === "reset") {
+      setIsLoading(true);
+      setError(null);
+      setCursor(null);
+      setPage(1);
+    } else {
+      setIsLoadingMore(true);
+    }
+
+    try {
+      const response = await activityApi.list(
+        mode === "reset"
+          ? { page: 1, perPage: 25 }
+          : cursor
+            ? { cursor, limit: 25 }
+            : { page: page + 1, perPage: 25 },
+      );
+      if (mode === "reset") {
+        setItems(response.items);
+      } else {
+        mergeUnique(response.items);
+      }
+      setCursor(response.nextCursor ?? null);
+      setHasMore(Boolean(response.hasMore));
+      if (!response.nextCursor) {
+        setPage(response.page);
+      }
+    } catch (err) {
+      const parsed = normalizeApiError(err);
+      setError(parsed.message);
+    } finally {
+      if (mode === "reset") setIsLoading(false);
+      else setIsLoadingMore(false);
+    }
+  };
 
   useEffect(() => {
     if (!isReady || !userId) return;
-    const load = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const data = await activityApi.list({ page: 1, perPage: 25 });
-        setItems(data.items);
-      } catch (err) {
-        const parsed = normalizeApiError(err);
-        setError(parsed.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    void load();
+    void loadActivity("reset");
   }, [isReady, userId]);
 
   const filteredItems = useMemo(() => {
@@ -258,8 +373,8 @@ export const ActivityPage = () => {
           </div>
           <ul className="divide-y divide-white/10">
             {isLoading ? (
-              <li className="px-4 py-6 text-center text-gray-400">
-                Loading activity...
+              <li>
+                <ActivitySkeleton rows={5} />
               </li>
             ) : error ? (
               <li className="px-4 py-6 text-center text-red-200" role="alert">
@@ -268,14 +383,7 @@ export const ActivityPage = () => {
                   <button
                     onClick={() => {
                       setError(null);
-                      setIsLoading(true);
-                      void activityApi
-                        .list({ page: 1, perPage: 25 })
-                        .then((data) => setItems(data.items))
-                        .catch((err) =>
-                          setError(normalizeApiError(err).message),
-                        )
-                        .finally(() => setIsLoading(false));
+                      void loadActivity("reset");
                     }}
                     className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors"
                   >
@@ -285,7 +393,7 @@ export const ActivityPage = () => {
               </li>
             ) : filteredItems.length === 0 ? (
               <li className="px-4 py-6">
-                <EmptyState />
+                {items.length === 0 ? <EmptyState /> : <FilterEmptyState />}
               </li>
             ) : (
               filteredItems.map((item) => (
@@ -293,6 +401,24 @@ export const ActivityPage = () => {
               ))
             )}
           </ul>
+          {!isLoading && !error && (items.length > 0 || hasMore) ? (
+            <div className="border-t border-white/10 px-4 py-4 flex items-center justify-center">
+              {hasMore ? (
+                <button
+                  type="button"
+                  onClick={() => void loadActivity("more")}
+                  disabled={isLoadingMore}
+                  className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10 disabled:opacity-60"
+                >
+                  {isLoadingMore ? "Loading..." : "Load more"}
+                </button>
+              ) : (
+                <span className="text-xs text-gray-400">
+                  You are all caught up.
+                </span>
+              )}
+            </div>
+          ) : null}
         </div>
       </div>
     </Page>

@@ -63,6 +63,8 @@ export type ActivityFilter =
   | "fulfillment";
 
 export type ActivityListParams = {
+  cursor?: string | null;
+  limit?: number;
   page?: number;
   perPage?: number;
 };
@@ -72,4 +74,5 @@ export type ActivityListResponse = {
   page: number;
   perPage: number;
   hasMore: boolean;
+  nextCursor?: string | null;
 };

@@ -300,46 +300,78 @@ const normalizeActivity = (raw: unknown): ActivityItem => {
 const extractMeta = (
   payload: unknown,
   fallback: { page: number; perPage: number; loaded: number },
-): Pick<ActivityListResponse, "page" | "perPage" | "hasMore"> => {
+): Pick<
+  ActivityListResponse,
+  "page" | "perPage" | "hasMore" | "nextCursor"
+> => {
   if (!payload || typeof payload !== "object") {
     return {
       page: fallback.page,
       perPage: fallback.perPage,
       hasMore: false,
+      nextCursor: null,
     };
   }
 
   const record = payload as Record<string, unknown>;
+  const meta =
+    record.meta && typeof record.meta === "object"
+      ? (record.meta as Record<string, unknown>)
+      : null;
 
   const page =
+    toNumber(meta?.page) ??
+    toNumber(meta?.current_page) ??
     toNumber(record.page) ??
     toNumber((record as { current_page?: unknown }).current_page) ??
     fallback.page;
   const perPage =
+    toNumber(meta?.per_page) ??
+    toNumber(meta?.perPage) ??
     toNumber((record as { per_page?: unknown }).per_page) ??
     toNumber((record as { perPage?: unknown }).perPage) ??
     toNumber((record as { items?: unknown }).items) ??
     fallback.perPage;
 
+  const nextCursorRaw =
+    typeof meta?.next_cursor === "string"
+      ? meta?.next_cursor
+      : typeof meta?.nextCursor === "string"
+        ? meta?.nextCursor
+        : typeof (record as { next_cursor?: unknown }).next_cursor === "string"
+          ? (record as { next_cursor: string }).next_cursor
+          : typeof (record as { nextCursor?: unknown }).nextCursor === "string"
+            ? (record as { nextCursor: string }).nextCursor
+            : null;
+
   const hasMore =
-    typeof (record as { has_more?: unknown }).has_more === "boolean"
-      ? Boolean((record as { has_more: boolean }).has_more)
-      : typeof (record as { hasMore?: unknown }).hasMore === "boolean"
-        ? Boolean((record as { hasMore: boolean }).hasMore)
-        : fallback.loaded >= (perPage ?? fallback.perPage);
+    typeof meta?.has_more === "boolean"
+      ? Boolean(meta?.has_more)
+      : typeof meta?.hasMore === "boolean"
+        ? Boolean(meta?.hasMore)
+        : typeof (record as { has_more?: unknown }).has_more === "boolean"
+          ? Boolean((record as { has_more: boolean }).has_more)
+          : typeof (record as { hasMore?: unknown }).hasMore === "boolean"
+            ? Boolean((record as { hasMore: boolean }).hasMore)
+            : Boolean(nextCursorRaw) ||
+              fallback.loaded >= (perPage ?? fallback.perPage);
 
   return {
     page: page ?? fallback.page,
     perPage: perPage ?? fallback.perPage,
     hasMore,
+    nextCursor: nextCursorRaw,
   };
 };
 
 const list = async (
   params: ActivityListParams = { page: 1, perPage: 25 },
 ): Promise<ActivityListResponse> => {
+  const limit = params.limit ?? params.perPage ?? 25;
   const response = await client.get("/api/v1/me/activity", {
-    params: { page: params.page ?? 1, per_page: params.perPage ?? 25 },
+    params: params.cursor
+      ? { cursor: params.cursor, limit }
+      : { page: params.page ?? 1, per_page: limit },
   });
 
   const items = extractItemsArray(response.data);
@@ -357,15 +389,16 @@ const list = async (
 
   const meta = extractMeta(response.data, {
     page: params.page ?? 1,
-    perPage: params.perPage ?? 25,
+    perPage: limit,
     loaded: normalized.length,
   });
 
   return {
     items: normalized,
     page: meta.page ?? params.page ?? 1,
-    perPage: meta.perPage ?? params.perPage ?? 25,
+    perPage: meta.perPage ?? limit,
     hasMore: meta.hasMore,
+    nextCursor: meta.nextCursor ?? null,
   };
 };
 

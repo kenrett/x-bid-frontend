@@ -112,17 +112,20 @@ describe("ActivityPage", () => {
       page: 1,
       perPage: 25,
       hasMore: false,
+      nextCursor: null,
     });
 
     renderPage();
 
     expect(await screen.findByText(/my activity/i)).toBeInTheDocument();
     expect(screen.getByText(/bid placed/i)).toBeInTheDocument();
+    expect(screen.getByText(/^bid$/i)).toBeInTheDocument();
     expect(screen.getByText(/^watching$/i)).toBeInTheDocument();
     expect(screen.getByText(/stopped watching/i)).toBeInTheDocument();
-    expect(screen.getByText("🙈")).toBeInTheDocument();
+    expect(screen.getByText(/watch removed/i)).toBeInTheDocument();
     expect(screen.getByText(/won/i)).toBeInTheDocument();
     expect(screen.getByText(/fulfillment update/i)).toBeInTheDocument();
+    expect(screen.getByText(/^fulfillment$/i)).toBeInTheDocument();
     expect(
       screen.getByText(/fulfillment:\s*pending\s*→\s*shipped/i),
     ).toBeInTheDocument();
@@ -151,6 +154,7 @@ describe("ActivityPage", () => {
       page: 1,
       perPage: 25,
       hasMore: false,
+      nextCursor: null,
     });
 
     renderPage();
@@ -171,6 +175,7 @@ describe("ActivityPage", () => {
         page: 1,
         perPage: 25,
         hasMore: false,
+        nextCursor: null,
       });
 
     renderPage();
@@ -182,5 +187,71 @@ describe("ActivityPage", () => {
 
     expect(await screen.findByText(/no activity yet/i)).toBeInTheDocument();
     expect(mockedActivityApi.list).toHaveBeenCalledTimes(2);
+  });
+
+  it("appends new items on load more without duplicates", async () => {
+    const firstPage: ActivityItem[] = [
+      {
+        id: "a1",
+        occurredAt: "2024-05-01T10:00:00Z",
+        auctionId: 10,
+        auctionTitle: "Gadget",
+        kind: "bid",
+        bidAmount: 1,
+        balanceDelta: -1,
+      },
+      {
+        id: "a2",
+        occurredAt: "2024-05-02T10:00:00Z",
+        auctionId: 11,
+        auctionTitle: "Laptop",
+        kind: "watch",
+        action: "added",
+      },
+    ];
+
+    const secondPage: ActivityItem[] = [
+      {
+        id: "a2",
+        occurredAt: "2024-05-02T10:00:00Z",
+        auctionId: 11,
+        auctionTitle: "Laptop",
+        kind: "watch",
+        action: "added",
+      },
+      {
+        id: "a3",
+        occurredAt: "2024-05-03T10:00:00Z",
+        auctionId: 12,
+        auctionTitle: "TV",
+        kind: "outcome",
+        outcome: "lost",
+      },
+    ];
+
+    mockedActivityApi.list
+      .mockResolvedValueOnce({
+        items: firstPage,
+        page: 1,
+        perPage: 25,
+        hasMore: true,
+        nextCursor: "cursor-1",
+      })
+      .mockResolvedValueOnce({
+        items: secondPage,
+        page: 1,
+        perPage: 25,
+        hasMore: false,
+        nextCursor: null,
+      });
+
+    renderPage();
+
+    expect(await screen.findByText("Gadget")).toBeInTheDocument();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("button", { name: /load more/i }));
+
+    expect(await screen.findByText("TV")).toBeInTheDocument();
+    expect(screen.getAllByText("Laptop").length).toBe(1);
   });
 });
