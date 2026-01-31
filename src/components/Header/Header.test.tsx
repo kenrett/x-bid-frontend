@@ -4,11 +4,15 @@ import { MemoryRouter } from "react-router-dom";
 import { Header } from "./Header";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { useAccountStatus } from "@features/account/hooks/useAccountStatus";
+import { useStorefront } from "../../storefront/useStorefront";
+import { STOREFRONT_CONFIGS } from "../../storefront/storefront";
 
 vi.mock("../../features/auth/hooks/useAuth");
 vi.mock("@features/account/hooks/useAccountStatus");
+vi.mock("../../storefront/useStorefront");
 const mockedUseAuth = vi.mocked(useAuth);
 const mockedUseAccountStatus = vi.mocked(useAccountStatus);
+const mockedUseStorefront = vi.mocked(useStorefront);
 
 const mockUser = { id: 1, email: "test@example.com", bidCredits: 100 };
 const mockAdmin = { ...mockUser, is_admin: true };
@@ -33,6 +37,10 @@ describe("Header Component", () => {
       emailVerifiedAt: null,
       refresh: vi.fn(),
     });
+    mockedUseStorefront.mockReturnValue({
+      key: "main",
+      config: STOREFRONT_CONFIGS.main,
+    });
   });
 
   it("should render the logo and main navigation links", () => {
@@ -55,6 +63,27 @@ describe("Header Component", () => {
       screen.getByRole("link", { name: /how it works/i }),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /about/i })).toBeInTheDocument();
+  });
+
+  it("renders the correct logo per storefront", () => {
+    mockedUseAuth.mockReturnValue({
+      user: null,
+      logout: mockLogout,
+      isReady: true,
+    } as unknown as ReturnType<typeof useAuth>);
+
+    const storefronts = [
+      STOREFRONT_CONFIGS.main,
+      STOREFRONT_CONFIGS.afterdark,
+      STOREFRONT_CONFIGS.marketplace,
+    ] as const;
+
+    for (const config of storefronts) {
+      mockedUseStorefront.mockReturnValue({ key: config.key, config });
+      const { unmount } = renderComponent();
+      expect(screen.getByAltText(config.shortName)).toBeInTheDocument();
+      unmount();
+    }
   });
 
   describe("when user is not logged in", () => {

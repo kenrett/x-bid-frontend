@@ -3,6 +3,8 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { render, screen, act } from "@testing-library/react";
 import { AuthProvider } from "../features/auth/providers/AuthProvider";
 import { Layout } from "./Layout";
+import { useStorefront } from "../storefront/useStorefront";
+import { STOREFRONT_CONFIGS } from "../storefront/storefront";
 
 const toastMocks = vi.hoisted(() => ({
   showToast: vi.fn(),
@@ -11,6 +13,9 @@ const toastMocks = vi.hoisted(() => ({
 vi.mock("@services/toast", () => ({
   showToast: (...args: unknown[]) => toastMocks.showToast(...args),
 }));
+vi.mock("../storefront/useStorefront");
+
+const mockedUseStorefront = vi.mocked(useStorefront);
 
 const renderWithContent = () =>
   render(
@@ -27,6 +32,13 @@ const renderWithContent = () =>
   );
 
 describe("Layout", () => {
+  beforeEach(() => {
+    mockedUseStorefront.mockReturnValue({
+      key: "main",
+      config: STOREFRONT_CONFIGS.main,
+    });
+  });
+
   it("renders header, footer, and outlet content", () => {
     renderWithContent();
     expect(screen.getByText(/body content/i)).toBeInTheDocument();
@@ -45,6 +57,22 @@ describe("Layout", () => {
     expect(toastMocks.showToast).toHaveBeenCalledWith(
       "Verify your email to continue.",
       "error",
+    );
+  });
+
+  it("applies storefront theme tokens as CSS vars", () => {
+    mockedUseStorefront.mockReturnValue({
+      key: "marketplace",
+      config: STOREFRONT_CONFIGS.marketplace,
+    });
+    const { container } = renderWithContent();
+    const root = container.firstElementChild as HTMLElement | null;
+    if (!root) throw new Error("missing layout root");
+    expect(root.style.getPropertyValue("--sf-primary")).toBe(
+      STOREFRONT_CONFIGS.marketplace.themeTokens.primary,
+    );
+    expect(root.style.getPropertyValue("--sf-background")).toBe(
+      STOREFRONT_CONFIGS.marketplace.themeTokens.background,
     );
   });
 });
