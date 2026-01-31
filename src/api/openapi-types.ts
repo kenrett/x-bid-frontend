@@ -574,7 +574,7 @@ export interface paths {
     /**
      * Repair missing purchase credits
      * @description POST /api/v1/admin/payments/:id/repair_credits
-     *     Ensures the ledger grant exists for a completed purchase without double-crediting.
+     *     Ensures the ledger grant exists for an applied purchase without double-crediting.
      */
     post: operations["POST__api_v1_admin_payments_{id}_repair_credits"];
     delete?: never;
@@ -924,7 +924,7 @@ export interface paths {
     };
     /**
      * Handle successful checkout callbacks and credit the user
-     * @description Idempotently processes a paid checkout session and credits the user with purchased bids.
+     * @description Returns the current status of the checkout session without mutating state.
      */
     get: operations["GET__api_v1_checkout_success"];
     put?: never;
@@ -1195,8 +1195,7 @@ export interface paths {
     /**
      * List current user's activity feed
      * @description GET /api/v1/me/activity
-     *     Merges bids, watches, and outcomes into a single newest-first feed.
-     *     NOTE: Currently merges in Ruby; may not scale for large histories.
+     *     Returns an event-backed, newest-first feed with cursor pagination.
      */
     get: operations["GET__api_v1_me_activity"];
     put?: never;
@@ -1577,6 +1576,7 @@ export interface components {
       sessions_revoked?: number;
       status?: string;
     };
+    "5bb19a086e9077f5192683c8c05feaa9": components["schemas"]["CheckoutStatus"];
     "5fa0310957b5c0b33595a49f03b95e19": components["schemas"]["ChangePasswordRequest"];
     "6175057dd6ab3c3e45d847a73028d9c3": components["schemas"]["BidPlacementResponse"];
     "6383e51ee52c0c02bb879720dd1369ff": components["schemas"]["AccountProfile"];
@@ -1853,6 +1853,13 @@ export interface components {
       status?: string | null;
       updated_bid_credits?: number | null;
     };
+    /** @description Read-only checkout status returned by GET /api/v1/checkout/success. */
+    CheckoutStatus: {
+      message?: string | null;
+      purchase_id: number | string;
+      /** @enum {string} */
+      status: "pending" | "applied" | "failed";
+    };
     /** @description Standard error envelope returned by all error responses. error_code maps to ServiceResult#code or controller error codes. */
     Error: {
       details?:
@@ -1905,20 +1912,9 @@ export interface components {
     };
     /** @description Session validity and context returned by GET /api/v1/logged_in. */
     LoggedInStatus: {
-      is_admin: boolean;
-      is_superuser: boolean;
       logged_in: boolean;
-      redirect_path: string | null;
-      seconds_remaining: number;
-      session: {
-        seconds_remaining: number;
-        /** Format: date-time */
-        session_expires_at: string;
-        session_token_id: number | string;
-      };
       /** Format: date-time */
-      session_expires_at: string;
-      session_token_id: number | string;
+      session_expires_at: string | null;
       user: components["schemas"]["User"];
     };
     /** @description Login payload accepted by /api/v1/login (nested or flat). */
@@ -1983,12 +1979,13 @@ export interface components {
       receipt_url?: string | null;
       /** @enum {string} */
       status:
-        | "pending"
-        | "completed"
+        | "created"
+        | "paid_pending_apply"
+        | "applied"
+        | "failed"
         | "partially_refunded"
         | "refunded"
-        | "voided"
-        | "failed";
+        | "voided";
       stripe_checkout_session_id?: string | null;
       stripe_payment_intent_id?: string | null;
     };
@@ -2124,8 +2121,17 @@ export interface components {
         "application/json": components["schemas"]["09eda044efad4320218b100180234bec"];
       };
     };
-    /** @description Audit logged */
+    /** @description Checkout status */
     resp_005: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        "application/json": components["schemas"]["5bb19a086e9077f5192683c8c05feaa9"];
+      };
+    };
+    /** @description Audit logged */
+    resp_006: {
       headers: {
         [name: string]: unknown;
       };
@@ -2134,7 +2140,7 @@ export interface components {
       };
     };
     /** @description Success */
-    resp_006: {
+    resp_007: {
       headers: {
         [name: string]: unknown;
       };
@@ -2143,7 +2149,7 @@ export interface components {
       };
     };
     /** @description Auction found */
-    resp_007: {
+    resp_008: {
       headers: {
         [name: string]: unknown;
       };
@@ -2152,7 +2158,7 @@ export interface components {
       };
     };
     /** @description Session timing */
-    resp_008: {
+    resp_009: {
       headers: {
         [name: string]: unknown;
       };
@@ -2161,7 +2167,7 @@ export interface components {
       };
     };
     /** @description Bid pack created */
-    resp_009: {
+    resp_010: {
       headers: {
         [name: string]: unknown;
       };
@@ -2170,7 +2176,7 @@ export interface components {
       };
     };
     /** @description Wins */
-    resp_010: {
+    resp_011: {
       headers: {
         [name: string]: unknown;
       };
@@ -2179,7 +2185,7 @@ export interface components {
       };
     };
     /** @description Purchases */
-    resp_011: {
+    resp_012: {
       headers: {
         [name: string]: unknown;
       };
@@ -2188,7 +2194,7 @@ export interface components {
       };
     };
     /** @description Auction extended */
-    resp_012: {
+    resp_013: {
       headers: {
         [name: string]: unknown;
       };
@@ -2197,7 +2203,7 @@ export interface components {
       };
     };
     /** @description Bid history */
-    resp_013: {
+    resp_014: {
       headers: {
         [name: string]: unknown;
       };
@@ -2206,7 +2212,7 @@ export interface components {
       };
     };
     /** @description Session refreshed */
-    resp_014: {
+    resp_015: {
       headers: {
         [name: string]: unknown;
       };
@@ -2215,7 +2221,7 @@ export interface components {
       };
     };
     /** @description Unprocessable content */
-    resp_015: {
+    resp_016: {
       headers: {
         [name: string]: unknown;
       };
@@ -2224,7 +2230,7 @@ export interface components {
       };
     };
     /** @description Admin auctions */
-    resp_016: {
+    resp_017: {
       headers: {
         [name: string]: unknown;
       };
@@ -2233,7 +2239,7 @@ export interface components {
       };
     };
     /** @description Bid packs */
-    resp_017: {
+    resp_018: {
       headers: {
         [name: string]: unknown;
       };
@@ -2242,7 +2248,7 @@ export interface components {
       };
     };
     /** @description Payments */
-    resp_018: {
+    resp_019: {
       headers: {
         [name: string]: unknown;
       };
@@ -2251,7 +2257,7 @@ export interface components {
       };
     };
     /** @description Bad request */
-    resp_019: {
+    resp_020: {
       headers: {
         [name: string]: unknown;
       };
@@ -2260,7 +2266,7 @@ export interface components {
       };
     };
     /** @description An unexpected error occurred on the server. The server was unable to process the request. */
-    resp_020: {
+    resp_021: {
       headers: {
         [name: string]: unknown;
       };
@@ -2269,7 +2275,7 @@ export interface components {
       };
     };
     /** @description Auctions */
-    resp_021: {
+    resp_022: {
       headers: {
         [name: string]: unknown;
       };
@@ -2278,7 +2284,7 @@ export interface components {
       };
     };
     /** @description Wallet balance */
-    resp_022: {
+    resp_023: {
       headers: {
         [name: string]: unknown;
       };
@@ -2287,7 +2293,7 @@ export interface components {
       };
     };
     /** @description Role updated */
-    resp_023: {
+    resp_024: {
       headers: {
         [name: string]: unknown;
       };
@@ -2296,7 +2302,7 @@ export interface components {
       };
     };
     /** @description Accepted */
-    resp_024: {
+    resp_025: {
       headers: {
         [name: string]: unknown;
       };
@@ -2305,7 +2311,7 @@ export interface components {
       };
     };
     /** @description Auction updated */
-    resp_025: {
+    resp_026: {
       headers: {
         [name: string]: unknown;
       };
@@ -2314,7 +2320,7 @@ export interface components {
       };
     };
     /** @description User updated */
-    resp_026: {
+    resp_027: {
       headers: {
         [name: string]: unknown;
       };
@@ -2323,7 +2329,7 @@ export interface components {
       };
     };
     /** @description Success */
-    resp_027: {
+    resp_028: {
       headers: {
         [name: string]: unknown;
       };
@@ -2332,7 +2338,7 @@ export interface components {
       };
     };
     /** @description Refund issued */
-    resp_028: {
+    resp_029: {
       headers: {
         [name: string]: unknown;
       };
@@ -2341,7 +2347,7 @@ export interface components {
       };
     };
     /** @description Accepted */
-    resp_029: {
+    resp_030: {
       headers: {
         [name: string]: unknown;
       };
@@ -2350,7 +2356,7 @@ export interface components {
       };
     };
     /** @description Success */
-    resp_030: {
+    resp_031: {
       headers: {
         [name: string]: unknown;
       };
@@ -2359,7 +2365,7 @@ export interface components {
       };
     };
     /** @description Wallet transactions */
-    resp_031: {
+    resp_032: {
       headers: {
         [name: string]: unknown;
       };
@@ -2368,21 +2374,12 @@ export interface components {
       };
     };
     /** @description Win claimed */
-    resp_032: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": components["schemas"]["701cfa5771768716c533d79a64c9de4e"];
-      };
-    };
-    /** @description Already processed */
     resp_033: {
       headers: {
         [name: string]: unknown;
       };
       content: {
-        "application/json": components["schemas"]["b6f9ed4b3630fb2e02eba22dced97fac"];
+        "application/json": components["schemas"]["701cfa5771768716c533d79a64c9de4e"];
       };
     };
     /** @description Session valid */
@@ -2601,17 +2598,8 @@ export interface components {
         "application/json": components["schemas"]["ac552b948996489944d9b1c178477677"];
       };
     };
-    /** @description Purchase applied */
-    resp_058: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": components["schemas"]["b6f9ed4b3630fb2e02eba22dced97fac"];
-      };
-    };
     /** @description Success */
-    resp_059: {
+    resp_058: {
       headers: {
         [name: string]: unknown;
       };
@@ -2620,7 +2608,7 @@ export interface components {
       };
     };
     /** @description Bid placed */
-    resp_060: {
+    resp_059: {
       headers: {
         [name: string]: unknown;
       };
@@ -2629,7 +2617,7 @@ export interface components {
       };
     };
     /** @description Auction retired */
-    resp_061: {
+    resp_060: {
       headers: {
         [name: string]: unknown;
       };
@@ -2638,7 +2626,7 @@ export interface components {
       };
     };
     /** @description Unprocessable content */
-    resp_062: {
+    resp_061: {
       headers: {
         [name: string]: unknown;
       };
@@ -2647,7 +2635,7 @@ export interface components {
       };
     };
     /** @description Too many requests */
-    resp_063: {
+    resp_062: {
       headers: {
         [name: string]: unknown;
       };
@@ -2656,7 +2644,7 @@ export interface components {
       };
     };
     /** @description Admin users */
-    resp_064: {
+    resp_063: {
       headers: {
         [name: string]: unknown;
       };
@@ -2665,7 +2653,7 @@ export interface components {
       };
     };
     /** @description Auction created */
-    resp_065: {
+    resp_064: {
       headers: {
         [name: string]: unknown;
       };
@@ -2674,7 +2662,7 @@ export interface components {
       };
     };
     /** @description Accepted */
-    resp_066: {
+    resp_065: {
       headers: {
         [name: string]: unknown;
       };
@@ -2683,7 +2671,7 @@ export interface components {
       };
     };
     /** @description Unauthorized */
-    resp_067: {
+    resp_066: {
       headers: {
         [name: string]: unknown;
       };
@@ -2692,7 +2680,7 @@ export interface components {
       };
     };
     /** @description Maintenance status */
-    resp_068: {
+    resp_067: {
       headers: {
         [name: string]: unknown;
       };
@@ -2701,7 +2689,7 @@ export interface components {
       };
     };
     /** @description Success */
-    resp_069: {
+    resp_068: {
       headers: {
         [name: string]: unknown;
       };
@@ -2867,7 +2855,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_021"];
+      200: components["responses"]["resp_022"];
       422: components["responses"]["resp_044"];
     };
   };
@@ -2880,11 +2868,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_069"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_068"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_043"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   PUT__api_v1_account: {
@@ -2897,11 +2885,11 @@ export interface operations {
     requestBody: components["requestBodies"]["req_001"];
     responses: {
       200: components["responses"]["resp_040"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_043"];
-      422: components["responses"]["resp_015"];
-      500: components["responses"]["resp_020"];
+      422: components["responses"]["resp_016"];
+      500: components["responses"]["resp_021"];
     };
   };
   DELETE__api_v1_account: {
@@ -2914,11 +2902,11 @@ export interface operations {
     requestBody: components["requestBodies"]["req_008"];
     responses: {
       200: components["responses"]["resp_038"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_043"];
-      422: components["responses"]["resp_015"];
-      500: components["responses"]["resp_020"];
+      422: components["responses"]["resp_016"];
+      500: components["responses"]["resp_021"];
     };
   };
   PATCH__api_v1_account: {
@@ -2931,11 +2919,11 @@ export interface operations {
     requestBody: components["requestBodies"]["req_001"];
     responses: {
       200: components["responses"]["resp_040"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_043"];
-      422: components["responses"]["resp_015"];
-      500: components["responses"]["resp_020"];
+      422: components["responses"]["resp_016"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_account_data_export: {
@@ -2948,10 +2936,10 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_050"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_043"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   POST__api_v1_account_data_export: {
@@ -2963,11 +2951,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      202: components["responses"]["resp_029"];
-      401: components["responses"]["resp_067"];
+      202: components["responses"]["resp_030"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       422: components["responses"]["resp_049"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "POST__api_v1_account_email-change": {
@@ -2979,12 +2967,12 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_006"];
     responses: {
-      202: components["responses"]["resp_066"];
-      401: components["responses"]["resp_067"];
+      202: components["responses"]["resp_065"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
-      422: components["responses"]["resp_015"];
-      429: components["responses"]["resp_063"];
-      500: components["responses"]["resp_020"];
+      422: components["responses"]["resp_016"];
+      429: components["responses"]["resp_062"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_account_export: {
@@ -2996,11 +2984,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_030"];
-      202: components["responses"]["resp_029"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_031"];
+      202: components["responses"]["resp_030"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_account_notifications: {
@@ -3013,10 +3001,10 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_035"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_043"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   PUT__api_v1_account_notifications: {
@@ -3029,11 +3017,11 @@ export interface operations {
     requestBody: components["requestBodies"]["req_007"];
     responses: {
       200: components["responses"]["resp_035"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_043"];
-      422: components["responses"]["resp_015"];
-      500: components["responses"]["resp_020"];
+      422: components["responses"]["resp_016"];
+      500: components["responses"]["resp_021"];
     };
   };
   POST__api_v1_account_password: {
@@ -3045,11 +3033,11 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_010"];
     responses: {
-      200: components["responses"]["resp_059"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_058"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
-      422: components["responses"]["resp_015"];
-      500: components["responses"]["resp_020"];
+      422: components["responses"]["resp_016"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_account_security: {
@@ -3061,11 +3049,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_027"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_028"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_043"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_account_sessions: {
@@ -3077,10 +3065,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_006"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_007"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   DELETE__api_v1_account_sessions: {
@@ -3092,10 +3080,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_059"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_058"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   POST__api_v1_account_sessions_revoke_others: {
@@ -3107,10 +3095,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_059"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_058"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "DELETE__api_v1_account_sessions_{id}": {
@@ -3126,11 +3114,11 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_038"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_043"];
-      422: components["responses"]["resp_015"];
-      500: components["responses"]["resp_020"];
+      422: components["responses"]["resp_016"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_admin_auctions: {
@@ -3159,10 +3147,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_016"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_017"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "GET__api_v1_admin_auctions_{id}": {
@@ -3177,11 +3165,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_007"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_008"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   POST__api_v1_admin_audit: {
@@ -3193,11 +3181,11 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_012"];
     responses: {
-      201: components["responses"]["resp_005"];
-      401: components["responses"]["resp_067"];
+      201: components["responses"]["resp_006"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "GET__api_v1_admin_bid-packs": {
@@ -3209,10 +3197,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_017"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_018"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "POST__api_v1_admin_bid-packs": {
@@ -3224,11 +3212,11 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_011"];
     responses: {
-      201: components["responses"]["resp_009"];
-      401: components["responses"]["resp_067"];
+      201: components["responses"]["resp_010"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "GET__api_v1_admin_bid-packs_new": {
@@ -3241,9 +3229,9 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_036"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "GET__api_v1_admin_bid-packs_{id}": {
@@ -3259,10 +3247,10 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_042"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "PUT__api_v1_admin_bid-packs_{id}": {
@@ -3278,11 +3266,11 @@ export interface operations {
     requestBody: components["requestBodies"]["req_011"];
     responses: {
       200: components["responses"]["resp_001"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "DELETE__api_v1_admin_bid-packs_{id}": {
@@ -3298,11 +3286,11 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_046"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "PATCH__api_v1_admin_bid-packs_{id}": {
@@ -3318,11 +3306,11 @@ export interface operations {
     requestBody: components["requestBodies"]["req_011"];
     responses: {
       200: components["responses"]["resp_001"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "GET__api_v1_admin_bid-packs_{id}_edit": {
@@ -3338,10 +3326,10 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_042"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "POST__api_v1_admin_fulfillments_{id}_complete": {
@@ -3358,7 +3346,7 @@ export interface operations {
     responses: {
       401: components["responses"]["resp_041"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "POST__api_v1_admin_fulfillments_{id}_process": {
@@ -3375,7 +3363,7 @@ export interface operations {
     responses: {
       401: components["responses"]["resp_041"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "POST__api_v1_admin_fulfillments_{id}_ship": {
@@ -3392,7 +3380,7 @@ export interface operations {
     responses: {
       401: components["responses"]["resp_041"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_admin_maintenance: {
@@ -3404,11 +3392,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_068"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_043"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   POST__api_v1_admin_maintenance: {
@@ -3424,12 +3412,12 @@ export interface operations {
     requestBody?: components["requestBodies"]["req_013"];
     responses: {
       200: components["responses"]["resp_037"];
-      400: components["responses"]["resp_019"];
-      401: components["responses"]["resp_067"];
+      400: components["responses"]["resp_020"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_043"];
       422: components["responses"]["resp_049"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_admin_payments: {
@@ -3444,10 +3432,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_018"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_019"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "GET__api_v1_admin_payments_{id}": {
@@ -3465,7 +3453,7 @@ export interface operations {
       401: components["responses"]["resp_041"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_043"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "POST__api_v1_admin_payments_{id}_refund": {
@@ -3480,12 +3468,12 @@ export interface operations {
     };
     requestBody?: components["requestBodies"]["req_005"];
     responses: {
-      200: components["responses"]["resp_028"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_029"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "POST__api_v1_admin_payments_{id}_repair_credits": {
@@ -3502,7 +3490,7 @@ export interface operations {
     responses: {
       401: components["responses"]["resp_041"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_admin_users: {
@@ -3514,10 +3502,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_064"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_063"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "PUT__api_v1_admin_users_{id}": {
@@ -3532,12 +3520,12 @@ export interface operations {
     };
     requestBody?: components["requestBodies"]["req_009"];
     responses: {
-      200: components["responses"]["resp_026"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_027"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "PATCH__api_v1_admin_users_{id}": {
@@ -3552,12 +3540,12 @@ export interface operations {
     };
     requestBody?: components["requestBodies"]["req_009"];
     responses: {
-      200: components["responses"]["resp_026"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_027"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "POST__api_v1_admin_users_{id}_ban": {
@@ -3573,11 +3561,11 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_055"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "POST__api_v1_admin_users_{id}_grant_admin": {
@@ -3592,12 +3580,12 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_023"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_024"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "POST__api_v1_admin_users_{id}_grant_superadmin": {
@@ -3612,12 +3600,12 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_023"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_024"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "POST__api_v1_admin_users_{id}_revoke_admin": {
@@ -3632,12 +3620,12 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_023"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_024"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "POST__api_v1_admin_users_{id}_revoke_superadmin": {
@@ -3652,12 +3640,12 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_023"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_024"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   POST__api_v1_age_gate_accept: {
@@ -3669,10 +3657,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      204: components["responses"]["resp_024"];
-      401: components["responses"]["resp_067"];
+      204: components["responses"]["resp_025"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_auctions: {
@@ -3687,7 +3675,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_021"];
+      200: components["responses"]["resp_022"];
       422: components["responses"]["resp_044"];
     };
   };
@@ -3700,11 +3688,11 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_003"];
     responses: {
-      201: components["responses"]["resp_065"];
-      401: components["responses"]["resp_067"];
+      201: components["responses"]["resp_064"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "GET__api_v1_auctions_{auction_id}_bid_history": {
@@ -3719,7 +3707,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_013"];
+      200: components["responses"]["resp_014"];
       404: components["responses"]["resp_002"];
     };
   };
@@ -3735,12 +3723,12 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_060"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_059"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "GET__api_v1_auctions_{id}": {
@@ -3755,7 +3743,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_007"];
+      200: components["responses"]["resp_008"];
       404: components["responses"]["resp_002"];
     };
   };
@@ -3771,12 +3759,12 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_003"];
     responses: {
-      200: components["responses"]["resp_025"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_026"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "DELETE__api_v1_auctions_{id}": {
@@ -3791,12 +3779,12 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      204: components["responses"]["resp_061"];
-      401: components["responses"]["resp_067"];
+      204: components["responses"]["resp_060"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "PATCH__api_v1_auctions_{id}": {
@@ -3811,12 +3799,12 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_003"];
     responses: {
-      200: components["responses"]["resp_025"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_026"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "POST__api_v1_auctions_{id}_extend_time": {
@@ -3831,12 +3819,12 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_012"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_013"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "POST__api_v1_auctions_{id}_watch": {
@@ -3854,7 +3842,7 @@ export interface operations {
       401: components["responses"]["resp_041"];
       403: components["responses"]["resp_047"];
       422: components["responses"]["resp_049"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "DELETE__api_v1_auctions_{id}_watch": {
@@ -3872,7 +3860,7 @@ export interface operations {
       401: components["responses"]["resp_041"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_043"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_bid_packs: {
@@ -3884,7 +3872,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_017"];
+      200: components["responses"]["resp_018"];
     };
   };
   GET__api_v1_checkout_status: {
@@ -3900,10 +3888,10 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_056"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_002"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_checkout_success: {
@@ -3918,13 +3906,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_058"];
-      208: components["responses"]["resp_033"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_005"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_002"];
-      422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   POST__api_v1_checkouts: {
@@ -3940,11 +3926,11 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_053"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_csrf: {
@@ -3971,7 +3957,7 @@ export interface operations {
     responses: {
       401: components["responses"]["resp_041"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   POST__api_v1_email_verifications_resend: {
@@ -3983,11 +3969,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      202: components["responses"]["resp_066"];
-      401: components["responses"]["resp_067"];
+      202: components["responses"]["resp_065"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
-      429: components["responses"]["resp_063"];
-      500: components["responses"]["resp_020"];
+      429: components["responses"]["resp_062"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_email_verifications_verify: {
@@ -4003,7 +3989,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_038"];
-      422: components["responses"]["resp_015"];
+      422: components["responses"]["resp_016"];
     };
   };
   GET__api_v1_health: {
@@ -4018,7 +4004,7 @@ export interface operations {
       401: components["responses"]["resp_041"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_043"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_logged_in: {
@@ -4031,9 +4017,9 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_034"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   POST__api_v1_login: {
@@ -4046,8 +4032,8 @@ export interface operations {
     requestBody: components["requestBodies"]["req_004"];
     responses: {
       200: components["responses"]["resp_004"];
-      400: components["responses"]["resp_019"];
-      401: components["responses"]["resp_067"];
+      400: components["responses"]["resp_020"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       422: components["responses"]["resp_049"];
     };
@@ -4062,10 +4048,10 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_051"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_043"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_maintenance: {
@@ -4077,7 +4063,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_068"];
+      200: components["responses"]["resp_067"];
       404: components["responses"]["resp_043"];
     };
   };
@@ -4091,10 +4077,10 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_045"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_043"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_me_activity: {
@@ -4108,7 +4094,7 @@ export interface operations {
     responses: {
       401: components["responses"]["resp_041"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_me_notifications: {
@@ -4121,9 +4107,9 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_057"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_me_purchases: {
@@ -4135,10 +4121,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_011"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_012"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "GET__api_v1_me_purchases_{id}": {
@@ -4154,10 +4140,10 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_048"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_002"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_me_wins: {
@@ -4169,10 +4155,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_010"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_011"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "GET__api_v1_me_wins_{auction_id}": {
@@ -4188,10 +4174,10 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_039"];
-      401: components["responses"]["resp_067"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_002"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   "POST__api_v1_me_wins_{auction_id}_claim": {
@@ -4206,12 +4192,12 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_032"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_033"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_002"];
       422: components["responses"]["resp_044"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   POST__api_v1_password_forgot: {
@@ -4223,8 +4209,8 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      202: components["responses"]["resp_066"];
-      400: components["responses"]["resp_019"];
+      202: components["responses"]["resp_065"];
+      400: components["responses"]["resp_020"];
       422: components["responses"]["resp_049"];
     };
   };
@@ -4238,8 +4224,8 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_003"];
-      400: components["responses"]["resp_019"];
-      401: components["responses"]["resp_067"];
+      400: components["responses"]["resp_020"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
       404: components["responses"]["resp_043"];
       422: components["responses"]["resp_044"];
@@ -4254,9 +4240,9 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_002"];
     responses: {
-      200: components["responses"]["resp_014"];
-      400: components["responses"]["resp_019"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_015"];
+      400: components["responses"]["resp_020"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_052"];
     };
   };
@@ -4269,10 +4255,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_008"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_009"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   POST__api_v1_signup: {
@@ -4285,7 +4271,7 @@ export interface operations {
     requestBody: components["requestBodies"]["req_014"];
     responses: {
       201: components["responses"]["resp_004"];
-      422: components["responses"]["resp_062"];
+      422: components["responses"]["resp_061"];
     };
   };
   POST__api_v1_stripe_webhooks: {
@@ -4300,7 +4286,7 @@ export interface operations {
       401: components["responses"]["resp_041"];
       403: components["responses"]["resp_047"];
       422: components["responses"]["resp_049"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   POST__api_v1_users: {
@@ -4313,7 +4299,7 @@ export interface operations {
     requestBody: components["requestBodies"]["req_014"];
     responses: {
       201: components["responses"]["resp_004"];
-      422: components["responses"]["resp_062"];
+      422: components["responses"]["resp_061"];
     };
   };
   GET__api_v1_wallet: {
@@ -4325,11 +4311,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_022"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_023"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_043"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__api_v1_wallet_transactions: {
@@ -4346,10 +4332,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_031"];
-      401: components["responses"]["resp_067"];
+      200: components["responses"]["resp_032"];
+      401: components["responses"]["resp_066"];
       403: components["responses"]["resp_047"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
   GET__cable_health: {
@@ -4364,7 +4350,7 @@ export interface operations {
       401: components["responses"]["resp_041"];
       403: components["responses"]["resp_047"];
       404: components["responses"]["resp_043"];
-      500: components["responses"]["resp_020"];
+      500: components["responses"]["resp_021"];
     };
   };
 }
