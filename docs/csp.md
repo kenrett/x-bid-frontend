@@ -14,7 +14,7 @@ The CSP is defined in `vercel.json` and is intentionally strict (no `unsafe-inli
   - All styles are bundled and served from our origin.
 
 - `connect-src 'self' ...`
-  - `https://x-bid-backend.onrender.com` and `wss://x-bid-backend.onrender.com` for production API + ActionCable.
+  - `https://api.biddersweet.app` and `wss://api.biddersweet.app` for production API + ActionCable.
   - `http://localhost:3000` and `ws://localhost:3000` for local backend development.
   - `https://api.stripe.com`, `https://m.stripe.network`, `https://hooks.stripe.com` for Stripe checkout API + telemetry flows.
 
