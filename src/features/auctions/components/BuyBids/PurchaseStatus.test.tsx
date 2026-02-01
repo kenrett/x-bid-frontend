@@ -124,6 +124,7 @@ describe("PurchaseStatus", () => {
 
   it("treats idempotent responses as success", async () => {
     mockedClient.get.mockResolvedValue({
+      status: 200,
       data: { idempotent: true },
     });
     mockedWalletApi.getWallet.mockResolvedValue({

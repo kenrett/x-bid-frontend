@@ -1955,10 +1955,14 @@ export interface components {
     };
     /** @description Read-only checkout status returned by GET /api/v1/checkout/success. */
     CheckoutStatus: {
+      applied?: boolean | null;
+      idempotent?: boolean | null;
       message?: string | null;
+      payment_status?: string | null;
       purchase_id: number | string;
       /** @enum {string} */
       status: "pending" | "applied" | "failed";
+      updated_bid_credits?: number | null;
     };
     /** @description Standard error envelope returned by all error responses. error_code maps to ServiceResult#code or controller error codes. */
     Error: {
