@@ -58,7 +58,7 @@ export const PurchaseStatus = () => {
   const normalizeStatus = (
     payload: CheckoutSuccessResponse,
   ): { status: "pending" | "applied" | "failed"; message?: string } => {
-    if (payload.applied === true) {
+    if (payload.applied === true || payload.idempotent === true) {
       return { status: "applied", message: payload.message ?? undefined };
     }
     const rawStatus =

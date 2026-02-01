@@ -122,9 +122,9 @@ describe("PurchaseStatus", () => {
     expect(screen.getByText("Card declined")).toBeInTheDocument();
   });
 
-  it("treats idempotent applied responses as success", async () => {
+  it("treats idempotent responses as success", async () => {
     mockedClient.get.mockResolvedValue({
-      data: { idempotent: true, applied: true },
+      data: { idempotent: true },
     });
     mockedWalletApi.getWallet.mockResolvedValue({
       creditsBalance: 150,
