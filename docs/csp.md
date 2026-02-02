@@ -18,8 +18,8 @@ The CSP is defined in `vercel.json` and is intentionally strict (no `unsafe-inli
   - `http://localhost:3000` and `ws://localhost:3000` for local backend development.
   - `https://api.stripe.com`, `https://m.stripe.network`, `https://hooks.stripe.com` for Stripe checkout API + telemetry flows.
 
-- `img-src 'self' data: https://robohash.org`
-  - App images, data URLs, and robohash avatars.
+- `img-src 'self' data: blob: https://api.biddersweet.app http://localhost:3000 https://robohash.org`
+  - App images, data URLs, object URL previews, API-hosted uploads, and robohash avatars.
 
 - `frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com`
   - Stripe-hosted iframes needed for embedded checkout.
