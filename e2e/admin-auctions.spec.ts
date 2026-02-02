@@ -22,7 +22,10 @@ test("admin can create and edit an auction", async ({ page }) => {
   let capturedCreate: unknown;
   await page.route("**/api/v1/admin/auctions", (route) => {
     if (route.request().method() === "POST") {
-      capturedCreate = route.request().postDataJSON();
+      const requestPayload = route.request().postDataJSON() as {
+        auction?: object;
+      };
+      capturedCreate = requestPayload.auction ?? requestPayload;
       auctionsPayload = [
         ...auctionsPayload,
         {
@@ -77,7 +80,10 @@ test("admin can create and edit an auction", async ({ page }) => {
     `**/api/v1/admin/auctions/${editableAuction.id}`,
     (route) => {
       if (route.request().method() === "PUT") {
-        capturedUpdate = route.request().postDataJSON();
+        const requestPayload = route.request().postDataJSON() as {
+          auction?: object;
+        };
+        capturedUpdate = requestPayload.auction ?? requestPayload;
         auctionsPayload = auctionsPayload.map((auction) =>
           auction.id === editableAuction.id
             ? { ...auction, ...(capturedUpdate as object) }

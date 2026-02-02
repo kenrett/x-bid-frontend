@@ -43,7 +43,10 @@ test("admin can create auction with schedule and image; shows on public feed", a
   );
   await page.route("**/api/v1/admin/auctions", (route) => {
     if (route.request().method() === "POST") {
-      createdPayload = route.request().postDataJSON();
+      const requestPayload = route.request().postDataJSON() as {
+        auction?: object;
+      };
+      createdPayload = requestPayload.auction ?? requestPayload;
       const newAuction = {
         id: 9991,
         ...(createdPayload as object),
@@ -172,7 +175,10 @@ test("admin edits auction status/date and update appears on public feed", async 
     `**/api/v1/admin/auctions/${editableAuction.id}`,
     (route) => {
       if (route.request().method() === "PUT") {
-        capturedUpdate = route.request().postDataJSON();
+        const requestPayload = route.request().postDataJSON() as {
+          auction?: object;
+        };
+        capturedUpdate = requestPayload.auction ?? requestPayload;
         adminAuctions = adminAuctions.map((auction) =>
           auction.id === editableAuction.id
             ? { ...auction, ...(capturedUpdate as object) }
