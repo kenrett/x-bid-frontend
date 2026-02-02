@@ -1,4 +1,4 @@
-import client from "@api/client";
+import client, { getApiBaseUrl } from "@api/client";
 import { getStorefrontKey } from "../../../storefront/storefront";
 import type { UploadAdapter, UploadError, UploadResult } from "../types";
 
@@ -63,9 +63,12 @@ export const createMultipartUploadAdapter = (options: {
       }
 
       if (import.meta.env.DEV) {
+        const baseURL = client.defaults.baseURL ?? getApiBaseUrl();
         console.info("[upload] request", {
           storefront: getStorefrontKey(),
           endpoint: options.endpoint,
+          baseURL,
+          withCredentials: Boolean(client.defaults.withCredentials),
           file_name: file.name,
           byte_size: file.size,
         });

@@ -127,6 +127,7 @@ const client = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 }) as AxiosInstance;
 
 type AuthDebugMeta = {
@@ -219,32 +220,7 @@ client.interceptors.request.use(
       config.url = buildApiUrl(config.url);
       config.baseURL = undefined;
     }
-    if (typeof config.url === "string") {
-      const resolvedUrl = config.url;
-      const originFallback = getWindowOrigin() ?? "http://localhost";
-      const apiBase = normalizedBaseURL ?? getWindowOrigin();
-      let shouldInclude = false;
-
-      if (apiBase) {
-        try {
-          const apiUrl = new URL(apiBase, originFallback);
-          const requestUrl = new URL(resolvedUrl, originFallback);
-          const apiPath = apiUrl.pathname.replace(/\/+$/, "");
-          const requestPath = requestUrl.pathname;
-          const pathMatches =
-            apiPath === "" ||
-            requestPath === apiPath ||
-            requestPath.startsWith(`${apiPath}/`);
-          shouldInclude = requestUrl.origin === apiUrl.origin && pathMatches;
-        } catch {
-          shouldInclude = false;
-        }
-      }
-
-      config.withCredentials = shouldInclude;
-    } else {
-      config.withCredentials = false;
-    }
+    config.withCredentials = true;
     if (isDebugAuthEnabled() || import.meta.env.DEV) {
       const method = (config.method ?? "get").toUpperCase();
       const resolvedUrlForLog =

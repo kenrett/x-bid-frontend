@@ -112,4 +112,29 @@ describe("api client", () => {
     expect(uploadConfig.url).toBe("https://api.biddersweet.app/api/v1/uploads");
     expect(uploadConfig.withCredentials).toBe(true);
   });
+
+  it("forces credentials on upload requests", async () => {
+    const adapter = vi.fn(async (config) => ({
+      data: {},
+      status: 200,
+      statusText: "OK",
+      headers: {},
+      config,
+    }));
+
+    client.defaults.adapter = adapter as typeof originalAdapter;
+    await client.post("/api/v1/uploads", {}, { withCredentials: false });
+
+    const uploadConfig = adapter.mock.calls
+      .map((call) => call[0])
+      .find(
+        (config) =>
+          typeof config.url === "string" &&
+          config.url.includes("/api/v1/uploads"),
+      );
+
+    if (!uploadConfig) throw new Error("upload request not captured");
+
+    expect(uploadConfig.withCredentials).toBe(true);
+  });
 });
