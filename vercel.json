@@ -1,5 +1,4 @@
 {
-  "cspNote": "img-src allows data: and blob: for inline previews and object URLs",
   "rewrites": [
     {
       "source": "/(.*)",
