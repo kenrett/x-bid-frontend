@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { addHours, format, isValid, parseISO, subHours } from "date-fns";
 import type {
   AuctionSummary,
   AuctionStatus,
@@ -6,6 +7,7 @@ import type {
 import { FileUploadField } from "@features/uploads/components/FileUploadField";
 import { useUploadAdapter } from "@features/uploads/useUploadAdapter";
 import type { UploadAdapter, UploadConstraints } from "@features/uploads/types";
+import { DateTimePicker } from "@components/forms/DateTimePicker";
 
 type FormPayload = Partial<AuctionSummary> & { title: string };
 
@@ -21,8 +23,8 @@ type FormState = {
   title: string;
   description: string;
   image_url: string;
-  start_date: string;
-  end_time: string;
+  start_date: string | null;
+  end_time: string | null;
   status: AuctionStatus | "";
   current_price: string;
 };
@@ -44,8 +46,8 @@ const toFormState = (values?: Partial<AuctionSummary>): FormState => ({
   title: values?.title ?? "",
   description: values?.description ?? "",
   image_url: values?.image_url ?? "",
-  start_date: values?.start_date ?? "",
-  end_time: values?.end_time ?? "",
+  start_date: values?.start_date ?? null,
+  end_time: values?.end_time ?? null,
   status: values?.status ?? "",
   current_price:
     values?.current_price !== undefined && values?.current_price !== null
@@ -58,7 +60,15 @@ const compactPayload = (state: FormState): FormPayload => {
     title: state.title.trim(),
   };
 
-  const optionalStrings: Array<[keyof FormState, keyof AuctionSummary]> = [
+  const optionalStrings: Array<
+    [
+      keyof Pick<
+        FormState,
+        "description" | "image_url" | "start_date" | "end_time"
+      >,
+      keyof AuctionSummary,
+    ]
+  > = [
     ["description", "description"],
     ["image_url", "image_url"],
     ["start_date", "start_date"],
@@ -66,10 +76,10 @@ const compactPayload = (state: FormState): FormPayload => {
   ];
 
   optionalStrings.forEach(([key, target]) => {
-    const value = state[key].trim();
-    if (value) {
+    const value = state[key];
+    if (value && value.trim()) {
       // @ts-expect-error - indexed assignment for dynamic keys
-      payload[target] = value;
+      payload[target] = value.trim();
     }
   });
 
@@ -86,6 +96,31 @@ const compactPayload = (state: FormState): FormPayload => {
   }
 
   return payload;
+};
+
+const formatISO = (value: Date) => format(value, "yyyy-MM-dd'T'HH:mm:ssXXX");
+
+const validateSchedule = (start: string | null, end: string | null) => {
+  let startError: string | undefined;
+  let endError: string | undefined;
+
+  if (start && !end) {
+    endError = "End date & time is required";
+  } else if (end && !start) {
+    startError = "Start date & time is required";
+  } else if (start && end) {
+    const startDate = parseISO(start);
+    const endDate = parseISO(end);
+    if (isValid(startDate) && isValid(endDate) && endDate <= startDate) {
+      endError = "End must be after start";
+    }
+  }
+
+  return {
+    startError,
+    endError,
+    isValid: !startError && !endError,
+  };
 };
 
 export const AdminAuctionForm = ({
@@ -121,10 +156,67 @@ export const AdminAuctionForm = ({
     }
 
     setError(null);
+
+    const scheduleCheck = validateSchedule(
+      formState.start_date,
+      formState.end_time,
+    );
+    if (!scheduleCheck.isValid) {
+      return;
+    }
+
     await onSubmit(compactPayload(formState));
   };
 
   const statusOptions = useMemo(() => STATUS_OPTIONS, []);
+  const scheduleCheck = validateSchedule(
+    formState.start_date,
+    formState.end_time,
+  );
+
+  const handleStartChange = (nextISO: string | null) => {
+    setFormState((prev) => {
+      if (!nextISO) {
+        return { ...prev, start_date: null };
+      }
+
+      if (!prev.end_time) {
+        const parsed = parseISO(nextISO);
+        const suggested = isValid(parsed)
+          ? formatISO(addHours(parsed, 1))
+          : null;
+        return {
+          ...prev,
+          start_date: nextISO,
+          end_time: suggested ?? prev.end_time ?? null,
+        };
+      }
+
+      return { ...prev, start_date: nextISO };
+    });
+  };
+
+  const handleEndChange = (nextISO: string | null) => {
+    setFormState((prev) => {
+      if (!nextISO) {
+        return { ...prev, end_time: null };
+      }
+
+      if (!prev.start_date) {
+        const parsed = parseISO(nextISO);
+        const suggested = isValid(parsed)
+          ? formatISO(subHours(parsed, 1))
+          : null;
+        return {
+          ...prev,
+          end_time: nextISO,
+          start_date: suggested ?? prev.start_date ?? null,
+        };
+      }
+
+      return { ...prev, end_time: nextISO };
+    });
+  };
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
@@ -208,27 +300,22 @@ export const AdminAuctionForm = ({
           />
         </label>
 
-        <label className="flex flex-col gap-2 text-sm text-gray-200">
-          <span className="font-semibold">Start Date</span>
-          <input
-            type="text"
-            value={formState.start_date}
-            onChange={handleChange("start_date")}
-            className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
-            placeholder="2024-06-01T12:00:00Z"
-          />
-        </label>
+        <DateTimePicker
+          label="Start date & time"
+          valueISO={formState.start_date}
+          onChangeISO={handleStartChange}
+          error={scheduleCheck.startError}
+          disabled={isSubmitting}
+        />
 
-        <label className="flex flex-col gap-2 text-sm text-gray-200">
-          <span className="font-semibold">End Time</span>
-          <input
-            type="text"
-            value={formState.end_time}
-            onChange={handleChange("end_time")}
-            className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
-            placeholder="2024-06-01T14:00:00Z"
-          />
-        </label>
+        <DateTimePicker
+          label="End date & time"
+          valueISO={formState.end_time}
+          onChangeISO={handleEndChange}
+          minISO={formState.start_date ?? undefined}
+          error={scheduleCheck.endError}
+          disabled={isSubmitting}
+        />
       </div>
 
       {error && <p className="text-sm text-red-300">{error}</p>}

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { format, parseISO } from "date-fns";
 import { AdminAuctionForm } from "./AdminAuctionForm";
 
 const renderForm = (
@@ -53,14 +54,69 @@ describe("AdminAuctionForm", () => {
     });
   });
 
+  it("submits ISO strings for start/end", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    renderForm({ onSubmit });
+
+    fireEvent.change(screen.getByLabelText(/Title/i), {
+      target: { value: "My Auction" },
+    });
+
+    const dateInputs = screen.getAllByLabelText("Date");
+    const timeSelects = screen.getAllByLabelText("Time");
+
+    fireEvent.change(dateInputs[0], { target: { value: "2026-02-02" } });
+    fireEvent.change(timeSelects[0], { target: { value: "14:30" } });
+    fireEvent.change(dateInputs[1], { target: { value: "2026-02-03" } });
+    fireEvent.change(timeSelects[1], { target: { value: "15:30" } });
+
+    const form = screen.getByText(/title \*/i).closest("form");
+    if (!form) throw new Error("Form not found");
+    form.noValidate = true;
+    fireEvent.submit(form);
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "My Auction",
+        start_date: expect.stringMatching(/2026-02-02T14:30:00/),
+        end_time: expect.stringMatching(/2026-02-03T15:30:00/),
+      }),
+    );
+  });
+
+  it("blocks submit when end is before start", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    renderForm({ onSubmit });
+
+    fireEvent.change(screen.getByLabelText(/Title/i), {
+      target: { value: "My Auction" },
+    });
+
+    const dateInputs = screen.getAllByLabelText("Date");
+    const timeSelects = screen.getAllByLabelText("Time");
+
+    fireEvent.change(dateInputs[0], { target: { value: "2026-02-02" } });
+    fireEvent.change(timeSelects[0], { target: { value: "14:30" } });
+    fireEvent.change(dateInputs[1], { target: { value: "2026-02-02" } });
+    fireEvent.change(timeSelects[1], { target: { value: "14:00" } });
+
+    const form = screen.getByText(/title \*/i).closest("form");
+    if (!form) throw new Error("Form not found");
+    form.noValidate = true;
+    fireEvent.submit(form);
+
+    expect(screen.getByText("End must be after start")).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
   it("pre-fills initial values", () => {
     renderForm({
       initialValues: {
         title: "Initial",
         description: "Desc",
         image_url: "http://example.com",
-        start_date: "2024-01-01",
-        end_time: "2024-01-02",
+        start_date: "2024-01-01T09:15:00-05:00",
+        end_time: "2024-01-02T10:30:00-05:00",
         status: "scheduled",
         current_price: 5,
       },
@@ -69,8 +125,16 @@ describe("AdminAuctionForm", () => {
     expect(screen.getByDisplayValue("Initial")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Desc")).toBeInTheDocument();
     expect(screen.getByDisplayValue("http://example.com")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("2024-01-01")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("2024-01-02")).toBeInTheDocument();
+    const dateInputs = screen.getAllByLabelText("Date");
+    const timeSelects = screen.getAllByLabelText("Time");
+    expect(dateInputs[0]).toHaveValue("2024-01-01");
+    expect(timeSelects[0]).toHaveValue(
+      format(parseISO("2024-01-01T09:15:00-05:00"), "HH:mm"),
+    );
+    expect(dateInputs[1]).toHaveValue("2024-01-02");
+    expect(timeSelects[1]).toHaveValue(
+      format(parseISO("2024-01-02T10:30:00-05:00"), "HH:mm"),
+    );
     expect(screen.getByDisplayValue("scheduled")).toBeInTheDocument();
     expect(screen.getByDisplayValue("5")).toBeInTheDocument();
   });

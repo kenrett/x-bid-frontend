@@ -68,8 +68,10 @@ test("admin can create auction with schedule and image; shows on public feed", a
   await page
     .locator('label:has-text("Status") select')
     .selectOption("scheduled");
-  await page.getByLabel("Start Date").fill("2025-06-01T12:00:00Z");
-  await page.getByLabel("End Time").fill("2025-06-02T12:00:00Z");
+  await page.getByLabel("Date").nth(0).fill("2025-06-01");
+  await page.getByLabel("Time").nth(0).selectOption("12:00");
+  await page.getByLabel("Date").nth(1).fill("2025-06-02");
+  await page.getByLabel("Time").nth(1).selectOption("12:00");
   await page.getByRole("button", { name: "Create auction" }).click();
 
   await expect(page).toHaveURL("/admin/auctions");
@@ -81,8 +83,8 @@ test("admin can create auction with schedule and image; shows on public feed", a
     image_url: "https://example.com/sunset.jpg",
     // scheduled converts to pending for API payload
     status: "pending",
-    start_date: "2025-06-01T12:00:00Z",
-    end_time: "2025-06-02T12:00:00Z",
+    start_date: expect.stringMatching(/2025-06-01T12:00:00/),
+    end_time: expect.stringMatching(/2025-06-02T12:00:00/),
   });
 
   // Public feed reflects the new auction.
@@ -200,13 +202,14 @@ test("admin edits auction status/date and update appears on public feed", async 
   await page
     .locator('label:has-text("Status") select')
     .selectOption("inactive");
-  await page.getByLabel("End Time").fill("2025-02-03T12:00:00Z");
+  await page.getByLabel("Date").nth(1).fill("2025-02-03");
+  await page.getByLabel("Time").nth(1).selectOption("12:00");
   await page.getByRole("button", { name: "Save changes" }).click();
 
   await expect(page).toHaveURL("/admin/auctions");
   expect(capturedUpdate).toMatchObject({
     status: "inactive",
-    end_time: "2025-02-03T12:00:00Z",
+    end_time: expect.stringMatching(/2025-02-03T12:00:00/),
   });
 
   await page.goto("/auctions");
