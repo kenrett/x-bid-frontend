@@ -344,7 +344,12 @@ export interface paths {
      */
     get: operations["GET__api_v1_admin_auctions"];
     put?: never;
-    post?: never;
+    /**
+     * Create a new auction (admin only)
+     * @description POST /api/v1/admin/auctions
+     *     Create and schedule or activate an auction. Status values are normalized to the allowed list.
+     */
+    post: operations["POST__api_v1_admin_auctions"];
     delete?: never;
     options?: never;
     head?: never;
@@ -364,8 +369,44 @@ export interface paths {
      *     Retrieves full auction details for administrators.
      */
     get: operations["GET__api_v1_admin_auctions_{id}"];
-    put?: never;
+    /**
+     * Update an existing auction (admin only)
+     * @description PUT /api/v1/admin/auctions/:id
+     *     Update auction details or transition status for an existing auction.
+     */
+    put: operations["PUT__api_v1_admin_auctions_{id}"];
     post?: never;
+    /**
+     * Retire an auction (admin only)
+     * @description DELETE /api/v1/admin/auctions/:id
+     *     Retire an auction to prevent further bids while keeping history intact.
+     */
+    delete: operations["DELETE__api_v1_admin_auctions_{id}"];
+    options?: never;
+    head?: never;
+    /**
+     * Update an existing auction (admin only)
+     * @description PUT /api/v1/admin/auctions/:id
+     *     Update auction details or transition status for an existing auction.
+     */
+    patch: operations["PATCH__api_v1_admin_auctions_{id}"];
+    trace?: never;
+  };
+  "/api/v1/admin/auctions/{id}/extend_time": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Extend an auction's end time (admin only)
+     * @description POST /api/v1/admin/auctions/:id/extend_time
+     *     Extends an active auction within the configured extension window.
+     */
+    post: operations["POST__api_v1_admin_auctions_{id}_extend_time"];
     delete?: never;
     options?: never;
     head?: never;
@@ -1554,6 +1595,26 @@ export interface paths {
      * @description POST /api/v1/uploads
      */
     post: operations["POST__api_v1_uploads"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/uploads/{signed_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * View
+     * @description GET /api/v1/uploads/:signed_id
+     */
+    get: operations["GET__api_v1_uploads_{signed_id}"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -2910,6 +2971,8 @@ export interface components {
     b616e3297225d84121c506134222a819: number;
     /** @description ID of the Stripe checkout session */
     c96cce3d59cd4fa44833d2fd8dcb937c: string;
+    /** @description Id of existing upload. */
+    dd422988154b00c223c3f630b9ca2790: string;
     /** @description ID of the bid pack to purchase */
     e47fcdce1e2038e964734571e689bfeb: number;
     /** @description Search by title or description */
@@ -3397,6 +3460,22 @@ export interface operations {
       500: components["responses"]["resp_022"];
     };
   };
+  POST__api_v1_admin_auctions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: components["requestBodies"]["req_003"];
+    responses: {
+      201: components["responses"]["resp_067"];
+      401: components["responses"]["resp_069"];
+      403: components["responses"]["resp_055"];
+      422: components["responses"]["resp_045"];
+      500: components["responses"]["resp_022"];
+    };
+  };
   "GET__api_v1_admin_auctions_{id}": {
     parameters: {
       query?: never;
@@ -3413,6 +3492,86 @@ export interface operations {
       401: components["responses"]["resp_069"];
       403: components["responses"]["resp_055"];
       404: components["responses"]["resp_003"];
+      500: components["responses"]["resp_022"];
+    };
+  };
+  "PUT__api_v1_admin_auctions_{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the auction */
+        id: components["parameters"]["08c34767a5405f30927bbac7a3c4fc71"];
+      };
+      cookie?: never;
+    };
+    requestBody: components["requestBodies"]["req_003"];
+    responses: {
+      200: components["responses"]["resp_027"];
+      401: components["responses"]["resp_069"];
+      403: components["responses"]["resp_055"];
+      404: components["responses"]["resp_003"];
+      422: components["responses"]["resp_045"];
+      500: components["responses"]["resp_022"];
+    };
+  };
+  "DELETE__api_v1_admin_auctions_{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the auction */
+        id: components["parameters"]["08c34767a5405f30927bbac7a3c4fc71"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: components["responses"]["resp_063"];
+      401: components["responses"]["resp_069"];
+      403: components["responses"]["resp_055"];
+      404: components["responses"]["resp_003"];
+      422: components["responses"]["resp_045"];
+      500: components["responses"]["resp_022"];
+    };
+  };
+  "PATCH__api_v1_admin_auctions_{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the auction */
+        id: components["parameters"]["08c34767a5405f30927bbac7a3c4fc71"];
+      };
+      cookie?: never;
+    };
+    requestBody: components["requestBodies"]["req_003"];
+    responses: {
+      200: components["responses"]["resp_027"];
+      401: components["responses"]["resp_069"];
+      403: components["responses"]["resp_055"];
+      404: components["responses"]["resp_003"];
+      422: components["responses"]["resp_045"];
+      500: components["responses"]["resp_022"];
+    };
+  };
+  "POST__api_v1_admin_auctions_{id}_extend_time": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description ID of the auction */
+        id: components["parameters"]["08c34767a5405f30927bbac7a3c4fc71"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: components["responses"]["resp_014"];
+      401: components["responses"]["resp_069"];
+      403: components["responses"]["resp_055"];
+      404: components["responses"]["resp_003"];
+      422: components["responses"]["resp_045"];
       500: components["responses"]["resp_022"];
     };
   };
@@ -4560,6 +4719,24 @@ export interface operations {
       401: components["responses"]["resp_042"];
       403: components["responses"]["resp_048"];
       422: components["responses"]["resp_052"];
+      500: components["responses"]["resp_022"];
+    };
+  };
+  "GET__api_v1_uploads_{signed_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Id of existing upload. */
+        signed_id: components["parameters"]["dd422988154b00c223c3f630b9ca2790"];
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      401: components["responses"]["resp_042"];
+      403: components["responses"]["resp_048"];
+      404: components["responses"]["resp_044"];
       500: components["responses"]["resp_022"];
     };
   };
