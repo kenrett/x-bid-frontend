@@ -7,7 +7,9 @@ export const logAdminAction = (action: string, payload?: Payload) => {
   const sendAudit = async () => {
     try {
       if (typeof window === "undefined") return; // skip during SSR/tests
-      await client.post("/api/v1/admin/audit", { action, payload });
+      await client.post("/api/v1/admin/audit", {
+        audit: { action, payload },
+      });
     } catch (error) {
       console.error("[admin:audit] failed to log action", error);
     }

@@ -21,8 +21,10 @@ describe("logAdminAction", () => {
     logAdminAction("test.action", { foo: "bar" });
     await vi.waitFor(() =>
       expect(mockedPost).toHaveBeenCalledWith("/api/v1/admin/audit", {
-        action: "test.action",
-        payload: { foo: "bar" },
+        audit: {
+          action: "test.action",
+          payload: { foo: "bar" },
+        },
       }),
     );
   });
