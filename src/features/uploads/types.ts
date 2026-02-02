@@ -23,6 +23,7 @@ export type UploadError = {
   message: string;
   retryable: boolean;
   status?: number;
+  responseBody?: unknown;
 };
 
 export type UploadResult = {

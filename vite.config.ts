@@ -68,6 +68,7 @@ const config: UserConfig & { test: VitestUserConfig["test"] } = {
   preview:
     process.env.VITE_E2E_TESTS === "true"
       ? {
+          allowedHosts: ["localhost", "lvh.me", ".lvh.me"],
           headers: (() => {
             const csp = readVercelCspHeader();
             return csp ? { "Content-Security-Policy": csp } : undefined;

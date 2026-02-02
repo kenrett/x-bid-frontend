@@ -62,7 +62,7 @@ describe("FileUploadField", () => {
 
   it("surfaces upload failures and allows retry", async () => {
     const upload = vi
-      .fn()
+      .fn<UploadAdapter["upload"]>()
       .mockRejectedValueOnce({
         code: "network",
         message: "Network interruption detected.",
@@ -83,7 +83,7 @@ describe("FileUploadField", () => {
       await screen.findByText(/network interruption detected/i),
     ).toBeInTheDocument();
 
-    const retry = screen.getByRole("button", { name: /retry upload/i });
+    const retry = screen.getByRole("button", { name: /try again/i });
     await user.click(retry);
     await waitFor(() => expect(upload).toHaveBeenCalledTimes(2));
   });
@@ -91,7 +91,7 @@ describe("FileUploadField", () => {
   it("clears the error after a successful retry", async () => {
     vi.useFakeTimers();
     const upload = vi
-      .fn()
+      .fn<UploadAdapter["upload"]>()
       .mockRejectedValueOnce({
         code: "server",
         message: "Server error.",
@@ -109,7 +109,7 @@ describe("FileUploadField", () => {
     await user.upload(input, file);
     expect(await screen.findByRole("alert")).toHaveTextContent(/server error/i);
 
-    const retry = screen.getByRole("button", { name: /retry upload/i });
+    const retry = screen.getByRole("button", { name: /try again/i });
     await user.click(retry);
     await vi.runAllTimersAsync();
 
@@ -120,8 +120,8 @@ describe("FileUploadField", () => {
   });
 
   it("allows cancelling and removing a pending upload", async () => {
-    const upload = vi.fn(
-      ({ signal }: { signal?: AbortSignal }) =>
+    const upload = vi.fn<UploadAdapter["upload"]>(
+      ({ signal }) =>
         new Promise((_, reject) => {
           signal?.addEventListener("abort", () => {
             reject({
