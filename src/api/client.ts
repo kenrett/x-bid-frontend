@@ -59,6 +59,9 @@ const resolveRuntimeApiBase = (): string | undefined => {
 const normalizeBase = (value: string | undefined): string | undefined => {
   if (!value) return undefined;
   const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.toLowerCase() === "undefined") return undefined;
+  if (trimmed.toLowerCase() === "null") return undefined;
   return trimmed.replace(/\/+$/, "") || undefined;
 };
 

@@ -89,7 +89,6 @@ describe("FileUploadField", () => {
   });
 
   it("clears the error after a successful retry", async () => {
-    vi.useFakeTimers();
     const upload = vi
       .fn<UploadAdapter["upload"]>()
       .mockRejectedValueOnce({
@@ -101,7 +100,7 @@ describe("FileUploadField", () => {
 
     const adapter: UploadAdapter = { upload };
     renderField(adapter);
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup();
 
     const input = screen.getByLabelText("Upload image") as HTMLInputElement;
     const file = new File(["test"], "image.png", { type: "image/png" });
@@ -111,12 +110,11 @@ describe("FileUploadField", () => {
 
     const retry = screen.getByRole("button", { name: /try again/i });
     await user.click(retry);
-    await vi.runAllTimersAsync();
 
-    expect(upload).toHaveBeenCalledTimes(2);
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-
-    vi.useRealTimers();
+    await waitFor(() => expect(upload).toHaveBeenCalledTimes(2));
+    await waitFor(() =>
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument(),
+    );
   });
 
   it("allows cancelling and removing a pending upload", async () => {
@@ -140,7 +138,7 @@ describe("FileUploadField", () => {
     const input = screen.getByLabelText("Upload image") as HTMLInputElement;
     const file = new File(["test"], "image.png", { type: "image/png" });
 
-    await user.upload(input, file);
+    void user.upload(input, file);
     const cancel = await screen.findByRole("button", {
       name: /cancel upload/i,
     });
