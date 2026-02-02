@@ -958,6 +958,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/auth/debug": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Report auth header/cookie presence for the current request
+     * @description GET /api/v1/auth/debug
+     */
+    get: operations["GET__api_v1_auth_debug"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/bid_packs": {
     parameters: {
       query?: never;
@@ -1514,6 +1534,26 @@ export interface paths {
     put?: never;
     /** Create */
     post: operations["POST__api_v1_stripe_webhooks"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/uploads": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create
+     * @description POST /api/v1/uploads
+     */
+    post: operations["POST__api_v1_uploads"];
     delete?: never;
     options?: never;
     head?: never;
@@ -4067,6 +4107,21 @@ export interface operations {
       500: components["responses"]["resp_022"];
     };
   };
+  GET__api_v1_auth_debug: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      401: components["responses"]["resp_042"];
+      403: components["responses"]["resp_048"];
+      404: components["responses"]["resp_044"];
+      500: components["responses"]["resp_022"];
+    };
+  };
   GET__api_v1_bid_packs: {
     parameters: {
       query?: never;
@@ -4479,6 +4534,21 @@ export interface operations {
     };
   };
   POST__api_v1_stripe_webhooks: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      401: components["responses"]["resp_042"];
+      403: components["responses"]["resp_048"];
+      422: components["responses"]["resp_052"];
+      500: components["responses"]["resp_022"];
+    };
+  };
+  POST__api_v1_uploads: {
     parameters: {
       query?: never;
       header?: never;
