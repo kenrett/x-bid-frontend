@@ -19,7 +19,12 @@ const applyEnv = (overrides: Record<string, unknown>) => {
 
 const setHostname = (hostname: string) => {
   Object.defineProperty(window, "location", {
-    value: { ...window.location, hostname },
+    value: {
+      ...window.location,
+      hostname,
+      host: hostname,
+      origin: `https://${hostname}`,
+    },
     writable: true,
   });
 };
@@ -67,5 +72,44 @@ describe("api client", () => {
 
     expect(headerValue).toBe("marketplace");
     expect(config.withCredentials).toBe(true);
+  });
+
+  it("uses runtime API base for biddersweet hostnames and includes credentials", async () => {
+    applyEnv({
+      VITE_API_BASE_URL: undefined,
+      VITE_STOREFRONT_KEY: "",
+    });
+    setHostname("afterdark.biddersweet.app");
+    vi.resetModules();
+    client = (await import("./client")).default;
+    originalAdapter = client.defaults.adapter;
+
+    const adapter = vi.fn(async (config) => {
+      const isCsrf =
+        typeof config.url === "string" && config.url.includes("/api/v1/csrf");
+      return {
+        data: isCsrf ? { csrf_token: "token" } : {},
+        status: 200,
+        statusText: "OK",
+        headers: {},
+        config,
+      };
+    });
+
+    client.defaults.adapter = adapter as typeof originalAdapter;
+    await client.post("/api/v1/uploads", {});
+
+    const uploadConfig = adapter.mock.calls
+      .map((call) => call[0])
+      .find(
+        (config) =>
+          typeof config.url === "string" &&
+          config.url.includes("/api/v1/uploads"),
+      );
+
+    if (!uploadConfig) throw new Error("upload request not captured");
+
+    expect(uploadConfig.url).toBe("https://api.biddersweet.app/api/v1/uploads");
+    expect(uploadConfig.withCredentials).toBe(true);
   });
 });
