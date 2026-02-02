@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { showToast } from "@services/toast";
+import { useAuth } from "@features/auth/hooks/useAuth";
 import type { UploadAdapter, UploadConstraints, UploadError } from "../types";
 import { normalizeUploadError } from "../uploadErrors";
 import { validateUploadFile } from "../uploadValidation";
@@ -40,6 +41,7 @@ export const FileUploadField = ({
   allowUrlPreview = true,
   ariaDescriptionId,
 }: FileUploadFieldProps) => {
+  const { user } = useAuth();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const abortReasonRef = useRef<"timeout" | "cancelled" | null>(null);
@@ -96,6 +98,24 @@ export const FileUploadField = ({
     setStatus("validating");
     setAttempt(0);
     setMaxAttempts(attempts);
+
+    if (!user) {
+      const authError: UploadError = {
+        code: "auth_required",
+        message: "Please log in to upload.",
+        retryable: false,
+      };
+      setError(authError);
+      setStatus("error");
+      setProgress(null);
+      logUploadEvent("upload_error", {
+        error: authError,
+        fileName: file.name,
+        byteSize: file.size,
+      });
+      showToast(authError.message, "error");
+      return;
+    }
 
     const validationError = await validateUploadFile(file, constraints);
     if (validationError) {

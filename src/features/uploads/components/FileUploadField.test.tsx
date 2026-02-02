@@ -1,16 +1,31 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FileUploadField } from "./FileUploadField";
 import type { UploadAdapter } from "../types";
+import { useAuth } from "@features/auth/hooks/useAuth";
 
 vi.mock("@services/toast", () => ({ showToast: vi.fn() }));
+vi.mock("@features/auth/hooks/useAuth");
+
+const mockedUseAuth = vi.mocked(useAuth);
 
 const constraints = {
   accept: ["image/png", "image/jpeg"],
   maxBytes: 1024 * 1024,
   guidance: "Test guidance",
 };
+
+const createAuthReturn = (user: Record<string, unknown> | null = {}) =>
+  ({
+    user,
+    isReady: true,
+    login: vi.fn(),
+    logout: vi.fn(),
+    updateUser: vi.fn(),
+    updateUserBalance: vi.fn(),
+    sessionRemainingSeconds: null,
+  }) as unknown as ReturnType<typeof useAuth>;
 
 const renderField = (adapter: UploadAdapter) =>
   render(
@@ -25,6 +40,10 @@ const renderField = (adapter: UploadAdapter) =>
   );
 
 describe("FileUploadField", () => {
+  beforeEach(() => {
+    mockedUseAuth.mockReturnValue(createAuthReturn({ id: 1 }));
+  });
+
   it("shows a validation error for unsupported file types", async () => {
     const adapter: UploadAdapter = {
       upload: vi.fn().mockResolvedValue({ url: "https://example.com/file" }),
@@ -152,5 +171,24 @@ describe("FileUploadField", () => {
     await user.click(remove);
 
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("blocks uploads when logged out", async () => {
+    mockedUseAuth.mockReturnValue(createAuthReturn(null));
+    const adapter: UploadAdapter = {
+      upload: vi.fn().mockResolvedValue({ url: "https://example.com/file" }),
+    };
+
+    renderField(adapter);
+    const user = userEvent.setup();
+    const input = screen.getByLabelText("Upload image") as HTMLInputElement;
+    const file = new File(["test"], "image.png", { type: "image/png" });
+
+    await user.upload(input, file);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /please log in to upload/i,
+    );
+    expect(adapter.upload).not.toHaveBeenCalled();
   });
 });
