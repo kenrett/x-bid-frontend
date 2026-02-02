@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FileUploadField } from "./FileUploadField";
 import type { UploadAdapter } from "../types";
+
+vi.mock("@services/toast", () => ({ showToast: vi.fn() }));
 
 const constraints = {
   accept: ["image/png", "image/jpeg"],
@@ -83,7 +85,74 @@ describe("FileUploadField", () => {
 
     const retry = screen.getByRole("button", { name: /retry upload/i });
     await user.click(retry);
+    await waitFor(() => expect(upload).toHaveBeenCalledTimes(2));
+  });
+
+  it("clears the error after a successful retry", async () => {
+    vi.useFakeTimers();
+    const upload = vi
+      .fn()
+      .mockRejectedValueOnce({
+        code: "server",
+        message: "Server error.",
+        retryable: true,
+      })
+      .mockResolvedValueOnce({ url: "https://example.com/file" });
+
+    const adapter: UploadAdapter = { upload };
+    renderField(adapter);
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+
+    const input = screen.getByLabelText("Upload image") as HTMLInputElement;
+    const file = new File(["test"], "image.png", { type: "image/png" });
+
+    await user.upload(input, file);
+    expect(await screen.findByRole("alert")).toHaveTextContent(/server error/i);
+
+    const retry = screen.getByRole("button", { name: /retry upload/i });
+    await user.click(retry);
+    await vi.runAllTimersAsync();
 
     expect(upload).toHaveBeenCalledTimes(2);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    vi.useRealTimers();
+  });
+
+  it("allows cancelling and removing a pending upload", async () => {
+    const upload = vi.fn(
+      ({ signal }: { signal?: AbortSignal }) =>
+        new Promise((_, reject) => {
+          signal?.addEventListener("abort", () => {
+            reject({
+              code: "cancelled",
+              message: "Upload cancelled.",
+              retryable: true,
+            });
+          });
+        }),
+    );
+
+    const adapter: UploadAdapter = { upload };
+    renderField(adapter);
+    const user = userEvent.setup();
+
+    const input = screen.getByLabelText("Upload image") as HTMLInputElement;
+    const file = new File(["test"], "image.png", { type: "image/png" });
+
+    await user.upload(input, file);
+    const cancel = await screen.findByRole("button", {
+      name: /cancel upload/i,
+    });
+    await user.click(cancel);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /upload cancelled/i,
+    );
+
+    const remove = screen.getByRole("button", { name: /remove file/i });
+    await user.click(remove);
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });

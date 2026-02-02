@@ -21,8 +21,17 @@ export const normalizeUploadError = (error: unknown): UploadError => {
   if (normalized.status === 413) {
     return {
       code: "payload_too_large",
-      message: "The file is larger than the upload limit.",
-      retryable: true,
+      message: normalized.message,
+      retryable: false,
+      status: normalized.status,
+    };
+  }
+
+  if (normalized.status === 422) {
+    return {
+      code: "invalid_type",
+      message: normalized.message,
+      retryable: false,
       status: normalized.status,
     };
   }
@@ -50,6 +59,15 @@ export const normalizeUploadError = (error: unknown): UploadError => {
       code: "network",
       message:
         "Network interruption detected. Check your connection and retry.",
+      retryable: true,
+      status: normalized.status,
+    };
+  }
+
+  if (normalized.code === "timeout") {
+    return {
+      code: "timeout",
+      message: "Upload timed out. Please try again.",
       retryable: true,
       status: normalized.status,
     };

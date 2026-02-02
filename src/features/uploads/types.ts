@@ -13,6 +13,8 @@ export type UploadErrorCode =
   | "auth_required"
   | "forbidden"
   | "network"
+  | "timeout"
+  | "cancelled"
   | "server"
   | "unknown";
 

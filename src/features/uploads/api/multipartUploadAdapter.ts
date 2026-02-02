@@ -1,19 +1,45 @@
 import client from "@api/client";
+import { getStorefrontKey } from "../../../storefront/storefront";
 import type { UploadAdapter, UploadError, UploadResult } from "../types";
 
 const DEFAULT_FIELD = "file";
+const MAX_STRING_LENGTH = 600;
+const MAX_ARRAY_ITEMS = 12;
+const MAX_OBJECT_KEYS = 12;
 
 const pickUploadUrl = (data: unknown): string | undefined => {
   if (!data || typeof data !== "object") return undefined;
   const record = data as Record<string, unknown>;
-  const candidates = [
-    record.url,
-    record.file_url,
-    record.image_url,
-    record.upload_url,
-  ];
-  const match = candidates.find((value) => typeof value === "string");
-  return match as string | undefined;
+  return typeof record.url === "string" ? record.url : undefined;
+};
+
+const redactValue = (value: unknown): unknown => {
+  if (typeof value === "string") {
+    if (value.length <= MAX_STRING_LENGTH) return value;
+    return `${value.slice(0, MAX_STRING_LENGTH)}… (${value.length} chars)`;
+  }
+
+  if (Array.isArray(value)) {
+    const trimmed = value.slice(0, MAX_ARRAY_ITEMS).map(redactValue);
+    return value.length > MAX_ARRAY_ITEMS
+      ? [...trimmed, `… (${value.length - MAX_ARRAY_ITEMS} more)`]
+      : trimmed;
+  }
+
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    const entries = Object.entries(record).slice(0, MAX_OBJECT_KEYS);
+    const result: Record<string, unknown> = {};
+    entries.forEach(([key, entryValue]) => {
+      result[key] = redactValue(entryValue);
+    });
+    if (Object.keys(record).length > MAX_OBJECT_KEYS) {
+      result.__truncated = `… (${Object.keys(record).length - MAX_OBJECT_KEYS} more keys)`;
+    }
+    return result;
+  }
+
+  return value;
 };
 
 export const createMultipartUploadAdapter = (options: {
@@ -36,6 +62,15 @@ export const createMultipartUploadAdapter = (options: {
         });
       }
 
+      if (import.meta.env.DEV) {
+        console.info("[upload] request", {
+          storefront: getStorefrontKey(),
+          endpoint: options.endpoint,
+          file_name: file.name,
+          byte_size: file.size,
+        });
+      }
+
       const response = await client.post(options.endpoint, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -54,6 +89,7 @@ export const createMultipartUploadAdapter = (options: {
           code: "unknown",
           message: "Upload succeeded but no URL was returned.",
           retryable: false,
+          responseBody: redactValue(response.data),
         } satisfies UploadError;
       }
 
