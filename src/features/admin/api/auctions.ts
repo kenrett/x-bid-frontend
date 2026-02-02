@@ -22,8 +22,10 @@ export const createAuction = async (
   const res = await client.post<AdminAuctionResponse>(
     "/api/v1/admin/auctions",
     {
-      ...payload,
-      status: statusToApi(payload.status),
+      auction: {
+        ...payload,
+        status: statusToApi(payload.status),
+      },
     },
   );
   const data =
@@ -39,8 +41,10 @@ export const updateAuction = async (
   const res = await client.put<AdminAuctionResponse>(
     `/api/v1/admin/auctions/${id}`,
     {
-      ...updates,
-      status: statusToApi(updates.status),
+      auction: {
+        ...updates,
+        status: statusToApi(updates.status),
+      },
     },
   );
   const data =

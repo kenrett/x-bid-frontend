@@ -45,8 +45,10 @@ describe("api/admin/auctions", () => {
     const result = await createAuction({ title: "Auction", status: "active" });
 
     expect(clientMocks.post).toHaveBeenCalledWith("/api/v1/admin/auctions", {
-      title: "Auction",
-      status: "to:active",
+      auction: {
+        title: "Auction",
+        status: "to:active",
+      },
     });
     expect(statusMocks.fromApi).toHaveBeenCalledWith("active");
     expect(result).toEqual({
@@ -62,7 +64,9 @@ describe("api/admin/auctions", () => {
     const result = await updateAuction(5, { status: "active" });
 
     expect(clientMocks.put).toHaveBeenCalledWith("/api/v1/admin/auctions/5", {
-      status: "to:active",
+      auction: {
+        status: "to:active",
+      },
     });
     expect(result.status).toBe("from:active");
     expect(result.current_price).toBe(12.5);
