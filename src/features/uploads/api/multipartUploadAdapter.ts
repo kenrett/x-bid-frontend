@@ -10,6 +10,7 @@ const MAX_OBJECT_KEYS = 12;
 const pickUploadUrl = (data: unknown): string | undefined => {
   if (!data || typeof data !== "object") return undefined;
   const record = data as Record<string, unknown>;
+  if (typeof record.public_url === "string") return record.public_url;
   return typeof record.url === "string" ? record.url : undefined;
 };
 
