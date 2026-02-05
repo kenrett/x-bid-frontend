@@ -155,30 +155,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  "/api/v1/account/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get the latest account export status
-     * @description GET /api/v1/account/data/export
-     */
-    get: operations["GET__api_v1_account_export"];
-    put?: never;
-    /**
-     * Request an account export (MVP)
-     * @description POST /api/v1/account/data/export
-     */
-    post: operations["POST__api_v1_account_export"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
   "/api/v1/account/export/download": {
     parameters: {
       query?: never;
@@ -3248,38 +3224,6 @@ export interface operations {
       403: components["responses"]["resp_048"];
       422: components["responses"]["resp_017"];
       429: components["responses"]["resp_065"];
-      500: components["responses"]["resp_022"];
-    };
-  };
-  GET__api_v1_account_export: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: components["responses"]["resp_053"];
-      401: components["responses"]["resp_069"];
-      403: components["responses"]["resp_048"];
-      404: components["responses"]["resp_044"];
-      500: components["responses"]["resp_022"];
-    };
-  };
-  POST__api_v1_account_export: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      202: components["responses"]["resp_031"];
-      401: components["responses"]["resp_069"];
-      403: components["responses"]["resp_048"];
-      422: components["responses"]["resp_052"];
       500: components["responses"]["resp_022"];
     };
   };
