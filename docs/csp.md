@@ -1,38 +1,33 @@
 # Content Security Policy (CSP)
 
-The CSP is defined in `vercel.json` and is intentionally strict (no `unsafe-inline`).
+This app uses an environment-aware CSP:
 
-## Why each allowed domain exists
+- Development: allows localhost + ws://localhost for Vite dev server and HMR.
+- Production: strict, no localhost entries.
 
-- `default-src 'self'`
-  - Disallow all third-party loads unless explicitly allowed.
+## Source of truth
 
-- `script-src 'self' https://js.stripe.com` and `script-src-elem 'self' https://js.stripe.com`
-  - `https://js.stripe.com` is required for Stripe’s loader (`/v3`) used by checkout.
+The canonical CSP definition lives in `src/config/csp.ts` and is used by:
 
-- `style-src 'self'`
-  - All styles are bundled and served from our origin.
+- Vite dev server headers (development CSP).
+- Vite preview headers (production CSP for e2e/smoke).
+- Tests that ensure `vercel.json` stays aligned with production CSP.
 
-- `connect-src 'self' ...`
-  - `https://api.biddersweet.app` and `wss://api.biddersweet.app` for production API + ActionCable.
-  - `http://localhost:3000` and `ws://localhost:3000` for local backend development.
-  - `https://api.stripe.com`, `https://m.stripe.network`, `https://hooks.stripe.com` for Stripe checkout API + telemetry flows.
+`vercel.json` must match the production CSP because Vercel headers are static at deploy time.
 
-- `img-src 'self' data: blob: https://api.biddersweet.app http://localhost:3000 https://robohash.org`
-  - App images, data URLs, object URL previews, API-hosted uploads, and robohash avatars.
+## Updating allowed origins
 
-- `frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com`
-  - Stripe-hosted iframes needed for embedded checkout.
+1. Edit `src/config/csp.ts`:
+   - Add new allowed origins to the relevant directive list.
+   - Keep dev-only allowances inside the `env === "development"` blocks.
+2. Update `vercel.json`:
+   - Replace the `Content-Security-Policy` value with the output of
+     `getCsp({ env: "production" })`.
+3. Run tests:
+   - `npm test` should pass and confirm no localhost entries in production.
 
-- `frame-ancestors 'none'`
-  - Prevent clickjacking by disallowing embedding.
+## Notes
 
-- `base-uri 'none'`
-  - Prevent base tag injection.
-
-- `form-action 'self'`
-  - Restrict form submissions to our origin.
-
-## Adding a new third party
-
-Before adding any new CSP host, identify exactly which directive needs it (`script-src`, `connect-src`, `frame-src`, etc.) and document the justification here.
+- `connect-src` includes the API origin, websocket origin, Stripe endpoints, and Cloudflare Insights.
+- `img-src` includes data/blob URLs, the API origin, and robohash.
+- If you introduce a CDN or new external asset host, add it to `img-src` (and `connect-src` if needed).

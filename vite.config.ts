@@ -1,36 +1,14 @@
 /// <reference types="vitest" />
 
-import { defineConfig, type UserConfig } from "vite";
+import { defineConfig, loadEnv, type UserConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "path";
-import fs from "node:fs";
 import type { UserConfig as VitestUserConfig } from "vitest/config";
 import { visualizer } from "rollup-plugin-visualizer";
+import { getCsp } from "./src/config/csp";
 
-const readVercelCspHeader = (): string | null => {
-  try {
-    const raw = fs.readFileSync(resolve(__dirname, "vercel.json"), "utf8");
-    const parsed = JSON.parse(raw) as {
-      headers?: Array<{
-        source?: string;
-        headers?: Array<{ key?: string; value?: string }>;
-      }>;
-    };
-    const allHeaders = parsed.headers ?? [];
-    for (const entry of allHeaders) {
-      const header = entry.headers?.find(
-        (h) => h.key === "Content-Security-Policy",
-      );
-      if (header?.value) return header.value;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-};
-
-const config: UserConfig & { test: VitestUserConfig["test"] } = {
+const baseConfig: UserConfig & { test: VitestUserConfig["test"] } = {
   plugins: [
     react(),
     tailwindcss(),
@@ -61,20 +39,6 @@ const config: UserConfig & { test: VitestUserConfig["test"] } = {
   build: {
     sourcemap: true,
   },
-  server: {
-    host: true,
-    allowedHosts: ["lvh.me", "localhost"],
-  },
-  preview:
-    process.env.VITE_E2E_TESTS === "true"
-      ? {
-          allowedHosts: ["localhost", "lvh.me", ".lvh.me"],
-          headers: (() => {
-            const csp = readVercelCspHeader();
-            return csp ? { "Content-Security-Policy": csp } : undefined;
-          })(),
-        }
-      : undefined,
   test: {
     globals: true,
     environment: "jsdom",
@@ -114,4 +78,29 @@ const config: UserConfig & { test: VitestUserConfig["test"] } = {
 };
 
 // https://vite.dev/config/
-export default defineConfig(config);
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  const csp = getCsp({
+    env: mode === "development" ? "development" : "production",
+    apiBaseUrl: env.VITE_API_BASE_URL,
+    cableUrl: env.VITE_CABLE_URL,
+  });
+
+  return {
+    ...baseConfig,
+    server: {
+      host: true,
+      allowedHosts: ["lvh.me", "localhost"],
+      headers: { "Content-Security-Policy": csp },
+    },
+    preview:
+      env.VITE_E2E_TESTS === "true"
+        ? {
+            allowedHosts: ["localhost", "lvh.me", ".lvh.me"],
+            headers: {
+              "Content-Security-Policy": getCsp({ env: "production" }),
+            },
+          }
+        : undefined,
+  };
+});
