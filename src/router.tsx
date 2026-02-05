@@ -57,6 +57,13 @@ export const routes: RouteObject[] = [
         ),
       },
       {
+        path: "/verify-email",
+        lazy: lazy(
+          () => import("@features/account/components/VerifyEmailPage"),
+          "VerifyEmailPage",
+        ),
+      },
+      {
         path: "/wallet",
         element: <Navigate to="/account/wallet" replace />,
       },

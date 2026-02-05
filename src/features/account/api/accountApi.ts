@@ -16,6 +16,7 @@ export const ACCOUNT_ENDPOINTS = {
   security: "/api/v1/account/security",
   password: "/api/v1/account/password",
   resendEmailVerification: "/api/v1/email_verifications/resend",
+  verifyEmail: "/api/v1/email_verifications/verify",
   sessions: "/api/v1/account/sessions",
   revokeOtherSessions: "/api/v1/account/sessions/revoke_others",
   notifications: "/api/v1/account/notifications",
@@ -394,6 +395,21 @@ export const accountApi = {
       ACCOUNT_ENDPOINTS.resendEmailVerification,
       () => client.post(ACCOUNT_ENDPOINTS.resendEmailVerification, {}),
     );
+  },
+
+  async verifyEmail(
+    token: string,
+  ): Promise<{ status: "verified" | "already_verified" }> {
+    const response = await requestAccountApi(
+      "GET",
+      ACCOUNT_ENDPOINTS.verifyEmail,
+      () => client.get(ACCOUNT_ENDPOINTS.verifyEmail, { params: { token } }),
+    );
+    const record = asRecord(response.data) ?? {};
+    const status = readString(record.status) ?? "verified";
+    return {
+      status: status === "already_verified" ? "already_verified" : "verified",
+    };
   },
 
   async listSessions(): Promise<AccountSession[]> {

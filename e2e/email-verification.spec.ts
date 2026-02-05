@@ -98,3 +98,16 @@ test("403 email_unverified routes to verify-email with guidance", async ({
     page.getByRole("heading", { name: /verify your email/i }),
   ).toBeVisible();
 });
+
+test("verify email link shows success state", async ({ page }) => {
+  await page.route("**/api/v1/email_verifications/verify**", (route) =>
+    fulfillJson(route, { status: "verified" }),
+  );
+
+  await page.goto("/verify-email?token=valid-token");
+
+  await expect(
+    page.getByRole("heading", { name: /email verified/i }),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: /go to login/i })).toBeVisible();
+});
