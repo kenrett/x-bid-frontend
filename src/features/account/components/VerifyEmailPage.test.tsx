@@ -1,12 +1,17 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
-import client from "@api/client";
 import { VerifyEmailPage } from "./VerifyEmailPage";
+import { accountApi } from "@features/account/api/accountApi";
 
-vi.mock("@api/client");
+vi.mock("@features/account/api/accountApi", () => ({
+  accountApi: {
+    verifyEmail: vi.fn(),
+    resendEmailVerification: vi.fn(),
+  },
+}));
 
-const mockedClient = vi.mocked(client, true);
+const mockedAccountApi = vi.mocked(accountApi, true);
 
 const renderPage = (initialEntry = "/verify-email?token=token123") =>
   render(
@@ -21,7 +26,7 @@ describe("VerifyEmailPage", () => {
   });
 
   it("renders loading then success", async () => {
-    mockedClient.get.mockResolvedValue({ data: { status: "verified" } });
+    mockedAccountApi.verifyEmail.mockResolvedValue({ status: "verified" });
 
     renderPage();
     expect(screen.getByText(/verifying your email/i)).toBeInTheDocument();
@@ -32,7 +37,7 @@ describe("VerifyEmailPage", () => {
   });
 
   it("renders an error message when verification fails", async () => {
-    mockedClient.get.mockRejectedValue({
+    mockedAccountApi.verifyEmail.mockRejectedValue({
       isAxiosError: true,
       response: {
         status: 422,
@@ -55,7 +60,7 @@ describe("VerifyEmailPage", () => {
     expect(alert).toHaveTextContent(/token is missing/i);
 
     await waitFor(() => {
-      expect(mockedClient.get).not.toHaveBeenCalled();
+      expect(mockedAccountApi.verifyEmail).not.toHaveBeenCalled();
     });
   });
 });
