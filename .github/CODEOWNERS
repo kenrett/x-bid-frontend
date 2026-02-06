@@ -1,0 +1,13 @@
+# Default owner
+* @kenrett
+
+# CI / deployment / automation
+.github/workflows/* @kenrett
+vercel.json @kenrett
+
+# Security-sensitive app surfaces
+src/lib/api/** @kenrett
+src/auth/** @kenrett
+src/pages/admin/** @kenrett
+src/components/checkout/** @kenrett
+src/components/wallet/** @kenrett
