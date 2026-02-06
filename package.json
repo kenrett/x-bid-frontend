@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
-    "@rails/actioncable": "^8.0.300",
+    "@rails/actioncable": "^8.1.200",
     "@sentry/react": "^8.24.1",
     "@stripe/react-stripe-js": "^5.3.0",
     "@tailwindcss/vite": "^4.1.13",
@@ -45,7 +45,7 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.5.2",
-    "@types/rails__actioncable": "^6.1.11",
+    "@types/rails__actioncable": "^8.0.3",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.0.4",
