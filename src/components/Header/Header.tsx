@@ -93,6 +93,7 @@ export function Header() {
   const isSuperAdmin = Boolean(user?.is_superuser);
   const isAdmin = Boolean(user?.is_admin || isSuperAdmin);
   const apiBase = import.meta.env.VITE_API_BASE_URL;
+  const isProduction = import.meta.env.PROD;
   const isAccountMode = appMode === "account";
   const navItems = isAccountMode
     ? [
@@ -117,10 +118,10 @@ export function Header() {
       isAdmin && !isAccountMode
         ? [
             { name: "Admin", href: "/admin/auctions" },
-            { name: "API Docs", href: apiDocsHref },
+            ...(isProduction ? [] : [{ name: "API Docs", href: apiDocsHref }]),
           ]
         : [],
-    [isAdmin, isAccountMode, apiDocsHref],
+    [isAdmin, isAccountMode, apiDocsHref, isProduction],
   );
   const accountNavItems = useMemo(
     () =>
