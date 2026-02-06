@@ -218,6 +218,13 @@ describe("OpenAPI contract drift", () => {
     expect(
       loginFields.has("password") || loginFields.has("session.password"),
     ).toBe(true);
+    expect(loginFields.has("otp") || loginFields.has("session.otp")).toBe(true);
+    expect(
+      loginFields.has("recovery_code") ||
+        loginFields.has("recoveryCode") ||
+        loginFields.has("session.recovery_code") ||
+        loginFields.has("session.recoveryCode"),
+    ).toBe(true);
 
     const signupFields = collectPropertyPaths(openapiSchema, signupSchema);
     expect(

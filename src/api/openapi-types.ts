@@ -2094,24 +2094,31 @@ export interface components {
       session_expires_at: string | null;
       user: components["schemas"]["User"];
     };
-    /** @description Login payload accepted by /api/v1/login (nested or flat). */
+    /** @description Login payload accepted by /api/v1/login (nested or flat), with optional 2FA code fields. */
     LoginRequest:
       | {
           session: {
             /** Format: email */
             email_address: string;
+            otp?: string;
             password: string;
+            recoveryCode?: string;
+            recovery_code?: string;
           };
         }
       | {
           /** Format: email */
           email_address: string;
+          otp?: string;
           password: string;
+          recovery_code?: string;
         }
       | {
           /** Format: email */
           emailAddress: string;
+          otp?: string;
           password: string;
+          recoveryCode?: string;
         };
     MaintenanceToggle: {
       enabled: boolean;
