@@ -51,7 +51,7 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         id: backend-run
         # v7
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         env:
           BACKEND_REPO: ${{ env.BACKEND_REPO }}
           BACKEND_OPENAPI_ARTIFACT_NAME: ${{ env.BACKEND_OPENAPI_ARTIFACT_NAME }}
@@ -117,7 +117,7 @@ jobs:
       - name: Find backend OpenAPI artifact run (main)
         id: backend-run-main
         # v7
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         env:
           BACKEND_REPO: ${{ env.BACKEND_REPO }}
           BACKEND_OPENAPI_ARTIFACT_NAME: ${{ env.BACKEND_OPENAPI_ARTIFACT_NAME }}
