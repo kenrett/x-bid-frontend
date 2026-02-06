@@ -100,6 +100,121 @@ describe("LoginForm", () => {
     expect(persisted).toBeNull();
   });
 
+  it("prompts for OTP when backend requires 2FA and retries login with otp", async () => {
+    mockedClient.post
+      .mockRejectedValueOnce({
+        isAxiosError: true,
+        response: {
+          status: 401,
+          data: {
+            error: {
+              code: "two_factor_required",
+              message: "Two-factor authentication required",
+            },
+          },
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          user: {
+            id: 1,
+            name: "Test User",
+            email: "test@example.com",
+            bidCredits: 0,
+            is_admin: false,
+            is_superuser: false,
+          },
+        },
+      });
+
+    const user = userEvent.setup();
+    renderLogin();
+
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "test@example.com",
+    );
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /^sign in$/i }));
+
+    expect(
+      await screen.findByText(/two-factor authentication required/i),
+    ).toBeInTheDocument();
+    await user.type(screen.getByLabelText(/authenticator code/i), "123456");
+    await user.click(
+      screen.getByRole("button", { name: /verify and sign in/i }),
+    );
+
+    expect(await screen.findByText("AUCTIONS")).toBeInTheDocument();
+    expect(mockedClient.post).toHaveBeenNthCalledWith(
+      2,
+      "/api/v1/login",
+      {
+        email_address: "test@example.com",
+        password: "password123",
+        otp: "123456",
+      },
+      { __debugLogin: true },
+    );
+  });
+
+  it("allows recovery code mode and submits recovery_code", async () => {
+    mockedClient.post
+      .mockRejectedValueOnce({
+        isAxiosError: true,
+        response: {
+          status: 401,
+          data: {
+            error: {
+              code: "two_factor_required",
+              message: "Two-factor authentication required",
+            },
+          },
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          user: {
+            id: 1,
+            name: "Test User",
+            email: "test@example.com",
+            bidCredits: 0,
+            is_admin: false,
+            is_superuser: false,
+          },
+        },
+      });
+
+    const user = userEvent.setup();
+    renderLogin();
+
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "test@example.com",
+    );
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /^sign in$/i }));
+
+    await user.click(
+      screen.getByRole("button", { name: /use recovery code/i }),
+    );
+    await user.type(screen.getByLabelText(/recovery code/i), "ABCD-1234");
+    await user.click(
+      screen.getByRole("button", { name: /verify and sign in/i }),
+    );
+
+    expect(mockedClient.post).toHaveBeenNthCalledWith(
+      2,
+      "/api/v1/login",
+      {
+        email_address: "test@example.com",
+        password: "password123",
+        recovery_code: "ABCD-1234",
+      },
+      { __debugLogin: true },
+    );
+  });
+
   it("navigates to redirect URL when present", async () => {
     mockedClient.post.mockResolvedValueOnce({
       data: {

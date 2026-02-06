@@ -11,36 +11,9 @@ import {
   isDebugAuthEnabled,
   shouldLogLoginDiagnostics,
 } from "../../../../debug/authDebug";
-import { saveTwoFactorChallenge } from "@features/auth/twoFactorStorage";
 
 const isUnexpectedAuthResponseError = (err: unknown) =>
   err instanceof Error && err.message.startsWith("Unexpected auth response:");
-
-const extractTwoFactorChallenge = (payload: unknown) => {
-  if (!payload || typeof payload !== "object") return null;
-  const record = payload as Record<string, unknown>;
-  const requires2fa =
-    record.two_factor_required === true ||
-    record.requires_2fa === true ||
-    record.mfa_required === true;
-  const challengeId =
-    typeof record.challenge_id === "string"
-      ? record.challenge_id
-      : typeof record.two_factor_challenge_id === "string"
-        ? record.two_factor_challenge_id
-        : typeof record.otp_challenge_id === "string"
-          ? record.otp_challenge_id
-          : null;
-  if (!challengeId && !requires2fa) return null;
-  if (!challengeId) return null;
-  const email =
-    typeof record.email_address === "string"
-      ? record.email_address
-      : typeof record.email === "string"
-        ? record.email
-        : null;
-  return { challengeId, email };
-};
 
 export const LoginForm = () => {
   const [email_address, setEmailAddress] = useState("");
@@ -49,6 +22,9 @@ export const LoginForm = () => {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
+  const [twoFactorRequired, setTwoFactorRequired] = useState(false);
+  const [twoFactorMode, setTwoFactorMode] = useState<"otp" | "recovery">("otp");
+  const [twoFactorCode, setTwoFactorCode] = useState("");
   const formRef = useRef<HTMLFormElement | null>(null);
   const errorRef = useRef<HTMLParagraphElement | null>(null);
   const submitAttemptedRef = useRef(false);
@@ -104,44 +80,42 @@ export const LoginForm = () => {
           note: "X-Storefront-Key may be added by interceptor",
         });
       }
-      const response = await client.post<
-        ApiJsonResponse<"/api/v1/login", "post">
-      >(
-        "/api/v1/login",
-        {
-          email_address,
-          password,
-        },
-        {
-          __debugLogin: true,
-        },
-      );
-      const challenge = extractTwoFactorChallenge(response.data);
-      if (challenge) {
-        saveTwoFactorChallenge({
-          challengeId: challenge.challengeId,
-          email: challenge.email,
-          redirectTo,
-        });
-        navigate("/login/2fa");
-        return;
+
+      const payload: Record<string, string> = {
+        email_address,
+        password,
+      };
+
+      if (twoFactorRequired) {
+        const trimmedCode = twoFactorCode.trim();
+        if (!trimmedCode) {
+          setError(
+            twoFactorMode === "otp"
+              ? "Enter your authenticator code to continue."
+              : "Enter a recovery code to continue.",
+          );
+          return;
+        }
+
+        if (twoFactorMode === "otp") {
+          payload.otp = trimmedCode;
+        } else {
+          payload.recovery_code = trimmedCode;
+        }
       }
 
+      const response = await client.post<
+        ApiJsonResponse<"/api/v1/login", "post">
+      >("/api/v1/login", payload, {
+        __debugLogin: true,
+      });
+
+      setTwoFactorRequired(false);
+      setTwoFactorCode("");
+      setTwoFactorMode("otp");
       login(normalizeAuthResponse(response.data));
-      navigate(redirectTo); // Redirect on successful login
+      navigate(redirectTo);
     } catch (err) {
-      const challenge = extractTwoFactorChallenge(
-        (err as { response?: { data?: unknown } })?.response?.data,
-      );
-      if (challenge) {
-        saveTwoFactorChallenge({
-          challengeId: challenge.challengeId,
-          email: challenge.email,
-          redirectTo,
-        });
-        navigate("/login/2fa");
-        return;
-      }
       if (isUnexpectedAuthResponseError(err)) {
         setError("Unexpected server response. Please try again.");
         if (import.meta.env.MODE !== "production") {
@@ -149,10 +123,25 @@ export const LoginForm = () => {
         }
         return;
       }
+
       const parsed = getApiErrorDetails(err, {
         useRawErrorMessage: false,
         fallbackMessage: "We couldn't sign you in. Please try again.",
       });
+
+      if (parsed.status === 401 && parsed.code === "two_factor_required") {
+        setTwoFactorRequired(true);
+        setError(
+          "Two-factor authentication required. Enter a code to continue.",
+        );
+        return;
+      }
+
+      if (parsed.status === 401 && parsed.code === "invalid_two_factor_code") {
+        setTwoFactorRequired(true);
+        setError("Invalid verification code. Please try again.");
+        return;
+      }
 
       if (parsed.status === 401) {
         setError("Invalid email or password. Please try again.");
@@ -318,6 +307,46 @@ export const LoginForm = () => {
                 ) : null}
               </div>
 
+              {twoFactorRequired ? (
+                <div className="space-y-3 rounded-xl border border-white/15 bg-white/5 p-4">
+                  <label
+                    htmlFor="login-two-factor-code"
+                    className="block text-sm font-semibold text-white"
+                  >
+                    {twoFactorMode === "otp"
+                      ? "Authenticator code"
+                      : "Recovery code"}
+                  </label>
+                  <input
+                    id="login-two-factor-code"
+                    value={twoFactorCode}
+                    onChange={(event) => setTwoFactorCode(event.target.value)}
+                    className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
+                    placeholder={
+                      twoFactorMode === "otp" ? "123456" : "ABCD-1234"
+                    }
+                    autoComplete="one-time-code"
+                    inputMode={twoFactorMode === "otp" ? "numeric" : "text"}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTwoFactorMode((prev) =>
+                        prev === "otp" ? "recovery" : "otp",
+                      );
+                      setTwoFactorCode("");
+                      setError(null);
+                    }}
+                    className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
+                  >
+                    {twoFactorMode === "otp"
+                      ? "Use recovery code"
+                      : "Use authenticator code"}
+                  </button>
+                </div>
+              ) : null}
+
               {notice && (
                 <p
                   className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-200"
@@ -345,7 +374,11 @@ export const LoginForm = () => {
               >
                 <span className="absolute inset-0 translate-y-[120%] bg-white/10 transition duration-500 group-hover:translate-y-0" />
                 <span className="relative">
-                  {loading ? "Signing in..." : "Sign in"}
+                  {loading
+                    ? "Signing in..."
+                    : twoFactorRequired
+                      ? "Verify and sign in"
+                      : "Sign in"}
                 </span>
               </button>
 
