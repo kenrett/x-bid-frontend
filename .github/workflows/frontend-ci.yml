@@ -202,7 +202,7 @@ jobs:
             find openapi-artifact -maxdepth 4 -type f -print
             exit 1
           fi
-          echo "OPENAPI_SPEC_PATH=$(realpath \"$OPENAPI_PATH\")" >> "$GITHUB_ENV"
+          echo "OPENAPI_SPEC_PATH=$(realpath "$OPENAPI_PATH")" >> "$GITHUB_ENV"
 
       - name: Preflight OpenAPI source
         run: |
@@ -254,7 +254,24 @@ jobs:
           npm run ct-2
 
       - name: Test
-        run: npm test --if-present
+        env:
+          OPENAPI_URL: ${{ vars.OPENAPI_URL || vars.BACKEND_OPENAPI_URL || '' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${OPENAPI_SPEC_PATH:-}" ] || [ ! -f "${OPENAPI_SPEC_PATH}" ]; then
+            FALLBACK_OPENAPI_PATH="$(find openapi-artifact -name openapi.json -print -quit || true)"
+            if [ -n "$FALLBACK_OPENAPI_PATH" ]; then
+              OPENAPI_SPEC_PATH="$(realpath "$FALLBACK_OPENAPI_PATH")"
+              export OPENAPI_SPEC_PATH
+            fi
+          fi
+
+          if [ -z "${OPENAPI_SPEC_PATH:-}" ] && [ -z "${OPENAPI_URL:-}" ]; then
+            echo "::error::Missing OpenAPI source for npm test (openapiContract.test.ts requires OPENAPI_SPEC_PATH or OPENAPI_URL)."
+            exit 1
+          fi
+
+          npm test --if-present
 
       - name: Build
         run: npm run build
