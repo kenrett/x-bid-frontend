@@ -1,5 +1,13 @@
 import client from "@api/client";
+import type { components } from "@api/openapi-types";
 import { reportUnexpectedResponse } from "@services/unexpectedResponse";
+
+export const TWO_FACTOR_ENDPOINTS = {
+  status: "/api/v1/account/2fa",
+  setup: "/api/v1/account/2fa/setup",
+  verify: "/api/v1/account/2fa/verify",
+  disable: "/api/v1/account/2fa/disable",
+} as const;
 
 export type TwoFactorStatus = {
   enabled: boolean;
@@ -16,6 +24,19 @@ export type TwoFactorSetup = {
 
 export type TwoFactorRecoveryCodes = {
   recoveryCodes: string[];
+};
+
+type OpenApiTwoFactorSetup =
+  components["schemas"]["AccountTwoFactorSetupResponse"];
+type OpenApiTwoFactorVerify =
+  components["schemas"]["AccountTwoFactorVerifyResponse"];
+
+type OpenApiTwoFactorStatus = {
+  enabled?: unknown;
+  enabled_at?: unknown;
+  enabledAt?: unknown;
+  is_enabled?: unknown;
+  active?: unknown;
 };
 
 const asRecord = (value: unknown): Record<string, unknown> | null =>
@@ -39,13 +60,15 @@ const normalizeStatus = (payload: unknown): TwoFactorStatus => {
   if (!record) throw reportUnexpectedResponse("two_factor.status", payload);
 
   const enabled =
-    readBoolean(record.enabled) ??
-    readBoolean(record.is_enabled) ??
-    readBoolean(record.active) ??
+    readBoolean((record as OpenApiTwoFactorStatus).enabled) ??
+    readBoolean((record as OpenApiTwoFactorStatus).is_enabled) ??
+    readBoolean((record as OpenApiTwoFactorStatus).active) ??
     false;
 
   const enabledAt =
-    readString(record.enabled_at) ?? readString(record.enabledAt) ?? null;
+    readString((record as OpenApiTwoFactorStatus).enabled_at) ??
+    readString((record as OpenApiTwoFactorStatus).enabledAt) ??
+    null;
 
   return { enabled, enabledAt };
 };
@@ -58,15 +81,18 @@ const normalizeSetup = (payload: unknown): TwoFactorSetup => {
     readString(record.secret) ??
     readString(record.otp_secret) ??
     readString(record.totp_secret) ??
+    readString((record as OpenApiTwoFactorSetup).secret) ??
     null;
 
   if (!secret)
     throw reportUnexpectedResponse("two_factor.setup.secret", payload);
 
   const otpauthUrl =
+    readString(record.otpauth_uri) ??
     readString(record.otpauth_url) ??
     readString(record.otpauthUrl) ??
     readString(record.qr_url) ??
+    readString((record as OpenApiTwoFactorSetup).otpauth_uri) ??
     null;
 
   const qrCodeSvg =
@@ -91,6 +117,7 @@ const normalizeRecoveryCodes = (payload: unknown): TwoFactorRecoveryCodes => {
 
   const codes =
     readStringArray(record.recovery_codes) ??
+    readStringArray((record as OpenApiTwoFactorVerify).recovery_codes) ??
     readStringArray(record.recoveryCodes) ??
     [];
 
@@ -99,15 +126,15 @@ const normalizeRecoveryCodes = (payload: unknown): TwoFactorRecoveryCodes => {
 
 export const twoFactorApi = {
   async getStatus(): Promise<TwoFactorStatus> {
-    const response = await client.get("/api/v1/account/two_factor");
+    const response = await client.get(TWO_FACTOR_ENDPOINTS.status);
     return normalizeStatus(response.data);
   },
   async startSetup(): Promise<TwoFactorSetup> {
-    const response = await client.post("/api/v1/account/two_factor/setup", {});
+    const response = await client.post(TWO_FACTOR_ENDPOINTS.setup, {});
     return normalizeSetup(response.data);
   },
   async verifySetup(code: string): Promise<TwoFactorRecoveryCodes> {
-    const response = await client.post("/api/v1/account/two_factor/verify", {
+    const response = await client.post(TWO_FACTOR_ENDPOINTS.verify, {
       code,
     });
     return normalizeRecoveryCodes(response.data);

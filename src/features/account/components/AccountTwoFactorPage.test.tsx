@@ -39,6 +39,7 @@ describe("AccountTwoFactorPage", () => {
     expect(
       await screen.findByText(/two-factor authentication/i),
     ).toBeInTheDocument();
+    expect(mockedTwoFactorApi.getStatus).toHaveBeenCalledTimes(1);
 
     await user.click(screen.getByRole("button", { name: /enable 2fa/i }));
 
