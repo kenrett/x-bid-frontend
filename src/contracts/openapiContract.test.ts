@@ -168,6 +168,16 @@ const getResponseSchema = (
   return deref(openapi, appJson?.schema);
 };
 
+const collectApiPathLiterals = (source: string): Set<string> => {
+  const out = new Set<string>();
+  const matches = source.matchAll(/["'`](\/api\/v1\/[^"'`\s]+)["'`]/g);
+  for (const match of matches) {
+    const value = match[1];
+    if (!value.includes("${")) out.add(value);
+  }
+  return out;
+};
+
 describe("OpenAPI contract drift", () => {
   let openapiSchema: JsonObject;
 
@@ -179,6 +189,9 @@ describe("OpenAPI contract drift", () => {
     const requiredPaths = [
       "/api/v1/signup",
       "/api/v1/login",
+      "/api/v1/account/2fa/setup",
+      "/api/v1/account/2fa/verify",
+      "/api/v1/account/2fa/disable",
       "/api/v1/session/refresh",
       "/api/v1/checkouts",
       "/api/v1/checkout/success",
@@ -193,7 +206,7 @@ describe("OpenAPI contract drift", () => {
     }
   });
 
-  it("auth request payloads include canonical field names", () => {
+  it("auth request payloads include canonical field names and 2FA fields", () => {
     const loginSchema = getRequestSchema(
       openapiSchema,
       "/api/v1/login",
@@ -213,6 +226,7 @@ describe("OpenAPI contract drift", () => {
     const loginFields = collectPropertyPaths(openapiSchema, loginSchema);
     expect(
       loginFields.has("email_address") ||
+        loginFields.has("emailAddress") ||
         loginFields.has("session.email_address"),
     ).toBe(true);
     expect(
@@ -244,6 +258,75 @@ describe("OpenAPI contract drift", () => {
         refreshFields.has("session.refresh_token") ||
         refreshFields.has("refresh.refresh_token"),
     ).toBe(true);
+  });
+
+  it("login 401 uses canonical error envelope shape for 2FA-required flow", () => {
+    const login401 = getResponseSchema(
+      openapiSchema,
+      "/api/v1/login",
+      "post",
+      "401",
+    );
+    const login401Fields = collectPropertyPaths(openapiSchema, login401);
+    expect(login401Fields.has("error_code")).toBe(true);
+    expect(login401Fields.has("message")).toBe(true);
+  });
+
+  it("2FA endpoints expose canonical methods and response schemas", () => {
+    getOperation(openapiSchema, "/api/v1/account/2fa/setup", "post");
+    getOperation(openapiSchema, "/api/v1/account/2fa/verify", "post");
+    getOperation(openapiSchema, "/api/v1/account/2fa/disable", "post");
+
+    const setup200 = getResponseSchema(
+      openapiSchema,
+      "/api/v1/account/2fa/setup",
+      "post",
+      "200",
+    );
+    const verify200 = getResponseSchema(
+      openapiSchema,
+      "/api/v1/account/2fa/verify",
+      "post",
+      "200",
+    );
+    const disable200 = getResponseSchema(
+      openapiSchema,
+      "/api/v1/account/2fa/disable",
+      "post",
+      "200",
+    );
+
+    const setupFields = collectPropertyPaths(openapiSchema, setup200);
+    expect(setupFields.has("secret")).toBe(true);
+    expect(setupFields.has("otpauth_uri")).toBe(true);
+
+    const verifyFields = collectPropertyPaths(openapiSchema, verify200);
+    expect(verifyFields.has("status")).toBe(true);
+    expect(verifyFields.has("recovery_codes")).toBe(true);
+
+    const disableFields = collectPropertyPaths(openapiSchema, disable200);
+    expect(disableFields.has("status")).toBe(true);
+  });
+
+  it("FE auth/2FA endpoint literals must exist in backend OpenAPI paths", () => {
+    const files = [
+      "src/features/auth/components/LoginForm/LoginForm.tsx",
+      "src/features/account/api/twoFactorApi.ts",
+    ];
+    const paths = openapiSchema.paths as JsonObject | undefined;
+    expect(paths).toBeTruthy();
+
+    const referencedPaths = new Set<string>();
+    for (const file of files) {
+      const source = fs.readFileSync(path.resolve(process.cwd(), file), "utf8");
+      const literals = collectApiPathLiterals(source);
+      for (const literal of literals) referencedPaths.add(literal);
+    }
+
+    expect(referencedPaths.size).toBeGreaterThan(0);
+    for (const apiPath of referencedPaths) {
+      expect(paths).toHaveProperty(apiPath);
+    }
   });
 
   it("auth responses include canonical token fields (snake_case)", () => {

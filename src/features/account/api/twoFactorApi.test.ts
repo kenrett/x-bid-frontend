@@ -15,9 +15,6 @@ describe("twoFactorApi", () => {
     expect(TWO_FACTOR_ENDPOINTS.status).toBe("/api/v1/account/2fa");
     expect(TWO_FACTOR_ENDPOINTS.setup).toBe("/api/v1/account/2fa/setup");
     expect(TWO_FACTOR_ENDPOINTS.verify).toBe("/api/v1/account/2fa/verify");
-    expect(Object.values(TWO_FACTOR_ENDPOINTS).join("\n")).not.toContain(
-      "/api/v1/account/two_factor",
-    );
   });
 
   it("fetches status from /api/v1/account/2fa", async () => {

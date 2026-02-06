@@ -16,10 +16,8 @@ test("inline 2fa login retries /api/v1/login with otp and signs in", async ({
       return fulfillJson(
         route,
         {
-          error: {
-            code: "two_factor_required",
-            message: "Two-factor authentication required",
-          },
+          error_code: "two_factor_required",
+          message: "Two-factor authentication required",
         },
         401,
       );
