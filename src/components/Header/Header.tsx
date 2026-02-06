@@ -3,7 +3,7 @@ import { Bars3Icon } from "@heroicons/react/24/outline";
 import { NavItem } from "../NavItem";
 import { Link, useLocation } from "react-router-dom";
 import { cva } from "class-variance-authority";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Skeleton } from "../Skeleton";
 import { useStorefront } from "../../storefront/useStorefront";
 import { getAppMode } from "../../appMode/appMode";
@@ -130,6 +130,9 @@ export function Header() {
 
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const mobileMenuPanelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 10);
@@ -137,6 +140,44 @@ export function Header() {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsMobileMenuOpen(false);
+        mobileMenuButtonRef.current?.focus();
+      }
+    };
+
+    const onPointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (mobileMenuPanelRef.current?.contains(target)) return;
+      if (mobileMenuButtonRef.current?.contains(target)) return;
+      setIsMobileMenuOpen(false);
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown);
+
+    const focusable = mobileMenuPanelRef.current?.querySelector<
+      HTMLAnchorElement | HTMLButtonElement
+    >('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])');
+    focusable?.focus();
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+    };
+  }, [isMobileMenuOpen]);
 
   return (
     <nav className={variants.nav({ admin: isAdmin })}>
@@ -163,17 +204,21 @@ export function Header() {
           </picture>
         </Link>
         <button
-          data-collapse-toggle="navbar-default"
+          ref={mobileMenuButtonRef}
           type="button"
           className={variants.mobileMenuButton()}
           aria-controls="navbar-default"
-          aria-expanded="false"
+          aria-expanded={isMobileMenuOpen}
+          onClick={() => setIsMobileMenuOpen((open) => !open)}
         >
-          <span className={`sr-only`}>Open main menu</span>
+          <span className={`sr-only`}>
+            {isMobileMenuOpen ? "Close main menu" : "Open main menu"}
+          </span>
           <Bars3Icon className="w-6 h-6" />
         </button>
         <div
-          className="hidden w-full md:block md:w-auto animate-fadeInUp"
+          ref={mobileMenuPanelRef}
+          className={`${isMobileMenuOpen ? "block" : "hidden"} w-full md:block md:w-auto animate-fadeInUp`}
           id="navbar-default"
         >
           <ul className={variants.navList()}>

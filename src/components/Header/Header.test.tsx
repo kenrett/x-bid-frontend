@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { Header } from "./Header";
@@ -51,12 +52,10 @@ describe("Header Component", () => {
     } as unknown as ReturnType<typeof useAuth>);
     renderComponent();
 
-    // Check for logo linking to home
     const logoLink = screen.getByAltText("BidderSweet").closest("a");
     expect(logoLink).toBeInTheDocument();
     expect(logoLink).toHaveAttribute("href", "/");
 
-    // Check for main navigation items
     expect(screen.getByRole("link", { name: /auctions/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /buy bids/i })).toBeInTheDocument();
     expect(
@@ -150,17 +149,87 @@ describe("Header Component", () => {
     });
   });
 
-  it("should render the mobile menu button", () => {
-    mockedUseAuth.mockReturnValue({
-      user: null,
-      logout: mockLogout,
-      isReady: true,
-    } as unknown as ReturnType<typeof useAuth>);
-    renderComponent();
-    const mobileMenuButton = screen.getByRole("button", {
-      name: /open main menu/i,
+  describe("mobile menu accessibility state", () => {
+    beforeEach(() => {
+      mockedUseAuth.mockReturnValue({
+        user: null,
+        logout: mockLogout,
+        isReady: true,
+      } as unknown as ReturnType<typeof useAuth>);
     });
-    expect(mobileMenuButton).toBeInTheDocument();
+
+    it("renders menu button with correct aria controls", () => {
+      renderComponent();
+      const mobileMenuButton = screen.getByRole("button", {
+        name: /open main menu/i,
+      });
+
+      expect(mobileMenuButton).toBeInTheDocument();
+      expect(mobileMenuButton).toHaveAttribute(
+        "aria-controls",
+        "navbar-default",
+      );
+      expect(mobileMenuButton).toHaveAttribute("aria-expanded", "false");
+    });
+
+    it("toggles panel visibility and aria-expanded on click", async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const mobileMenuButton = screen.getByRole("button", {
+        name: /open main menu/i,
+      });
+      const mobileMenuPanel = document.getElementById("navbar-default");
+      expect(mobileMenuPanel).toHaveClass("hidden");
+
+      await user.click(mobileMenuButton);
+
+      expect(mobileMenuButton).toHaveAttribute("aria-expanded", "true");
+      expect(
+        screen.getByRole("button", { name: /close main menu/i }),
+      ).toBeInTheDocument();
+      expect(mobileMenuPanel).toHaveClass("block");
+      expect(screen.getByRole("link", { name: /auctions/i })).toHaveFocus();
+
+      await user.click(
+        screen.getByRole("button", { name: /close main menu/i }),
+      );
+
+      expect(
+        screen.getByRole("button", { name: /open main menu/i }),
+      ).toHaveAttribute("aria-expanded", "false");
+      expect(mobileMenuPanel).toHaveClass("hidden");
+    });
+
+    it("supports Enter and Space to toggle, and Escape to dismiss", async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const menuButton = screen.getByRole("button", {
+        name: /open main menu/i,
+      });
+      menuButton.focus();
+      await user.keyboard("{Enter}");
+
+      expect(
+        screen.getByRole("button", { name: /close main menu/i }),
+      ).toHaveAttribute("aria-expanded", "true");
+
+      await user.keyboard("{Escape}");
+
+      const reopenedMenuButton = screen.getByRole("button", {
+        name: /open main menu/i,
+      });
+      expect(reopenedMenuButton).toHaveAttribute("aria-expanded", "false");
+      expect(reopenedMenuButton).toHaveFocus();
+
+      reopenedMenuButton.focus();
+      await user.keyboard(" ");
+
+      expect(
+        screen.getByRole("button", { name: /close main menu/i }),
+      ).toHaveAttribute("aria-expanded", "true");
+    });
   });
 
   describe("admin vs superadmin badges and banner", () => {
@@ -190,7 +259,7 @@ describe("Header Component", () => {
         screen.getByText(/superadmin privileges active/i),
       ).toBeInTheDocument();
       expect(screen.getByText("Superadmin")).toBeInTheDocument();
-      expect(screen.queryAllByText("Admin").length).toBeGreaterThan(0); // nav link
+      expect(screen.queryAllByText("Admin").length).toBeGreaterThan(0);
     });
 
     it("shows no admin banner for regular user", () => {
