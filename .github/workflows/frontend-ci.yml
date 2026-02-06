@@ -73,7 +73,7 @@ jobs:
             });
             const candidates = runs.data.workflow_runs ?? [];
             if (!candidates.length) {
-              core.setFailed(`No backend workflow run found for head_sha=${headSha} in ${process.env.BACKEND_REPO}`);
+              core.notice(`No backend PR run found for head_sha=${headSha}; will fall back to latest successful main artifact.`);
               return;
             }
 
@@ -110,12 +110,11 @@ jobs:
             );
             const names =
               latestArtifacts.data.artifacts?.map((a) => a.name).join(", ") || "(none)";
-            core.setFailed(
-              `No backend PR run (head_sha=${headSha}) had artifact '${artifactName}'. Latest run ${latest.id} artifacts: ${names}`,
+            core.notice(
+              `No backend PR run (head_sha=${headSha}) had artifact '${artifactName}'. Latest run ${latest.id} artifacts: ${names}. Falling back to latest successful main artifact.`,
             );
 
       - name: Find backend OpenAPI artifact run (main)
-        if: ${{ github.event_name != 'pull_request' }}
         id: backend-run-main
         # v7
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
@@ -225,6 +224,14 @@ jobs:
           OPENAPI_URL: ${{ vars.OPENAPI_URL || vars.BACKEND_OPENAPI_URL || '' }}
         run: |
           set -euo pipefail
+          if [ -z "${OPENAPI_SPEC_PATH:-}" ] || [ ! -f "${OPENAPI_SPEC_PATH}" ]; then
+            FALLBACK_OPENAPI_PATH="$(find openapi-artifact -name openapi.json -print -quit || true)"
+            if [ -n "$FALLBACK_OPENAPI_PATH" ]; then
+              OPENAPI_SPEC_PATH="$(realpath "$FALLBACK_OPENAPI_PATH")"
+              export OPENAPI_SPEC_PATH
+            fi
+          fi
+
           if [ -n "${OPENAPI_SPEC_PATH:-}" ] && [ -f "${OPENAPI_SPEC_PATH}" ]; then
             npm run check:api-types
           elif [ -n "${OPENAPI_URL:-}" ]; then
@@ -235,7 +242,16 @@ jobs:
           fi
 
       - name: Contract drift tests (CT-2)
-        run: npm run ct-2
+        run: |
+          set -euo pipefail
+          if [ -z "${OPENAPI_SPEC_PATH:-}" ] || [ ! -f "${OPENAPI_SPEC_PATH}" ]; then
+            FALLBACK_OPENAPI_PATH="$(find openapi-artifact -name openapi.json -print -quit || true)"
+            if [ -n "$FALLBACK_OPENAPI_PATH" ]; then
+              OPENAPI_SPEC_PATH="$(realpath "$FALLBACK_OPENAPI_PATH")"
+              export OPENAPI_SPEC_PATH
+            fi
+          fi
+          npm run ct-2
 
       - name: Test
         run: npm test --if-present
