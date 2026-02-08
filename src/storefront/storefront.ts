@@ -40,11 +40,11 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
     domain: "biddersweet.app",
     themeTokens: {
       // MAIN = modern, energetic, clean
-      primary: "#ff4d4f",
-      accent: "#f6c177",
+      primary: "#c62828",
+      accent: "#8b5000",
       background: "#f6f5f1",
       surface: "#ffffff",
-      border: "rgba(15, 23, 42, 0.12)",
+      border: "rgba(15, 23, 42, 0.20)",
       text: "#0f172a",
       mutedText: "#475569",
       onPrimary: "#ffffff",
@@ -64,11 +64,11 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
     domain: "afterdark.biddersweet.app",
     themeTokens: {
       // AFTER DARK = neon luxe on near-black
-      primary: "#a855f7",
+      primary: "#b56cff",
       accent: "#f59e0b",
       background: "#0b0b10",
       surface: "rgba(255, 255, 255, 0.06)",
-      border: "rgba(255, 255, 255, 0.10)",
+      border: "rgba(255, 255, 255, 0.34)",
       text: "#f8fafc",
       mutedText: "rgba(248, 250, 252, 0.70)",
       onPrimary: "#0b0b10",
@@ -99,19 +99,19 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
       background: "#ebe1ba",
       // Surface: light card on dark background (creates instant differentiation from Main)
       surface: "#F8FAFC",
-      // Border: subtle dark border to separate paper cards on graphite
-      border: "rgba(148, 163, 184, 0.35)",
+      // Border: stronger dark boundary so cards and controls separate clearly.
+      border: "rgba(100, 116, 139, 0.53)",
 
       // Text on light surface (ink)
       text: "#0B1220",
       mutedText: "#475569",
 
       // Primary action: teal (very distinct from Main's red and After Dark's purple)
-      primary: "#14B8A6",
-      onPrimary: "#041312",
+      primary: "#115e59",
+      onPrimary: "#ffffff",
 
       // Accent: amber for pricing badges / highlights
-      accent: "#F59E0B",
+      accent: "#92400e",
 
       radius: "14px",
       // Shadow: softer because surfaces are light; still pops on dark background
