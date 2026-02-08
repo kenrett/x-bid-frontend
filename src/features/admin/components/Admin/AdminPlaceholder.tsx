@@ -7,9 +7,9 @@ export const AdminPlaceholder = ({
   title,
   description,
 }: AdminPlaceholderProps) => (
-  <div className="text-white">
+  <div className="text-[color:var(--sf-text)]">
     <h2 className="text-2xl font-bold mb-2">{title}</h2>
-    <p className="text-gray-400">
+    <p className="text-[color:var(--sf-mutedText)]">
       {description ?? "This section is coming soon."}
     </p>
   </div>

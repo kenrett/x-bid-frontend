@@ -49,13 +49,13 @@ export const AdminPaymentsPage = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wide text-gray-500">
+          <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
             Payments
           </p>
-          <h2 className="text-3xl font-serif font-bold text-white">
+          <h2 className="text-3xl font-serif font-bold text-[color:var(--sf-text)]">
             Recent payments
           </h2>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-[color:var(--sf-mutedText)] mt-1">
             Live payment history pulled from the API. Use refresh to sync the
             latest records.
           </p>
@@ -63,7 +63,7 @@ export const AdminPaymentsPage = () => {
         <button
           onClick={handleRefresh}
           disabled={isLoading}
-          className="text-sm text-gray-200 bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg px-3 py-2 transition-colors disabled:opacity-60"
+          className="text-sm text-[color:var(--sf-mutedText)] bg-white/10 hover:bg-white/20 border border-[color:var(--sf-border)] rounded-lg px-3 py-2 transition-colors disabled:opacity-60"
         >
           {isLoading ? "Refreshing..." : "Refresh"}
         </button>

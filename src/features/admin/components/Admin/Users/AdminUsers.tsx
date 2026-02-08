@@ -27,23 +27,27 @@ export const AdminUsers = ({
   };
 
   return (
-    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-4">
+    <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-4 space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h3 className="text-lg font-semibold text-white">Admin Users</h3>
+        <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
+          Admin Users
+        </h3>
         <input
           type="search"
           value={search}
           onChange={handleSearch}
           placeholder="Search by name or email"
-          className="rounded-lg bg-black/20 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+          className="rounded-lg bg-black/20 border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
         />
       </div>
-      <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5">
+      <div className="overflow-hidden rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)]">
         {users.length === 0 ? (
-          <div className="p-4 text-sm text-gray-300">No matching admins.</div>
+          <div className="p-4 text-sm text-[color:var(--sf-mutedText)]">
+            No matching admins.
+          </div>
         ) : (
-          <table className="min-w-full text-sm text-gray-200">
-            <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-gray-400">
+          <table className="min-w-full text-sm text-[color:var(--sf-mutedText)]">
+            <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-[color:var(--sf-mutedText)]">
               <tr>
                 <th className="px-4 py-3">Name</th>
                 <th className="px-4 py-3">Email</th>
@@ -55,16 +59,18 @@ export const AdminUsers = ({
             <tbody className="divide-y divide-white/10">
               {users.map((adminUser) => (
                 <tr key={adminUser.id} className="hover:bg-white/[0.04]">
-                  <td className="px-4 py-3 font-semibold text-white">
+                  <td className="px-4 py-3 font-semibold text-[color:var(--sf-text)]">
                     {adminUser.name}
                   </td>
-                  <td className="px-4 py-3 text-gray-200">{adminUser.email}</td>
+                  <td className="px-4 py-3 text-[color:var(--sf-mutedText)]">
+                    {adminUser.email}
+                  </td>
                   <td className="px-4 py-3">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-semibold ${
                         adminUser.role === "superadmin"
                           ? "bg-red-900 text-red-100 border border-red-300/40"
-                          : "bg-white/10 text-gray-100 border border-white/20"
+                          : "bg-white/10 text-[color:var(--sf-mutedText)] border border-white/20"
                       }`}
                     >
                       {adminUser.role}
@@ -75,7 +81,7 @@ export const AdminUsers = ({
                       className={`px-2 py-1 rounded-full text-xs font-semibold ${
                         adminUser.status === "active"
                           ? "bg-green-900 text-green-100 border border-green-300/30"
-                          : "bg-gray-700 text-gray-200 border border-gray-400/30"
+                          : "bg-gray-700 text-[color:var(--sf-mutedText)] border border-gray-400/30"
                       }`}
                     >
                       {adminUser.status}

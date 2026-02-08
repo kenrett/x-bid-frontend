@@ -107,52 +107,52 @@ export const AdminBidPackForm = ({
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <label className="flex flex-col gap-2 text-sm text-gray-200">
+        <label className="flex flex-col gap-2 text-sm text-[color:var(--sf-mutedText)]">
           <span className="font-semibold">Name *</span>
           <input
             type="text"
             value={formState.name}
             onChange={handleChange("name")}
-            className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="rounded-lg bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
             placeholder="Starter Pack"
             required
           />
         </label>
 
-        <label className="flex items-center gap-3 text-sm text-gray-200">
+        <label className="flex items-center gap-3 text-sm text-[color:var(--sf-mutedText)]">
           <input
             type="checkbox"
             checked={formState.highlight}
             onChange={handleChange("highlight")}
-            className="h-4 w-4 rounded border-white/30 bg-white/10 text-pink-500 focus:ring-pink-500"
+            className="h-4 w-4 rounded border-white/30 bg-white/10 text-[color:var(--sf-accent)] focus:ring-[color:var(--sf-focus-ring)]"
           />
           <span className="font-semibold">Highlight as featured</span>
         </label>
 
-        <label className="flex flex-col gap-2 text-sm text-gray-200 md:col-span-2">
+        <label className="flex flex-col gap-2 text-sm text-[color:var(--sf-mutedText)] md:col-span-2">
           <span className="font-semibold">Description</span>
           <textarea
             value={formState.description}
             onChange={handleChange("description")}
-            className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500 min-h-[100px]"
+            className="rounded-lg bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)] min-h-[100px]"
             placeholder="Short description for the pack."
           />
         </label>
 
-        <label className="flex flex-col gap-2 text-sm text-gray-200">
+        <label className="flex flex-col gap-2 text-sm text-[color:var(--sf-mutedText)]">
           <span className="font-semibold">Bids *</span>
           <input
             type="number"
             min={1}
             value={formState.bids}
             onChange={handleChange("bids")}
-            className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="rounded-lg bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
             placeholder="50"
             required
           />
         </label>
 
-        <label className="flex flex-col gap-2 text-sm text-gray-200">
+        <label className="flex flex-col gap-2 text-sm text-[color:var(--sf-mutedText)]">
           <span className="font-semibold">Price *</span>
           <input
             type="number"
@@ -160,15 +160,15 @@ export const AdminBidPackForm = ({
             step="0.01"
             value={formState.price}
             onChange={handleChange("price")}
-            className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="rounded-lg bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
             placeholder="9.99"
             required
           />
         </label>
 
-        <div className="flex flex-col gap-2 text-sm text-gray-200">
+        <div className="flex flex-col gap-2 text-sm text-[color:var(--sf-mutedText)]">
           <span className="font-semibold">Price per bid</span>
-          <div className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white">
+          <div className="rounded-lg bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)]">
             ${pricePerBid}
           </div>
         </div>
@@ -180,7 +180,7 @@ export const AdminBidPackForm = ({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="bg-pink-600 hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+          className="bg-pink-600 hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-[color:var(--sf-text)] px-4 py-2 rounded-lg font-semibold transition-colors"
         >
           {isSubmitting ? "Saving..." : submitLabel}
         </button>

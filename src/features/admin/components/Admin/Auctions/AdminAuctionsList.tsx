@@ -146,7 +146,7 @@ export const AdminAuctionsList = () => {
 
   const statusBadge = useCallback((status: AuctionSummary["status"]) => {
     const styles: Record<AuctionSummary["status"], string> = {
-      inactive: "bg-gray-700 text-gray-100",
+      inactive: "bg-gray-700 text-[color:var(--sf-mutedText)]",
       scheduled: "bg-blue-900 text-blue-100",
       active: "bg-green-900 text-green-100",
       complete: "bg-purple-900 text-purple-100",
@@ -218,42 +218,46 @@ export const AdminAuctionsList = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wide text-gray-500">
+          <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
             Auctions
           </p>
-          <h2 className="text-2xl font-serif font-bold text-white">
+          <h2 className="text-2xl font-serif font-bold text-[color:var(--sf-text)]">
             Manage auctions
           </h2>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => void fetchAuctions()}
-            className="text-sm text-gray-200 bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg px-3 py-2 transition-colors"
+            className="text-sm text-[color:var(--sf-mutedText)] bg-white/10 hover:bg-white/20 border border-[color:var(--sf-border)] rounded-lg px-3 py-2 transition-colors"
           >
             Refresh
           </button>
           <Link
             to="/admin/auctions/new"
-            className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+            className="bg-pink-600 hover:bg-pink-700 text-[color:var(--sf-text)] px-4 py-2 rounded-lg font-semibold transition-colors"
           >
             New Auction
           </Link>
         </div>
       </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-4">
+      <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-4 space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2 text-sm text-gray-300">
-            <span className="font-semibold text-white">{filteredCount}</span>
+          <div className="flex items-center gap-2 text-sm text-[color:var(--sf-mutedText)]">
+            <span className="font-semibold text-[color:var(--sf-text)]">
+              {filteredCount}
+            </span>
             <span>of</span>
-            <span className="font-semibold text-white">{totalCount}</span>
+            <span className="font-semibold text-[color:var(--sf-text)]">
+              {totalCount}
+            </span>
             <span>auctions</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={resetFilters}
-              className="text-sm text-gray-200 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-3 py-2 transition-colors"
+              className="text-sm text-[color:var(--sf-mutedText)] bg-[color:var(--sf-surface)] hover:bg-white/10 border border-[color:var(--sf-border)] rounded-lg px-3 py-2 transition-colors"
             >
               Clear filters
             </button>
@@ -266,7 +270,7 @@ export const AdminAuctionsList = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search title"
-            className="rounded-lg bg-black/20 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="rounded-lg bg-black/20 border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
           />
           <div className="flex flex-wrap gap-2">
             {(
@@ -285,8 +289,8 @@ export const AdminAuctionsList = () => {
                 onClick={() => setStatusFilter(status)}
                 className={`text-sm px-3 py-2 rounded-lg border transition-colors ${
                   statusFilter === status
-                    ? "bg-pink-600 border-pink-400 text-white"
-                    : "bg-white/5 border-white/10 text-gray-200 hover:bg-white/10"
+                    ? "bg-pink-600 border-pink-400 text-[color:var(--sf-text)]"
+                    : "bg-[color:var(--sf-surface)] border-[color:var(--sf-border)] text-[color:var(--sf-mutedText)] hover:bg-white/10"
                 }`}
               >
                 {status === "all" ? "All" : status}
@@ -297,26 +301,30 @@ export const AdminAuctionsList = () => {
             type="datetime-local"
             value={startAfter}
             onChange={(e) => setStartAfter(e.target.value)}
-            className="rounded-lg bg-black/20 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="rounded-lg bg-black/20 border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
             placeholder="Start after"
           />
           <input
             type="datetime-local"
             value={endBefore}
             onChange={(e) => setEndBefore(e.target.value)}
-            className="rounded-lg bg-black/20 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="rounded-lg bg-black/20 border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
             placeholder="End before"
           />
         </div>
       </div>
 
-      {loading && <p className="text-sm text-gray-400">Loading auctions...</p>}
+      {loading && (
+        <p className="text-sm text-[color:var(--sf-mutedText)]">
+          Loading auctions...
+        </p>
+      )}
       {!loading && error && (
         <div className="rounded-2xl border border-red-500/30 bg-red-900/30 p-4 text-red-100 flex items-center justify-between">
           <div className="text-sm">{error}</div>
           <button
             onClick={() => void fetchAuctions()}
-            className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors"
+            className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-[color:var(--sf-text)] transition-colors"
           >
             Retry
           </button>
@@ -324,32 +332,32 @@ export const AdminAuctionsList = () => {
       )}
 
       {!loading && !error && (
-        <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+        <div className="overflow-hidden rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)]">
           {!hasAuctions ? (
-            <div className="p-6 text-gray-300 flex items-center justify-between">
+            <div className="p-6 text-[color:var(--sf-mutedText)] flex items-center justify-between">
               <span>No auctions found.</span>
               <button
                 onClick={() => void fetchAuctions()}
-                className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors"
+                className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-[color:var(--sf-text)] transition-colors"
               >
                 Retry
               </button>
             </div>
           ) : (
-            <table className="min-w-full text-sm text-gray-200">
-              <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-gray-400">
+            <table className="min-w-full text-sm text-[color:var(--sf-mutedText)]">
+              <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-[color:var(--sf-mutedText)]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-gray-300 uppercase text-xs tracking-wide">
+                  <th className="px-4 py-3 text-left text-[color:var(--sf-mutedText)] uppercase text-xs tracking-wide">
                     Title
                   </th>
-                  <th className="px-4 py-3 text-left text-gray-300 uppercase text-xs tracking-wide">
+                  <th className="px-4 py-3 text-left text-[color:var(--sf-mutedText)] uppercase text-xs tracking-wide">
                     Status
                   </th>
                   <th className="px-4 py-3">
                     <button
                       type="button"
                       onClick={() => toggleSort("start_date")}
-                      className="flex items-center gap-1 text-left text-gray-300 uppercase text-xs tracking-wide hover:text-white"
+                      className="flex items-center gap-1 text-left text-[color:var(--sf-mutedText)] uppercase text-xs tracking-wide hover:text-[color:var(--sf-text)]"
                     >
                       Start
                       {sortKey === "start_date" && (
@@ -363,7 +371,7 @@ export const AdminAuctionsList = () => {
                     <button
                       type="button"
                       onClick={() => toggleSort("current_price")}
-                      className="flex items-center gap-1 text-left text-gray-300 uppercase text-xs tracking-wide hover:text-white"
+                      className="flex items-center gap-1 text-left text-[color:var(--sf-mutedText)] uppercase text-xs tracking-wide hover:text-[color:var(--sf-text)]"
                     >
                       Current Price
                       {sortKey === "current_price" && (
@@ -377,7 +385,7 @@ export const AdminAuctionsList = () => {
                     <button
                       type="button"
                       onClick={() => toggleSort("end_time")}
-                      className="flex items-center gap-1 text-left text-gray-300 uppercase text-xs tracking-wide hover:text-white"
+                      className="flex items-center gap-1 text-left text-[color:var(--sf-mutedText)] uppercase text-xs tracking-wide hover:text-[color:var(--sf-text)]"
                     >
                       End
                       {sortKey === "end_time" && (
@@ -387,10 +395,10 @@ export const AdminAuctionsList = () => {
                       )}
                     </button>
                   </th>
-                  <th className="px-4 py-3 text-left text-gray-300 uppercase text-xs tracking-wide">
+                  <th className="px-4 py-3 text-left text-[color:var(--sf-mutedText)] uppercase text-xs tracking-wide">
                     Highest Bidder
                   </th>
-                  <th className="px-4 py-3 text-right text-gray-300 uppercase text-xs tracking-wide">
+                  <th className="px-4 py-3 text-right text-[color:var(--sf-mutedText)] uppercase text-xs tracking-wide">
                     Actions
                   </th>
                 </tr>
@@ -398,26 +406,26 @@ export const AdminAuctionsList = () => {
               <tbody className="divide-y divide-white/10">
                 {filteredAndSorted.map((auction) => (
                   <tr key={auction.id} className="hover:bg-white/[0.04]">
-                    <td className="px-4 py-3 font-semibold text-white">
+                    <td className="px-4 py-3 font-semibold text-[color:var(--sf-text)]">
                       {auction.title}
                     </td>
                     <td className="px-4 py-3">{statusBadge(auction.status)}</td>
-                    <td className="px-4 py-3 text-gray-300">
+                    <td className="px-4 py-3 text-[color:var(--sf-mutedText)]">
                       {auction.start_date || "—"}
                     </td>
                     <td className="px-4 py-3">
                       ${Number(auction.current_price).toFixed(2)}
                     </td>
-                    <td className="px-4 py-3 text-gray-300">
+                    <td className="px-4 py-3 text-[color:var(--sf-mutedText)]">
                       {auction.end_time || "—"}
                     </td>
-                    <td className="px-4 py-3 text-gray-300">
+                    <td className="px-4 py-3 text-[color:var(--sf-mutedText)]">
                       {auction.winning_user_name ?? "—"}
                     </td>
                     <td className="px-4 py-3 text-right space-x-2">
                       <Link
                         to={`/admin/auctions/${auction.id}`}
-                        className="text-sm text-gray-200 hover:text-white underline underline-offset-2"
+                        className="text-sm text-[color:var(--sf-mutedText)] hover:text-[color:var(--sf-text)] underline underline-offset-2"
                       >
                         View
                       </Link>

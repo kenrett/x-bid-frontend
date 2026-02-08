@@ -61,38 +61,38 @@ export const AdminSettings = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wide text-gray-500">
+          <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
             Settings
           </p>
-          <h2 className="text-3xl font-serif font-bold text-white">
+          <h2 className="text-3xl font-serif font-bold text-[color:var(--sf-text)]">
             Platform configuration
           </h2>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-[color:var(--sf-mutedText)] mt-1">
             Toggle maintenance mode (superadmin only).
           </p>
         </div>
       </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-4">
+      <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
               Maintenance mode
             </h3>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[color:var(--sf-mutedText)]">
               Temporarily disable public access. Last updated:{" "}
-              <span className="text-gray-200">
+              <span className="text-[color:var(--sf-mutedText)]">
                 {updatedAt ? new Date(updatedAt).toLocaleString() : "—"}
               </span>
             </p>
           </div>
-          <label className="inline-flex items-center gap-2 text-sm text-white">
+          <label className="inline-flex items-center gap-2 text-sm text-[color:var(--sf-text)]">
             <input
               type="checkbox"
               checked={maintenanceMode}
               onChange={(e) => void handleToggle(e.target.checked)}
               disabled={loading || saving || !isSuperAdmin}
-              className="h-4 w-4 rounded border-white/30 bg-white/10 text-pink-500 focus:ring-pink-500"
+              className="h-4 w-4 rounded border-white/30 bg-white/10 text-[color:var(--sf-accent)] focus:ring-[color:var(--sf-focus-ring)]"
             />
             {loading ? "Loading..." : maintenanceMode ? "Enabled" : "Disabled"}
           </label>

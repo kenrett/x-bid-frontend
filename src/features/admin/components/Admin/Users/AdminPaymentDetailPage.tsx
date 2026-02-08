@@ -162,13 +162,13 @@ export const AdminPaymentDetailPage = () => {
           <div className="mt-3 flex gap-2">
             <button
               onClick={() => void loadPayment()}
-              className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors"
+              className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-[color:var(--sf-text)] transition-colors"
             >
               Retry
             </button>
             <Link
               to={`/admin/${ADMIN_PATHS.payments}`}
-              className="text-sm font-semibold bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-white transition-colors"
+              className="text-sm font-semibold bg-[color:var(--sf-surface)] hover:bg-white/10 border border-[color:var(--sf-border)] rounded-lg px-3 py-2 text-[color:var(--sf-text)] transition-colors"
             >
               Back to payments
             </Link>
@@ -188,17 +188,17 @@ export const AdminPaymentDetailPage = () => {
         <div className="space-y-1">
           <Link
             to={`/admin/${ADMIN_PATHS.payments}`}
-            className="text-xs text-gray-400 hover:text-white transition-colors"
+            className="text-xs text-[color:var(--sf-mutedText)] hover:text-[color:var(--sf-text)] transition-colors"
           >
             ← Back to payments
           </Link>
-          <p className="text-xs uppercase tracking-wide text-gray-500">
+          <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
             Payment #{payment.id}
           </p>
-          <h2 className="text-3xl font-serif font-bold text-white">
+          <h2 className="text-3xl font-serif font-bold text-[color:var(--sf-text)]">
             {payment.userEmail || "Unknown user"}
           </h2>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-[color:var(--sf-mutedText)]">
             Created {payment.createdAt || "—"}
           </p>
         </div>
@@ -206,23 +206,25 @@ export const AdminPaymentDetailPage = () => {
           <button
             onClick={() => void loadPayment()}
             disabled={isLoading || isRepairing}
-            className="text-sm text-gray-200 bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg px-3 py-2 transition-colors disabled:opacity-60"
+            className="text-sm text-[color:var(--sf-mutedText)] bg-white/10 hover:bg-white/20 border border-[color:var(--sf-border)] rounded-lg px-3 py-2 transition-colors disabled:opacity-60"
           >
             {isLoading ? "Refreshing..." : "Refresh"}
           </button>
           <button
             onClick={() => void handleRepair()}
             disabled={isRepairing || isLoading}
-            className="text-sm text-white bg-pink-600 hover:bg-pink-700 border border-pink-400/60 rounded-lg px-3 py-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="text-sm text-[color:var(--sf-text)] bg-pink-600 hover:bg-pink-700 border border-pink-400/60 rounded-lg px-3 py-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isRepairing ? "Repairing..." : "Repair credits"}
           </button>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
-        <h3 className="text-lg font-semibold text-white">Refund</h3>
-        <p className="text-sm text-gray-300">
+      <div className="rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-4 space-y-3">
+        <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
+          Refund
+        </h3>
+        <p className="text-sm text-[color:var(--sf-mutedText)]">
           Amount is in dollars. Leave blank for a full refund.
         </p>
         {refundError ? (
@@ -246,7 +248,7 @@ export const AdminPaymentDetailPage = () => {
           <div className="space-y-1">
             <label
               htmlFor="refund-amount"
-              className="block text-xs uppercase tracking-wide text-gray-400"
+              className="block text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]"
             >
               Refund amount ($)
             </label>
@@ -256,13 +258,13 @@ export const AdminPaymentDetailPage = () => {
               onChange={(event) => setRefundAmount(event.target.value)}
               placeholder="e.g. 5.00"
               inputMode="decimal"
-              className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full rounded-lg bg-black/20 border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
             />
           </div>
           <div className="space-y-1 md:col-span-2">
             <label
               htmlFor="refund-reason"
-              className="block text-xs uppercase tracking-wide text-gray-400"
+              className="block text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]"
             >
               Reason (optional)
             </label>
@@ -271,7 +273,7 @@ export const AdminPaymentDetailPage = () => {
               value={refundReason}
               onChange={(event) => setRefundReason(event.target.value)}
               placeholder="e.g. duplicate purchase"
-              className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full rounded-lg bg-black/20 border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
             />
           </div>
         </div>
@@ -279,7 +281,7 @@ export const AdminPaymentDetailPage = () => {
           <button
             onClick={() => void handleRefund()}
             disabled={isRefunding || isLoading || isRepairing}
-            className="text-sm text-white bg-red-600 hover:bg-red-700 border border-red-400/60 rounded-lg px-3 py-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="text-sm text-[color:var(--sf-text)] bg-red-600 hover:bg-red-700 border border-red-400/60 rounded-lg px-3 py-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isRefunding ? "Refunding..." : "Issue refund"}
           </button>
@@ -304,14 +306,16 @@ export const AdminPaymentDetailPage = () => {
           label="Bid pack"
           value={
             payment.bidPackName ? (
-              <span className="text-white">
+              <span className="text-[color:var(--sf-text)]">
                 {payment.bidPackName}{" "}
                 {payment.bidPackId ? (
-                  <span className="text-gray-400">({payment.bidPackId})</span>
+                  <span className="text-[color:var(--sf-mutedText)]">
+                    ({payment.bidPackId})
+                  </span>
                 ) : null}
               </span>
             ) : (
-              <span className="text-gray-300">Unknown</span>
+              <span className="text-[color:var(--sf-mutedText)]">Unknown</span>
             )
           }
         />
@@ -327,18 +331,20 @@ export const AdminPaymentDetailPage = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-            <h3 className="text-lg font-semibold text-white">
+        <div className="lg:col-span-2 bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[color:var(--sf-border)]">
+            <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
               Credit transactions ({payment.ledgerEntries.length})
             </h3>
           </div>
           {payment.ledgerEntries.length === 0 ? (
-            <div className="p-4 text-sm text-gray-300">No ledger entries.</div>
+            <div className="p-4 text-sm text-[color:var(--sf-mutedText)]">
+              No ledger entries.
+            </div>
           ) : (
             <div className="overflow-auto">
-              <table className="min-w-full text-sm text-gray-200">
-                <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-gray-400">
+              <table className="min-w-full text-sm text-[color:var(--sf-mutedText)]">
+                <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-[color:var(--sf-mutedText)]">
                   <tr>
                     <th className="px-4 py-3">Created</th>
                     <th className="px-4 py-3">Kind</th>
@@ -357,10 +363,12 @@ export const AdminPaymentDetailPage = () => {
                       <td className="px-4 py-3">{entry.amount.toFixed(2)}</td>
                       <td className="px-4 py-3">
                         {entry.reason || (
-                          <span className="text-gray-500">—</span>
+                          <span className="text-[color:var(--sf-mutedText)]">
+                            —
+                          </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-gray-400">
+                      <td className="px-4 py-3 text-[color:var(--sf-mutedText)]">
                         {entry.idempotencyKey || "—"}
                       </td>
                     </tr>
@@ -379,7 +387,9 @@ export const AdminPaymentDetailPage = () => {
           }`}
         >
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-white">Balance audit</h3>
+            <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
+              Balance audit
+            </h3>
             <span
               className={`text-xs font-semibold uppercase tracking-wide ${
                 hasMismatch ? "text-amber-100" : "text-green-100"
@@ -416,9 +426,13 @@ export const AdminPaymentDetailPage = () => {
 };
 
 const DetailCard = ({ label, value }: { label: string; value: ReactNode }) => (
-  <div className="bg-white/5 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/10 space-y-1">
-    <p className="text-xs uppercase tracking-wide text-gray-400">{label}</p>
-    <div className="text-sm text-white break-all">{value || "—"}</div>
+  <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-4 shadow-lg shadow-black/10 space-y-1">
+    <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
+      {label}
+    </p>
+    <div className="text-sm text-[color:var(--sf-text)] break-all">
+      {value || "—"}
+    </div>
   </div>
 );
 
@@ -444,8 +458,8 @@ const StatusBadge = ({
 };
 
 const AuditRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex items-center justify-between text-sm text-white">
-    <span className="text-gray-300">{label}</span>
+  <div className="flex items-center justify-between text-sm text-[color:var(--sf-text)]">
+    <span className="text-[color:var(--sf-mutedText)]">{label}</span>
     <span className="font-semibold">{value}</span>
   </div>
 );

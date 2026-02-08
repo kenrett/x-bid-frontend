@@ -30,13 +30,15 @@ export const AdminAuctionCreate = () => {
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-xs uppercase tracking-wide text-gray-500">Create</p>
-        <h2 className="text-2xl font-serif font-bold text-white">
+        <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
+          Create
+        </p>
+        <h2 className="text-2xl font-serif font-bold text-[color:var(--sf-text)]">
           New auction
         </h2>
       </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+      <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-6">
         <AdminAuctionForm
           submitLabel="Create auction"
           onSubmit={handleSubmit}

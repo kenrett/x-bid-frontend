@@ -80,17 +80,23 @@ export const AdminAuctionEdit = () => {
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-xs uppercase tracking-wide text-gray-500">Edit</p>
-        <h2 className="text-2xl font-serif font-bold text-white">
+        <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
+          Edit
+        </p>
+        <h2 className="text-2xl font-serif font-bold text-[color:var(--sf-text)]">
           Update auction
         </h2>
       </div>
 
-      {loading && <p className="text-sm text-gray-400">Loading auction...</p>}
+      {loading && (
+        <p className="text-sm text-[color:var(--sf-mutedText)]">
+          Loading auction...
+        </p>
+      )}
       {error && <p className="text-sm text-red-300">{error}</p>}
 
       {!loading && !error && auction && (
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+        <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-6">
           <AdminAuctionForm
             initialValues={auction}
             submitLabel="Save changes"

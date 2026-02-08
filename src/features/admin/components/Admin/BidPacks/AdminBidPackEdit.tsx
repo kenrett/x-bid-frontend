@@ -94,25 +94,33 @@ export const AdminBidPackEdit = () => {
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-xs uppercase tracking-wide text-gray-500">Edit</p>
-        <h2 className="text-2xl font-serif font-bold text-white">
+        <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
+          Edit
+        </p>
+        <h2 className="text-2xl font-serif font-bold text-[color:var(--sf-text)]">
           Update bid pack
         </h2>
       </div>
 
-      {loading && <p className="text-sm text-gray-400">Loading bid pack...</p>}
+      {loading && (
+        <p className="text-sm text-[color:var(--sf-mutedText)]">
+          Loading bid pack...
+        </p>
+      )}
       {error && <p className="text-sm text-red-300">{error}</p>}
 
       {!loading && !error && bidPack && (
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
+        <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-300">Status:</span>
+              <span className="text-sm text-[color:var(--sf-mutedText)]">
+                Status:
+              </span>
               <span
                 className={`text-xs font-semibold px-2 py-1 rounded-full ${
                   bidPack.status === "active"
                     ? "bg-green-900 text-green-100"
-                    : "bg-gray-800 text-gray-200 border border-white/10"
+                    : "bg-gray-800 text-[color:var(--sf-mutedText)] border border-[color:var(--sf-border)]"
                 }`}
               >
                 {bidPack.status === "active" ? "Active" : "Retired"}

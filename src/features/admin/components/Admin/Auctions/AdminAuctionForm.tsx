@@ -221,24 +221,24 @@ export const AdminAuctionForm = ({
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <label className="flex flex-col gap-2 text-sm text-gray-200">
+        <label className="flex flex-col gap-2 text-sm text-[color:var(--sf-mutedText)]">
           <span className="font-semibold">Title *</span>
           <input
             type="text"
             value={formState.title}
             onChange={handleChange("title")}
-            className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="rounded-lg bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
             placeholder="e.g., Vintage Guitar Auction"
             required
           />
         </label>
 
-        <label className="flex flex-col gap-2 text-sm text-gray-200">
+        <label className="flex flex-col gap-2 text-sm text-[color:var(--sf-mutedText)]">
           <span className="font-semibold">Status</span>
           <select
             value={formState.status}
             onChange={handleChange("status")}
-            className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="rounded-lg bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
           >
             <option value="">Select status</option>
             {statusOptions.map((status) => (
@@ -249,17 +249,17 @@ export const AdminAuctionForm = ({
           </select>
         </label>
 
-        <label className="flex flex-col gap-2 text-sm text-gray-200 md:col-span-2">
+        <label className="flex flex-col gap-2 text-sm text-[color:var(--sf-mutedText)] md:col-span-2">
           <span className="font-semibold">Description</span>
           <textarea
             value={formState.description}
             onChange={handleChange("description")}
-            className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500 min-h-[120px]"
+            className="rounded-lg bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)] min-h-[120px]"
             placeholder="Short description for bidders."
           />
         </label>
 
-        <div className="flex flex-col gap-4 text-sm text-gray-200 md:col-span-2">
+        <div className="flex flex-col gap-4 text-sm text-[color:var(--sf-mutedText)] md:col-span-2">
           {resolvedUploadAdapter ? (
             <FileUploadField
               id="auction-image-upload"
@@ -275,25 +275,25 @@ export const AdminAuctionForm = ({
             />
           ) : null}
 
-          <label className="flex flex-col gap-2 text-sm text-gray-200">
+          <label className="flex flex-col gap-2 text-sm text-[color:var(--sf-mutedText)]">
             <span className="font-semibold">Image URL</span>
             <input
               type="url"
               value={formState.image_url}
               onChange={handleChange("image_url")}
-              className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="rounded-lg bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
               placeholder="https://example.com/image.jpg"
             />
           </label>
         </div>
 
-        <label className="flex flex-col gap-2 text-sm text-gray-200">
+        <label className="flex flex-col gap-2 text-sm text-[color:var(--sf-mutedText)]">
           <span className="font-semibold">Current Price</span>
           <input
             type="number"
             value={formState.current_price}
             onChange={handleChange("current_price")}
-            className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="rounded-lg bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
             placeholder="0.00"
             step="0.01"
             min="0"
@@ -324,7 +324,7 @@ export const AdminAuctionForm = ({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="bg-pink-600 hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+          className="bg-pink-600 hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed text-[color:var(--sf-text)] px-4 py-2 rounded-lg font-semibold transition-colors"
         >
           {isSubmitting ? "Saving..." : submitLabel}
         </button>

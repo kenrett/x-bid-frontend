@@ -119,21 +119,27 @@ export const AdminUsersPage = () => {
     return (
       <div className="space-y-4">
         <div>
-          <p className="text-xs uppercase tracking-wide text-gray-500">Users</p>
-          <h2 className="text-3xl font-serif font-bold text-white">
+          <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
+            Users
+          </p>
+          <h2 className="text-3xl font-serif font-bold text-[color:var(--sf-text)]">
             Admin accounts
           </h2>
-          <p className="text-sm text-gray-400 mt-1">Superadmin-only page.</p>
+          <p className="text-sm text-[color:var(--sf-mutedText)] mt-1">
+            Superadmin-only page.
+          </p>
         </div>
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-gray-200">
-          <p className="font-semibold text-white">Access denied</p>
-          <p className="text-sm text-gray-400 mt-1">
+        <div className="rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-4 text-[color:var(--sf-mutedText)]">
+          <p className="font-semibold text-[color:var(--sf-text)]">
+            Access denied
+          </p>
+          <p className="text-sm text-[color:var(--sf-mutedText)] mt-1">
             You don&apos;t have permission to view admin user management.
           </p>
           <div className="mt-4 flex gap-3">
             <Link
               to="/admin"
-              className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-white transition-colors"
+              className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-[color:var(--sf-text)] transition-colors"
             >
               Back to admin
             </Link>
@@ -147,11 +153,13 @@ export const AdminUsersPage = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wide text-gray-500">Users</p>
-          <h2 className="text-3xl font-serif font-bold text-white">
+          <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
+            Users
+          </p>
+          <h2 className="text-3xl font-serif font-bold text-[color:var(--sf-text)]">
             Admin accounts
           </h2>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-[color:var(--sf-mutedText)] mt-1">
             Manage user roles and access.
           </p>
         </div>

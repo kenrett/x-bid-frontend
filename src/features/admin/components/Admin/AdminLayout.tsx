@@ -21,15 +21,15 @@ export const AdminLayout = () => {
     <Page>
       <div className="container mx-auto">
         <div className="grid grid-cols-[240px_1fr] gap-8">
-          <aside className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col gap-6">
+          <aside className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-5 flex flex-col gap-6">
             <div>
-              <div className="text-xs uppercase tracking-wide text-gray-400 mb-1">
+              <div className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)] mb-1">
                 Signed in as
               </div>
-              <div className="text-lg font-semibold text-white truncate">
+              <div className="text-lg font-semibold text-[color:var(--sf-text)] truncate">
                 {user?.name ?? "Admin"}
               </div>
-              <div className="text-xs text-gray-500 truncate">
+              <div className="text-xs text-[color:var(--sf-mutedText)] truncate">
                 {user?.email}
               </div>
             </div>
@@ -41,8 +41,8 @@ export const AdminLayout = () => {
                   className={({ isActive }) =>
                     `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       isActive
-                        ? "bg-gradient-to-r from-pink-500/70 to-purple-600/70 text-white shadow-lg shadow-purple-500/30"
-                        : "text-gray-300 hover:text-white hover:bg-white/10"
+                        ? "bg-[linear-gradient(90deg,var(--sf-primary),var(--sf-accent))] text-[color:var(--sf-onPrimary)] shadow-lg shadow-purple-500/30"
+                        : "text-[color:var(--sf-mutedText)] hover:text-[color:var(--sf-text)] hover:bg-white/10"
                     }`
                   }
                 >
@@ -52,7 +52,7 @@ export const AdminLayout = () => {
             </nav>
             <button
               onClick={logout}
-              className="mt-auto text-sm font-medium text-gray-200 bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg py-2 transition-colors"
+              className="mt-auto text-sm font-medium text-[color:var(--sf-mutedText)] bg-white/10 hover:bg-white/20 border border-[color:var(--sf-border)] rounded-lg py-2 transition-colors"
             >
               Log Out
             </button>
@@ -61,22 +61,24 @@ export const AdminLayout = () => {
           <section className="space-y-4">
             <header className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-wide text-gray-500">
+                <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
                   Admin Console
                 </p>
-                <h1 className="text-3xl font-serif font-bold text-white">
+                <h1 className="text-3xl font-serif font-bold text-[color:var(--sf-text)]">
                   Control Center
                 </h1>
               </div>
               <div className="text-right">
-                <p className="text-sm text-gray-400">Welcome back</p>
-                <p className="text-lg font-semibold text-white">
+                <p className="text-sm text-[color:var(--sf-mutedText)]">
+                  Welcome back
+                </p>
+                <p className="text-lg font-semibold text-[color:var(--sf-text)]">
                   {user?.name ?? "Admin"}
                 </p>
               </div>
             </header>
 
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-lg shadow-purple-500/10">
+            <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-6 shadow-lg shadow-purple-500/10">
               <Outlet />
             </div>
           </section>

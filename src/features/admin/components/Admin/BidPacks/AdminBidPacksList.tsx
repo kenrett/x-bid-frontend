@@ -108,27 +108,32 @@ export const AdminBidPacksList = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wide text-gray-500">
+          <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
             Bid Packs
           </p>
-          <h2 className="text-2xl font-serif font-bold text-white">
+          <h2 className="text-2xl font-serif font-bold text-[color:var(--sf-text)]">
             Manage bid packs
           </h2>
         </div>
         <Link
           to="/admin/bid-packs/new"
-          className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+          className="bg-pink-600 hover:bg-pink-700 text-[color:var(--sf-text)] px-4 py-2 rounded-lg font-semibold transition-colors"
         >
           New Bid Pack
         </Link>
       </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-3">
-        <div className="flex items-center justify-between flex-wrap gap-2 text-sm text-gray-300">
+      <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-4 space-y-3">
+        <div className="flex items-center justify-between flex-wrap gap-2 text-sm text-[color:var(--sf-mutedText)]">
           <span>
             Showing{" "}
-            <span className="text-white font-semibold">{filtered.length}</span>{" "}
-            of <span className="text-white font-semibold">{packs.length}</span>{" "}
+            <span className="text-[color:var(--sf-text)] font-semibold">
+              {filtered.length}
+            </span>{" "}
+            of{" "}
+            <span className="text-[color:var(--sf-text)] font-semibold">
+              {packs.length}
+            </span>{" "}
             packs
           </span>
           <button
@@ -138,7 +143,7 @@ export const AdminBidPacksList = () => {
               setHighlightFilter("all");
               void fetchPacks();
             }}
-            className="text-sm text-gray-200 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-3 py-2 transition-colors"
+            className="text-sm text-[color:var(--sf-mutedText)] bg-[color:var(--sf-surface)] hover:bg-white/10 border border-[color:var(--sf-border)] rounded-lg px-3 py-2 transition-colors"
           >
             Clear filters
           </button>
@@ -149,7 +154,7 @@ export const AdminBidPacksList = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name"
-            className="rounded-lg bg-black/20 border border-white/10 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="rounded-lg bg-black/20 border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
           />
           <div className="flex flex-wrap gap-2">
             {(["all", "featured", "standard"] as const).map((filter) => (
@@ -159,8 +164,8 @@ export const AdminBidPacksList = () => {
                 onClick={() => setHighlightFilter(filter)}
                 className={`text-sm px-3 py-2 rounded-lg border transition-colors ${
                   highlightFilter === filter
-                    ? "bg-pink-600 border-pink-400 text-white"
-                    : "bg-white/5 border-white/10 text-gray-200 hover:bg-white/10"
+                    ? "bg-pink-600 border-pink-400 text-[color:var(--sf-text)]"
+                    : "bg-[color:var(--sf-surface)] border-[color:var(--sf-border)] text-[color:var(--sf-mutedText)] hover:bg-white/10"
                 }`}
               >
                 {filter === "all"
@@ -174,13 +179,17 @@ export const AdminBidPacksList = () => {
         </div>
       </div>
 
-      {loading && <p className="text-sm text-gray-400">Loading bid packs...</p>}
+      {loading && (
+        <p className="text-sm text-[color:var(--sf-mutedText)]">
+          Loading bid packs...
+        </p>
+      )}
       {!loading && error && (
         <div className="rounded-2xl border border-red-500/30 bg-red-900/30 p-4 text-red-100 flex items-center justify-between">
           <div className="text-sm">{error}</div>
           <button
             onClick={() => void fetchPacks()}
-            className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors"
+            className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-[color:var(--sf-text)] transition-colors"
           >
             Retry
           </button>
@@ -188,20 +197,20 @@ export const AdminBidPacksList = () => {
       )}
 
       {!loading && !error && (
-        <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+        <div className="overflow-hidden rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)]">
           {!hasPacks ? (
-            <div className="p-6 text-gray-300 flex items-center justify-between">
+            <div className="p-6 text-[color:var(--sf-mutedText)] flex items-center justify-between">
               <span>No bid packs found.</span>
               <button
                 onClick={() => void fetchPacks()}
-                className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors"
+                className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-[color:var(--sf-text)] transition-colors"
               >
                 Retry
               </button>
             </div>
           ) : (
-            <table className="min-w-full text-sm text-gray-200">
-              <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-gray-400">
+            <table className="min-w-full text-sm text-[color:var(--sf-mutedText)]">
+              <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-[color:var(--sf-mutedText)]">
                 <tr>
                   <th className="px-4 py-3">Name</th>
                   <th className="px-4 py-3">Bids</th>
@@ -215,7 +224,7 @@ export const AdminBidPacksList = () => {
               <tbody className="divide-y divide-white/10">
                 {filtered.map((pack) => (
                   <tr key={pack.id} className="hover:bg-white/[0.04]">
-                    <td className="px-4 py-3 font-semibold text-white">
+                    <td className="px-4 py-3 font-semibold text-[color:var(--sf-text)]">
                       {pack.name}
                     </td>
                     <td className="px-4 py-3">{pack.bids}</td>
@@ -227,8 +236,8 @@ export const AdminBidPacksList = () => {
                       <span
                         className={`text-xs font-semibold px-2 py-1 rounded-full ${
                           pack.highlight
-                            ? "bg-pink-900 text-pink-100"
-                            : "bg-white/10 text-gray-200"
+                            ? "bg-pink-900 text-[color:var(--sf-accent)]"
+                            : "bg-white/10 text-[color:var(--sf-mutedText)]"
                         }`}
                       >
                         {pack.highlight ? "Featured" : "Standard"}
@@ -239,7 +248,7 @@ export const AdminBidPacksList = () => {
                         className={`text-xs font-semibold px-2 py-1 rounded-full ${
                           pack.status === "active"
                             ? "bg-green-900 text-green-100"
-                            : "bg-gray-800 text-gray-200 border border-white/10"
+                            : "bg-gray-800 text-[color:var(--sf-mutedText)] border border-[color:var(--sf-border)]"
                         }`}
                       >
                         {pack.status === "active" ? "Active" : "Retired"}

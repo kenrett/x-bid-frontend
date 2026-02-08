@@ -46,13 +46,13 @@ export const AdminAuctionDetail = () => {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-wide text-gray-500">
+          <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
             Admin Monitor
           </p>
-          <h2 className="text-3xl font-serif font-bold text-white">
+          <h2 className="text-3xl font-serif font-bold text-[color:var(--sf-text)]">
             {auction.title}
           </h2>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-[color:var(--sf-mutedText)] mt-1">
             Live overview with bid stream and controls.
           </p>
         </div>
@@ -60,7 +60,7 @@ export const AdminAuctionDetail = () => {
           <button
             onClick={() => void handleRefresh()}
             disabled={isRefreshing}
-            className="text-sm text-gray-200 bg-white/10 hover:bg-white/20 border border-white/10 rounded-lg px-3 py-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-sm text-[color:var(--sf-mutedText)] bg-white/10 hover:bg-white/20 border border-[color:var(--sf-border)] rounded-lg px-3 py-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isRefreshing ? "Refreshing..." : "Force refresh"}
           </button>
@@ -88,24 +88,34 @@ export const AdminAuctionDetail = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
-          <h3 className="text-lg font-semibold text-white mb-2">Details</h3>
-          <div className="space-y-2 text-sm text-gray-200">
+        <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-4">
+          <h3 className="text-lg font-semibold text-[color:var(--sf-text)] mb-2">
+            Details
+          </h3>
+          <div className="space-y-2 text-sm text-[color:var(--sf-mutedText)]">
             <div>
-              <span className="text-gray-400">Description: </span>
+              <span className="text-[color:var(--sf-mutedText)]">
+                Description:{" "}
+              </span>
               <span>{auction.description || "—"}</span>
             </div>
             <div>
-              <span className="text-gray-400">Image URL: </span>
+              <span className="text-[color:var(--sf-mutedText)]">
+                Image URL:{" "}
+              </span>
               <span className="break-all">{auction.image_url || "—"}</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+        <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-lg font-semibold text-white">Bid history</h3>
-            <span className="text-xs text-gray-400">{bids.length} bids</span>
+            <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
+              Bid history
+            </h3>
+            <span className="text-xs text-[color:var(--sf-mutedText)]">
+              {bids.length} bids
+            </span>
           </div>
           <div className="max-h-[420px] overflow-auto pr-2">
             <BidHistory bids={bids} />
@@ -123,8 +133,12 @@ const InfoCard = ({
   label: string;
   value: React.ReactNode;
 }) => (
-  <div className="bg-white/5 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/20">
-    <p className="text-xs uppercase tracking-wide text-gray-400">{label}</p>
-    <div className="text-lg font-semibold text-white break-all">{value}</div>
+  <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-4 shadow-lg shadow-black/20">
+    <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
+      {label}
+    </p>
+    <div className="text-lg font-semibold text-[color:var(--sf-text)] break-all">
+      {value}
+    </div>
   </div>
 );
