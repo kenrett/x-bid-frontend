@@ -244,10 +244,14 @@ export const AdminPaymentDetailPage = () => {
         ) : null}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="space-y-1">
-            <label className="block text-xs uppercase tracking-wide text-gray-400">
+            <label
+              htmlFor="refund-amount"
+              className="block text-xs uppercase tracking-wide text-gray-400"
+            >
               Refund amount ($)
             </label>
             <input
+              id="refund-amount"
               value={refundAmount}
               onChange={(event) => setRefundAmount(event.target.value)}
               placeholder="e.g. 5.00"
@@ -256,10 +260,14 @@ export const AdminPaymentDetailPage = () => {
             />
           </div>
           <div className="space-y-1 md:col-span-2">
-            <label className="block text-xs uppercase tracking-wide text-gray-400">
+            <label
+              htmlFor="refund-reason"
+              className="block text-xs uppercase tracking-wide text-gray-400"
+            >
               Reason (optional)
             </label>
             <input
+              id="refund-reason"
               value={refundReason}
               onChange={(event) => setRefundReason(event.target.value)}
               placeholder="e.g. duplicate purchase"

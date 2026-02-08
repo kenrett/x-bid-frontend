@@ -128,9 +128,9 @@ describe("AdminPaymentDetailPage", () => {
 
     expect(await screen.findByText(/payer@example.com/i)).toBeInTheDocument();
 
-    await user.type(screen.getByPlaceholderText("e.g. 5.00"), "5.00");
+    await user.type(screen.getByLabelText(/refund amount \(\$\)/i), "5.00");
     await user.type(
-      screen.getByPlaceholderText("e.g. duplicate purchase"),
+      screen.getByLabelText(/reason \(optional\)/i),
       " duplicate ",
     );
     await user.click(screen.getByRole("button", { name: /issue refund/i }));
