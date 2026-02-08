@@ -94,8 +94,10 @@ export const VerifyEmailPage = () => {
   return (
     <Page centered>
       <div className="w-full max-w-xl text-center">
-        <h1 className="font-serif text-4xl font-bold text-white">{heading}</h1>
-        <p className="mt-3 text-base text-gray-300">
+        <h1 className="font-serif text-4xl font-bold text-[color:var(--sf-text)]">
+          {heading}
+        </h1>
+        <p className="mt-3 text-base text-[color:var(--sf-mutedText)]">
           {state.status === "loading"
             ? "Verifying your email…"
             : state.status === "success"
@@ -122,13 +124,13 @@ export const VerifyEmailPage = () => {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
               to="/login"
-              className="inline-flex items-center justify-center rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
+              className="inline-flex items-center justify-center rounded-lg border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-2 text-sm font-semibold text-[color:var(--sf-text)] hover:bg-white/10"
             >
               Go to login
             </Link>
             <Link
               to="/account"
-              className="inline-flex items-center justify-center rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
+              className="inline-flex items-center justify-center rounded-lg border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-2 text-sm font-semibold text-[color:var(--sf-text)] hover:bg-white/10"
             >
               Go to account
             </Link>

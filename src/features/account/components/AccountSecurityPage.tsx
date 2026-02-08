@@ -5,7 +5,7 @@ import { normalizeApiError, type FieldErrors } from "@api/normalizeApiError";
 import { showToast } from "@services/toast";
 
 const INPUT_CLASSES =
-  "w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40";
+  "w-full rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-3 text-[color:var(--sf-text)] placeholder:text-[color:var(--sf-mutedText)] shadow-inner shadow-black/10 outline-none transition focus:border-[color:var(--sf-focus-ring)]/70 focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]/40";
 
 const MIN_PASSWORD_LEN = 12;
 const RESEND_COOLDOWN_SECONDS = 30;
@@ -178,14 +178,20 @@ export const AccountSecurityPage = () => {
   };
 
   if (loading) {
-    return <p className="text-gray-400 text-lg">Loading security…</p>;
+    return (
+      <p className="text-[color:var(--sf-mutedText)] text-lg">
+        Loading security…
+      </p>
+    );
   }
 
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <h2 className="text-2xl font-semibold text-white">Security</h2>
-        <p className="text-sm text-gray-300">
+        <h2 className="text-2xl font-semibold text-[color:var(--sf-text)]">
+          Security
+        </h2>
+        <p className="text-sm text-[color:var(--sf-mutedText)]">
           Update your password and manage email verification.
         </p>
       </header>
@@ -202,10 +208,12 @@ export const AccountSecurityPage = () => {
       )}
 
       <section
-        className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-5"
+        className="grid gap-4 rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-5"
         aria-busy={savingPassword ? "true" : "false"}
       >
-        <h3 className="text-lg font-semibold text-white">Change password</h3>
+        <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
+          Change password
+        </h3>
 
         {passwordError && (
           <div
@@ -292,7 +300,7 @@ export const AccountSecurityPage = () => {
                 {passwordFieldErrors.new_password[0]}
               </p>
             ) : (
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-[color:var(--sf-mutedText)]">
                 Use at least {MIN_PASSWORD_LEN} characters.
               </p>
             )}
@@ -348,17 +356,19 @@ export const AccountSecurityPage = () => {
         </div>
       </section>
 
-      <section className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-5">
-        <h3 className="text-lg font-semibold text-white">Email verification</h3>
+      <section className="grid gap-4 rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-5">
+        <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
+          Email verification
+        </h3>
 
         <div className="grid gap-2">
-          <div className="text-sm text-gray-300">
+          <div className="text-sm text-[color:var(--sf-mutedText)]">
             Status:{" "}
-            <span className="font-semibold text-white">
+            <span className="font-semibold text-[color:var(--sf-text)]">
               {security?.emailVerified ? "Verified" : "Unverified"}
             </span>
           </div>
-          <div className="text-sm text-gray-400">
+          <div className="text-sm text-[color:var(--sf-mutedText)]">
             Verified at: {formatDateTime(security?.emailVerifiedAt)}
           </div>
         </div>
@@ -382,7 +392,7 @@ export const AccountSecurityPage = () => {
             type="button"
             onClick={handleResendVerification}
             disabled={resending || resendCooldownRemaining > 0}
-            className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10 disabled:opacity-50"
+            className="rounded-lg border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-2 text-sm font-semibold text-[color:var(--sf-text)] hover:bg-white/10 disabled:opacity-50"
           >
             {resending
               ? "Sending…"
@@ -391,24 +401,24 @@ export const AccountSecurityPage = () => {
                 : "Resend verification email"}
           </button>
           {!security?.emailVerified && (
-            <p className="text-sm text-gray-300">
+            <p className="text-sm text-[color:var(--sf-mutedText)]">
               Verification is required for sensitive account actions.
             </p>
           )}
         </div>
       </section>
 
-      <section className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-5">
-        <h3 className="text-lg font-semibold text-white">
+      <section className="grid gap-4 rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-5">
+        <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
           Two-factor authentication
         </h3>
-        <p className="text-sm text-gray-300">
+        <p className="text-sm text-[color:var(--sf-mutedText)]">
           Add an extra step during sign-in using an authenticator app and
           recovery codes.
         </p>
         <Link
           to="/account/security/2fa"
-          className="inline-flex w-fit items-center rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
+          className="inline-flex w-fit items-center rounded-lg border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-2 text-sm font-semibold text-[color:var(--sf-text)] hover:bg-white/10"
         >
           Manage 2FA
         </Link>

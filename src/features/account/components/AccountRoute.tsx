@@ -9,7 +9,9 @@ export const AccountRoute = () => {
   if (!isReady) {
     return (
       <Page centered>
-        <p className="text-gray-400 text-lg">Loading your account...</p>
+        <p className="text-[color:var(--sf-mutedText)] text-lg">
+          Loading your account...
+        </p>
       </Page>
     );
   }

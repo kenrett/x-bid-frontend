@@ -77,14 +77,20 @@ export const AccountNotificationsPage = () => {
   };
 
   if (loading) {
-    return <p className="text-gray-400 text-lg">Loading notifications…</p>;
+    return (
+      <p className="text-[color:var(--sf-mutedText)] text-lg">
+        Loading notifications…
+      </p>
+    );
   }
 
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <h2 className="text-2xl font-semibold text-white">Notifications</h2>
-        <p className="text-sm text-gray-300">
+        <h2 className="text-2xl font-semibold text-[color:var(--sf-text)]">
+          Notifications
+        </h2>
+        <p className="text-sm text-[color:var(--sf-mutedText)]">
           Choose which emails and alerts you receive.
         </p>
       </header>
@@ -103,7 +109,7 @@ export const AccountNotificationsPage = () => {
         </div>
       )}
 
-      <section className="grid gap-3 rounded-2xl border border-white/10 bg-white/5 p-5">
+      <section className="grid gap-3 rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-5">
         <Toggle
           label="Marketing emails"
           description="Discounts, promos, and offers."
@@ -155,7 +161,7 @@ export const AccountNotificationsPage = () => {
           type="button"
           onClick={() => setPrefs(originalPrefs)}
           disabled={!isDirty}
-          className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10 disabled:opacity-50"
+          className="rounded-lg border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-2 text-sm font-semibold text-[color:var(--sf-text)] hover:bg-white/10 disabled:opacity-50"
         >
           Reset
         </button>
@@ -175,10 +181,14 @@ const Toggle = ({
   checked: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => (
-  <label className="flex items-start justify-between gap-4 rounded-xl border border-white/10 bg-black/20 px-4 py-3">
+  <label className="flex items-start justify-between gap-4 rounded-xl border border-[color:var(--sf-border)] bg-black/20 px-4 py-3">
     <div className="space-y-1">
-      <div className="text-sm font-semibold text-white">{label}</div>
-      <div className="text-xs text-gray-400">{description}</div>
+      <div className="text-sm font-semibold text-[color:var(--sf-text)]">
+        {label}
+      </div>
+      <div className="text-xs text-[color:var(--sf-mutedText)]">
+        {description}
+      </div>
     </div>
     <input
       type="checkbox"

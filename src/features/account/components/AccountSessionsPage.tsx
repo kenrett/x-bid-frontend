@@ -106,14 +106,20 @@ export const AccountSessionsPage = () => {
   })();
 
   if (loading) {
-    return <p className="text-gray-400 text-lg">Loading sessions…</p>;
+    return (
+      <p className="text-[color:var(--sf-mutedText)] text-lg">
+        Loading sessions…
+      </p>
+    );
   }
 
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <h2 className="text-2xl font-semibold text-white">Sessions</h2>
-        <p className="text-sm text-gray-300">
+        <h2 className="text-2xl font-semibold text-[color:var(--sf-text)]">
+          Sessions
+        </h2>
+        <p className="text-sm text-[color:var(--sf-mutedText)]">
           Manage devices signed into your account.
         </p>
       </header>
@@ -128,9 +134,9 @@ export const AccountSessionsPage = () => {
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="text-sm text-gray-300">
+        <div className="text-sm text-[color:var(--sf-mutedText)]">
           Current session:{" "}
-          <span className="font-semibold text-white">
+          <span className="font-semibold text-[color:var(--sf-text)]">
             {currentSession?.deviceLabel ?? "—"}
           </span>
         </div>
@@ -156,7 +162,7 @@ export const AccountSessionsPage = () => {
             type="button"
             onClick={() => setPendingConfirm({ kind: "revoke_others" })}
             disabled={revokingOthers}
-            className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10 disabled:opacity-50"
+            className="rounded-lg border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-2 text-sm font-semibold text-[color:var(--sf-text)] hover:bg-white/10 disabled:opacity-50"
           >
             {revokingOthers ? "Signing out…" : "Sign out of other devices"}
           </button>
@@ -165,18 +171,20 @@ export const AccountSessionsPage = () => {
 
       <div className="grid gap-3">
         {sessions.length === 0 ? (
-          <p className="text-sm text-gray-300">No sessions found.</p>
+          <p className="text-sm text-[color:var(--sf-mutedText)]">
+            No sessions found.
+          </p>
         ) : (
           sessions.map((session) => (
             <div
               key={session.id}
               data-testid={`session-card-${session.id}`}
-              className="rounded-2xl border border-white/10 bg-white/5 p-4"
+              className="rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-4"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <div className="text-sm font-semibold text-white">
+                    <div className="text-sm font-semibold text-[color:var(--sf-text)]">
                       {session.deviceLabel}
                     </div>
                     {session.isCurrent && (
@@ -185,7 +193,7 @@ export const AccountSessionsPage = () => {
                       </span>
                     )}
                   </div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-xs text-[color:var(--sf-mutedText)]">
                     {session.ip ? `IP: ${session.ip} • ` : ""}
                     Last seen: {formatDateTime(session.lastSeenAt)} • Created:{" "}
                     {formatDateTime(session.createdAt)}

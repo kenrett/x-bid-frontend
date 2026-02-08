@@ -70,7 +70,7 @@ export const AccountVerifyEmailPage = () => {
               {next ? (
                 <Link
                   to={nextUrl ?? "/"}
-                  className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a]"
+                  className="inline-flex items-center justify-center rounded-lg border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-3 py-2 text-xs font-semibold text-[color:var(--sf-text)] hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sf-focus-ring)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a]"
                 >
                   Back
                 </Link>
@@ -79,16 +79,16 @@ export const AccountVerifyEmailPage = () => {
           </div>
         </div>
       ) : null}
-      <h2 className="font-serif text-4xl font-bold mb-3 text-white">
+      <h2 className="font-serif text-4xl font-bold mb-3 text-[color:var(--sf-text)]">
         Verify your email
       </h2>
-      <p className="mb-6 text-lg text-gray-400">
+      <p className="mb-6 text-lg text-[color:var(--sf-mutedText)]">
         {isVerified
           ? "Your email is verified."
           : "Verify your email to place bids and buy bid packs."}
       </p>
       {user?.email ? (
-        <p className="mb-6 text-sm text-gray-300">
+        <p className="mb-6 text-sm text-[color:var(--sf-mutedText)]">
           Signed in as <span className="font-semibold">{user.email}</span>
         </p>
       ) : null}

@@ -161,14 +161,20 @@ export const AccountExportPage = () => {
   };
 
   if (loading) {
-    return <p className="text-gray-400 text-lg">Loading export status…</p>;
+    return (
+      <p className="text-[color:var(--sf-mutedText)] text-lg">
+        Loading export status…
+      </p>
+    );
   }
 
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <h2 className="text-2xl font-semibold text-white">Export your data</h2>
-        <p className="text-sm text-gray-300">
+        <h2 className="text-2xl font-semibold text-[color:var(--sf-text)]">
+          Export your data
+        </h2>
+        <p className="text-sm text-[color:var(--sf-mutedText)]">
           Download a copy of your account data as JSON. Exports may take a few
           moments to generate.
         </p>
@@ -197,20 +203,24 @@ export const AccountExportPage = () => {
         />
       ) : null}
 
-      <section className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-5">
-        <h3 className="text-lg font-semibold text-white">Current status</h3>
+      <section className="grid gap-4 rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-5">
+        <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
+          Current status
+        </h3>
 
-        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-gray-200">
+        <div className="rounded-xl border border-[color:var(--sf-border)] bg-black/20 px-4 py-3 text-sm text-[color:var(--sf-mutedText)]">
           <div>
             Status:{" "}
-            <span className="font-semibold text-white">
+            <span className="font-semibold text-[color:var(--sf-text)]">
               {exportStatus?.status ?? "—"}
             </span>
             {polling ? (
-              <span className="ml-2 text-xs text-gray-400">(checking…)</span>
+              <span className="ml-2 text-xs text-[color:var(--sf-mutedText)]">
+                (checking…)
+              </span>
             ) : null}
           </div>
-          <div className="text-xs text-gray-400">
+          <div className="text-xs text-[color:var(--sf-mutedText)]">
             Requested: {formatDateTime(exportStatus?.requestedAt)} • Ready:{" "}
             {formatDateTime(exportStatus?.readyAt)}
           </div>
@@ -233,7 +243,7 @@ export const AccountExportPage = () => {
             type="button"
             onClick={() => void load()}
             disabled={requesting || polling}
-            className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10 disabled:opacity-50"
+            className="rounded-lg border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-2 text-sm font-semibold text-[color:var(--sf-text)] hover:bg-white/10 disabled:opacity-50"
           >
             Refresh status
           </button>
@@ -241,7 +251,7 @@ export const AccountExportPage = () => {
             <button
               type="button"
               onClick={() => download(exportStatus.downloadUrl!)}
-              className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
+              className="rounded-lg border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-2 text-sm font-semibold text-[color:var(--sf-text)] hover:bg-white/10"
             >
               Download JSON
             </button>

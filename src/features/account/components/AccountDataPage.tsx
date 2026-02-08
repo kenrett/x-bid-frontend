@@ -4,8 +4,10 @@ export const AccountDataPage = () => {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <h2 className="text-2xl font-semibold text-white">Data</h2>
-        <p className="text-sm text-gray-300">
+        <h2 className="text-2xl font-semibold text-[color:var(--sf-text)]">
+          Data
+        </h2>
+        <p className="text-sm text-[color:var(--sf-mutedText)]">
           Export your data or permanently delete your account.
         </p>
       </header>
@@ -13,13 +15,15 @@ export const AccountDataPage = () => {
       <div className="grid gap-4 md:grid-cols-2">
         <Link
           to="/account/data/export"
-          className="block rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:bg-white/10"
+          className="block rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-5 transition hover:bg-white/10"
         >
-          <h3 className="text-lg font-semibold text-white">Export your data</h3>
-          <p className="mt-1 text-sm text-gray-300">
+          <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
+            Export your data
+          </h3>
+          <p className="mt-1 text-sm text-[color:var(--sf-mutedText)]">
             Request an export and download it as JSON.
           </p>
-          <div className="mt-4 text-sm font-semibold text-pink-200">
+          <div className="mt-4 text-sm font-semibold text-[color:var(--sf-accent)]">
             Manage export →
           </div>
         </Link>

@@ -81,8 +81,10 @@ export const AccountDeletePage = () => {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <h2 className="text-2xl font-semibold text-white">Delete account</h2>
-        <p className="text-sm text-gray-300">
+        <h2 className="text-2xl font-semibold text-[color:var(--sf-text)]">
+          Delete account
+        </h2>
+        <p className="text-sm text-[color:var(--sf-mutedText)]">
           Permanently remove your account and all associated data.
         </p>
       </header>
@@ -125,7 +127,7 @@ export const AccountDeletePage = () => {
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             ref={currentPasswordRef}
-            className="w-full rounded-xl border border-red-400/30 bg-black/20 px-4 py-3 text-white placeholder:text-gray-500 outline-none transition focus:ring-2 focus:ring-red-500/40"
+            className="w-full rounded-xl border border-red-400/30 bg-black/20 px-4 py-3 text-[color:var(--sf-text)] placeholder:text-[color:var(--sf-mutedText)] outline-none transition focus:ring-2 focus:ring-red-500/40"
             autoComplete="current-password"
             aria-invalid={
               deleteFieldErrors.current_password?.length ? "true" : "false"

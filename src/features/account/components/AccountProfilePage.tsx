@@ -5,7 +5,7 @@ import { showToast } from "@services/toast";
 import { useAuth } from "@features/auth/hooks/useAuth";
 
 const INPUT_CLASSES =
-  "w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40";
+  "w-full rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-3 text-[color:var(--sf-text)] placeholder:text-[color:var(--sf-mutedText)] shadow-inner shadow-black/10 outline-none transition focus:border-[color:var(--sf-focus-ring)]/70 focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]/40";
 
 const formatDateTime = (value: string | undefined) => {
   if (!value) return "—";
@@ -134,13 +134,19 @@ export const AccountProfilePage = () => {
   };
 
   if (loading) {
-    return <p className="text-gray-400 text-lg">Loading profile…</p>;
+    return (
+      <p className="text-[color:var(--sf-mutedText)] text-lg">
+        Loading profile…
+      </p>
+    );
   }
 
   if (error && !profile) {
     return (
       <div className="space-y-3">
-        <h2 className="text-2xl font-semibold text-white">Profile</h2>
+        <h2 className="text-2xl font-semibold text-[color:var(--sf-text)]">
+          Profile
+        </h2>
         <p role="alert" className="text-red-300">
           {error}
         </p>
@@ -151,8 +157,10 @@ export const AccountProfilePage = () => {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <h2 className="text-2xl font-semibold text-white">Profile</h2>
-        <p className="text-sm text-gray-300">
+        <h2 className="text-2xl font-semibold text-[color:var(--sf-text)]">
+          Profile
+        </h2>
+        <p className="text-sm text-[color:var(--sf-mutedText)]">
           Review your account details and manage email verification.
         </p>
       </header>
@@ -171,8 +179,10 @@ export const AccountProfilePage = () => {
         </div>
       )}
 
-      <section className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-5">
-        <h3 className="text-lg font-semibold text-white">Account info</h3>
+      <section className="grid gap-4 rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-5">
+        <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
+          Account info
+        </h3>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
@@ -199,7 +209,7 @@ export const AccountProfilePage = () => {
 
           <div className="space-y-2">
             <div className="block text-sm font-semibold">Email</div>
-            <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white">
+            <div className="rounded-xl border border-[color:var(--sf-border)] bg-black/20 px-4 py-3 text-[color:var(--sf-text)]">
               {profile?.email ?? "—"}
             </div>
           </div>
@@ -207,14 +217,18 @@ export const AccountProfilePage = () => {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1">
-            <div className="text-sm text-gray-400">Created</div>
-            <div className="text-sm text-gray-100">
+            <div className="text-sm text-[color:var(--sf-mutedText)]">
+              Created
+            </div>
+            <div className="text-sm text-[color:var(--sf-mutedText)]">
               {formatDateTime(profile?.createdAt)}
             </div>
           </div>
           <div className="space-y-1">
-            <div className="text-sm text-gray-400">Email verified</div>
-            <div className="text-sm text-gray-100">
+            <div className="text-sm text-[color:var(--sf-mutedText)]">
+              Email verified
+            </div>
+            <div className="text-sm text-[color:var(--sf-mutedText)]">
               {formatYesNo(profile?.emailVerified)}
               {profile?.emailVerifiedAt
                 ? ` (at ${formatDateTime(profile.emailVerifiedAt ?? undefined)})`
@@ -235,18 +249,20 @@ export const AccountProfilePage = () => {
           <button
             type="button"
             onClick={() => setNameDraft(profile?.name ?? "")}
-            className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
+            className="rounded-lg border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-2 text-sm font-semibold text-[color:var(--sf-text)] hover:bg-white/10"
           >
             Reset
           </button>
         </div>
       </section>
 
-      <section className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-5">
+      <section className="grid gap-4 rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
-            <h3 className="text-lg font-semibold text-white">Change email</h3>
-            <p className="text-sm text-gray-300">
+            <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
+              Change email
+            </h3>
+            <p className="text-sm text-[color:var(--sf-mutedText)]">
               Email changes require verification. We’ll send a verification link
               to your new address.
             </p>
@@ -254,7 +270,7 @@ export const AccountProfilePage = () => {
           <button
             type="button"
             onClick={() => setShowEmailChange((v) => !v)}
-            className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
+            className="rounded-lg border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-2 text-sm font-semibold text-[color:var(--sf-text)] hover:bg-white/10"
           >
             {showEmailChange ? "Close" : "Change email"}
           </button>
@@ -339,7 +355,7 @@ export const AccountProfilePage = () => {
                     ? "Sent"
                     : "Send verification"}
               </button>
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-[color:var(--sf-mutedText)]">
                 {emailChangeStatus === "sent"
                   ? "Check your inbox to verify the new email."
                   : "We’ll keep your current email active until verified."}

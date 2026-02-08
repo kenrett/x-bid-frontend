@@ -121,17 +121,19 @@ export const AccountTwoFactorPage = () => {
 
   if (loading) {
     return (
-      <p className="text-gray-400 text-lg">Loading two-factor status...</p>
+      <p className="text-[color:var(--sf-mutedText)] text-lg">
+        Loading two-factor status...
+      </p>
     );
   }
 
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <h2 className="text-2xl font-semibold text-white">
+        <h2 className="text-2xl font-semibold text-[color:var(--sf-text)]">
           Two-factor authentication
         </h2>
-        <p className="text-sm text-gray-300">
+        <p className="text-sm text-[color:var(--sf-mutedText)]">
           Add an extra layer of protection to your account with an authenticator
           app.
         </p>
@@ -146,13 +148,13 @@ export const AccountTwoFactorPage = () => {
         </div>
       )}
 
-      <section className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-5">
+      <section className="grid gap-4 rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-5">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold text-white">
+            <p className="text-sm font-semibold text-[color:var(--sf-text)]">
               Status: {status?.enabled ? "Enabled" : "Not enabled"}
             </p>
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-[color:var(--sf-mutedText)]">
               Enabled at: {formatDateTime(status?.enabledAt)}
             </p>
           </div>
@@ -169,12 +171,12 @@ export const AccountTwoFactorPage = () => {
         </div>
 
         {!status?.enabled ? (
-          <p className="text-sm text-gray-300">
+          <p className="text-sm text-[color:var(--sf-mutedText)]">
             Use an authenticator app (like 1Password, Google Authenticator, or
             Authy) to generate one-time codes when you sign in.
           </p>
         ) : (
-          <p className="text-sm text-gray-300">
+          <p className="text-sm text-[color:var(--sf-mutedText)]">
             Two-factor authentication is active. Keep your recovery codes stored
             safely.
           </p>
@@ -182,12 +184,12 @@ export const AccountTwoFactorPage = () => {
       </section>
 
       {step === "setup" && setup ? (
-        <section className="grid gap-5 rounded-2xl border border-white/10 bg-white/5 p-5">
+        <section className="grid gap-5 rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-5">
           <div>
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
               Scan the QR code
             </h3>
-            <p className="text-sm text-gray-300">
+            <p className="text-sm text-[color:var(--sf-mutedText)]">
               Open your authenticator app and scan the QR code or enter the
               secret manually.
             </p>
@@ -197,19 +199,21 @@ export const AccountTwoFactorPage = () => {
               <img
                 src={qrSrc}
                 alt="Two-factor QR code"
-                className="h-40 w-40 rounded-xl border border-white/10 bg-white/5 p-2"
+                className="h-40 w-40 rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-2"
               />
             ) : (
-              <div className="flex h-40 w-40 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-xs text-gray-400">
+              <div className="flex h-40 w-40 items-center justify-center rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] text-xs text-[color:var(--sf-mutedText)]">
                 QR code pending
               </div>
             )}
             <div className="space-y-2">
-              <div className="text-sm font-semibold text-white">Secret key</div>
-              <div className="rounded-lg border border-white/10 bg-black/30 px-3 py-2 font-mono text-sm text-gray-100">
+              <div className="text-sm font-semibold text-[color:var(--sf-text)]">
+                Secret key
+              </div>
+              <div className="rounded-lg border border-[color:var(--sf-border)] bg-black/30 px-3 py-2 font-mono text-sm text-[color:var(--sf-mutedText)]">
                 {setup.secret}
               </div>
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-[color:var(--sf-mutedText)]">
                 Issuer: {setup.issuer ?? "X Bid"} • Account:{" "}
                 {setup.accountName ?? "Your account"}
               </div>
@@ -228,7 +232,7 @@ export const AccountTwoFactorPage = () => {
               value={code}
               onChange={(e) => setCode(e.target.value)}
               ref={codeRef}
-              className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
+              className="w-full rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-3 text-[color:var(--sf-text)] placeholder:text-[color:var(--sf-mutedText)] outline-none transition focus:border-[color:var(--sf-focus-ring)]/70 focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]/40"
               placeholder="123456"
               inputMode="numeric"
               autoComplete="one-time-code"
@@ -248,7 +252,7 @@ export const AccountTwoFactorPage = () => {
               type="button"
               onClick={() => setStep("status")}
               disabled={busy}
-              className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10 disabled:opacity-50"
+              className="rounded-lg border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-2 text-sm font-semibold text-[color:var(--sf-text)] hover:bg-white/10 disabled:opacity-50"
             >
               Cancel
             </button>
