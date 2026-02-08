@@ -1758,6 +1758,7 @@ export interface components {
       sessions_revoked?: number;
       status?: string;
     };
+    "5873aa90c67f4c11a7daaa4d2302bb84": components["schemas"]["AccountTwoFactorVerifyRequest"];
     "5bb19a086e9077f5192683c8c05feaa9": components["schemas"]["CheckoutStatus"];
     "5fa0310957b5c0b33595a49f03b95e19": components["schemas"]["ChangePasswordRequest"];
     "6175057dd6ab3c3e45d847a73028d9c3": components["schemas"]["BidPlacementResponse"];
@@ -1779,6 +1780,7 @@ export interface components {
       session_token_id?: number;
       user?: Record<string, never>;
     };
+    "7d23008fce7117726abc26fc1bdba80c": components["schemas"]["AccountTwoFactorDisableRequest"];
     "8f2da65cfba791e94dd2ba283fcaf20b": components["schemas"]["AuctionUpsert"];
     "8fcf44720df100dc78c3cb161689ebb0": components["schemas"]["RefreshRequest"];
     "92391726031d167dc21005ee2680953a": components["schemas"]["Auction"];
@@ -1860,6 +1862,17 @@ export interface components {
     AccountSessionsResponse: {
       sessions: components["schemas"]["AccountSession"][];
     };
+    AccountTwoFactorDisableRequest:
+      | {
+          account: {
+            code: string;
+            current_password: string;
+          };
+        }
+      | {
+          code: string;
+          current_password: string;
+        };
     AccountTwoFactorDisableResponse: {
       status: string;
     };
@@ -1872,6 +1885,15 @@ export interface components {
       /** Format: date-time */
       enabled_at: string | null;
     };
+    AccountTwoFactorVerifyRequest:
+      | {
+          account: {
+            code: string;
+          };
+        }
+      | {
+          code: string;
+        };
     AccountTwoFactorVerifyResponse: {
       recovery_codes: string[];
       status: string;
@@ -3081,16 +3103,28 @@ export interface components {
         "application/json": components["schemas"]["a9e1a606eb82c3fa25a4df4f74ec3380"];
       };
     };
-    /** @description Maintenance toggle */
+    /** @description Verify payload */
     req_013: {
+      content: {
+        "application/json": components["schemas"]["5873aa90c67f4c11a7daaa4d2302bb84"];
+      };
+    };
+    /** @description Maintenance toggle */
+    req_014: {
       content: {
         "application/json": components["schemas"]["30d3c70eaf62d1e420cb43b97fdec55f"];
       };
     };
     /** @description Signup payload */
-    req_014: {
+    req_015: {
       content: {
         "application/json": components["schemas"]["fca7ae9c5b5a5fdbca32473db8333bdf"];
+      };
+    };
+    /** @description Disable payload */
+    req_016: {
+      content: {
+        "application/json": components["schemas"]["7d23008fce7117726abc26fc1bdba80c"];
       };
     };
   };
@@ -3205,7 +3239,7 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: components["requestBodies"]["req_016"];
     responses: {
       200: components["responses"]["resp_051"];
       401: components["responses"]["resp_070"];
@@ -3236,7 +3270,7 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: components["requestBodies"]["req_013"];
     responses: {
       200: components["responses"]["resp_037"];
       401: components["responses"]["resp_070"];
@@ -3822,7 +3856,7 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody?: components["requestBodies"]["req_013"];
+    requestBody?: components["requestBodies"]["req_014"];
     responses: {
       200: components["responses"]["resp_038"];
       400: components["responses"]["resp_021"];
@@ -4696,7 +4730,7 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody: components["requestBodies"]["req_014"];
+    requestBody: components["requestBodies"]["req_015"];
     responses: {
       201: components["responses"]["resp_005"];
       422: components["responses"]["resp_065"];
@@ -4757,7 +4791,7 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody: components["requestBodies"]["req_014"];
+    requestBody: components["requestBodies"]["req_015"];
     responses: {
       201: components["responses"]["resp_005"];
       422: components["responses"]["resp_065"];
