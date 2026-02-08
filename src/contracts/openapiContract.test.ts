@@ -260,6 +260,24 @@ describe("OpenAPI contract drift", () => {
     ).toBe(true);
   });
 
+  it("admin refund request schema stays snake_case", () => {
+    const refundSchema = getRequestSchema(
+      openapiSchema,
+      "/api/v1/admin/payments/{id}/refund",
+      "post",
+    );
+
+    const refundFields = collectPropertyPaths(openapiSchema, refundSchema);
+    expect(refundFields.has("amount_cents")).toBe(true);
+    expect(refundFields.has("full_refund")).toBe(true);
+    expect(refundFields.has("reason")).toBe(true);
+
+    expect(refundFields.has("amountCents")).toBe(false);
+    expect(refundFields.has("fullRefund")).toBe(false);
+    expect(refundFields.has("refund.amountCents")).toBe(false);
+    expect(refundFields.has("refund.fullRefund")).toBe(false);
+  });
+
   it("login 401 uses canonical error envelope shape for 2FA-required flow", () => {
     const login401 = getResponseSchema(
       openapiSchema,

@@ -23,6 +23,15 @@ type RawPayment =
       ? Item
       : Record<string, unknown>;
 
+type OpenApiJsonRequestBody<
+  P extends keyof paths,
+  M extends keyof paths[P],
+> = paths[P][M] extends {
+  requestBody?: { content: { "application/json": infer T } };
+}
+  ? T
+  : never;
+
 type AdminPaymentDetailResponse = {
   purchase?: unknown;
   payment?: unknown;
@@ -53,6 +62,11 @@ type AdminRefundPaymentResponse = {
   refunded_cents?: unknown;
   refundedCents?: unknown;
 } & Record<string, unknown>;
+
+type AdminRefundRequestBody = OpenApiJsonRequestBody<
+  "/api/v1/admin/payments/{id}/refund",
+  "post"
+>;
 
 const toNumber = (value: unknown): number | null => {
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
@@ -454,11 +468,7 @@ export const adminPaymentsApi = {
   ): Promise<
     Payment & { refundId?: string | null; refundedCents?: number | null }
   > {
-    const body: {
-      amount_cents?: number;
-      full_refund?: true;
-      reason?: string;
-    } = {};
+    const body: AdminRefundRequestBody = {};
     if (typeof payload.amountCents === "number") {
       body.amount_cents = payload.amountCents;
     } else if (payload.fullRefund) {

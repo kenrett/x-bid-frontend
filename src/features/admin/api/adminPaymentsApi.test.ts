@@ -1,6 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import client from "@api/client";
+import type { paths } from "@api/openapi-types";
 import { adminPaymentsApi } from "./adminPaymentsApi";
+
+type OpenApiJsonRequestBody<
+  P extends keyof paths,
+  M extends keyof paths[P],
+> = paths[P][M] extends {
+  requestBody?: { content: { "application/json": infer T } };
+}
+  ? T
+  : never;
+
+type AdminRefundRequestBody = OpenApiJsonRequestBody<
+  "/api/v1/admin/payments/{id}/refund",
+  "post"
+>;
 
 vi.mock("@api/client", () => ({
   __esModule: true,
@@ -212,12 +227,14 @@ describe("adminPaymentsApi", () => {
       reason: " duplicate ",
     });
 
+    const expectedBody: AdminRefundRequestBody = {
+      amount_cents: 500,
+      reason: "duplicate",
+    };
+
     expect(mockedPost).toHaveBeenCalledWith(
       "/api/v1/admin/payments/10/refund",
-      {
-        amount_cents: 500,
-        reason: "duplicate",
-      },
+      expectedBody,
     );
     expect(result).toMatchObject({
       id: 10,
@@ -247,12 +264,14 @@ describe("adminPaymentsApi", () => {
       reason: "full",
     });
 
+    const expectedBody: AdminRefundRequestBody = {
+      full_refund: true,
+      reason: "full",
+    };
+
     expect(mockedPost).toHaveBeenCalledWith(
       "/api/v1/admin/payments/10/refund",
-      {
-        full_refund: true,
-        reason: "full",
-      },
+      expectedBody,
     );
   });
 });
