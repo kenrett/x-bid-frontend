@@ -125,7 +125,8 @@ const LinksCell = ({
       : null,
   ].filter(Boolean) as { href: string; label: string }[];
 
-  if (links.length === 0) return <span className="text-gray-500">—</span>;
+  if (links.length === 0)
+    return <span className="text-[color:var(--sf-mutedText)]">—</span>;
 
   return (
     <div className="flex gap-3">
@@ -309,7 +310,7 @@ export const BidHistoryPage = () => {
             <span>{error}</span>
             <button
               onClick={() => void handleLoad()}
-              className="self-start md:self-auto text-sm px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-colors"
+              className="self-start md:self-auto text-sm px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-[color:var(--sf-text)] hover:bg-white/20 transition-colors"
             >
               Retry
             </button>
@@ -320,37 +321,39 @@ export const BidHistoryPage = () => {
           {isLoading ? (
             <SummarySkeleton />
           ) : (
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl">
-              <p className="text-sm text-gray-400 mb-2">Credits balance</p>
+            <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-6 shadow-xl">
+              <p className="text-sm text-[color:var(--sf-mutedText)] mb-2">
+                Credits balance
+              </p>
               <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-bold text-white">
+                <span className="text-4xl font-bold text-[color:var(--sf-text)]">
                   {balanceLabel ?? "—"}
                 </span>
                 {wallet?.currency && (
-                  <span className="text-sm text-gray-400">
+                  <span className="text-sm text-[color:var(--sf-mutedText)]">
                     {wallet.currency}
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-[color:var(--sf-mutedText)] mt-2">
                 As of {formatDate(wallet?.asOf)}
               </p>
             </div>
           )}
         </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-4 shadow-xl">
+        <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-4 space-y-4 shadow-xl">
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
               Transaction history
             </h3>
-            <div className="text-xs text-gray-400">
+            <div className="text-xs text-[color:var(--sf-mutedText)]">
               Showing {transactions.length} entries
             </div>
           </div>
-          <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
-            <table className="min-w-full text-sm text-gray-200">
-              <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-gray-400">
+          <div className="overflow-hidden rounded-xl border border-[color:var(--sf-border)] bg-black/20">
+            <table className="min-w-full text-sm text-[color:var(--sf-mutedText)]">
+              <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-[color:var(--sf-mutedText)]">
                 <tr>
                   <th className="px-4 py-3">Date</th>
                   <th className="px-4 py-3">Storefront</th>
@@ -367,7 +370,7 @@ export const BidHistoryPage = () => {
                   <tr>
                     <td
                       colSpan={6}
-                      className="px-4 py-6 text-center text-gray-400"
+                      className="px-4 py-6 text-center text-[color:var(--sf-mutedText)]"
                     >
                       No transactions yet
                     </td>
@@ -385,7 +388,7 @@ export const BidHistoryPage = () => {
                         );
                         return (
                           <>
-                            <td className="px-4 py-3 text-gray-200">
+                            <td className="px-4 py-3 text-[color:var(--sf-mutedText)]">
                               {formatDate(tx.occurredAt)}
                             </td>
                             <td className="px-4 py-3">
@@ -403,7 +406,7 @@ export const BidHistoryPage = () => {
                             >
                               {formatAmount(signedAmount)}
                             </td>
-                            <td className="px-4 py-3 text-gray-200">
+                            <td className="px-4 py-3 text-[color:var(--sf-mutedText)]">
                               {tx.reason ?? "—"}
                             </td>
                             <td className="px-4 py-3">
@@ -426,7 +429,7 @@ export const BidHistoryPage = () => {
               <button
                 onClick={() => void handleLoadMore()}
                 disabled={isLoadingMore}
-                className="px-4 py-2 rounded-lg border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-colors disabled:opacity-60"
+                className="px-4 py-2 rounded-lg border border-white/20 bg-white/10 text-[color:var(--sf-text)] hover:bg-white/20 transition-colors disabled:opacity-60"
               >
                 {isLoadingMore ? "Loading..." : "Load more"}
               </button>

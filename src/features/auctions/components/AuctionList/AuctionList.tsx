@@ -153,7 +153,9 @@ const AuctionList = () => {
   return (
     <Page>
       {auctions.length === 0 ? (
-        <p className="text-center text-gray-400">No auctions found.</p>
+        <p className="text-center text-[color:var(--sf-mutedText)]">
+          No auctions found.
+        </p>
       ) : (
         <div className="container mx-auto p-4">
           <div className="text-center mb-12">

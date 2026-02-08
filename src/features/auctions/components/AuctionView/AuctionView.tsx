@@ -205,7 +205,7 @@ const AuctionViewComponent = ({
                   )}
                   <Suspense
                     fallback={
-                      <div className="text-center text-gray-400">
+                      <div className="text-center text-[color:var(--sf-mutedText)]">
                         Loading bid history...
                       </div>
                     }

@@ -76,8 +76,8 @@ const StatusBadge = ({ status }: { status: PurchaseDetail["status"] }) => {
 };
 
 const DetailRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex items-center justify-between text-sm text-white">
-    <span className="text-gray-300">{label}</span>
+  <div className="flex items-center justify-between text-sm text-[color:var(--sf-text)]">
+    <span className="text-[color:var(--sf-mutedText)]">{label}</span>
     <span className="font-semibold break-all text-right">{value || "—"}</span>
   </div>
 );
@@ -116,7 +116,7 @@ const CopyButton = ({
       onClick={() => void handleCopy()}
       disabled={isDisabled}
       aria-label={label}
-      className="text-xs font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-2 py-1 text-white transition-colors disabled:opacity-50 disabled:hover:bg-white/10"
+      className="text-xs font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-2 py-1 text-[color:var(--sf-text)] transition-colors disabled:opacity-50 disabled:hover:bg-white/10"
     >
       {copied ? "Copied" : "Copy"}
     </button>
@@ -156,9 +156,11 @@ const extractStorefrontKeyFromError = (
 };
 
 const SummaryItem = ({ label, value }: { label: string; value: ReactNode }) => (
-  <div className="bg-white/5 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/10 space-y-1">
-    <p className="text-xs uppercase tracking-wide text-gray-400">{label}</p>
-    <div className="text-sm text-white">{value || "—"}</div>
+  <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-4 shadow-lg shadow-black/10 space-y-1">
+    <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
+      {label}
+    </p>
+    <div className="text-sm text-[color:var(--sf-text)]">{value || "—"}</div>
   </div>
 );
 
@@ -261,13 +263,13 @@ export const PurchaseDetailPage = () => {
             {error}
           </p>
           {blockedStorefront && (
-            <p className="text-sm text-white/70">
+            <p className="text-sm text-[color:var(--sf-text)]/70">
               This item belongs to {blockedStorefront.name}.{" "}
               <a
                 href={getStorefrontOrigin(blockedStorefront.key)}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="font-semibold text-white underline underline-offset-2"
+                className="font-semibold text-[color:var(--sf-text)] underline underline-offset-2"
                 onClick={() => {
                   const targetOrigin = getStorefrontOrigin(
                     blockedStorefront.key,
@@ -288,13 +290,13 @@ export const PurchaseDetailPage = () => {
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => void handleLoad()}
-              className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-white transition-colors"
+              className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-[color:var(--sf-text)] transition-colors"
             >
               Retry
             </button>
             <Link
               to="/account/purchases"
-              className="text-sm font-semibold bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-4 py-2 text-white transition-colors"
+              className="text-sm font-semibold bg-[color:var(--sf-surface)] hover:bg-white/10 border border-[color:var(--sf-border)] rounded-lg px-4 py-2 text-[color:var(--sf-text)] transition-colors"
             >
               Back to purchases
             </Link>
@@ -340,31 +342,37 @@ export const PurchaseDetailPage = () => {
                 href={purchase.receiptUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-sm text-pink-200 hover:text-pink-100 underline underline-offset-2"
+                className="text-sm text-[color:var(--sf-accent)] hover:text-[color:var(--sf-accent)] underline underline-offset-2"
               >
                 View receipt
               </a>
             ) : (
-              <span className="text-sm text-gray-400">Payment details</span>
+              <span className="text-sm text-[color:var(--sf-mutedText)]">
+                Payment details
+              </span>
             )}
           </div>
         </div>
 
-        <section className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg shadow-black/10 space-y-4">
-          <h2 className="text-lg font-semibold text-white">Purchase details</h2>
+        <section className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-5 shadow-lg shadow-black/10 space-y-4">
+          <h2 className="text-lg font-semibold text-[color:var(--sf-text)]">
+            Purchase details
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <SummaryItem
               label="Pack"
               value={
                 purchase.bidPackName ? (
-                  <span className="text-white">
+                  <span className="text-[color:var(--sf-text)]">
                     {purchase.bidPackName}
                     {purchase.bidPackId ? (
-                      <span className="text-gray-400">{` (#${purchase.bidPackId})`}</span>
+                      <span className="text-[color:var(--sf-mutedText)]">{` (#${purchase.bidPackId})`}</span>
                     ) : null}
                   </span>
                 ) : (
-                  <span className="text-gray-400">Unknown</span>
+                  <span className="text-[color:var(--sf-mutedText)]">
+                    Unknown
+                  </span>
                 )
               }
             />
@@ -374,7 +382,7 @@ export const PurchaseDetailPage = () => {
                 creditsAdded !== null && creditsAdded !== undefined ? (
                   `${creditsAdded.toLocaleString()} credits`
                 ) : (
-                  <span className="text-gray-400">—</span>
+                  <span className="text-[color:var(--sf-mutedText)]">—</span>
                 )
               }
             />
@@ -399,19 +407,19 @@ export const PurchaseDetailPage = () => {
                     href={purchase.receiptUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-pink-200 hover:text-pink-100 underline underline-offset-2"
+                    className="text-[color:var(--sf-accent)] hover:text-[color:var(--sf-accent)] underline underline-offset-2"
                   >
                     View receipt
                   </a>
                 ) : (
-                  <span className="text-gray-400">—</span>
+                  <span className="text-[color:var(--sf-mutedText)]">—</span>
                 )
               }
             />
           </div>
         </section>
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg shadow-black/10 space-y-3">
+        <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-5 shadow-lg shadow-black/10 space-y-3">
           <details
             open={showTechnical}
             onToggle={(event) =>
@@ -420,20 +428,22 @@ export const PurchaseDetailPage = () => {
             className="group"
           >
             <summary className="flex items-center justify-between cursor-pointer list-none">
-              <h3 className="text-lg font-semibold text-white">
+              <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
                 Support / Debug
               </h3>
-              <span className="text-sm font-semibold bg-white/10 group-open:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors">
+              <span className="text-sm font-semibold bg-white/10 group-open:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-[color:var(--sf-text)] transition-colors">
                 {showTechnical ? "Hide" : "Show"}
               </span>
             </summary>
             <div className="mt-4 space-y-4">
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-[color:var(--sf-mutedText)]">
                 Share these ids with support if something looks off.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center justify-between gap-3 text-sm text-white">
-                  <span className="text-gray-300">Purchase id</span>
+                <div className="flex items-center justify-between gap-3 text-sm text-[color:var(--sf-text)]">
+                  <span className="text-[color:var(--sf-mutedText)]">
+                    Purchase id
+                  </span>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold break-all text-right">
                       {purchase.id}
@@ -444,8 +454,10 @@ export const PurchaseDetailPage = () => {
                     />
                   </div>
                 </div>
-                <div className="flex items-center justify-between gap-3 text-sm text-white">
-                  <span className="text-gray-300">Ledger grant entry id</span>
+                <div className="flex items-center justify-between gap-3 text-sm text-[color:var(--sf-text)]">
+                  <span className="text-[color:var(--sf-mutedText)]">
+                    Ledger grant entry id
+                  </span>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold break-all text-right">
                       {purchase.ledgerGrantEntryId ?? "—"}

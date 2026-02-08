@@ -114,5 +114,9 @@ export function Countdown({ endTime, status, onEnd }: CountdownProps) {
     };
   }, [endTimestamp, status, notifyEnd]);
 
-  return <div className="text-3xl font-bold text-white">{timeRemaining}</div>;
+  return (
+    <div className="text-3xl font-bold text-[color:var(--sf-text)]">
+      {timeRemaining}
+    </div>
+  );
 }

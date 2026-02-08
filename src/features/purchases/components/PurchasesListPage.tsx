@@ -119,7 +119,9 @@ export const PurchasesListPage = () => {
   if (!isReady) {
     return (
       <Page centered>
-        <p className="text-gray-400 text-lg">Loading your purchases...</p>
+        <p className="text-[color:var(--sf-mutedText)] text-lg">
+          Loading your purchases...
+        </p>
       </Page>
     );
   }
@@ -150,10 +152,10 @@ export const PurchasesListPage = () => {
           <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--sf-mutedText)]">
             Account
           </p>
-          <h1 className="font-serif text-4xl font-bold text-white">
+          <h1 className="font-serif text-4xl font-bold text-[color:var(--sf-text)]">
             Purchases
           </h1>
-          <p className="text-gray-400">
+          <p className="text-[color:var(--sf-mutedText)]">
             Review your bid pack purchases and receipts.
           </p>
         </div>
@@ -169,7 +171,7 @@ export const PurchasesListPage = () => {
               </p>
               <button
                 onClick={() => void handleLoad()}
-                className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors"
+                className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-[color:var(--sf-text)] transition-colors"
               >
                 Retry
               </button>
@@ -177,20 +179,20 @@ export const PurchasesListPage = () => {
           </div>
         ) : null}
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-xl shadow-black/10">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-            <h2 className="text-lg font-semibold text-white">
+        <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl overflow-hidden shadow-xl shadow-black/10">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[color:var(--sf-border)]">
+            <h2 className="text-lg font-semibold text-[color:var(--sf-text)]">
               Purchase history
             </h2>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[color:var(--sf-mutedText)]">
               {isLoading
                 ? "Loading..."
                 : `${purchases.length} purchase${purchases.length === 1 ? "" : "s"}`}
             </p>
           </div>
           <div className="overflow-auto">
-            <table className="min-w-full text-sm text-gray-200">
-              <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-gray-400">
+            <table className="min-w-full text-sm text-[color:var(--sf-mutedText)]">
+              <thead className="bg-white/10 text-left uppercase text-xs tracking-wide text-[color:var(--sf-mutedText)]">
                 <tr>
                   <th className="px-4 py-3">Date</th>
                   <th className="px-4 py-3">Storefront</th>
@@ -207,7 +209,7 @@ export const PurchasesListPage = () => {
                 <tbody>
                   <tr>
                     <td
-                      className="px-4 py-6 text-center text-gray-400"
+                      className="px-4 py-6 text-center text-[color:var(--sf-mutedText)]"
                       colSpan={7}
                     >
                       No purchases yet.
@@ -232,7 +234,9 @@ export const PurchasesListPage = () => {
                       </td>
                       <td className="px-4 py-3">
                         {purchase.bidPackName || (
-                          <span className="text-gray-500">Unknown</span>
+                          <span className="text-[color:var(--sf-mutedText)]">
+                            Unknown
+                          </span>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -254,12 +258,14 @@ export const PurchasesListPage = () => {
                             target="_blank"
                             rel="noreferrer"
                             onClick={(event) => event.stopPropagation()}
-                            className="text-pink-200 hover:text-pink-100 underline underline-offset-2"
+                            className="text-[color:var(--sf-accent)] hover:text-[color:var(--sf-accent)] underline underline-offset-2"
                           >
                             View receipt
                           </a>
                         ) : (
-                          <span className="text-gray-400">Payment details</span>
+                          <span className="text-[color:var(--sf-mutedText)]">
+                            Payment details
+                          </span>
                         )}
                       </td>
                     </tr>

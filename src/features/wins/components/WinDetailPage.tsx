@@ -83,7 +83,8 @@ const statusMeta = (status: WinFulfillmentStatus) => {
   }
   return {
     label: "Unknown",
-    styles: "bg-white/10 text-gray-200 border border-white/20",
+    styles:
+      "bg-white/10 text-[color:var(--sf-mutedText)] border border-white/20",
     action: "View auction",
   };
 };
@@ -98,9 +99,11 @@ const StatusBadge = ({ status }: { status: WinFulfillmentStatus }) => {
 };
 
 const SummaryItem = ({ label, value }: { label: string; value: string }) => (
-  <div className="bg-white/5 border border-white/10 rounded-2xl p-4 shadow-lg shadow-black/10 space-y-1">
-    <p className="text-xs uppercase tracking-wide text-gray-400">{label}</p>
-    <div className="text-sm text-white">{value || "—"}</div>
+  <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-4 shadow-lg shadow-black/10 space-y-1">
+    <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
+      {label}
+    </p>
+    <div className="text-sm text-[color:var(--sf-text)]">{value || "—"}</div>
   </div>
 );
 
@@ -321,10 +324,10 @@ export const WinDetailPage = () => {
   if (!user) {
     return (
       <Page centered>
-        <h2 className="font-serif text-4xl font-bold mb-3 text-white">
+        <h2 className="font-serif text-4xl font-bold mb-3 text-[color:var(--sf-text)]">
           Sign in to view this win
         </h2>
-        <p className="mb-6 text-lg text-gray-400">
+        <p className="mb-6 text-lg text-[color:var(--sf-mutedText)]">
           You need an account to view your won auctions.
         </p>
         <Link
@@ -347,13 +350,13 @@ export const WinDetailPage = () => {
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => void handleLoad()}
-              className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-white transition-colors"
+              className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-[color:var(--sf-text)] transition-colors"
             >
               Retry
             </button>
             <Link
               to="/account/wins"
-              className="text-sm font-semibold bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-4 py-2 text-white transition-colors"
+              className="text-sm font-semibold bg-[color:var(--sf-surface)] hover:bg-white/10 border border-[color:var(--sf-border)] rounded-lg px-4 py-2 text-[color:var(--sf-text)] transition-colors"
             >
               Back to wins
             </Link>
@@ -412,30 +415,36 @@ export const WinDetailPage = () => {
         </div>
 
         {showTracking ? (
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg shadow-black/10 space-y-3">
+          <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-5 shadow-lg shadow-black/10 space-y-3">
             <div className="flex items-center justify-between gap-4">
-              <h3 className="text-lg font-semibold text-white">Tracking</h3>
+              <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
+                Tracking
+              </h3>
               {win.trackingUrl ? (
                 <a
                   href={win.trackingUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-sm text-pink-200 hover:text-pink-100 underline underline-offset-2"
+                  className="text-sm text-[color:var(--sf-accent)] hover:text-[color:var(--sf-accent)] underline underline-offset-2"
                 >
                   Track package
                 </a>
               ) : null}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-              <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-                <span className="text-gray-300">Carrier</span>
-                <span className="font-semibold text-white">
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-3">
+                <span className="text-[color:var(--sf-mutedText)]">
+                  Carrier
+                </span>
+                <span className="font-semibold text-[color:var(--sf-text)]">
                   {win.shippingCarrier || "—"}
                 </span>
               </div>
-              <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-                <span className="text-gray-300">Tracking #</span>
-                <span className="font-semibold text-white break-all text-right">
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-3">
+                <span className="text-[color:var(--sf-mutedText)]">
+                  Tracking #
+                </span>
+                <span className="font-semibold text-[color:var(--sf-text)] break-all text-right">
                   {win.trackingNumber || "—"}
                 </span>
               </div>
@@ -455,13 +464,13 @@ export const WinDetailPage = () => {
             <div className="mt-4 flex flex-wrap gap-3">
               <Link
                 to="/account/wins"
-                className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-white transition-colors"
+                className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-[color:var(--sf-text)] transition-colors"
               >
                 Back to wins
               </Link>
               <Link
                 to={`/auctions/${win.auctionId}`}
-                className="text-sm font-semibold bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-4 py-2 text-white transition-colors"
+                className="text-sm font-semibold bg-[color:var(--sf-surface)] hover:bg-white/10 border border-[color:var(--sf-border)] rounded-lg px-4 py-2 text-[color:var(--sf-text)] transition-colors"
               >
                 View auction
               </Link>
@@ -470,20 +479,20 @@ export const WinDetailPage = () => {
         ) : null}
 
         {canClaim ? (
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg shadow-black/10 space-y-4">
+          <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-5 shadow-lg shadow-black/10 space-y-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
                   Claim prize
                 </h3>
-                <p className="text-sm text-gray-300">
+                <p className="text-sm text-[color:var(--sf-mutedText)]">
                   Provide your shipping details to claim this win.
                 </p>
               </div>
               {!showClaimForm ? (
                 <button
                   onClick={() => setShowClaimForm(true)}
-                  className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-white transition-colors whitespace-nowrap"
+                  className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-[color:var(--sf-text)] transition-colors whitespace-nowrap"
                 >
                   Claim prize
                 </button>
@@ -516,7 +525,7 @@ export const WinDetailPage = () => {
                     <div key={key} className="space-y-2">
                       <label
                         htmlFor={`claim-${key}`}
-                        className="block text-sm font-semibold text-white"
+                        className="block text-sm font-semibold text-[color:var(--sf-text)]"
                       >
                         {label}
                       </label>
@@ -531,7 +540,7 @@ export const WinDetailPage = () => {
                             [key]: e.target.value,
                           }))
                         }
-                        className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
+                        className="w-full rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-3 text-[color:var(--sf-text)] placeholder:text-[color:var(--sf-mutedText)] shadow-inner shadow-black/10 outline-none transition focus:border-[color:var(--sf-focus-ring)]/70 focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]/40"
                         placeholder={placeholder}
                         aria-invalid={fieldErrors[key] ? "true" : "false"}
                       />
@@ -552,14 +561,14 @@ export const WinDetailPage = () => {
                       setClaimError(null);
                       setFieldErrors({});
                     }}
-                    className="text-sm font-semibold bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-4 py-2 text-white transition-colors"
+                    className="text-sm font-semibold bg-[color:var(--sf-surface)] hover:bg-white/10 border border-[color:var(--sf-border)] rounded-lg px-4 py-2 text-[color:var(--sf-text)] transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isClaiming}
-                    className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-white transition-colors disabled:opacity-60"
+                    className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-[color:var(--sf-text)] transition-colors disabled:opacity-60"
                   >
                     {isClaiming ? "Submitting..." : "Submit claim"}
                   </button>
@@ -570,9 +579,13 @@ export const WinDetailPage = () => {
         ) : null}
 
         {win.fulfillmentNote ? (
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-5 shadow-lg shadow-black/10 space-y-2">
-            <h3 className="text-lg font-semibold text-white">Notes</h3>
-            <p className="text-sm text-gray-300">{win.fulfillmentNote}</p>
+          <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-5 shadow-lg shadow-black/10 space-y-2">
+            <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
+              Notes
+            </h3>
+            <p className="text-sm text-[color:var(--sf-mutedText)]">
+              {win.fulfillmentNote}
+            </p>
           </div>
         ) : null}
       </div>

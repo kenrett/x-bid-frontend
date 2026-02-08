@@ -7,7 +7,7 @@ import { validateUploadFile } from "../uploadValidation";
 import { logUploadEvent } from "../uploadTelemetry";
 
 const BUTTON_CLASSES =
-  "rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50";
+  "rounded-lg border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-3 py-2 text-xs font-semibold text-[color:var(--sf-text)] transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50";
 
 const MAX_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 700;
@@ -262,14 +262,21 @@ export const FileUploadField = ({
     <div className="space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
-          <label htmlFor={id} className="text-sm font-semibold text-gray-200">
+          <label
+            htmlFor={id}
+            className="text-sm font-semibold text-[color:var(--sf-mutedText)]"
+          >
             {label}
           </label>
           {description ? (
-            <p className="text-xs text-gray-400">{description}</p>
+            <p className="text-xs text-[color:var(--sf-mutedText)]">
+              {description}
+            </p>
           ) : null}
           {helperText ? (
-            <p className="text-xs text-gray-400">{helperText}</p>
+            <p className="text-xs text-[color:var(--sf-mutedText)]">
+              {helperText}
+            </p>
           ) : null}
         </div>
         {status === "success" ? (
@@ -277,7 +284,7 @@ export const FileUploadField = ({
         ) : null}
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-3">
+      <div className="rounded-xl border border-[color:var(--sf-border)] bg-black/20 p-4 space-y-3">
         <input
           ref={inputRef}
           id={id}
@@ -286,11 +293,14 @@ export const FileUploadField = ({
           aria-describedby={ariaDescriptionId}
           onChange={handleFileChange}
           disabled={disabled || isUploading}
-          className="block w-full text-sm text-gray-200 file:mr-4 file:rounded-lg file:border-0 file:bg-pink-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-black hover:file:bg-pink-400 disabled:opacity-60"
+          className="block w-full text-sm text-[color:var(--sf-mutedText)] file:mr-4 file:rounded-lg file:border-0 file:bg-pink-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-black hover:file:bg-pink-400 disabled:opacity-60"
         />
 
         {status === "uploading" || status === "validating" ? (
-          <div className="text-xs text-gray-300" aria-live="polite">
+          <div
+            className="text-xs text-[color:var(--sf-mutedText)]"
+            aria-live="polite"
+          >
             {status === "validating"
               ? "Validating file..."
               : `Uploading...${attempt && maxAttempts > 1 ? ` (attempt ${attempt}/${maxAttempts})` : ""}`}
@@ -309,11 +319,13 @@ export const FileUploadField = ({
 
         {status === "success" && value && allowUrlPreview ? (
           <div className="space-y-2">
-            <div className="text-xs text-gray-400">Uploaded image preview</div>
+            <div className="text-xs text-[color:var(--sf-mutedText)]">
+              Uploaded image preview
+            </div>
             <img
               src={value}
               alt="Uploaded preview"
-              className="h-28 w-auto rounded-lg border border-white/10 object-cover"
+              className="h-28 w-auto rounded-lg border border-[color:var(--sf-border)] object-cover"
             />
           </div>
         ) : null}
