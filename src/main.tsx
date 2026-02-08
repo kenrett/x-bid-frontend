@@ -9,6 +9,11 @@ import { initSentry, SENTRY_ENABLED } from "./sentryClient";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary";
 import { logError } from "./services/logger";
 import { getStorefrontKey } from "./storefront/getStorefrontKey";
+import { ColorModeProvider } from "./theme/ColorModeProvider";
+import {
+  applyColorModeToDocument,
+  readColorModePreference,
+} from "./theme/colorMode";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Root element not found");
@@ -24,15 +29,18 @@ if (SENTRY_ENABLED) {
 }
 
 document.documentElement.dataset.storefront = getStorefrontKey();
+applyColorModeToDocument(readColorModePreference());
 
 createRoot(rootElement).render(
   <StrictMode>
     <ErrorBoundary onError={logError}>
-      <AuthProvider>
-        <FlowbiteInitializer />
-        <App />
-        <ToastContainer />
-      </AuthProvider>
+      <ColorModeProvider>
+        <AuthProvider>
+          <FlowbiteInitializer />
+          <App />
+          <ToastContainer />
+        </AuthProvider>
+      </ColorModeProvider>
     </ErrorBoundary>
   </StrictMode>,
 );

@@ -4,6 +4,7 @@ import {
   type StorefrontThemeTokens,
   type StorefrontKey,
 } from "./storefront";
+import type { ResolvedColorMode } from "../theme/colorMode";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
@@ -140,6 +141,7 @@ const resolveThemeContrastColors = (themeTokens: StorefrontThemeTokens) => {
     borderOnSurface,
     primary: toOpaque(parseColor(themeTokens.primary), background),
     accent: toOpaque(parseColor(themeTokens.accent), background),
+    focusRing: toOpaque(parseColor(themeTokens.focusRing), background),
     onPrimary: toOpaque(parseColor(themeTokens.onPrimary), background),
     status,
   };
@@ -156,30 +158,34 @@ describe("storefront configs", () => {
 });
 
 describe("storefront token contrast", () => {
-  it("meets AA contrast for critical primary and accent text usage", () => {
-    Object.values(STOREFRONT_CONFIGS).forEach(({ key, themeTokens }) => {
-      const colors = resolveThemeContrastColors(themeTokens);
+  const modes: ResolvedColorMode[] = ["light", "dark"];
 
-      expect(
-        contrastRatio(colors.onPrimary, colors.primary),
-        `${key}: onPrimary text on primary buttons`,
-      ).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT);
-      expect(
-        contrastRatio(colors.primary, colors.surface),
-        `${key}: primary text on surface`,
-      ).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT);
-      expect(
-        contrastRatio(colors.primary, colors.background),
-        `${key}: primary text on background`,
-      ).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT);
-      expect(
-        contrastRatio(colors.accent, colors.surface),
-        `${key}: accent text on surface`,
-      ).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT);
-      expect(
-        contrastRatio(colors.accent, colors.background),
-        `${key}: accent text on background`,
-      ).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT);
+  it("meets AA contrast for critical primary and accent text usage", () => {
+    Object.values(STOREFRONT_CONFIGS).forEach(({ key, themeTokensByMode }) => {
+      modes.forEach((mode) => {
+        const colors = resolveThemeContrastColors(themeTokensByMode[mode]);
+
+        expect(
+          contrastRatio(colors.onPrimary, colors.primary),
+          `${key}/${mode}: onPrimary text on primary buttons`,
+        ).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT);
+        expect(
+          contrastRatio(colors.primary, colors.surface),
+          `${key}/${mode}: primary text on surface`,
+        ).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT);
+        expect(
+          contrastRatio(colors.primary, colors.background),
+          `${key}/${mode}: primary text on background`,
+        ).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT);
+        expect(
+          contrastRatio(colors.accent, colors.surface),
+          `${key}/${mode}: accent text on surface`,
+        ).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT);
+        expect(
+          contrastRatio(colors.accent, colors.background),
+          `${key}/${mode}: accent text on background`,
+        ).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT);
+      });
     });
   });
 
@@ -190,35 +196,55 @@ describe("storefront token contrast", () => {
       afterdark: 3.0,
     };
 
-    Object.values(STOREFRONT_CONFIGS).forEach(({ key, themeTokens }) => {
-      const colors = resolveThemeContrastColors(themeTokens);
-      expect(
-        contrastRatio(colors.borderOnSurface, colors.surface),
-        `${key}: border against surface`,
-      ).toBeGreaterThanOrEqual(minimumBorderContrastByStorefront[key]);
+    Object.values(STOREFRONT_CONFIGS).forEach(({ key, themeTokensByMode }) => {
+      modes.forEach((mode) => {
+        const colors = resolveThemeContrastColors(themeTokensByMode[mode]);
+        expect(
+          contrastRatio(colors.borderOnSurface, colors.surface),
+          `${key}/${mode}: border against surface`,
+        ).toBeGreaterThanOrEqual(minimumBorderContrastByStorefront[key]);
+      });
     });
   });
 
   it("meets AA contrast for status text on status backgrounds", () => {
     const statusKeys = ["success", "warning", "error", "info"] as const;
 
-    Object.values(STOREFRONT_CONFIGS).forEach(({ key, themeTokens }) => {
-      const colors = resolveThemeContrastColors(themeTokens);
-      statusKeys.forEach((statusKey) => {
+    Object.values(STOREFRONT_CONFIGS).forEach(({ key, themeTokensByMode }) => {
+      modes.forEach((mode) => {
+        const colors = resolveThemeContrastColors(themeTokensByMode[mode]);
+        statusKeys.forEach((statusKey) => {
+          expect(
+            contrastRatio(
+              colors.status[statusKey].text,
+              colors.status[statusKey].bg,
+            ),
+            `${key}/${mode}: ${statusKey} status text on status background`,
+          ).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT);
+          expect(
+            contrastRatio(
+              colors.status[statusKey].border,
+              colors.status[statusKey].bg,
+            ),
+            `${key}/${mode}: ${statusKey} status border against status background`,
+          ).toBeGreaterThanOrEqual(1.5);
+        });
+      });
+    });
+  });
+
+  it("keeps focus ring visible against both surface and background", () => {
+    Object.values(STOREFRONT_CONFIGS).forEach(({ key, themeTokensByMode }) => {
+      modes.forEach((mode) => {
+        const colors = resolveThemeContrastColors(themeTokensByMode[mode]);
         expect(
-          contrastRatio(
-            colors.status[statusKey].text,
-            colors.status[statusKey].bg,
-          ),
-          `${key}: ${statusKey} status text on status background`,
-        ).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT);
+          contrastRatio(colors.focusRing, colors.surface),
+          `${key}/${mode}: focus ring against surface`,
+        ).toBeGreaterThanOrEqual(3);
         expect(
-          contrastRatio(
-            colors.status[statusKey].border,
-            colors.status[statusKey].bg,
-          ),
-          `${key}: ${statusKey} status border against status background`,
-        ).toBeGreaterThanOrEqual(1.5);
+          contrastRatio(colors.focusRing, colors.background),
+          `${key}/${mode}: focus ring against background`,
+        ).toBeGreaterThanOrEqual(3);
       });
     });
   });

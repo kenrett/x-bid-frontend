@@ -7,6 +7,7 @@ import { useAuth } from "../../features/auth/hooks/useAuth";
 import { useAccountStatus } from "@features/account/hooks/useAccountStatus";
 import { useStorefront } from "../../storefront/useStorefront";
 import { STOREFRONT_CONFIGS } from "../../storefront/storefront";
+import { ColorModeProvider } from "../../theme/ColorModeProvider";
 
 vi.mock("../../features/auth/hooks/useAuth");
 vi.mock("@features/account/hooks/useAccountStatus");
@@ -23,7 +24,9 @@ const mockLogout = vi.fn();
 const renderComponent = (initialPath = "/") => {
   return render(
     <MemoryRouter initialEntries={[initialPath]}>
-      <Header />
+      <ColorModeProvider>
+        <Header />
+      </ColorModeProvider>
     </MemoryRouter>,
   );
 };
@@ -31,6 +34,9 @@ const renderComponent = (initialPath = "/") => {
 describe("Header Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.localStorage.removeItem("xbid-color-mode");
+    document.documentElement.dataset.colorMode = "";
+    document.documentElement.dataset.colorModePreference = "";
     mockedUseAccountStatus.mockReturnValue({
       isLoading: false,
       error: null,
@@ -229,6 +235,31 @@ describe("Header Component", () => {
       expect(
         screen.getByRole("button", { name: /close main menu/i }),
       ).toHaveAttribute("aria-expanded", "true");
+    });
+
+    it("cycles global color mode and updates root attributes", async () => {
+      const user = userEvent.setup();
+      renderComponent();
+
+      const modeButton = screen.getByRole("button", {
+        name: /color mode system/i,
+      });
+      expect(document.documentElement.dataset.colorModePreference).toBe(
+        "system",
+      );
+      expect(document.documentElement.dataset.colorMode).toBe("light");
+
+      await user.click(modeButton);
+      expect(document.documentElement.dataset.colorModePreference).toBe(
+        "light",
+      );
+      expect(document.documentElement.dataset.colorMode).toBe("light");
+      expect(window.localStorage.getItem("xbid-color-mode")).toBe("light");
+
+      await user.click(modeButton);
+      expect(document.documentElement.dataset.colorModePreference).toBe("dark");
+      expect(document.documentElement.dataset.colorMode).toBe("dark");
+      expect(window.localStorage.getItem("xbid-color-mode")).toBe("dark");
     });
   });
 

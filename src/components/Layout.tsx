@@ -13,6 +13,7 @@ import { AuthDebugPanel } from "../debug/AuthDebugPanel";
 import { maybeLogStorefrontSwitchLanding } from "../debug/authDebugSwitch";
 import { UploadProvider } from "@features/uploads/UploadProvider";
 import { defaultUploadAdapter } from "@features/uploads/uploadConfig";
+import { useColorMode } from "../theme/ColorModeProvider";
 
 export const Layout = () => {
   const navigate = useNavigate();
@@ -20,7 +21,8 @@ export const Layout = () => {
   const redirectingRef = useRef(false);
   const { user, isReady } = useAuth();
   const { config } = useStorefront();
-  const { themeTokens } = config;
+  const { effectiveMode } = useColorMode();
+  const themeTokens = config.themeTokensByMode[effectiveMode];
 
   useEffect(() => {
     if (getAppMode() !== "account") return;
@@ -81,6 +83,7 @@ export const Layout = () => {
   return (
     <div
       className="flex min-h-screen flex-col bg-[var(--sf-background)] text-[var(--sf-text)]"
+      data-color-mode={effectiveMode}
       style={
         {
           ["--sf-primary"]: themeTokens.primary,
@@ -91,6 +94,7 @@ export const Layout = () => {
           ["--sf-text"]: themeTokens.text,
           ["--sf-mutedText"]: themeTokens.mutedText,
           ["--sf-onPrimary"]: themeTokens.onPrimary,
+          ["--sf-focus-ring"]: themeTokens.focusRing,
           ["--sf-radius"]: themeTokens.radius,
           ["--sf-shadow"]: themeTokens.shadow,
           ["--sf-heading-font"]: themeTokens.headingFont,

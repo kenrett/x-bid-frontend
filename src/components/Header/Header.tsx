@@ -7,6 +7,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Skeleton } from "../Skeleton";
 import { useStorefront } from "../../storefront/useStorefront";
 import { getAppMode } from "../../appMode/appMode";
+import { useColorMode } from "../../theme/ColorModeProvider";
+import {
+  getColorModeLabel,
+  getNextColorModePreference,
+} from "../../theme/colorMode";
 
 const STRINGS = {
   GREETING: "Hello",
@@ -66,16 +71,19 @@ const variants = {
     "relative w-60 h-auto drop-shadow-[0_10px_22px_rgba(15,23,42,0.16)] transition-transform duration-300 hover:scale-[1.02]",
   ),
   mobileMenuButton: cva(
-    "inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-[color:var(--sf-mutedText)] rounded-[var(--sf-radius)] hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-primary)]",
+    "inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-[color:var(--sf-mutedText)] rounded-[var(--sf-radius)] hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]",
   ),
   navList: cva(
     "font-medium flex flex-col p-3 md:p-0 mt-4 border border-[color:var(--sf-border)] rounded-[var(--sf-radius)] bg-[color:var(--sf-surface)] md:flex-row md:items-center md:space-x-2 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-transparent",
   ),
   logoutButton: cva(
-    "flex items-center gap-2 px-3 py-2 text-sm font-semibold text-[color:var(--sf-text)] bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-[var(--sf-radius)] hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-primary)] transition",
+    "flex items-center gap-2 px-3 py-2 text-sm font-semibold text-[color:var(--sf-text)] bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-[var(--sf-radius)] hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)] transition",
   ),
   signInLink: cva(
-    "inline-flex items-center justify-center text-sm bg-[color:var(--sf-primary)] text-[color:var(--sf-onPrimary)] px-4 py-2 rounded-[var(--sf-radius)] font-semibold shadow-[var(--sf-shadow)] transition hover:brightness-95 active:brightness-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-primary)]",
+    "inline-flex items-center justify-center text-sm bg-[color:var(--sf-primary)] text-[color:var(--sf-onPrimary)] px-4 py-2 rounded-[var(--sf-radius)] font-semibold shadow-[var(--sf-shadow)] transition hover:brightness-95 active:brightness-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]",
+  ),
+  colorModeButton: cva(
+    "inline-flex items-center justify-center rounded-[var(--sf-radius)] border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-3 py-2 text-sm font-semibold text-[color:var(--sf-text)] transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]",
   ),
 };
 
@@ -88,6 +96,7 @@ const NAV_ITEMS = [
 
 export function Header() {
   const { config: storefront } = useStorefront();
+  const { mode, modeLabel, setMode } = useColorMode();
   const appMode = getAppMode();
   const { user, logout, isReady } = useAuth();
   const isSuperAdmin = Boolean(user?.is_superuser);
@@ -130,6 +139,8 @@ export function Header() {
   );
 
   const location = useLocation();
+  const nextMode = getNextColorModePreference(mode);
+  const nextModeLabel = getColorModeLabel(nextMode);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -238,6 +249,16 @@ export function Header() {
                 {item.name}
               </NavItem>
             ))}
+            <li>
+              <button
+                type="button"
+                className={variants.colorModeButton()}
+                onClick={() => setMode(nextMode)}
+                aria-label={`Color mode ${modeLabel}. Activate to switch to ${nextModeLabel}.`}
+              >
+                Theme: {modeLabel}
+              </button>
+            </li>
             {user ? (
               <>
                 <li className="md:ml-4 flex items-center gap-4">

@@ -15,6 +15,15 @@
   --font-sans: "Zalando Sans Expanded", ui-sans-serif, system-ui, sans-serif;
   --sf-heading-font: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
   --sf-body-font: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  --sf-focus-ring: #1d4ed8;
+}
+
+:root[data-color-mode="light"] {
+  color-scheme: light;
+}
+
+:root[data-color-mode="dark"] {
+  color-scheme: dark;
 }
 
 body {

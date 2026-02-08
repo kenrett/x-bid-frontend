@@ -5,6 +5,7 @@ import { AuthProvider } from "../features/auth/providers/AuthProvider";
 import { Layout } from "./Layout";
 import { useStorefront } from "../storefront/useStorefront";
 import { STOREFRONT_CONFIGS } from "../storefront/storefront";
+import { ColorModeProvider } from "../theme/ColorModeProvider";
 
 const toastMocks = vi.hoisted(() => ({
   showToast: vi.fn(),
@@ -20,14 +21,16 @@ const mockedUseStorefront = vi.mocked(useStorefront);
 const renderWithContent = () =>
   render(
     <MemoryRouter initialEntries={["/"]}>
-      <AuthProvider>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<div>body content</div>} />
-            <Route path="/account/verify-email" element={<div>VERIFY</div>} />
-          </Route>
-        </Routes>
-      </AuthProvider>
+      <ColorModeProvider>
+        <AuthProvider>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<div>body content</div>} />
+              <Route path="/account/verify-email" element={<div>VERIFY</div>} />
+            </Route>
+          </Routes>
+        </AuthProvider>
+      </ColorModeProvider>
     </MemoryRouter>,
   );
 
@@ -69,10 +72,10 @@ describe("Layout", () => {
     const root = container.firstElementChild as HTMLElement | null;
     if (!root) throw new Error("missing layout root");
     expect(root.style.getPropertyValue("--sf-primary")).toBe(
-      STOREFRONT_CONFIGS.marketplace.themeTokens.primary,
+      STOREFRONT_CONFIGS.marketplace.themeTokensByMode.light.primary,
     );
     expect(root.style.getPropertyValue("--sf-background")).toBe(
-      STOREFRONT_CONFIGS.marketplace.themeTokens.background,
+      STOREFRONT_CONFIGS.marketplace.themeTokensByMode.light.background,
     );
   });
 });

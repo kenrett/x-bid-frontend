@@ -60,7 +60,10 @@ describe("main bootstrap", () => {
   beforeEach(() => {
     document.body.innerHTML = '<div id="root"></div>';
     document.documentElement.dataset.storefront = "";
+    document.documentElement.dataset.colorMode = "";
+    document.documentElement.dataset.colorModePreference = "";
     renderMock.mockClear();
+    window.localStorage.removeItem("xbid-color-mode");
     applyEnv({ VITE_STOREFRONT_KEY: "" });
     setHostname("afterdark.biddersweet.app");
   });
@@ -73,5 +76,7 @@ describe("main bootstrap", () => {
     vi.resetModules();
     await import("./main");
     expect(document.documentElement.dataset.storefront).toBe("afterdark");
+    expect(document.documentElement.dataset.colorModePreference).toBe("system");
+    expect(document.documentElement.dataset.colorMode).toBe("light");
   });
 });

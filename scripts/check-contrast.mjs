@@ -212,119 +212,145 @@ function runChecks() {
     });
   };
 
+  const modes = ["light", "dark"];
+
   for (const [storefrontKey, config] of Object.entries(storefronts)) {
-    const tokens = config?.themeTokens;
-    if (!tokens) {
-      fail(`Missing themeTokens for storefront "${storefrontKey}"`);
+    const tokensByMode = config?.themeTokensByMode;
+    if (!tokensByMode) {
+      fail(`Missing themeTokensByMode for storefront "${storefrontKey}"`);
     }
 
-    const background = parseColor(tokens.background);
-    const surfaceRaw = parseColor(tokens.surface);
-    const surface = toOpaque(surfaceRaw, background);
-    const primary = parseColor(tokens.primary);
-    const accent = parseColor(tokens.accent);
-    const onPrimary = parseColor(tokens.onPrimary);
-    const borderRaw = parseColor(tokens.border);
-    const borderOnSurface = toOpaque(borderRaw, surface);
-    const borderOnBackground = toOpaque(borderRaw, background);
+    for (const mode of modes) {
+      const tokens = tokensByMode[mode];
+      if (!tokens) {
+        fail(`Missing ${mode} tokens for storefront "${storefrontKey}"`);
+      }
 
-    check({
-      storefront: storefrontKey,
-      pair: "onPrimary text on primary",
-      fg: onPrimary,
-      bg: primary,
-      threshold: TEXT_THRESHOLD,
-    });
-
-    check({
-      storefront: storefrontKey,
-      pair: "primary text on background",
-      fg: primary,
-      bg: background,
-      threshold: TEXT_THRESHOLD,
-    });
-
-    check({
-      storefront: storefrontKey,
-      pair: "primary text on surface",
-      fg: primary,
-      bg: surface,
-      threshold: TEXT_THRESHOLD,
-    });
-
-    check({
-      storefront: storefrontKey,
-      pair: "accent text on background",
-      fg: accent,
-      bg: background,
-      threshold: TEXT_THRESHOLD,
-    });
-
-    check({
-      storefront: storefrontKey,
-      pair: "accent text on surface",
-      fg: accent,
-      bg: surface,
-      threshold: TEXT_THRESHOLD,
-    });
-
-    check({
-      storefront: storefrontKey,
-      pair: "border vs surface",
-      fg: borderOnSurface,
-      bg: surface,
-      threshold: NON_TEXT_THRESHOLD,
-    });
-
-    check({
-      storefront: storefrontKey,
-      pair: "border vs background",
-      fg: borderOnBackground,
-      bg: background,
-      threshold: NON_TEXT_THRESHOLD,
-    });
-
-    for (const [statusName, statusTokens] of Object.entries(tokens.status ?? {})) {
-      const statusBgRaw = parseColor(statusTokens.bg);
-      const statusText = parseColor(statusTokens.text);
-      const statusBorderRaw = parseColor(statusTokens.border);
-
-      const statusBgOnSurface = toOpaque(statusBgRaw, surface);
-      const statusBgOnBackground = toOpaque(statusBgRaw, background);
-      const statusBorderOnSurface = toOpaque(statusBorderRaw, statusBgOnSurface);
-      const statusBorderOnBackground = toOpaque(statusBorderRaw, statusBgOnBackground);
+      const background = parseColor(tokens.background);
+      const surfaceRaw = parseColor(tokens.surface);
+      const surface = toOpaque(surfaceRaw, background);
+      const primary = parseColor(tokens.primary);
+      const accent = parseColor(tokens.accent);
+      const onPrimary = parseColor(tokens.onPrimary);
+      const focusRing = parseColor(tokens.focusRing);
+      const borderRaw = parseColor(tokens.border);
+      const borderOnSurface = toOpaque(borderRaw, surface);
+      const borderOnBackground = toOpaque(borderRaw, background);
 
       check({
-        storefront: storefrontKey,
-        pair: `status.${statusName}.text on status.${statusName}.bg (on surface)`,
-        fg: statusText,
-        bg: statusBgOnSurface,
+        storefront: `${storefrontKey}/${mode}`,
+        pair: "onPrimary text on primary",
+        fg: onPrimary,
+        bg: primary,
         threshold: TEXT_THRESHOLD,
       });
 
       check({
-        storefront: storefrontKey,
-        pair: `status.${statusName}.text on status.${statusName}.bg (on background)`,
-        fg: statusText,
-        bg: statusBgOnBackground,
+        storefront: `${storefrontKey}/${mode}`,
+        pair: "primary text on background",
+        fg: primary,
+        bg: background,
         threshold: TEXT_THRESHOLD,
       });
 
       check({
-        storefront: storefrontKey,
-        pair: `status.${statusName}.border vs status.${statusName}.bg (on surface)`,
-        fg: statusBorderOnSurface,
-        bg: statusBgOnSurface,
+        storefront: `${storefrontKey}/${mode}`,
+        pair: "primary text on surface",
+        fg: primary,
+        bg: surface,
+        threshold: TEXT_THRESHOLD,
+      });
+
+      check({
+        storefront: `${storefrontKey}/${mode}`,
+        pair: "accent text on background",
+        fg: accent,
+        bg: background,
+        threshold: TEXT_THRESHOLD,
+      });
+
+      check({
+        storefront: `${storefrontKey}/${mode}`,
+        pair: "accent text on surface",
+        fg: accent,
+        bg: surface,
+        threshold: TEXT_THRESHOLD,
+      });
+
+      check({
+        storefront: `${storefrontKey}/${mode}`,
+        pair: "border vs surface",
+        fg: borderOnSurface,
+        bg: surface,
         threshold: NON_TEXT_THRESHOLD,
       });
 
       check({
-        storefront: storefrontKey,
-        pair: `status.${statusName}.border vs status.${statusName}.bg (on background)`,
-        fg: statusBorderOnBackground,
-        bg: statusBgOnBackground,
+        storefront: `${storefrontKey}/${mode}`,
+        pair: "border vs background",
+        fg: borderOnBackground,
+        bg: background,
         threshold: NON_TEXT_THRESHOLD,
       });
+
+      check({
+        storefront: `${storefrontKey}/${mode}`,
+        pair: "focus ring vs surface",
+        fg: focusRing,
+        bg: surface,
+        threshold: 3,
+      });
+
+      check({
+        storefront: `${storefrontKey}/${mode}`,
+        pair: "focus ring vs background",
+        fg: focusRing,
+        bg: background,
+        threshold: 3,
+      });
+
+      for (const [statusName, statusTokens] of Object.entries(tokens.status ?? {})) {
+        const statusBgRaw = parseColor(statusTokens.bg);
+        const statusText = parseColor(statusTokens.text);
+        const statusBorderRaw = parseColor(statusTokens.border);
+
+        const statusBgOnSurface = toOpaque(statusBgRaw, surface);
+        const statusBgOnBackground = toOpaque(statusBgRaw, background);
+        const statusBorderOnSurface = toOpaque(statusBorderRaw, statusBgOnSurface);
+        const statusBorderOnBackground = toOpaque(statusBorderRaw, statusBgOnBackground);
+
+        check({
+          storefront: `${storefrontKey}/${mode}`,
+          pair: `status.${statusName}.text on status.${statusName}.bg (on surface)`,
+          fg: statusText,
+          bg: statusBgOnSurface,
+          threshold: TEXT_THRESHOLD,
+        });
+
+        check({
+          storefront: `${storefrontKey}/${mode}`,
+          pair: `status.${statusName}.text on status.${statusName}.bg (on background)`,
+          fg: statusText,
+          bg: statusBgOnBackground,
+          threshold: TEXT_THRESHOLD,
+        });
+
+        check({
+          storefront: `${storefrontKey}/${mode}`,
+          pair: `status.${statusName}.border vs status.${statusName}.bg (on surface)`,
+          fg: statusBorderOnSurface,
+          bg: statusBgOnSurface,
+          threshold: NON_TEXT_THRESHOLD,
+        });
+
+        check({
+          storefront: `${storefrontKey}/${mode}`,
+          pair: `status.${statusName}.border vs status.${statusName}.bg (on background)`,
+          fg: statusBorderOnBackground,
+          bg: statusBgOnBackground,
+          threshold: NON_TEXT_THRESHOLD,
+        });
+      }
     }
   }
 
