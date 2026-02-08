@@ -285,7 +285,14 @@ export const PurchaseStatus = () => {
   if (status === "loading") {
     return (
       <Page centered>
-        <p className="text-gray-400 text-lg">Verifying payment...</p>
+        <p
+          className="text-gray-400 text-lg"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          Verifying payment...
+        </p>
       </Page>
     );
   }
@@ -298,7 +305,12 @@ export const PurchaseStatus = () => {
           <h2 className="font-serif text-3xl font-bold text-white">
             Finalizing purchase
           </h2>
-          <p className="text-lg text-gray-400">
+          <p
+            className="text-lg text-gray-400"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
             {message ?? "Finalizing purchase... this can take a moment."}
           </p>
           {status === "timeout" ? (

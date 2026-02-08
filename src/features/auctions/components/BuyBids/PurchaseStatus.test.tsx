@@ -152,6 +152,9 @@ describe("PurchaseStatus", () => {
       expect(
         await screen.findByRole("heading", { name: /finalizing purchase/i }),
       ).toBeInTheDocument();
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Finalizing purchase... this can take a moment.",
+      );
 
       await waitFor(() => expect(mockedClient.get).toHaveBeenCalledTimes(1));
       expect(timeoutSpy).toHaveBeenCalled();
