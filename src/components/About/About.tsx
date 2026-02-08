@@ -2,7 +2,7 @@ import logo from "../../assets/xbid_logo_high_res.png";
 import { Link } from "react-router-dom";
 export const About = () => {
   return (
-    <div className="font-sans bg-[#0d0d1a] text-[#e0e0e0] antialiased">
+    <div className="font-sans bg-[color:var(--sf-background)] text-[color:var(--sf-text)] antialiased">
       {/* Hero Section */}
       <header
         className="relative min-h-screen flex items-center justify-center text-center py-20 bg-cover bg-center"
@@ -12,20 +12,20 @@ export const About = () => {
         }}
       >
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0d0d1a]/95 via-[#0d0d1a]/60 to-[#0d0d1a]/95 z-0"></div>
+        <div className="absolute inset-0 z-0 bg-gradient-to-r from-[color:var(--sf-background)]/95 via-[color:var(--sf-background)]/60 to-[color:var(--sf-background)]/95"></div>
 
         <div className="relative z-10 px-6 max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between">
           <div className="md:w-1/2 text-left md:pr-12 mb-8 md:mb-0">
-            <h1 className="font-serif text-6xl md:text-7xl font-extrabold leading-tight mb-6 bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
+            <h1 className="font-serif text-6xl md:text-7xl font-extrabold leading-tight mb-6 bg-gradient-to-r from-[color:var(--sf-primary)] to-[color:var(--sf-accent)] bg-clip-text text-transparent">
               The Thrill of the Chase, The Pleasure of the Win.
             </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 font-light italic">
+            <p className="text-xl md:text-2xl text-[color:var(--sf-mutedText)] mb-8 font-light italic">
               You're not just bidding; you're indulging. The thrill, the tease,
               the tantalizing win.
             </p>
             <a
               href="/auctions"
-              className="inline-block text-lg md:text-xl bg-[#ff69b4] text-[#1a0d2e] px-8 py-3 rounded-full font-semibold transition-all duration-300 ease-in-out hover:bg-[#a020f0] hover:text-white transform hover:scale-105"
+              className="inline-block text-lg md:text-xl bg-[color:var(--sf-primary)] text-[color:var(--sf-onPrimary)] px-8 py-3 rounded-[var(--sf-radius)] font-semibold shadow-[var(--sf-shadow)] transition-all duration-300 ease-in-out hover:brightness-95 active:brightness-90 transform hover:scale-105"
             >
               Start Your Bid-venture
             </a>
@@ -64,17 +64,17 @@ export const About = () => {
             />
           </div>
           <div className="md:w-1/2 text-left">
-            <h2 className="font-serif text-5xl font-extrabold mb-6 bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
+            <h2 className="font-serif text-5xl font-extrabold mb-6 bg-gradient-to-r from-[color:var(--sf-primary)] to-[color:var(--sf-accent)] bg-clip-text text-transparent">
               Our Story: Our Tease
             </h2>
-            <p className="text-lg text-gray-300 leading-relaxed mb-4">
+            <p className="text-lg text-[color:var(--sf-mutedText)] leading-relaxed mb-4">
               XBid was born from a little whisper, a shared fantasy: What if
               bidding could be more... *personal*? We saw a world of auctions
               that were dull, distant, and devoid of desire. We yearned for a
               platform where every click was a heartbeat, every bid a delicious
               gamble.
             </p>
-            <p className="text-lg text-gray-300 leading-relaxed">
+            <p className="text-lg text-[color:var(--sf-mutedText)] leading-relaxed">
               Our founders, a mischievous group of tech-romantics, dared to
               dream of a place where winning felt truly exquisite. They poured
               their passion into crafting XBid, transforming the mundane into
@@ -85,8 +85,8 @@ export const About = () => {
       </section>
 
       {/* Values Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-[#1a0d2e] via-[#0d0d1a] to-[#1a0d2e] text-center">
-        <h2 className="font-serif text-5xl font-extrabold mb-12 bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
+      <section className="py-20 px-6 bg-gradient-to-br from-[color:var(--sf-surface)] via-[color:var(--sf-background)] to-[color:var(--sf-surface)] text-center">
+        <h2 className="font-serif text-5xl font-extrabold mb-12 bg-gradient-to-r from-[color:var(--sf-primary)] to-[color:var(--sf-accent)] bg-clip-text text-transparent">
           Our Values: More Than Just Talk
         </h2>
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -166,18 +166,20 @@ export const About = () => {
           ].map((value) => (
             <div
               key={value.title}
-              className="bg-[#1a0d2e]/50 backdrop-blur-sm border border-white/5 p-8 rounded-3xl shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#ff69b4]/20"
+              className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] p-8 rounded-3xl shadow-[var(--sf-shadow)] transition-all duration-300 ease-in-out hover:-translate-y-2 hover:brightness-95"
             >
-              <div className="flex items-center justify-center mb-6 text-[#ff69b4] drop-shadow-[0_0_8px_rgba(255,105,180,0.5)]">
+              <div className="flex items-center justify-center mb-6 text-[color:var(--sf-primary)]">
                 {value.icon}
               </div>
               <h3 className="font-serif text-3xl font-bold mb-2">
                 {value.title}
               </h3>
-              <p className="text-lg text-pink-400 italic mb-4">
+              <p className="text-lg text-[color:var(--sf-primary)] italic mb-4">
                 {value.subtitle}
               </p>
-              <p className="text-gray-400">{value.description}</p>
+              <p className="text-[color:var(--sf-mutedText)]">
+                {value.description}
+              </p>
             </div>
           ))}
         </div>
@@ -185,10 +187,10 @@ export const About = () => {
 
       {/* Team Section */}
       <section className="py-20 px-6 text-center">
-        <h2 className="font-serif text-5xl font-extrabold mb-4 bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
+        <h2 className="font-serif text-5xl font-extrabold mb-4 bg-gradient-to-r from-[color:var(--sf-primary)] to-[color:var(--sf-accent)] bg-clip-text text-transparent">
           The Maestros of Desire
         </h2>
-        <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
+        <p className="text-xl text-[color:var(--sf-mutedText)] mb-12 max-w-3xl mx-auto">
           Behind every tantalizing item are the minds of the XBid team,
           dedicated to igniting your desires.
         </p>
@@ -200,8 +202,8 @@ export const About = () => {
               description:
                 "Ken curates every experience, ensuring each auction holds a captivating allure. His motto: 'I don't just find items, I find obsessions.'",
               img: "https://placehold.co/150x150/1a0d2e/ff69b4?text=KR",
-              borderColor: "border-pink-500",
-              titleColor: "text-pink-400",
+              borderColor: "border-[color:var(--sf-border)]",
+              titleColor: "text-[color:var(--sf-primary)]",
             },
             {
               name: "Amay Champaneria",
@@ -209,8 +211,8 @@ export const About = () => {
               description:
                 "Amay ensures our platform performs flawlessly, making every click, every bid, a smooth and satisfying sensation.",
               img: "https://placehold.co/150x150/1a0d2e/a020f0?text=AC",
-              borderColor: "border-purple-500",
-              titleColor: "text-purple-400",
+              borderColor: "border-[color:var(--sf-border)]",
+              titleColor: "text-[color:var(--sf-primary)]",
             },
             {
               name: "Eric Vierhaus",
@@ -218,13 +220,13 @@ export const About = () => {
               description:
                 "Eric is your go-to for any query, ensuring your XBid experience is nothing short of blissful and always discreet.",
               img: "https://placehold.co/150x150/1a0d2e/ff69b4?text=EV",
-              borderColor: "border-pink-500",
-              titleColor: "text-pink-400",
+              borderColor: "border-[color:var(--sf-border)]",
+              titleColor: "text-[color:var(--sf-primary)]",
             },
           ].map((member) => (
             <div
               key={member.name}
-              className="bg-[#1a0d2e]/50 backdrop-blur-sm border border-white/5 p-8 rounded-3xl shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#a020f0]/20 flex flex-col items-center"
+              className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] p-8 rounded-3xl shadow-[var(--sf-shadow)] transition-all duration-300 ease-in-out hover:-translate-y-2 hover:brightness-95 flex flex-col items-center"
             >
               <img
                 src={member.img}
@@ -241,7 +243,7 @@ export const About = () => {
               <p className={`text-lg mb-4 font-semibold ${member.titleColor}`}>
                 {member.title}
               </p>
-              <p className="text-gray-400 text-base leading-relaxed">
+              <p className="text-[color:var(--sf-mutedText)] text-base leading-relaxed">
                 {member.description}
               </p>
             </div>
@@ -250,24 +252,24 @@ export const About = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6 bg-gradient-to-r from-[#a020f0] to-[#ff69b4] text-center">
-        <h2 className="font-serif text-5xl font-extrabold mb-8 text-white drop-shadow-lg">
+      <section className="py-20 px-6 bg-gradient-to-r from-[color:var(--sf-accent)] to-[color:var(--sf-primary)] text-center">
+        <h2 className="font-serif text-5xl font-extrabold mb-8 text-[color:var(--sf-onPrimary)] drop-shadow-lg">
           Ready to Claim Your Victory?
         </h2>
-        <p className="text-xl md:text-2xl text-gray-200 mb-10 max-w-4xl mx-auto leading-relaxed">
+        <p className="text-xl md:text-2xl text-[color:var(--sf-onPrimary)]/90 mb-10 max-w-4xl mx-auto leading-relaxed">
           The thrill awaits. Dive into the world of XBid where every bid is an
           adventure and every win is pure ecstasy.
         </p>
         <a
           href="#auctions"
-          className="inline-block text-2xl md:text-3xl bg-white text-[#1a0d2e] px-10 py-4 rounded-full font-bold transition-all duration-300 ease-in-out transform hover:scale-110 hover:shadow-2xl"
+          className="inline-block text-2xl md:text-3xl bg-[color:var(--sf-surface)] text-[color:var(--sf-text)] px-10 py-4 rounded-[var(--sf-radius)] font-bold shadow-[var(--sf-shadow)] transition-all duration-300 ease-in-out transform hover:scale-105 hover:brightness-95"
         >
           Unleash Your Desires Now!
         </a>
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#0d0d1a] py-12 px-6 text-center text-gray-500 text-sm">
+      <footer className="bg-[color:var(--sf-background)] py-12 px-6 text-center text-[color:var(--sf-mutedText)] text-sm border-t border-[color:var(--sf-border)]">
         <div className="max-w-6xl mx-auto">
           <p>
             &copy; {new Date().getFullYear()} XBid. All rights reserved. Play
@@ -276,16 +278,19 @@ export const About = () => {
           <div className="mt-4 flex justify-center space-x-6">
             <a
               href="#privacy"
-              className="hover:text-pink-400 transition-colors"
+              className="hover:text-[color:var(--sf-primary)] transition-colors"
             >
               Privacy Policy
             </a>
-            <a href="#terms" className="hover:text-pink-400 transition-colors">
+            <a
+              href="#terms"
+              className="hover:text-[color:var(--sf-primary)] transition-colors"
+            >
               Terms of Service
             </a>
             <a
               href="#contact"
-              className="hover:text-pink-400 transition-colors"
+              className="hover:text-[color:var(--sf-primary)] transition-colors"
             >
               Contact Us
             </a>

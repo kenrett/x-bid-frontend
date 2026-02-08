@@ -5,17 +5,17 @@ export const TermsAndConditions = () => {
     <Page>
       <div className="container mx-auto max-w-4xl ">
         <div className="text-center mb-12">
-          <h1 className="font-serif text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
+          <h1 className="font-serif text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[color:var(--sf-primary)] to-[color:var(--sf-accent)] bg-clip-text text-transparent">
             Terms & Conditions
           </h1>
-          <p className="text-lg text-gray-400">
+          <p className="text-lg text-[color:var(--sf-mutedText)]">
             Last Updated: November 13, 2025
           </p>
         </div>
 
-        <div className="space-y-8 text-gray-300 leading-relaxed">
+        <div className="space-y-8 text-[color:var(--sf-text)] leading-relaxed">
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               1. Acceptance of Terms
             </h2>
             <p>
@@ -24,7 +24,7 @@ export const TermsAndConditions = () => {
               Terms and Conditions, our{" "}
               <a
                 href="/privacy-policy"
-                className="text-pink-400 hover:underline"
+                className="text-[color:var(--sf-primary)] hover:underline"
               >
                 Privacy Policy
               </a>
@@ -40,7 +40,7 @@ export const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               2. Eligibility
             </h2>
             <p>
@@ -53,7 +53,7 @@ export const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               3. How X-Bid Works
             </h2>
             <p>
@@ -90,7 +90,7 @@ export const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               4. 'Buy It Now' Feature
             </h2>
             <p>
@@ -104,7 +104,7 @@ export const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               5. Payments, Shipping, and Returns
             </h2>
             <p>
@@ -122,7 +122,7 @@ export const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               6. User Conduct and Termination
             </h2>
             <p>
@@ -140,7 +140,7 @@ export const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               7. Intellectual Property
             </h2>
             <p>
@@ -153,7 +153,7 @@ export const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               8. Disclaimer of Warranties
             </h2>
             <p>
@@ -166,7 +166,7 @@ export const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               9. Limitation of Liability
             </h2>
             <p>
@@ -181,7 +181,7 @@ export const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               10. Indemnification
             </h2>
             <p>
@@ -194,7 +194,7 @@ export const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               11. Governing Law and Dispute Resolution
             </h2>
             <p>
@@ -207,7 +207,7 @@ export const TermsAndConditions = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               12. Contact Us
             </h2>
             <p>

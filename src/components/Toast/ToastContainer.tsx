@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { subscribeToToasts, type ToastMessage } from "../../services/toast";
 
 const VARIANT_STYLES: Record<ToastMessage["variant"], string> = {
-  info: "bg-white/10 border-blue-400/40 text-blue-100",
+  info: "bg-[color:var(--sf-surface)] border-[color:var(--sf-border)] text-[color:var(--sf-text)]",
   success: "bg-green-900/60 border-green-400/60 text-green-50",
   error: "bg-red-900/60 border-red-400/60 text-red-50",
 };
@@ -64,7 +64,7 @@ export const ToastContainer = () => {
             <div className="text-sm leading-snug">{toast.message}</div>
             <button
               type="button"
-              className="shrink-0 rounded-md border border-white/15 bg-white/5 px-2 py-1 text-xs font-semibold text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-pink-300/50"
+              className="shrink-0 rounded-md border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-2 py-1 text-xs font-semibold text-[color:var(--sf-text)] hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-primary)]"
               aria-label="Dismiss notification"
               onClick={() => removeToast(toast.id)}
             >

@@ -16,12 +16,12 @@ export const ProcessingNotice = ({
   onAction,
 }: ProcessingNoticeProps) => {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-center shadow-lg shadow-black/10 space-y-3">
-      <p className="text-xs uppercase tracking-[0.2em] text-pink-200">
+    <div className="rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-5 py-4 text-center shadow-[var(--sf-shadow)] space-y-3">
+      <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--sf-primary)]">
         {title}
       </p>
-      <p className="text-lg text-white">{message}</p>
-      <p className="text-sm text-gray-400">{hint}</p>
+      <p className="text-lg text-[color:var(--sf-text)]">{message}</p>
+      <p className="text-sm text-[color:var(--sf-mutedText)]">{hint}</p>
       {onAction ? (
         <button
           type="button"

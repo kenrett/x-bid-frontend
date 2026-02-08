@@ -286,7 +286,7 @@ export const PurchaseStatus = () => {
     return (
       <Page centered>
         <p
-          className="text-gray-400 text-lg"
+          className="text-[color:var(--sf-mutedText)] text-lg"
           role="status"
           aria-live="polite"
           aria-atomic="true"
@@ -301,12 +301,12 @@ export const PurchaseStatus = () => {
     return (
       <Page centered>
         <div className="flex flex-col items-center gap-4 text-center">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-pink-400 border-t-transparent" />
-          <h2 className="font-serif text-3xl font-bold text-white">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[color:var(--sf-primary)] border-t-transparent" />
+          <h2 className="font-serif text-3xl font-bold text-[color:var(--sf-text)]">
             Finalizing purchase
           </h2>
           <p
-            className="text-lg text-gray-400"
+            className="text-lg text-[color:var(--sf-mutedText)]"
             role="status"
             aria-live="polite"
             aria-atomic="true"
@@ -341,7 +341,10 @@ export const PurchaseStatus = () => {
         <h2 className="font-serif text-4xl font-bold mb-4 text-red-400">
           Login required
         </h2>
-        <p className="mb-6 text-lg text-gray-400" role="alert">
+        <p
+          className="mb-6 text-lg text-[color:var(--sf-mutedText)]"
+          role="alert"
+        >
           {message ?? "Please log in to verify your purchase."}
         </p>
         <Link
@@ -362,7 +365,7 @@ export const PurchaseStatus = () => {
         {status === "applied" ? "Purchase Complete" : "Payment Error"}
       </h2>
       <p
-        className="mb-6 text-lg text-gray-400"
+        className="mb-6 text-lg text-[color:var(--sf-mutedText)]"
         role={status === "applied" ? "status" : "alert"}
       >
         {message ?? "Something went wrong."}

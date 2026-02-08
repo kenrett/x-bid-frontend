@@ -219,7 +219,7 @@ export const BuyBids = () => {
   if (user.email_verified === null && !user.email_verified_at) {
     return (
       <Page centered>
-        <p className="text-gray-400 text-lg">
+        <p className="text-[color:var(--sf-mutedText)] text-lg">
           Checking email verification status...
         </p>
       </Page>
@@ -248,7 +248,9 @@ export const BuyBids = () => {
   if (isLoadingPacks) {
     return (
       <Page centered>
-        <p className="text-gray-400 text-lg">Loading bid packs...</p>
+        <p className="text-[color:var(--sf-mutedText)] text-lg">
+          Loading bid packs...
+        </p>
       </Page>
     );
   }
@@ -327,11 +329,13 @@ export const BuyBids = () => {
       <Page>
         <div
           id="checkout"
-          className="min-h-[320px] flex items-center justify-center bg-[#1a0d2e]/40 rounded-2xl border border-white/10 p-6"
+          className="min-h-[320px] flex items-center justify-center bg-[color:var(--sf-surface)] rounded-2xl border border-[color:var(--sf-border)] p-6 shadow-[var(--sf-shadow)]"
           aria-busy="true"
         >
           {!isCheckoutReady && (
-            <p className="text-gray-300">Loading secure checkout...</p>
+            <p className="text-[color:var(--sf-mutedText)]">
+              Loading secure checkout...
+            </p>
           )}
           <EmbeddedCheckoutProvider
             stripe={stripeLoader}
@@ -350,10 +354,10 @@ export const BuyBids = () => {
     <Page>
       <div className="container mx-auto">
         <div className="text-center mb-12 ">
-          <h1 className="font-serif text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
+          <h1 className="font-serif text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[color:var(--sf-primary)] to-[color:var(--sf-accent)] bg-clip-text text-transparent">
             Arm Yourself
           </h1>
-          <p className="text-lg md:text-xl text-gray-400">
+          <p className="text-lg md:text-xl text-[color:var(--sf-mutedText)]">
             More bids mean more power. Choose your pack and dominate the floor.
           </p>
         </div>
@@ -367,49 +371,49 @@ export const BuyBids = () => {
             .map((pack, index) => (
               <div
                 key={pack.id}
-                className={`group flex flex-col text-center bg-[#1a0d2e]/50 backdrop-blur-sm border rounded-2xl p-6 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl ${
+                className={`group flex flex-col text-center bg-[color:var(--sf-surface)] border rounded-2xl p-6 shadow-[var(--sf-shadow)] transition-all duration-300 hover:-translate-y-2 ${
                   pack.highlight
-                    ? "border-pink-500 hover:shadow-pink-500/20 relative"
-                    : "border-white/10 hover:shadow-purple-500/20"
+                    ? "border-[color:var(--sf-primary)] relative"
+                    : "border-[color:var(--sf-border)] hover:brightness-95"
                 }`}
                 style={{
                   animation: `fadeInUp 0.5s ${index * 0.1}s ease-out both`,
                 }}
               >
                 {pack.highlight && (
-                  <div className="absolute -top-4 right-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg transform rotate-6">
+                  <div className="absolute -top-4 right-4 bg-gradient-to-r from-[color:var(--sf-primary)] to-[color:var(--sf-accent)] text-[color:var(--sf-onPrimary)] text-xs font-bold px-4 py-1.5 rounded-full shadow-[var(--sf-shadow)] transform rotate-6">
                     BEST VALUE
                   </div>
                 )}
-                <h2 className="font-serif text-3xl font-bold text-white tracking-tight">
+                <h2 className="font-serif text-3xl font-bold text-[color:var(--sf-text)] tracking-tight">
                   {pack.name}
                 </h2>
-                <p className="text-sm text-gray-400 mb-4 h-10">
+                <p className="text-sm text-[color:var(--sf-mutedText)] mb-4 h-10">
                   {pack.description}
                 </p>
                 <div className="my-4">
-                  <span className="text-6xl font-extrabold text-white">
+                  <span className="text-6xl font-extrabold text-[color:var(--sf-text)]">
                     {pack.bids}
                   </span>
-                  <span className="text-xl font-medium text-gray-400">
+                  <span className="text-xl font-medium text-[color:var(--sf-mutedText)]">
                     {" "}
                     Bids
                   </span>
                 </div>
-                <div className="text-4xl font-bold text-white mb-2">
+                <div className="text-4xl font-bold text-[color:var(--sf-text)] mb-2">
                   ${Number(pack.price).toFixed(2)}
                 </div>
-                <p className="text-pink-400 mb-6 font-medium">
+                <p className="text-[color:var(--sf-accent)] mb-6 font-medium">
                   ({pack.pricePerBid}/Bid)
                 </p>
                 <button
                   onClick={() => handleBuy(pack.id)}
                   disabled={isPurchasingPackId !== null}
                   aria-busy={isPurchasingPackId === pack.id}
-                  className={`mt-auto w-full font-bold py-3 px-6 rounded-full transition-all duration-300 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a] disabled:opacity-50 disabled:cursor-not-allowed ${
+                  className={`mt-auto w-full font-bold py-3 px-6 rounded-full transition-all duration-300 shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sf-primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--sf-background)] disabled:opacity-50 disabled:cursor-not-allowed ${
                     pack.highlight
-                      ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white transform hover:scale-105"
-                      : "bg-white/10 text-white hover:bg-white/20 transform hover:-translate-y-0.5"
+                      ? "bg-[color:var(--sf-primary)] text-[color:var(--sf-onPrimary)] transform hover:scale-105 hover:brightness-95 active:brightness-90"
+                      : "bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] text-[color:var(--sf-text)] hover:brightness-95 transform hover:-translate-y-0.5"
                   }`}
                 >
                   {isPurchasingPackId === pack.id

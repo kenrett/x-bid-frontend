@@ -5,17 +5,17 @@ export const PrivacyPolicy = () => {
     <Page>
       <div className="container mx-auto max-w-4xl ">
         <div className="text-center mb-12">
-          <h1 className="font-serif text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[#ff69b4] to-[#a020f0] bg-clip-text text-transparent">
+          <h1 className="font-serif text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-[color:var(--sf-primary)] to-[color:var(--sf-accent)] bg-clip-text text-transparent">
             Privacy Policy
           </h1>
-          <p className="text-lg text-gray-400">
+          <p className="text-lg text-[color:var(--sf-mutedText)]">
             Last Updated: November 13, 2025
           </p>
         </div>
 
-        <div className="space-y-8 text-gray-300 leading-relaxed">
+        <div className="space-y-8 text-[color:var(--sf-text)] leading-relaxed">
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               1. Introduction
             </h2>
             <p>
@@ -35,7 +35,7 @@ export const PrivacyPolicy = () => {
               is also governed by our{" "}
               <a
                 href="/terms-and-conditions"
-                className="text-pink-400 hover:underline"
+                className="text-[color:var(--sf-primary)] hover:underline"
               >
                 Terms and Conditions
               </a>
@@ -44,7 +44,7 @@ export const PrivacyPolicy = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               2. Information We Collect
             </h2>
             <p>We may collect the following types of information:</p>
@@ -79,7 +79,7 @@ export const PrivacyPolicy = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               3. How We Use Your Information
             </h2>
             <p>
@@ -112,7 +112,7 @@ export const PrivacyPolicy = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               4. How We Share Your Information
             </h2>
             <p>
@@ -142,7 +142,7 @@ export const PrivacyPolicy = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               5. Cookies and Tracking Technologies
             </h2>
             <p>
@@ -164,7 +164,7 @@ export const PrivacyPolicy = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               6. Data Security
             </h2>
             <p>
@@ -177,7 +177,7 @@ export const PrivacyPolicy = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               7. Your Data Protection Rights (GDPR & CCPA)
             </h2>
             <p>
@@ -213,7 +213,7 @@ export const PrivacyPolicy = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               8. Children's Privacy
             </h2>
             <p>
@@ -226,7 +226,7 @@ export const PrivacyPolicy = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               9. Changes to This Privacy Policy
             </h2>
             <p>
@@ -238,7 +238,7 @@ export const PrivacyPolicy = () => {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-pink-400 mb-4">
+            <h2 className="text-2xl font-bold text-[color:var(--sf-primary)] mb-4">
               10. Contact Us
             </h2>
             <p>
