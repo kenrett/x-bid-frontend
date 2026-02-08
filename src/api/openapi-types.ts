@@ -2167,8 +2167,16 @@ export interface components {
     };
     PaymentRefundRequest: {
       amount_cents?: number;
+      /** @description Set true to refund the full remaining amount. Do not send amount_cents when true. */
+      full_refund?: boolean;
       reason?: string | null;
-    };
+    } & (
+      | unknown
+      | {
+          /** @enum {boolean} */
+          full_refund: true;
+        }
+    );
     /** @description Bid-pack purchase record for the current user. */
     Purchase: {
       amount_cents: number;

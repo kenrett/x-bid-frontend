@@ -215,7 +215,7 @@ describe("adminPaymentsApi", () => {
     expect(mockedPost).toHaveBeenCalledWith(
       "/api/v1/admin/payments/10/refund",
       {
-        amountCents: 500,
+        amount_cents: 500,
         reason: "duplicate",
       },
     );
@@ -229,5 +229,30 @@ describe("adminPaymentsApi", () => {
       refundedCents: 2500,
       refundId: "re_123",
     });
+  });
+
+  it("posts explicit full refund payload when no amount is provided", async () => {
+    mockedPost.mockResolvedValue({
+      data: {
+        id: "10",
+        user_email: "payer@example.com",
+        amount_cents: "2500",
+        status: "refunded",
+        created_at: "2024-05-01T00:00:00Z",
+      },
+    });
+
+    await adminPaymentsApi.refundPayment(10, {
+      fullRefund: true,
+      reason: "full",
+    });
+
+    expect(mockedPost).toHaveBeenCalledWith(
+      "/api/v1/admin/payments/10/refund",
+      {
+        full_refund: true,
+        reason: "full",
+      },
+    );
   });
 });

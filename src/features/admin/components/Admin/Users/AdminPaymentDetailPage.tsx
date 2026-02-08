@@ -103,10 +103,14 @@ export const AdminPaymentDetailPage = () => {
 
     try {
       setIsRefunding(true);
-      const result = await adminPaymentsApi.refundPayment(paymentId, {
-        amountCents,
-        reason,
-      });
+      const refundPayload =
+        typeof amountCents === "number"
+          ? { amountCents, reason }
+          : { fullRefund: true, reason };
+      const result = await adminPaymentsApi.refundPayment(
+        paymentId,
+        refundPayload,
+      );
 
       const refundId =
         typeof result.refundId === "string" ? result.refundId : null;

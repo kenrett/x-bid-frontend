@@ -152,6 +152,43 @@ describe("AdminPaymentDetailPage", () => {
     expect(await screen.findByText("failed")).toBeInTheDocument();
   });
 
+  it("issues full refund when amount input is left blank", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    mockedApi.refundPayment.mockResolvedValueOnce({
+      id: 10,
+      userEmail: "payer@example.com",
+      amount: 25,
+      status: "failed",
+      createdAt: "2024-05-01T00:00:00Z",
+      refundId: "re_full",
+      refundedCents: 2500,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/admin/payments/10"]}>
+        <Routes>
+          <Route
+            path="/admin/payments/:id"
+            element={<AdminPaymentDetailPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/payer@example.com/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /issue refund/i }));
+
+    await waitFor(() =>
+      expect(mockedApi.refundPayment).toHaveBeenCalledWith(10, {
+        fullRefund: true,
+        reason: undefined,
+      }),
+    );
+  });
+
   it("shows an error message when refund fails", async () => {
     const user = userEvent.setup();
     vi.spyOn(window, "confirm").mockReturnValue(true);

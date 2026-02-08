@@ -450,13 +450,19 @@ export const adminPaymentsApi = {
 
   async refundPayment(
     id: number,
-    payload: { amountCents?: number; reason?: string },
+    payload: { amountCents?: number; fullRefund?: boolean; reason?: string },
   ): Promise<
     Payment & { refundId?: string | null; refundedCents?: number | null }
   > {
-    const body: { amountCents?: number; reason?: string } = {};
+    const body: {
+      amount_cents?: number;
+      full_refund?: true;
+      reason?: string;
+    } = {};
     if (typeof payload.amountCents === "number") {
-      body.amountCents = payload.amountCents;
+      body.amount_cents = payload.amountCents;
+    } else if (payload.fullRefund) {
+      body.full_refund = true;
     }
     if (typeof payload.reason === "string") {
       const normalizedReason = payload.reason.trim();
