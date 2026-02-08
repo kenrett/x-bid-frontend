@@ -40,9 +40,9 @@ const variants = {
   adminBanner: cva("text-center text-sm py-2 px-4 sticky top-0 z-[60]", {
     variants: {
       super: {
-        true: "bg-red-700 text-white shadow-[0_8px_30px_rgba(255,0,0,0.45)] border-b border-red-300",
+        true: "bg-red-700 text-[color:var(--sf-text)] shadow-[0_8px_30px_rgba(255,0,0,0.45)] border-b border-red-300",
         false:
-          "bg-pink-700 text-white shadow-md shadow-pink-900/30 border-b border-pink-200/60",
+          "bg-pink-700 text-[color:var(--sf-text)] shadow-md shadow-pink-900/30 border-b border-pink-200/60",
       },
     },
     defaultVariants: {
@@ -269,8 +269,8 @@ export function Header() {
                         <span
                           className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs border ${
                             isSuperAdmin
-                              ? "bg-red-600 text-white border-red-300 shadow-[0_0_12px_rgba(255,0,0,0.6)]"
-                              : "bg-white/10 text-white border-white/20"
+                              ? "bg-red-600 text-[color:var(--sf-text)] border-red-300 shadow-[0_0_12px_rgba(255,0,0,0.6)]"
+                              : "bg-white/10 text-[color:var(--sf-text)] border-white/20"
                           }`}
                         >
                           {isSuperAdmin ? "Superadmin" : "Admin"}

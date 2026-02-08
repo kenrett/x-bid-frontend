@@ -110,10 +110,10 @@ export const AuthDebugPanel = () => {
 
   return (
     <aside
-      className="fixed bottom-4 left-4 z-[100] w-[320px] max-w-[90vw] rounded-xl border border-white/20 bg-black/80 text-white shadow-xl backdrop-blur"
+      className="fixed bottom-4 left-4 z-[100] w-[320px] max-w-[90vw] rounded-xl border border-white/20 bg-black/80 text-[color:var(--sf-text)] shadow-xl backdrop-blur"
       aria-label="Auth debug panel"
     >
-      <div className="flex items-center justify-between border-b border-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide">
+      <div className="flex items-center justify-between border-b border-[color:var(--sf-border)] px-3 py-2 text-xs font-semibold uppercase tracking-wide">
         <span>Auth Debug</span>
         <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px]">
           {import.meta.env.MODE}
@@ -144,7 +144,10 @@ export const AuthDebugPanel = () => {
           {debugState.apiRequests.length ? (
             <ul className="space-y-1">
               {debugState.apiRequests.map((entry) => (
-                <li key={entry.id} className="rounded bg-white/5 p-1">
+                <li
+                  key={entry.id}
+                  className="rounded bg-[color:var(--sf-surface)] p-1"
+                >
                   <div>
                     {entry.method} {entry.url}
                   </div>
@@ -158,7 +161,9 @@ export const AuthDebugPanel = () => {
               ))}
             </ul>
           ) : (
-            <div className="text-white/70">(no requests yet)</div>
+            <div className="text-[color:var(--sf-text)]/70">
+              (no requests yet)
+            </div>
           )}
         </div>
 
@@ -167,7 +172,10 @@ export const AuthDebugPanel = () => {
           {debugState.wsAttempts.length ? (
             <ul className="space-y-1">
               {debugState.wsAttempts.map((entry) => (
-                <li key={entry.id} className="rounded bg-white/5 p-1">
+                <li
+                  key={entry.id}
+                  className="rounded bg-[color:var(--sf-surface)] p-1"
+                >
                   <div>{entry.url}</div>
                   <div>
                     token param: {entry.didIncludeTokenParam ? "yes" : "no"}
@@ -179,11 +187,13 @@ export const AuthDebugPanel = () => {
               ))}
             </ul>
           ) : (
-            <div className="text-white/70">(no ws attempts yet)</div>
+            <div className="text-[color:var(--sf-text)]/70">
+              (no ws attempts yet)
+            </div>
           )}
         </div>
 
-        <div className="space-y-2 border-t border-white/10 pt-2">
+        <div className="space-y-2 border-t border-[color:var(--sf-border)] pt-2">
           <div className="flex items-center justify-between">
             <div className="font-semibold">Auth diagnostics</div>
             <button
@@ -226,7 +236,7 @@ export const AuthDebugPanel = () => {
           {diagnostics ? (
             <button
               type="button"
-              className="w-full rounded-lg border border-white/20 bg-white/5 px-2 py-1 text-xs font-semibold text-white hover:bg-white/10"
+              className="w-full rounded-lg border border-white/20 bg-[color:var(--sf-surface)] px-2 py-1 text-xs font-semibold text-[color:var(--sf-text)] hover:bg-white/10"
               onClick={() =>
                 void navigator.clipboard.writeText(diagnosticsJson)
               }

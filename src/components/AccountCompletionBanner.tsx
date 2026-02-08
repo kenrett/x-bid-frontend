@@ -11,7 +11,7 @@ export const AccountCompletionBanner = () => {
 
   if (isLoading) {
     return (
-      <div className="border-b border-white/10 bg-white/5">
+      <div className="border-b border-[color:var(--sf-border)] bg-[color:var(--sf-surface)]">
         <div className="mx-auto max-w-screen-xl px-4 py-2">
           <Skeleton className="h-5 w-80" aria-label="Loading account details" />
         </div>

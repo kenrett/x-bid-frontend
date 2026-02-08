@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 export const GoodbyePage = () => {
   return (
     <div className="container mx-auto max-w-2xl px-4 py-16">
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-lg shadow-purple-500/10">
-        <h1 className="text-3xl font-serif font-bold text-white">
+      <div className="rounded-2xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-8 shadow-lg shadow-purple-500/10">
+        <h1 className="text-3xl font-serif font-bold text-[color:var(--sf-text)]">
           Account deleted
         </h1>
-        <p className="mt-3 text-sm text-gray-300">
+        <p className="mt-3 text-sm text-[color:var(--sf-mutedText)]">
           Your account has been permanently deleted and you have been signed
           out.
         </p>

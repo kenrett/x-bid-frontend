@@ -147,11 +147,11 @@ export const DateTimePicker = ({
   const describedBy = [helpId, errorId].filter(Boolean).join(" ") || undefined;
 
   return (
-    <div className="flex flex-col gap-2 text-sm text-gray-200">
+    <div className="flex flex-col gap-2 text-sm text-[color:var(--sf-mutedText)]">
       <span className="font-semibold">{label}</span>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-2">
-          <span className="text-xs uppercase tracking-wide text-gray-400">
+          <span className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
             Date
           </span>
           <input
@@ -159,8 +159,8 @@ export const DateTimePicker = ({
             type="date"
             value={dateValue}
             onChange={(event) => handleDateChange(event.target.value)}
-            className={`rounded-lg bg-white/5 border px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500 ${
-              error ? "border-pink-500" : "border-white/10"
+            className={`rounded-lg bg-[color:var(--sf-surface)] border px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)] ${
+              error ? "border-pink-500" : "border-[color:var(--sf-border)]"
             }`}
             min={minDateValue}
             required={required}
@@ -171,15 +171,15 @@ export const DateTimePicker = ({
         </label>
 
         <label className="flex flex-col gap-2">
-          <span className="text-xs uppercase tracking-wide text-gray-400">
+          <span className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
             Time
           </span>
           <select
             id={`${id}-time`}
             value={timeValue}
             onChange={(event) => handleTimeChange(event.target.value)}
-            className={`rounded-lg bg-white/5 border px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500 ${
-              error ? "border-pink-500" : "border-white/10"
+            className={`rounded-lg bg-[color:var(--sf-surface)] border px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)] ${
+              error ? "border-pink-500" : "border-[color:var(--sf-border)]"
             }`}
             required={required}
             disabled={disabled}
@@ -204,25 +204,29 @@ export const DateTimePicker = ({
         <button
           type="button"
           onClick={handleClear}
-          className="text-xs font-semibold text-pink-300 hover:text-pink-200"
+          className="text-xs font-semibold text-[color:var(--sf-accent)] hover:text-[color:var(--sf-accent)]"
           disabled={disabled}
         >
           Clear
         </button>
         {previewLabel ? (
-          <span className="text-xs text-gray-300">{previewLabel}</span>
+          <span className="text-xs text-[color:var(--sf-mutedText)]">
+            {previewLabel}
+          </span>
         ) : (
-          <span className="text-xs text-gray-500">No date/time selected</span>
+          <span className="text-xs text-[color:var(--sf-mutedText)]">
+            No date/time selected
+          </span>
         )}
       </div>
 
       {helpText ? (
-        <p id={helpId} className="text-xs text-gray-400">
+        <p id={helpId} className="text-xs text-[color:var(--sf-mutedText)]">
           {helpText}
         </p>
       ) : null}
       {error ? (
-        <p id={errorId} className="text-xs text-pink-300">
+        <p id={errorId} className="text-xs text-[color:var(--sf-accent)]">
           {error}
         </p>
       ) : null}
