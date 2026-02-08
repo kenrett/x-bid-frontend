@@ -1955,8 +1955,8 @@ export interface components {
         image_url?: string | null;
         /** @description Marks the auction as adult inventory (restricted to afterdark storefront + age gate). */
         is_adult?: boolean | null;
-        /** @description Marks the auction as artisan-curated inventory (restricted to artisan storefront). */
-        is_artisan?: boolean | null;
+        /** @description Marks the auction as marketplace-curated inventory (restricted to marketplace storefront). */
+        is_marketplace?: boolean | null;
         /** Format: date-time */
         start_date?: string | null;
         /** @enum {string|null} */

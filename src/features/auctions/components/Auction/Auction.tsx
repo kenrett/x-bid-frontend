@@ -49,7 +49,7 @@ export function Auction({
   const fetchPriority = index < 2 ? "high" : "low";
 
   const { key: storefrontKey } = useStorefront();
-  const isArtisan = storefrontKey === "marketplace";
+  const isMarketplace = storefrontKey === "marketplace";
 
   return (
     <button
@@ -57,7 +57,7 @@ export function Auction({
       type="button"
       onClick={() => onClick(id)}
       className={`group block w-full text-left overflow-hidden rounded-[var(--sf-radius)] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-primary)] focus:ring-offset-2 focus:ring-offset-[color:var(--sf-background)] animate-[fadeInUp_0.5s_ease-out_both] ${delayClass} ${
-        isArtisan
+        isMarketplace
           ? "bg-[color:var(--sf-surface)] border-[color:var(--sf-accent)]/60 border-[1px] shadow-[0_12px_35px_rgba(35,38,29,0.35)] hover:-translate-y-[0.35rem] hover:shadow-[0_18px_45px_rgba(35,38,29,0.35)]"
           : "bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] shadow-[var(--sf-shadow)] hover:-translate-y-1 hover:shadow-[var(--sf-shadow)]"
       }`}
