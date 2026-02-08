@@ -14,6 +14,7 @@
     "format": "prettier --write .",
     "gen:api-types": "node scripts/gen-api-types.mjs --out src/api/openapi-types.ts",
     "check:api-types": "node scripts/check-api-types.mjs",
+    "check:contrast": "node scripts/check-contrast.mjs",
     "openapi:types": "node scripts/openapi-types.mjs",
     "ct-2": "node scripts/ct-2.mjs",
     "prepare": "husky",

@@ -219,6 +219,9 @@ jobs:
       - name: Lint
         run: npm run lint --if-present
 
+      - name: Contrast tokens
+        run: npm run check:contrast --if-present
+
       - name: Check generated API types
         env:
           OPENAPI_URL: ${{ vars.OPENAPI_URL || vars.BACKEND_OPENAPI_URL || '' }}
