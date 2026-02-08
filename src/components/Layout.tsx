@@ -95,6 +95,18 @@ export const Layout = () => {
           ["--sf-shadow"]: themeTokens.shadow,
           ["--sf-heading-font"]: themeTokens.headingFont,
           ["--sf-body-font"]: themeTokens.bodyFont,
+          ["--sf-status-success-bg"]: themeTokens.status.success.bg,
+          ["--sf-status-success-text"]: themeTokens.status.success.text,
+          ["--sf-status-success-border"]: themeTokens.status.success.border,
+          ["--sf-status-warning-bg"]: themeTokens.status.warning.bg,
+          ["--sf-status-warning-text"]: themeTokens.status.warning.text,
+          ["--sf-status-warning-border"]: themeTokens.status.warning.border,
+          ["--sf-status-error-bg"]: themeTokens.status.error.bg,
+          ["--sf-status-error-text"]: themeTokens.status.error.text,
+          ["--sf-status-error-border"]: themeTokens.status.error.border,
+          ["--sf-status-info-bg"]: themeTokens.status.info.bg,
+          ["--sf-status-info-text"]: themeTokens.status.info.text,
+          ["--sf-status-info-border"]: themeTokens.status.info.border,
           fontFamily: themeTokens.bodyFont,
         } as CSSProperties
       }

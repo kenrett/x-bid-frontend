@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 
 type ConfirmModalProps = {
   open: boolean;
@@ -137,6 +138,17 @@ export const ConfirmModal = ({
             {description}
           </p>
         ) : null}
+        {danger ? (
+          <div
+            className="mt-3 rounded-lg border border-[color:var(--sf-status-warning-border)] bg-[color:var(--sf-status-warning-bg)] px-3 py-2 text-[color:var(--sf-status-warning-text)]"
+            role="status"
+          >
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
+              <ExclamationTriangleIcon className="h-4 w-4" aria-hidden="true" />
+              Danger action
+            </div>
+          </div>
+        ) : null}
         <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
@@ -151,7 +163,7 @@ export const ConfirmModal = ({
             onClick={onConfirm}
             className={`rounded-[var(--sf-radius)] px-4 py-2 text-sm font-semibold shadow-[var(--sf-shadow)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sf-primary)] ${
               danger
-                ? "border border-red-400/40 bg-red-900/30 text-red-100 hover:bg-red-900/40"
+                ? "border border-[color:var(--sf-status-error-border)] bg-[color:var(--sf-status-error-bg)] text-[color:var(--sf-status-error-text)] hover:brightness-95"
                 : "bg-[color:var(--sf-primary)] text-[color:var(--sf-onPrimary)] hover:brightness-95 active:brightness-90"
             }`}
           >

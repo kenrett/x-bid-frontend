@@ -205,9 +205,9 @@ describe("AuctionList", () => {
     mockedGetAuctions.mockResolvedValue(mockAuctions);
     render(<AuctionList />);
 
-    expect(await screen.findByTestId("live-status")).toHaveTextContent(
-      "Live updates on",
-    );
+    const status = await screen.findByTestId("live-status");
+    expect(status).toHaveTextContent("Connected");
+    expect(status).toHaveTextContent("Live updates on");
   });
 
   it("applies live updates to existing auctions", async () => {

@@ -112,6 +112,28 @@ const resolveThemeContrastColors = (themeTokens: StorefrontThemeTokens) => {
   const background = toOpaque(parseColor(themeTokens.background), WHITE);
   const surface = toOpaque(parseColor(themeTokens.surface), background);
   const borderOnSurface = toOpaque(parseColor(themeTokens.border), surface);
+  const status = {
+    success: {
+      bg: toOpaque(parseColor(themeTokens.status.success.bg), surface),
+      text: toOpaque(parseColor(themeTokens.status.success.text), surface),
+      border: toOpaque(parseColor(themeTokens.status.success.border), surface),
+    },
+    warning: {
+      bg: toOpaque(parseColor(themeTokens.status.warning.bg), surface),
+      text: toOpaque(parseColor(themeTokens.status.warning.text), surface),
+      border: toOpaque(parseColor(themeTokens.status.warning.border), surface),
+    },
+    error: {
+      bg: toOpaque(parseColor(themeTokens.status.error.bg), surface),
+      text: toOpaque(parseColor(themeTokens.status.error.text), surface),
+      border: toOpaque(parseColor(themeTokens.status.error.border), surface),
+    },
+    info: {
+      bg: toOpaque(parseColor(themeTokens.status.info.bg), surface),
+      text: toOpaque(parseColor(themeTokens.status.info.text), surface),
+      border: toOpaque(parseColor(themeTokens.status.info.border), surface),
+    },
+  };
   return {
     background,
     surface,
@@ -119,6 +141,7 @@ const resolveThemeContrastColors = (themeTokens: StorefrontThemeTokens) => {
     primary: toOpaque(parseColor(themeTokens.primary), background),
     accent: toOpaque(parseColor(themeTokens.accent), background),
     onPrimary: toOpaque(parseColor(themeTokens.onPrimary), background),
+    status,
   };
 };
 
@@ -173,6 +196,30 @@ describe("storefront token contrast", () => {
         contrastRatio(colors.borderOnSurface, colors.surface),
         `${key}: border against surface`,
       ).toBeGreaterThanOrEqual(minimumBorderContrastByStorefront[key]);
+    });
+  });
+
+  it("meets AA contrast for status text on status backgrounds", () => {
+    const statusKeys = ["success", "warning", "error", "info"] as const;
+
+    Object.values(STOREFRONT_CONFIGS).forEach(({ key, themeTokens }) => {
+      const colors = resolveThemeContrastColors(themeTokens);
+      statusKeys.forEach((statusKey) => {
+        expect(
+          contrastRatio(
+            colors.status[statusKey].text,
+            colors.status[statusKey].bg,
+          ),
+          `${key}: ${statusKey} status text on status background`,
+        ).toBeGreaterThanOrEqual(WCAG_AA_NORMAL_TEXT);
+        expect(
+          contrastRatio(
+            colors.status[statusKey].border,
+            colors.status[statusKey].bg,
+          ),
+          `${key}: ${statusKey} status border against status background`,
+        ).toBeGreaterThanOrEqual(1.5);
+      });
     });
   });
 

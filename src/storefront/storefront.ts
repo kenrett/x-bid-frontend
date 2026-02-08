@@ -19,6 +19,12 @@ export type StorefrontThemeTokens = {
   shadow: string;
   headingFont: string;
   bodyFont: string;
+  status: {
+    success: { bg: string; text: string; border: string };
+    warning: { bg: string; text: string; border: string };
+    error: { bg: string; text: string; border: string };
+    info: { bg: string; text: string; border: string };
+  };
 };
 
 export type StorefrontConfig = {
@@ -52,6 +58,28 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
       shadow: "0 16px 40px rgba(15, 23, 42, 0.10)",
       headingFont: `"Zalando Sans Expanded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
       bodyFont: `"Zalando Sans Expanded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
+      status: {
+        success: {
+          bg: "#e6f7ec",
+          text: "#0f5132",
+          border: "#2f855a",
+        },
+        warning: {
+          bg: "#fff4db",
+          text: "#7a4a00",
+          border: "#b7791f",
+        },
+        error: {
+          bg: "#fde8e8",
+          text: "#7f1d1d",
+          border: "#c53030",
+        },
+        info: {
+          bg: "#e8f0fe",
+          text: "#1e3a8a",
+          border: "#3b82f6",
+        },
+      },
     },
     logoPath: "/assets/BidderSweet.png",
   },
@@ -76,6 +104,28 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
       shadow: "0 18px 50px rgba(0, 0, 0, 0.55)",
       headingFont: `"Zalando Sans Expanded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
       bodyFont: `"Zalando Sans Expanded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
+      status: {
+        success: {
+          bg: "rgba(34, 197, 94, 0.22)",
+          text: "#dcfce7",
+          border: "rgba(134, 239, 172, 0.65)",
+        },
+        warning: {
+          bg: "rgba(245, 158, 11, 0.22)",
+          text: "#fef3c7",
+          border: "rgba(252, 211, 77, 0.70)",
+        },
+        error: {
+          bg: "rgba(239, 68, 68, 0.22)",
+          text: "#fee2e2",
+          border: "rgba(252, 165, 165, 0.70)",
+        },
+        info: {
+          bg: "rgba(59, 130, 246, 0.22)",
+          text: "#dbeafe",
+          border: "rgba(147, 197, 253, 0.70)",
+        },
+      },
     },
     logoPath: "/assets/AfterDark.png",
   },
@@ -121,6 +171,28 @@ export const STOREFRONT_CONFIGS: Record<StorefrontKey, StorefrontConfig> = {
       // Use a serif heading only if you want editorial; otherwise go modern.
       headingFont: `"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
       bodyFont: `"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`,
+      status: {
+        success: {
+          bg: "#e6f7f3",
+          text: "#0f4c45",
+          border: "#0f766e",
+        },
+        warning: {
+          bg: "#fff7e0",
+          text: "#7c3f00",
+          border: "#b45309",
+        },
+        error: {
+          bg: "#fdecec",
+          text: "#7f1d1d",
+          border: "#b91c1c",
+        },
+        info: {
+          bg: "#e8f2ff",
+          text: "#1e3a8a",
+          border: "#1d4ed8",
+        },
+      },
     },
     logoPath: "/assets/Marketplace.png",
   },

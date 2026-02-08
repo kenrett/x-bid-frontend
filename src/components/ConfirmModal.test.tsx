@@ -36,6 +36,7 @@ describe("ConfirmModal", () => {
 
     await user.click(openButton);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText(/danger action/i)).toBeInTheDocument();
 
     const confirm = screen.getByRole("button", { name: "Do it" });
     const cancel = screen.getByRole("button", { name: "Nope" });

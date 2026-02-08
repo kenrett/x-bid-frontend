@@ -70,6 +70,7 @@ describe("ToastContainer", () => {
     const message = screen.getByText("Saved");
     const toast = message.closest('[role="status"]');
     expect(toast).not.toBeNull();
-    expect(toast).toHaveClass("bg-green-900/60");
+    expect(toast).toHaveClass("bg-[color:var(--sf-status-success-bg)]");
+    expect(screen.getByText("Success")).toBeInTheDocument();
   });
 });

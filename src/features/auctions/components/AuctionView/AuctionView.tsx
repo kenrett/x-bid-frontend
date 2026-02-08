@@ -1,6 +1,11 @@
 import { memo, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/solid";
 
 import { Countdown } from "../Countdown/Countdown";
 const BidHistory = lazy(() =>
@@ -67,26 +72,31 @@ const AuctionViewComponent = ({
             <span
               className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold tracking-wide uppercase ${
                 isConnected
-                  ? "border-green-500/60 bg-green-500/10 text-green-200"
+                  ? "border-[color:var(--sf-status-success-border)] bg-[color:var(--sf-status-success-bg)] text-[color:var(--sf-status-success-text)]"
                   : isConnecting
-                    ? "border-amber-400/60 bg-amber-400/10 text-amber-200"
-                    : "border-red-400/60 bg-red-500/10 text-red-200"
+                    ? "border-[color:var(--sf-status-warning-border)] bg-[color:var(--sf-status-warning-bg)] text-[color:var(--sf-status-warning-text)]"
+                    : "border-[color:var(--sf-status-error-border)] bg-[color:var(--sf-status-error-bg)] text-[color:var(--sf-status-error-text)]"
               }`}
               aria-live="polite"
             >
-              <span
-                className={`h-2.5 w-2.5 rounded-full ${
-                  isConnected
-                    ? "bg-green-400 animate-pulse"
-                    : isConnecting
-                      ? "bg-amber-300 animate-pulse"
-                      : "bg-red-400"
-                }`}
-              />
-              Live
+              {isConnected ? (
+                <CheckCircleIcon className="h-3.5 w-3.5" aria-hidden="true" />
+              ) : isConnecting ? (
+                <ExclamationTriangleIcon
+                  className="h-3.5 w-3.5 animate-pulse"
+                  aria-hidden="true"
+                />
+              ) : (
+                <XCircleIcon className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+              {isConnected
+                ? "Live connected"
+                : isConnecting
+                  ? "Live reconnecting"
+                  : "Live offline"}
             </span>
             {!isConnected && (
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-[color:var(--sf-mutedText)]">
                 {isConnecting
                   ? "Connecting to live feed..."
                   : "Live feed disconnected. Trying to reconnect."}
@@ -96,9 +106,13 @@ const AuctionViewComponent = ({
         </div>
         {!isConnected && (
           <div
-            className="mb-4 rounded-xl border border-red-500/50 bg-red-950/60 px-4 py-3 text-red-100"
+            className="mb-4 rounded-xl border border-[color:var(--sf-status-error-border)] bg-[color:var(--sf-status-error-bg)] px-4 py-3 text-[color:var(--sf-status-error-text)]"
             role="status"
           >
+            <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
+              <XCircleIcon className="h-4 w-4" aria-hidden="true" />
+              Live status
+            </div>
             Live updates are currently offline. Bids will refresh once the
             connection returns.
           </div>
@@ -179,9 +193,13 @@ const AuctionViewComponent = ({
                 <>
                   {bidError && (
                     <div
-                      className="p-4 bg-red-900/50 border border-red-500/50 text-red-300 rounded-lg text-center"
+                      className="rounded-lg border border-[color:var(--sf-status-error-border)] bg-[color:var(--sf-status-error-bg)] p-4 text-center text-[color:var(--sf-status-error-text)]"
                       role="alert"
                     >
+                      <div className="mb-1 flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide">
+                        <XCircleIcon className="h-4 w-4" aria-hidden="true" />
+                        Bid error
+                      </div>
                       {bidError}
                     </div>
                   )}
@@ -217,12 +235,19 @@ const AuctionViewComponent = ({
                           : "Place Your Bid"}
                   </button>
                   {isBiddingBlockedByEmail ? (
-                    <div className="mt-3 rounded-xl border border-amber-300/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                    <div className="mt-3 rounded-xl border border-[color:var(--sf-status-warning-border)] bg-[color:var(--sf-status-warning-bg)] px-4 py-3 text-sm text-[color:var(--sf-status-warning-text)]">
+                      <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
+                        <ExclamationTriangleIcon
+                          className="h-4 w-4"
+                          aria-hidden="true"
+                        />
+                        Verification required
+                      </div>
                       Verify your email to place bids.{" "}
                       <button
                         type="button"
                         onClick={() => navigate("/account/verify-email")}
-                        className="font-semibold underline underline-offset-2 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d1a] rounded"
+                        className="rounded font-semibold underline underline-offset-2 hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--sf-status-warning-border)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--sf-status-warning-bg)]"
                       >
                         Verify now
                       </button>

@@ -13,6 +13,7 @@ import {
   useAuctionListChannel,
   type AuctionListUpdate,
 } from "@features/auctions/hooks/useAuctionListChannel";
+import { CheckCircleIcon, PauseCircleIcon } from "@heroicons/react/24/solid";
 
 const mergeAuctionUpdate = (
   current: AuctionSummary[],
@@ -167,18 +168,19 @@ const AuctionList = () => {
                 data-testid="live-status"
                 className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
                   connectionState === "connected"
-                    ? "bg-green-500/10 text-green-700 border border-green-500/20"
-                    : "bg-[color:var(--sf-surface)] text-[color:var(--sf-mutedText)] border border-[color:var(--sf-border)]"
+                    ? "bg-[color:var(--sf-status-success-bg)] text-[color:var(--sf-status-success-text)] border border-[color:var(--sf-status-success-border)]"
+                    : "bg-[color:var(--sf-status-warning-bg)] text-[color:var(--sf-status-warning-text)] border border-[color:var(--sf-status-warning-border)]"
                 }`}
                 aria-live="polite"
               >
-                <span
-                  className={`h-2 w-2 rounded-full ${
-                    connectionState === "connected"
-                      ? "bg-green-500"
-                      : "bg-[color:var(--sf-mutedText)]"
-                  }`}
-                />
+                {connectionState === "connected" ? (
+                  <CheckCircleIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                ) : (
+                  <PauseCircleIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                )}
+                <span className="uppercase tracking-wide text-[10px]">
+                  {connectionState === "connected" ? "Connected" : "Paused"}
+                </span>
                 Live updates {connectionState === "connected" ? "on" : "paused"}
               </span>
             </div>

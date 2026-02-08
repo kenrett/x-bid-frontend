@@ -1,10 +1,33 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { subscribeToToasts, type ToastMessage } from "../../services/toast";
+import {
+  CheckCircleIcon,
+  InformationCircleIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/solid";
 
-const VARIANT_STYLES: Record<ToastMessage["variant"], string> = {
-  info: "bg-[color:var(--sf-surface)] border-[color:var(--sf-border)] text-[color:var(--sf-text)]",
-  success: "bg-green-900/60 border-green-400/60 text-green-50",
-  error: "bg-red-900/60 border-red-400/60 text-red-50",
+const VARIANT_META: Record<
+  ToastMessage["variant"],
+  { style: string; label: string; Icon: typeof InformationCircleIcon }
+> = {
+  info: {
+    style:
+      "bg-[color:var(--sf-status-info-bg)] border-[color:var(--sf-status-info-border)] text-[color:var(--sf-status-info-text)]",
+    label: "Info",
+    Icon: InformationCircleIcon,
+  },
+  success: {
+    style:
+      "bg-[color:var(--sf-status-success-bg)] border-[color:var(--sf-status-success-border)] text-[color:var(--sf-status-success-text)]",
+    label: "Success",
+    Icon: CheckCircleIcon,
+  },
+  error: {
+    style:
+      "bg-[color:var(--sf-status-error-bg)] border-[color:var(--sf-status-error-border)] text-[color:var(--sf-status-error-text)]",
+    label: "Error",
+    Icon: XCircleIcon,
+  },
 };
 
 export const ToastContainer = () => {
@@ -48,31 +71,42 @@ export const ToastContainer = () => {
       role="region"
       aria-label="Notifications"
     >
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          role={toast.variant === "error" ? "alert" : "status"}
-          className={`rounded-lg border px-4 py-3 shadow-lg shadow-black/30 backdrop-blur ${VARIANT_STYLES[toast.variant]}`}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              event.stopPropagation();
-              removeToast(toast.id);
-            }
-          }}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="text-sm leading-snug">{toast.message}</div>
-            <button
-              type="button"
-              className="shrink-0 rounded-md border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-2 py-1 text-xs font-semibold text-[color:var(--sf-text)] hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-primary)]"
-              aria-label="Dismiss notification"
-              onClick={() => removeToast(toast.id)}
-            >
-              ×
-            </button>
+      {toasts.map((toast) => {
+        const { Icon, label, style } = VARIANT_META[toast.variant];
+        return (
+          <div
+            key={toast.id}
+            role={toast.variant === "error" ? "alert" : "status"}
+            className={`rounded-lg border px-4 py-3 shadow-lg shadow-black/30 backdrop-blur ${style}`}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.stopPropagation();
+                removeToast(toast.id);
+              }
+            }}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-2">
+                <Icon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                <div className="text-sm leading-snug">
+                  <div className="text-[11px] font-semibold uppercase tracking-wide">
+                    {label}
+                  </div>
+                  {toast.message}
+                </div>
+              </div>
+              <button
+                type="button"
+                className="shrink-0 rounded-md border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-2 py-1 text-xs font-semibold text-[color:var(--sf-text)] hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-primary)]"
+                aria-label="Dismiss notification"
+                onClick={() => removeToast(toast.id)}
+              >
+                ×
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

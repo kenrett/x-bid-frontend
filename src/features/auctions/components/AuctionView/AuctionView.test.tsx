@@ -260,6 +260,7 @@ describe("AuctionView Component", () => {
   describe("Live connection indicators", () => {
     it("shows a disconnect banner when offline", () => {
       renderComponent({ connectionState: "disconnected" });
+      expect(screen.getByText(/Live offline/i)).toBeInTheDocument();
       expect(
         screen.getByText(/Live updates are currently offline/i),
       ).toBeInTheDocument();
@@ -270,6 +271,7 @@ describe("AuctionView Component", () => {
 
     it("shows connecting message when connecting", () => {
       renderComponent({ connectionState: "connecting" });
+      expect(screen.getByText(/Live reconnecting/i)).toBeInTheDocument();
       expect(screen.getByText(/Connecting to live feed/i)).toBeInTheDocument();
     });
   });
