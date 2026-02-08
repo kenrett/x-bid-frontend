@@ -106,26 +106,28 @@ export const ResetPassword = () => {
 
       <div className="relative mx-auto flex min-h-[calc(100vh-7rem)] max-w-5xl flex-col items-center px-6 py-14 lg:flex-row lg:items-center lg:justify-between lg:gap-16 lg:py-20">
         <div className="max-w-xl space-y-4 text-center lg:text-left">
-          <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-pink-300">
+          <p className="inline-flex items-center gap-2 rounded-full border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--sf-accent)]">
             Reset access
           </p>
-          <h1 className="font-serif text-4xl font-black leading-tight text-white drop-shadow-sm sm:text-5xl">
+          <h1 className="font-serif text-4xl font-black leading-tight text-[color:var(--sf-text)] drop-shadow-sm sm:text-5xl">
             Set a new password.
           </h1>
-          <p className="text-base text-gray-300 sm:text-lg">
+          <p className="text-base text-[color:var(--sf-mutedText)] sm:text-lg">
             Choose a new password to regain access. For your security, all
             previous sessions have been revoked.
           </p>
         </div>
 
         <div className="relative mt-10 w-full max-w-lg lg:mt-0">
-          <div className="absolute inset-[-1px] rounded-[28px] bg-gradient-to-br from-pink-500/60 via-purple-500/40 to-indigo-500/60 opacity-60 blur-xl" />
-          <div className="relative rounded-[24px] border border-white/10 bg-white/5 p-8 shadow-[0_25px_60px_rgba(0,0,0,0.35)] backdrop-blur">
+          <div className="absolute inset-[-1px] rounded-[28px] bg-[linear-gradient(135deg,var(--sf-primary),var(--sf-accent))] opacity-60 blur-xl" />
+          <div className="relative rounded-[24px] border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-8 shadow-[0_25px_60px_rgba(0,0,0,0.35)] backdrop-blur">
             <div className="mb-6">
-              <p className="text-xs uppercase tracking-[0.18em] text-pink-200/80">
+              <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--sf-accent)]">
                 Password reset
               </p>
-              <h2 className="text-2xl font-bold text-white">Update password</h2>
+              <h2 className="text-2xl font-bold text-[color:var(--sf-text)]">
+                Update password
+              </h2>
             </div>
 
             <form
@@ -138,7 +140,7 @@ export const ResetPassword = () => {
               <div className="space-y-2">
                 <label
                   htmlFor="reset-token"
-                  className="block text-sm font-semibold text-white"
+                  className="block text-sm font-semibold text-[color:var(--sf-text)]"
                 >
                   Reset token
                 </label>
@@ -151,7 +153,7 @@ export const ResetPassword = () => {
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
                   ref={tokenRef}
-                  className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
+                  className="w-full rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-3 text-[color:var(--sf-text)] placeholder:text-[color:var(--sf-mutedText)] shadow-inner shadow-black/10 outline-none transition focus:border-[color:var(--sf-focus-ring)]/70 focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]/40"
                   aria-invalid={fieldErrors.token?.length ? "true" : "false"}
                   aria-describedby={
                     fieldErrors.token?.length ? "reset-token-error" : undefined
@@ -172,7 +174,7 @@ export const ResetPassword = () => {
                 <div className="space-y-2">
                   <label
                     htmlFor="reset-password"
-                    className="block text-sm font-semibold text-white"
+                    className="block text-sm font-semibold text-[color:var(--sf-text)]"
                   >
                     New password
                   </label>
@@ -185,7 +187,7 @@ export const ResetPassword = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     ref={passwordRef}
-                    className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
+                    className="w-full rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-3 text-[color:var(--sf-text)] placeholder:text-[color:var(--sf-mutedText)] shadow-inner shadow-black/10 outline-none transition focus:border-[color:var(--sf-focus-ring)]/70 focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]/40"
                     autoComplete="new-password"
                     aria-invalid={
                       fieldErrors.password?.length ? "true" : "false"
@@ -210,7 +212,7 @@ export const ResetPassword = () => {
                 <div className="space-y-2">
                   <label
                     htmlFor="reset-password-confirm"
-                    className="block text-sm font-semibold text-white"
+                    className="block text-sm font-semibold text-[color:var(--sf-text)]"
                   >
                     Confirm password
                   </label>
@@ -223,7 +225,7 @@ export const ResetPassword = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     ref={confirmPasswordRef}
-                    className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
+                    className="w-full rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-3 text-[color:var(--sf-text)] placeholder:text-[color:var(--sf-mutedText)] shadow-inner shadow-black/10 outline-none transition focus:border-[color:var(--sf-focus-ring)]/70 focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]/40"
                     autoComplete="new-password"
                     aria-invalid={
                       fieldErrors.password_confirmation?.length
@@ -256,7 +258,7 @@ export const ResetPassword = () => {
                   {message}{" "}
                   <button
                     type="button"
-                    className="underline underline-offset-4 text-pink-200 hover:text-white"
+                    className="underline underline-offset-4 text-[color:var(--sf-accent)] hover:text-[color:var(--sf-text)]"
                     onClick={() => navigate("/login")}
                   >
                     Sign in
@@ -277,7 +279,7 @@ export const ResetPassword = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="group relative inline-flex w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-pink-500/20 transition hover:scale-[1.01] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-pink-300/50 disabled:opacity-60"
+                className="group relative inline-flex w-full items-center justify-center overflow-hidden rounded-xl bg-[linear-gradient(90deg,var(--sf-primary),var(--sf-accent))] px-5 py-3 text-sm font-semibold text-[color:var(--sf-onPrimary)] shadow-lg shadow-pink-500/20 transition hover:scale-[1.01] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)] disabled:opacity-60"
               >
                 <span className="absolute inset-0 translate-y-[120%] bg-white/10 transition duration-500 group-hover:translate-y-0" />
                 <span className="relative">
@@ -285,10 +287,10 @@ export const ResetPassword = () => {
                 </span>
               </button>
 
-              <div className="text-center text-sm font-medium text-gray-300">
+              <div className="text-center text-sm font-medium text-[color:var(--sf-mutedText)]">
                 <Link
                   to="/login"
-                  className="text-pink-300 underline-offset-4 transition hover:text-white hover:underline"
+                  className="text-[color:var(--sf-accent)] underline-offset-4 transition hover:text-[color:var(--sf-text)] hover:underline"
                 >
                   Back to sign in
                 </Link>

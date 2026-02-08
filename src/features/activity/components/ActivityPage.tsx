@@ -40,13 +40,15 @@ const kindIcon = (kind: ActivityKind, outcome?: "won" | "lost") => {
 const pillStyles = (active: boolean) =>
   `px-3 py-1 rounded-full text-sm font-semibold transition-colors border ${
     active
-      ? "bg-white/20 text-white border-white/40"
-      : "bg-white/5 text-gray-200 border-white/10 hover:bg-white/10"
+      ? "bg-white/20 text-[color:var(--sf-text)] border-white/40"
+      : "bg-[color:var(--sf-surface)] text-[color:var(--sf-mutedText)] border-[color:var(--sf-border)] hover:bg-white/10"
   }`;
 
 const EmptyState = () => (
-  <div className="text-center text-gray-400 py-10">
-    <p className="text-lg font-semibold text-white mb-2">No activity yet</p>
+  <div className="text-center text-[color:var(--sf-mutedText)] py-10">
+    <p className="text-lg font-semibold text-[color:var(--sf-text)] mb-2">
+      No activity yet
+    </p>
     <p className="text-sm">
       Your bids, watches, and outcomes will appear here.
     </p>
@@ -54,8 +56,8 @@ const EmptyState = () => (
 );
 
 const FilterEmptyState = () => (
-  <div className="text-center text-gray-400 py-10">
-    <p className="text-lg font-semibold text-white mb-2">
+  <div className="text-center text-[color:var(--sf-mutedText)] py-10">
+    <p className="text-lg font-semibold text-[color:var(--sf-text)] mb-2">
       No activity for this filter
     </p>
     <p className="text-sm">Try switching to another activity type.</p>
@@ -85,7 +87,11 @@ const eventBadge = (
   options?: { outcome?: "won" | "lost"; watchAction?: "added" | "removed" },
 ) => {
   if (kind === "bid")
-    return { label: "Bid", icon: "🎯", style: "bg-pink-500/20 text-pink-100" };
+    return {
+      label: "Bid",
+      icon: "🎯",
+      style: "bg-pink-500/20 text-[color:var(--sf-accent)]",
+    };
   if (kind === "watch") {
     const action = options?.watchAction;
     return action === "removed"
@@ -111,7 +117,11 @@ const eventBadge = (
       icon: "📦",
       style: "bg-amber-500/20 text-amber-100",
     };
-  return { label: "Activity", icon: "📜", style: "bg-white/10 text-gray-100" };
+  return {
+    label: "Activity",
+    icon: "📜",
+    style: "bg-white/10 text-[color:var(--sf-mutedText)]",
+  };
 };
 
 const ActivityRow = ({ item }: { item: ActivityItem }) => {
@@ -184,14 +194,16 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
   });
 
   return (
-    <li className="flex items-start gap-3 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors">
+    <li className="flex items-start gap-3 px-3 py-3 rounded-lg hover:bg-[color:var(--sf-surface)] transition-colors">
       <div className="text-lg" aria-hidden>
         {icon}
       </div>
       <div className="flex-1 space-y-1">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-white">{label}</span>
+            <span className="text-sm font-semibold text-[color:var(--sf-text)]">
+              {label}
+            </span>
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${badge.style}`}
             >
@@ -199,7 +211,7 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
               {badge.label}
             </span>
           </div>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-[color:var(--sf-mutedText)]">
             {formatDate(item.occurredAt)}
           </span>
         </div>
@@ -207,15 +219,17 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
           {item.auctionId > 0 ? (
             <Link
               to={primaryLinkTo}
-              className="text-sm text-pink-200 hover:text-pink-100 underline underline-offset-2"
+              className="text-sm text-[color:var(--sf-accent)] hover:text-[color:var(--sf-accent)] underline underline-offset-2"
             >
               {displayTitle}
             </Link>
           ) : (
-            <span className="text-sm text-gray-200">{displayTitle}</span>
+            <span className="text-sm text-[color:var(--sf-mutedText)]">
+              {displayTitle}
+            </span>
           )}
           {detail ? (
-            <span className="text-xs text-gray-300">
+            <span className="text-xs text-[color:var(--sf-mutedText)]">
               {detail}
               {item.kind === "fulfillment" && item.trackingUrl ? (
                 <>
@@ -224,7 +238,7 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
                     href={item.trackingUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-pink-200 hover:text-pink-100 underline underline-offset-2"
+                    className="text-[color:var(--sf-accent)] hover:text-[color:var(--sf-accent)] underline underline-offset-2"
                   >
                     Tracking
                   </a>
@@ -236,7 +250,7 @@ const ActivityRow = ({ item }: { item: ActivityItem }) => {
               href={item.trackingUrl}
               target="_blank"
               rel="noreferrer"
-              className="text-xs text-pink-200 hover:text-pink-100 underline underline-offset-2"
+              className="text-xs text-[color:var(--sf-accent)] hover:text-[color:var(--sf-accent)] underline underline-offset-2"
             >
               Tracking
             </a>
@@ -324,13 +338,17 @@ export const ActivityPage = () => {
   if (!isReady)
     return (
       <Page centered>
-        <p className="text-gray-400 text-lg">Loading activity...</p>
+        <p className="text-[color:var(--sf-mutedText)] text-lg">
+          Loading activity...
+        </p>
       </Page>
     );
   if (!user)
     return (
       <Page centered>
-        <p className="text-gray-400 text-lg">Sign in to view your activity.</p>
+        <p className="text-[color:var(--sf-mutedText)] text-lg">
+          Sign in to view your activity.
+        </p>
       </Page>
     );
 
@@ -339,13 +357,13 @@ export const ActivityPage = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs uppercase tracking-wide text-gray-500">
+            <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
               Account
             </p>
-            <h1 className="text-3xl font-serif font-bold text-white">
+            <h1 className="text-3xl font-serif font-bold text-[color:var(--sf-text)]">
               My Activity
             </h1>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[color:var(--sf-mutedText)]">
               Latest bids, watches, and auction outcomes.
             </p>
           </div>
@@ -362,10 +380,12 @@ export const ActivityPage = () => {
           </div>
         </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl shadow-lg shadow-black/10">
-          <div className="border-b border-white/10 px-4 py-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">Feed</h2>
-            <span className="text-xs text-gray-400">
+        <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl shadow-lg shadow-black/10">
+          <div className="border-b border-[color:var(--sf-border)] px-4 py-3 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-[color:var(--sf-text)]">
+              Feed
+            </h2>
+            <span className="text-xs text-[color:var(--sf-mutedText)]">
               {isLoading
                 ? "Loading..."
                 : `${filteredItems.length} item${filteredItems.length === 1 ? "" : "s"}`}
@@ -385,7 +405,7 @@ export const ActivityPage = () => {
                       setError(null);
                       void loadActivity("reset");
                     }}
-                    className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-colors"
+                    className="text-sm font-semibold bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-[color:var(--sf-text)] transition-colors"
                   >
                     Retry
                   </button>
@@ -402,18 +422,18 @@ export const ActivityPage = () => {
             )}
           </ul>
           {!isLoading && !error && (items.length > 0 || hasMore) ? (
-            <div className="border-t border-white/10 px-4 py-4 flex items-center justify-center">
+            <div className="border-t border-[color:var(--sf-border)] px-4 py-4 flex items-center justify-center">
               {hasMore ? (
                 <button
                   type="button"
                   onClick={() => void loadActivity("more")}
                   disabled={isLoadingMore}
-                  className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10 disabled:opacity-60"
+                  className="rounded-lg border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-2 text-sm font-semibold text-[color:var(--sf-text)] hover:bg-white/10 disabled:opacity-60"
                 >
                   {isLoadingMore ? "Loading..." : "Load more"}
                 </button>
               ) : (
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-[color:var(--sf-mutedText)]">
                   You are all caught up.
                 </span>
               )}

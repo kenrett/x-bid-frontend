@@ -87,24 +87,24 @@ export const SignUpForm = () => {
 
       <div className="relative mx-auto flex min-h-[calc(100vh-7rem)] max-w-6xl flex-col items-center px-6 py-14 lg:flex-row lg:items-center lg:justify-between lg:gap-16 lg:py-20">
         <div className="max-w-xl space-y-4 text-center lg:text-left">
-          <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-pink-300 shadow-[0_10px_50px_rgba(255,105,180,0.15)]">
+          <p className="inline-flex items-center gap-2 rounded-full border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--sf-accent)] shadow-[0_10px_50px_rgba(255,105,180,0.15)]">
             New here
           </p>
-          <h1 className="font-serif text-4xl font-black leading-tight text-white drop-shadow-sm sm:text-5xl">
+          <h1 className="font-serif text-4xl font-black leading-tight text-[color:var(--sf-text)] drop-shadow-sm sm:text-5xl">
             Create your bidder identity.
           </h1>
-          <p className="text-base text-gray-300 sm:text-lg">
+          <p className="text-base text-[color:var(--sf-mutedText)] sm:text-lg">
             Join the marketplace, set your alerts, and jump into live auctions
             with bid packs and watchlists tailored to you.
           </p>
-          <div className="grid gap-3 text-sm text-gray-300 sm:grid-cols-2 sm:text-base">
-            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-pink-500/15 text-pink-300 text-xs font-semibold">
+          <div className="grid gap-3 text-sm text-[color:var(--sf-mutedText)] sm:grid-cols-2 sm:text-base">
+            <div className="flex items-center gap-2 rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-3 backdrop-blur">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-pink-500/15 text-[color:var(--sf-accent)] text-xs font-semibold">
                 AIM
               </span>
               <span>Track the drops you care about most.</span>
             </div>
-            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur">
+            <div className="flex items-center gap-2 rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-3 backdrop-blur">
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-purple-500/15 text-purple-200 text-xs font-semibold">
                 BOOST
               </span>
@@ -114,18 +114,18 @@ export const SignUpForm = () => {
         </div>
 
         <div className="relative mt-10 w-full max-w-lg lg:mt-0">
-          <div className="absolute inset-[-1px] rounded-[28px] bg-gradient-to-br from-pink-500/60 via-purple-500/40 to-indigo-500/60 opacity-60 blur-xl" />
-          <div className="relative rounded-[24px] border border-white/10 bg-white/5 p-8 shadow-[0_25px_60px_rgba(0,0,0,0.35)] backdrop-blur">
+          <div className="absolute inset-[-1px] rounded-[28px] bg-[linear-gradient(135deg,var(--sf-primary),var(--sf-accent))] opacity-60 blur-xl" />
+          <div className="relative rounded-[24px] border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-8 shadow-[0_25px_60px_rgba(0,0,0,0.35)] backdrop-blur">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-pink-200/80">
+                <p className="text-xs uppercase tracking-[0.18em] text-[color:var(--sf-accent)]">
                   Create
                 </p>
-                <h2 className="text-2xl font-bold text-white">
+                <h2 className="text-2xl font-bold text-[color:var(--sf-text)]">
                   Create an account
                 </h2>
               </div>
-              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-pink-200">
+              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-[color:var(--sf-accent)]">
                 New bidder
               </span>
             </div>
@@ -139,7 +139,7 @@ export const SignUpForm = () => {
               <div className="space-y-2">
                 <label
                   htmlFor="name"
-                  className="block text-sm font-semibold text-white"
+                  className="block text-sm font-semibold text-[color:var(--sf-text)]"
                 >
                   Name
                 </label>
@@ -151,7 +151,7 @@ export const SignUpForm = () => {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
+                  className="w-full rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-3 text-[color:var(--sf-text)] placeholder:text-[color:var(--sf-mutedText)] shadow-inner shadow-black/10 outline-none transition focus:border-[color:var(--sf-focus-ring)]/70 focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]/40"
                   autoComplete="name"
                   aria-invalid={fieldErrors.name?.length ? "true" : "false"}
                   aria-describedby={
@@ -172,7 +172,7 @@ export const SignUpForm = () => {
               <div className="space-y-2">
                 <label
                   htmlFor="email_address"
-                  className="block text-sm font-semibold text-white"
+                  className="block text-sm font-semibold text-[color:var(--sf-text)]"
                 >
                   Email address
                 </label>
@@ -184,7 +184,7 @@ export const SignUpForm = () => {
                   required
                   value={email_address}
                   onChange={(e) => setEmailAddress(e.target.value)}
-                  className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
+                  className="w-full rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-3 text-[color:var(--sf-text)] placeholder:text-[color:var(--sf-mutedText)] shadow-inner shadow-black/10 outline-none transition focus:border-[color:var(--sf-focus-ring)]/70 focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]/40"
                   autoComplete="email"
                   aria-invalid={
                     fieldErrors.email_address?.length ||
@@ -215,7 +215,7 @@ export const SignUpForm = () => {
                 <div className="space-y-2">
                   <label
                     htmlFor="password"
-                    className="block text-sm font-semibold text-white"
+                    className="block text-sm font-semibold text-[color:var(--sf-text)]"
                   >
                     Password
                   </label>
@@ -227,7 +227,7 @@ export const SignUpForm = () => {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
+                    className="w-full rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-3 text-[color:var(--sf-text)] placeholder:text-[color:var(--sf-mutedText)] shadow-inner shadow-black/10 outline-none transition focus:border-[color:var(--sf-focus-ring)]/70 focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]/40"
                     autoComplete="new-password"
                     aria-invalid={
                       fieldErrors.password?.length ? "true" : "false"
@@ -252,7 +252,7 @@ export const SignUpForm = () => {
                 <div className="space-y-2">
                   <label
                     htmlFor="confirm_password"
-                    className="block text-sm font-semibold text-white"
+                    className="block text-sm font-semibold text-[color:var(--sf-text)]"
                   >
                     Confirm password
                   </label>
@@ -264,7 +264,7 @@ export const SignUpForm = () => {
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-gray-500 shadow-inner shadow-black/10 outline-none transition focus:border-pink-400/70 focus:ring-2 focus:ring-pink-500/40"
+                    className="w-full rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-4 py-3 text-[color:var(--sf-text)] placeholder:text-[color:var(--sf-mutedText)] shadow-inner shadow-black/10 outline-none transition focus:border-[color:var(--sf-focus-ring)]/70 focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]/40"
                     autoComplete="new-password"
                     aria-invalid={
                       fieldErrors.confirm_password?.length ||
@@ -309,7 +309,7 @@ export const SignUpForm = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative inline-flex w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-pink-500/20 transition hover:scale-[1.01] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-pink-300/50 disabled:opacity-60"
+                className="group relative inline-flex w-full items-center justify-center overflow-hidden rounded-xl bg-[linear-gradient(90deg,var(--sf-primary),var(--sf-accent))] px-5 py-3 text-sm font-semibold text-[color:var(--sf-onPrimary)] shadow-lg shadow-pink-500/20 transition hover:scale-[1.01] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)] disabled:opacity-60"
               >
                 <span className="absolute inset-0 translate-y-[120%] bg-white/10 transition duration-500 group-hover:translate-y-0" />
                 <span className="relative">
@@ -317,11 +317,11 @@ export const SignUpForm = () => {
                 </span>
               </button>
 
-              <div className="text-center text-sm font-medium text-gray-300">
+              <div className="text-center text-sm font-medium text-[color:var(--sf-mutedText)]">
                 Already have an account?{" "}
                 <Link
                   to="/login"
-                  className="text-pink-300 underline-offset-4 transition hover:text-white hover:underline"
+                  className="text-[color:var(--sf-accent)] underline-offset-4 transition hover:text-[color:var(--sf-text)] hover:underline"
                 >
                   Sign in
                 </Link>
