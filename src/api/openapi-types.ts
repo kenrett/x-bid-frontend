@@ -4155,6 +4155,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_015"];
+      403: components["responses"]["resp_056"];
       404: components["responses"]["resp_003"];
     };
   };
@@ -4172,7 +4173,7 @@ export interface operations {
     responses: {
       200: components["responses"]["resp_063"];
       401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_049"];
+      403: components["responses"]["resp_056"];
       404: components["responses"]["resp_003"];
       422: components["responses"]["resp_046"];
       500: components["responses"]["resp_022"];
