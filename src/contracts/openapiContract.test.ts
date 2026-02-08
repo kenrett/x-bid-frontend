@@ -173,8 +173,59 @@ const collectApiPathLiterals = (source: string): Set<string> => {
   const matches = source.matchAll(/["'`](\/api\/v1\/[^"'`\s]+)["'`]/g);
   for (const match of matches) {
     const value = match[1];
-    if (!value.includes("${")) out.add(value);
+    out.add(value);
   }
+  return out;
+};
+
+const SOURCE_SCAN_ROOTS = ["src/api", "src/debug", "src/features"] as const;
+const SOURCE_SCAN_EXTENSIONS = new Set([".ts", ".tsx"]);
+const SOURCE_SCAN_IGNORED_SUFFIXES = [
+  ".test.ts",
+  ".test.tsx",
+  ".spec.ts",
+  ".spec.tsx",
+  ".d.ts",
+] as const;
+
+const normalizeApiPathForComparison = (value: string): string => {
+  const [pathname] = value.split("?");
+  const normalizedPath = pathname
+    .replace(/\$\{[^}]+\}/g, "{param}")
+    .replace(/\{[^}]+\}/g, "{param}")
+    .replace(/\/+$/, "");
+  return normalizedPath || "/";
+};
+
+const collectSourceFiles = (rootDir: string): string[] => {
+  if (!fs.existsSync(rootDir)) return [];
+
+  const out: string[] = [];
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const fullPath = path.join(dir, entry.name);
+
+      if (entry.isDirectory()) {
+        walk(fullPath);
+        continue;
+      }
+
+      const extension = path.extname(entry.name);
+      if (!SOURCE_SCAN_EXTENSIONS.has(extension)) continue;
+      if (
+        SOURCE_SCAN_IGNORED_SUFFIXES.some((suffix) =>
+          entry.name.endsWith(suffix),
+        )
+      ) {
+        continue;
+      }
+      if (entry.name === "openapi-types.ts") continue;
+
+      out.push(fullPath);
+    }
+  };
+
+  walk(rootDir);
   return out;
 };
 
@@ -326,24 +377,30 @@ describe("OpenAPI contract drift", () => {
     expect(disableFields.has("status")).toBe(true);
   });
 
-  it("FE auth/2FA endpoint literals must exist in backend OpenAPI paths", () => {
-    const files = [
-      "src/features/auth/components/LoginForm/LoginForm.tsx",
-      "src/features/account/api/twoFactorApi.ts",
-    ];
+  it("FE API endpoint literals must exist in backend OpenAPI paths", () => {
     const paths = openapiSchema.paths as JsonObject | undefined;
     expect(paths).toBeTruthy();
+    const normalizedOpenApiPaths = new Set<string>(
+      Object.keys(paths ?? {}).map((apiPath) =>
+        normalizeApiPathForComparison(apiPath),
+      ),
+    );
 
     const referencedPaths = new Set<string>();
-    for (const file of files) {
-      const source = fs.readFileSync(path.resolve(process.cwd(), file), "utf8");
-      const literals = collectApiPathLiterals(source);
-      for (const literal of literals) referencedPaths.add(literal);
+    for (const root of SOURCE_SCAN_ROOTS) {
+      const files = collectSourceFiles(path.resolve(process.cwd(), root));
+      for (const file of files) {
+        const source = fs.readFileSync(file, "utf8");
+        const literals = collectApiPathLiterals(source);
+        for (const literal of literals) {
+          referencedPaths.add(normalizeApiPathForComparison(literal));
+        }
+      }
     }
 
     expect(referencedPaths.size).toBeGreaterThan(0);
     for (const apiPath of referencedPaths) {
-      expect(paths).toHaveProperty(apiPath);
+      expect(normalizedOpenApiPaths.has(apiPath)).toBe(true);
     }
   });
 
