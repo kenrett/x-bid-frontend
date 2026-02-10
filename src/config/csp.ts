@@ -83,25 +83,23 @@ export const getCsp = ({ env, apiBaseUrl, cableUrl }: CspOptions): string => {
     ...(env === "development" ? devImgSrc : []),
   ]);
 
+  const scriptSrc = uniq([
+    "'self'",
+    "https://js.stripe.com",
+    "https://static.cloudflareinsights.com",
+    ...(env === "development" ? ["'unsafe-inline'", "'unsafe-eval'"] : []),
+  ]);
+
+  const styleSrc = uniq([
+    "'self'",
+    ...(env === "development" ? ["'unsafe-inline'"] : []),
+  ]);
+
   return serialize([
     ["default-src", ["'self'"]],
-    [
-      "script-src",
-      [
-        "'self'",
-        "https://js.stripe.com",
-        "https://static.cloudflareinsights.com",
-      ],
-    ],
-    [
-      "script-src-elem",
-      [
-        "'self'",
-        "https://js.stripe.com",
-        "https://static.cloudflareinsights.com",
-      ],
-    ],
-    ["style-src", ["'self'"]],
+    ["script-src", scriptSrc],
+    ["script-src-elem", scriptSrc],
+    ["style-src", styleSrc],
     ["connect-src", connectSrc],
     ["img-src", imgSrc],
     [

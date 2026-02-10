@@ -13,6 +13,7 @@ import {
   useAuctionListChannel,
   type AuctionListUpdate,
 } from "@features/auctions/hooks/useAuctionListChannel";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { CheckCircleIcon, PauseCircleIcon } from "@heroicons/react/24/solid";
 
 const mergeAuctionUpdate = (
@@ -167,23 +168,23 @@ const AuctionList = () => {
             </p>
             <div className="flex justify-center mt-3">
               <span
-                data-testid="live-status"
-                className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
-                  connectionState === "connected"
-                    ? "bg-[color:var(--sf-status-success-bg)] text-[color:var(--sf-status-success-text)] border border-[color:var(--sf-status-success-border)]"
-                    : "bg-[color:var(--sf-status-warning-bg)] text-[color:var(--sf-status-warning-text)] border border-[color:var(--sf-status-warning-border)]"
-                }`}
-                aria-live="polite"
+              // data-testid="live-status"
+              // className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
+              //   connectionState === "connected"
+              //     ? "bg-[color:var(--sf-status-success-bg)] text-[color:var(--sf-status-success-text)] border border-[color:var(--sf-status-success-border)]"
+              //     : "bg-[color:var(--sf-status-warning-bg)] text-[color:var(--sf-status-warning-text)] border border-[color:var(--sf-status-warning-border)]"
+              // }`}
+              // aria-live="polite"
               >
-                {connectionState === "connected" ? (
+                {/* {connectionState === "connected" ? (
                   <CheckCircleIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 ) : (
                   <PauseCircleIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                )}
-                <span className="uppercase tracking-wide text-[10px]">
+                )} */}
+                {/* <span className="uppercase tracking-wide text-[10px]">
                   {connectionState === "connected" ? "Connected" : "Paused"}
-                </span>
-                Live updates {connectionState === "connected" ? "on" : "paused"}
+                </span> */}
+                {/* Live updates {connectionState === "connected" ? "on" : "paused"} */}
               </span>
             </div>
           </div>

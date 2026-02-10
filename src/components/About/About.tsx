@@ -1,4 +1,4 @@
-import logo from "../../assets/xbid_logo_high_res.png";
+import logo from "../../../public/assets/Marketplace.png";
 import { Link } from "react-router-dom";
 export const About = () => {
   return (
@@ -193,7 +193,7 @@ export const About = () => {
         <p className="text-xl text-[color:var(--sf-mutedText)] mb-12 max-w-3xl mx-auto">
           BidderSweet is led by CEO and founder Ken Rettberg.
         </p>
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 gap-10 place-items-center">
           {[
             {
               name: "Ken Rettberg",
@@ -207,7 +207,7 @@ export const About = () => {
           ].map((member) => (
             <div
               key={member.name}
-              className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] p-8 rounded-3xl shadow-[var(--sf-shadow)] transition-all duration-300 ease-in-out hover:-translate-y-2 hover:brightness-95 flex flex-col items-center"
+              className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] p-8 rounded-3xl shadow-[var(--sf-shadow)] transition-all duration-300 ease-in-out hover:-translate-y-2 hover:brightness-95 flex flex-col items-center w-full max-w-sm"
             >
               <img
                 src={member.img}

@@ -192,7 +192,7 @@ export const LoginForm = () => {
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-purple-500/15 text-purple-200 text-xs font-semibold">
                 SAFE
               </span>
-              <span>Secure sessions with session tokens.</span>
+              <span>Secure sessions.</span>
             </div>
           </div>
         </div>

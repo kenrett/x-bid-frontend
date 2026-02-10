@@ -35,6 +35,14 @@ describe("CSP", () => {
     expect(csp).toContain("ws://localhost:*");
     expect(csp).toContain("http://127.0.0.1:*");
     expect(csp).toContain("ws://127.0.0.1:*");
+    expect(csp).toContain("'unsafe-inline'");
+    expect(csp).toContain("'unsafe-eval'");
+  });
+
+  it("keeps production CSP free of unsafe inline/eval script allowances", () => {
+    const csp = getCsp({ env: "production" });
+    expect(csp).not.toContain("'unsafe-inline'");
+    expect(csp).not.toContain("'unsafe-eval'");
   });
 
   it("keeps vercel.json CSP in sync with production CSP", () => {

@@ -98,25 +98,29 @@ export var getCsp = function (_a) {
       true,
     ),
   );
+  var scriptSrc = uniq(
+    __spreadArray(
+      [
+        "'self'",
+        "https://js.stripe.com",
+        "https://static.cloudflareinsights.com",
+      ],
+      env === "development" ? ["'unsafe-inline'", "'unsafe-eval'"] : [],
+      true,
+    ),
+  );
+  var styleSrc = uniq(
+    __spreadArray(
+      ["'self'"],
+      env === "development" ? ["'unsafe-inline'"] : [],
+      true,
+    ),
+  );
   return serialize([
     ["default-src", ["'self'"]],
-    [
-      "script-src",
-      [
-        "'self'",
-        "https://js.stripe.com",
-        "https://static.cloudflareinsights.com",
-      ],
-    ],
-    [
-      "script-src-elem",
-      [
-        "'self'",
-        "https://js.stripe.com",
-        "https://static.cloudflareinsights.com",
-      ],
-    ],
-    ["style-src", ["'self'"]],
+    ["script-src", scriptSrc],
+    ["script-src-elem", scriptSrc],
+    ["style-src", styleSrc],
     ["connect-src", connectSrc],
     ["img-src", imgSrc],
     [

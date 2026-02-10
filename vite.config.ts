@@ -90,13 +90,24 @@ export default defineConfig(({ mode }) => {
     ...baseConfig,
     server: {
       host: true,
-      allowedHosts: ["lvh.me", "localhost"],
+      allowedHosts: [
+        "main.lvh.me",
+        "marketplace.lvh.me",
+        "afterdark.lvh.me",
+        "localhost",
+      ],
       headers: { "Content-Security-Policy": csp },
     },
     preview:
       env.VITE_E2E_TESTS === "true"
         ? {
-            allowedHosts: ["localhost", "lvh.me", ".lvh.me"],
+            allowedHosts: [
+              "localhost",
+              "main.lvh.me",
+              "marketplace.lvh.me",
+              "afterdark.lvh.me",
+              ".lvh.me",
+            ],
             headers: {
               "Content-Security-Policy": getCsp({ env: "production" }),
             },
