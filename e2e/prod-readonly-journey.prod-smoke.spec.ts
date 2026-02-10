@@ -2,7 +2,10 @@ import { expect, test } from "@playwright/test";
 import { acceptAgeGateIfPresent, resolveAuctionsState } from "./prod/flows";
 
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
-const ALLOWED_MUTATING_PATHS = [/\/api\/v1\/age_gate\/accept(?:[/?#]|$)/i];
+const ALLOWED_MUTATING_PATHS = [
+  /\/api\/v1\/age_gate\/accept(?:[/?#]|$)/i,
+  /\/cdn-cgi\/rum(?:[/?#]|$)/i,
+];
 
 const getRootDomain = (hostname: string): string => {
   const parts = hostname.split(".").filter(Boolean);
