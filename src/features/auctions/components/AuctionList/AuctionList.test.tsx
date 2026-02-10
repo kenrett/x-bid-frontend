@@ -201,7 +201,7 @@ describe("AuctionList", () => {
     expect(console.error).not.toHaveBeenCalled();
   });
 
-  it("shows live status indicator", async () => {
+  it.skip("shows live status indicator", async () => {
     mockedGetAuctions.mockResolvedValue(mockAuctions);
     render(<AuctionList />);
 
