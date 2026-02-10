@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { AxiosHeaders } from "axios";
+import { AxiosHeaders, type AxiosError } from "axios";
+import { authSessionStore } from "@features/auth/tokenStore";
 
 const originalEnv = { ...import.meta.env };
 
@@ -32,6 +33,7 @@ const setHostname = (hostname: string) => {
 describe("api client", () => {
   let originalAdapter: typeof import("./client").default.defaults.adapter;
   let client: typeof import("./client").default;
+  let handleResponseError: typeof import("./client").handleResponseError;
 
   beforeEach(async () => {
     applyEnv({
@@ -40,8 +42,11 @@ describe("api client", () => {
     });
     setHostname("marketplace.biddersweet.app");
     vi.resetModules();
-    client = (await import("./client")).default;
+    const clientModule = await import("./client");
+    client = clientModule.default;
+    handleResponseError = clientModule.handleResponseError;
     originalAdapter = client.defaults.adapter;
+    authSessionStore.clear();
   });
 
   afterEach(() => {
@@ -136,5 +141,51 @@ describe("api client", () => {
     if (!uploadConfig) throw new Error("upload request not captured");
 
     expect(uploadConfig.withCredentials).toBe(true);
+  });
+
+  it("does not dispatch app:unauthorized for missing-credential auth probes", async () => {
+    const onUnauthorized = vi.fn();
+    window.addEventListener("app:unauthorized", onUnauthorized);
+
+    const error = {
+      config: { url: "https://api.biddersweet.app/api/v1/logged_in" },
+      response: {
+        status: 401,
+        data: {
+          error: {
+            code: "invalid_token",
+            details: { reason: "missing_authorization_header" },
+          },
+        },
+      },
+    } as AxiosError;
+
+    await expect(handleResponseError(error)).rejects.toBe(error);
+
+    expect(onUnauthorized).not.toHaveBeenCalled();
+    window.removeEventListener("app:unauthorized", onUnauthorized);
+  });
+
+  it("dispatches app:unauthorized for expired sessions", async () => {
+    const onUnauthorized = vi.fn();
+    window.addEventListener("app:unauthorized", onUnauthorized);
+
+    const error = {
+      config: { url: "https://api.biddersweet.app/api/v1/session/remaining" },
+      response: {
+        status: 401,
+        data: {
+          error: {
+            code: "invalid_token",
+            details: { reason: "expired_session" },
+          },
+        },
+      },
+    } as AxiosError;
+
+    await expect(handleResponseError(error)).rejects.toBe(error);
+
+    expect(onUnauthorized).toHaveBeenCalledTimes(1);
+    window.removeEventListener("app:unauthorized", onUnauthorized);
   });
 });

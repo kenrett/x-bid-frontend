@@ -103,6 +103,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   localStorage.clear();
   authSessionStore.clear();
+  delete (window as { __lastRedirect?: string }).__lastRedirect;
   toastMocks.showToast.mockReset();
   mockedClient.get.mockReset();
   mockedClient.delete.mockReset();
@@ -417,6 +418,45 @@ describe("AuthProvider", () => {
     expect((window as { __lastRedirect?: string }).__lastRedirect).toBe(
       `/login?next=${encodeURIComponent("/auctions?from=test")}&redirect=${encodeURIComponent("/auctions?from=test")}&reason=session_expired`,
     );
+  });
+
+  it("does not redirect on missing-credential unauthorized probe events", async () => {
+    Object.defineProperty(window, "location", {
+      value: {
+        ...window.location,
+        pathname: "/auctions",
+        search: "?from=test",
+      },
+      writable: true,
+    });
+
+    render(
+      <Wrapper>
+        <TestConsumer />
+      </Wrapper>,
+    );
+
+    await waitForReady();
+    await waitFor(() => {
+      window.dispatchEvent(
+        new CustomEvent("app:unauthorized", {
+          detail: {
+            status: 401,
+            code: "invalid_token",
+            reason: "missing_authorization_header",
+            requestPath: "/api/v1/logged_in",
+          },
+        }),
+      );
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("user")).toHaveTextContent("none"),
+    );
+    expect(toastMocks.showToast).not.toHaveBeenCalled();
+    expect(
+      (window as { __lastRedirect?: string }).__lastRedirect,
+    ).toBeUndefined();
   });
 
   it("handles repeated unauthorized events without looping or double-toasting", async () => {
