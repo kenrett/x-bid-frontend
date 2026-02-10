@@ -82,8 +82,15 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
 - `npm run test`: Runs the Vitest suite in watch mode (see `src/test/setup.ts` for the shared test setup).
 - `npm run test:ci`: Executes the Vitest suite once for CI environments.
 - `npm run test:e2e`: Runs the Playwright end-to-end suite.
-- `npm run test:e2e:prod-smoke`: Runs read-only Playwright smoke checks against `PLAYWRIGHT_BASE_URL` (required).
+- `npm run test:e2e:prod-smoke`: Runs read-only Playwright smoke checks against all configured prod storefront targets.
+- `npm run test:e2e:prod-smoke:fast`: Runs `@p0` prod smoke checks.
+- `npm run test:e2e:prod-smoke:standard`: Runs `@p0` + `@p1` prod smoke checks.
+- `npm run test:e2e:prod-smoke:deep`: Runs full prod smoke checks (`@p0` + `@p1` + `@p2`).
+  - Includes `public-access-diagnostic.json` artifact per storefront run for route access outcomes.
+  - Set `PROD_SMOKE_TARGETS` to override storefront URLs, e.g. `main=https://www.biddersweet.app,afterdark=https://afterdark.biddersweet.app,marketplace=https://marketplace.biddersweet.app`.
   - Set `PROD_SMOKE_STRICT_CSP=true` to fail on known inline-script CSP violations.
+  - Set `PROD_SMOKE_STRICT_PERF=true` to fail on slow critical responses (threshold via `PROD_SMOKE_SLOW_MS`, default `3000`).
+  - Set `PROD_SMOKE_AUCTIONS_TIMEOUT_MS` to tune auctions-list settle timeout (default `45000`).
 - `npm run preview`: Serves the production build locally for preview after `npm run build`.
 
 ## 🧱 Architecture
