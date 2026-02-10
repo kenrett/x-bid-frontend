@@ -37,7 +37,7 @@ export const About = () => {
             >
               <img
                 src={logo}
-                alt="XBid logo on a luxurious dark background"
+                alt="BidderSweet logo on a luxurious dark background"
                 loading="lazy"
                 decoding="async"
                 width={512}
@@ -68,17 +68,17 @@ export const About = () => {
               Our Story: Our Tease
             </h2>
             <p className="text-lg text-[color:var(--sf-mutedText)] leading-relaxed mb-4">
-              XBid was born from a little whisper, a shared fantasy: What if
-              bidding could be more... *personal*? We saw a world of auctions
+              BidderSweet was born from a little whisper, a shared fantasy: What
+              if bidding could be more... *personal*? We saw a world of auctions
               that were dull, distant, and devoid of desire. We yearned for a
               platform where every click was a heartbeat, every bid a delicious
               gamble.
             </p>
             <p className="text-lg text-[color:var(--sf-mutedText)] leading-relaxed">
-              Our founders, a mischievous group of tech-romantics, dared to
-              dream of a place where winning felt truly exquisite. They poured
-              their passion into crafting XBid, transforming the mundane into
-              the magnificent, one tantalizing penny at a time.
+              CEO and founder Ken Rettberg dreamed of a place where winning felt
+              truly exquisite. He poured his passion into crafting BidderSweet,
+              transforming the mundane into the magnificent, one tantalizing
+              penny at a time.
             </p>
           </div>
         </div>
@@ -117,7 +117,7 @@ export const About = () => {
               title: "Discretion",
               subtitle: "Your Secret Is Safe",
               description:
-                "What happens on XBid, stays on XBid. We understand the delicate nature of desire, ensuring your bids and wins are always handled with the utmost privacy.",
+                "What happens on BidderSweet, stays on BidderSweet. We understand the delicate nature of desire, ensuring your bids and wins are always handled with the utmost privacy.",
               icon: (
                 <svg
                   className="w-24 h-24"
@@ -188,38 +188,19 @@ export const About = () => {
       {/* Team Section */}
       <section className="py-20 px-6 text-center">
         <h2 className="font-serif text-5xl font-extrabold mb-4 bg-gradient-to-r from-[color:var(--sf-primary)] to-[color:var(--sf-accent)] bg-clip-text text-transparent">
-          The Maestros of Desire
+          Leadership
         </h2>
         <p className="text-xl text-[color:var(--sf-mutedText)] mb-12 max-w-3xl mx-auto">
-          Behind every tantalizing item are the minds of the XBid team,
-          dedicated to igniting your desires.
+          BidderSweet is led by CEO and founder Ken Rettberg.
         </p>
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {[
             {
               name: "Ken Rettberg",
-              title: "Chief Excitement Officer",
+              title: "CEO and Founder",
               description:
                 "Ken curates every experience, ensuring each auction holds a captivating allure. His motto: 'I don't just find items, I find obsessions.'",
               img: "https://placehold.co/150x150/1a0d2e/ff69b4?text=KR",
-              borderColor: "border-[color:var(--sf-border)]",
-              titleColor: "text-[color:var(--sf-primary)]",
-            },
-            {
-              name: "Amay Champaneria",
-              title: "Head of Digital Indulgence",
-              description:
-                "Amay ensures our platform performs flawlessly, making every click, every bid, a smooth and satisfying sensation.",
-              img: "https://placehold.co/150x150/1a0d2e/a020f0?text=AC",
-              borderColor: "border-[color:var(--sf-border)]",
-              titleColor: "text-[color:var(--sf-primary)]",
-            },
-            {
-              name: "Eric Vierhaus",
-              title: "Assistant to the Client Pleasure Advocate",
-              description:
-                "Eric is your go-to for any query, ensuring your XBid experience is nothing short of blissful and always discreet.",
-              img: "https://placehold.co/150x150/1a0d2e/ff69b4?text=EV",
               borderColor: "border-[color:var(--sf-border)]",
               titleColor: "text-[color:var(--sf-primary)]",
             },
@@ -257,8 +238,8 @@ export const About = () => {
           Ready to Claim Your Victory?
         </h2>
         <p className="text-xl md:text-2xl text-[color:var(--sf-onPrimary)]/90 mb-10 max-w-4xl mx-auto leading-relaxed">
-          The thrill awaits. Dive into the world of XBid where every bid is an
-          adventure and every win is pure ecstasy.
+          The thrill awaits. Dive into the world of BidderSweet where every bid
+          is an adventure and every win is pure ecstasy.
         </p>
         <a
           href="#auctions"
@@ -272,8 +253,8 @@ export const About = () => {
       <footer className="bg-[color:var(--sf-background)] py-12 px-6 text-center text-[color:var(--sf-mutedText)] text-sm border-t border-[color:var(--sf-border)]">
         <div className="max-w-6xl mx-auto">
           <p>
-            &copy; {new Date().getFullYear()} XBid. All rights reserved. Play
-            Responsibly, Bid Enthusiastically.
+            &copy; {new Date().getFullYear()} BidderSweet. All rights reserved.
+            Play Responsibly, Bid Enthusiastically.
           </p>
           <div className="mt-4 flex justify-center space-x-6">
             <a

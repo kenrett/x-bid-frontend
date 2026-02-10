@@ -48,10 +48,11 @@ describe("About Component", () => {
     expect(screen.getByText("The Thrill")).toBeInTheDocument();
   });
 
-  it("renders all three team members", () => {
+  it("renders only CEO and founder Ken Rettberg in leadership", () => {
     renderAboutPage();
     expect(screen.getByText("Ken Rettberg")).toBeInTheDocument();
-    expect(screen.getByText("Amay Champaneria")).toBeInTheDocument();
-    expect(screen.getByText("Eric Vierhaus")).toBeInTheDocument();
+    expect(screen.getByText("CEO and Founder")).toBeInTheDocument();
+    expect(screen.queryByText("Amay Champaneria")).not.toBeInTheDocument();
+    expect(screen.queryByText("Eric Vierhaus")).not.toBeInTheDocument();
   });
 });

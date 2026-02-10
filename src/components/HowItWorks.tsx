@@ -124,7 +124,7 @@ export const HowItWorks = () => {
             </ul>
             <p className="mt-3 font-bold text-green-300 text-lg">
               You've just claimed a $250 prize for less than $43. That's the
-              XBid high.
+              BidderSweet high.
             </p>
           </div>
         </>
@@ -179,11 +179,11 @@ export const HowItWorks = () => {
 
         <div className="max-w-4xl mx-auto mb-12 text-center">
           <p className="text-[color:var(--sf-mutedText)] leading-relaxed">
-            Welcome to XBid. You're moments away from acquiring incredible deals
-            on pristine, factory-sealed products. This isn't your standard
-            auction. Here, the action is fast, the pulse is high, and the
-            satisfaction of the win is exquisite. Follow our guide to mastering
-            the game.
+            Welcome to BidderSweet. You're moments away from acquiring
+            incredible deals on pristine, factory-sealed products. This isn't
+            your standard auction. Here, the action is fast, the pulse is high,
+            and the satisfaction of the win is exquisite. Follow our guide to
+            mastering the game.
           </p>
         </div>
 

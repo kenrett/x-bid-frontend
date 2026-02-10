@@ -11,7 +11,10 @@ export default defineConfig({
     bypassCSP: true,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
-    video: "retain-on-failure",
+    video: (process.env.PLAYWRIGHT_VIDEO_MODE ?? "retain-on-failure") as
+      | "off"
+      | "on"
+      | "retain-on-failure",
   },
   webServer: {
     command:

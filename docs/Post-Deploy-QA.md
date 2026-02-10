@@ -1,4 +1,4 @@
-# Post-Deploy QA Checklist (XBid)
+# Post-Deploy QA Checklist (BidderSweet)
 
 ## Auth & Roles
 

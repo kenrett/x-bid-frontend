@@ -1,6 +1,6 @@
 # XBid Frontend
 
-This is the frontend for XBid, a penny auction web application built with React. It provides a dynamic and real-time user interface for browsing auctions, placing bids, and managing user accounts.
+This is the frontend for BidderSweet, a penny auction web application built with React. It provides a dynamic and real-time user interface for browsing auctions, placing bids, and managing user accounts.
 
 ## 📚 Documentation
 
