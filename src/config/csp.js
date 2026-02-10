@@ -93,7 +93,15 @@ export var getCsp = function (_a) {
   );
   var imgSrc = uniq(
     __spreadArray(
-      ["'self'", "data:", "blob:", apiOrigin, "https://robohash.org"],
+      [
+        "'self'",
+        "data:",
+        "blob:",
+        apiOrigin,
+        "https://images.unsplash.com",
+        "https://placehold.co",
+        "https://robohash.org",
+      ],
       env === "development" ? devImgSrc : [],
       true,
     ),
@@ -116,11 +124,13 @@ export var getCsp = function (_a) {
       true,
     ),
   );
+  var workerSrc = uniq(["'self'", "blob:"]);
   return serialize([
     ["default-src", ["'self'"]],
     ["script-src", scriptSrc],
     ["script-src-elem", scriptSrc],
     ["style-src", styleSrc],
+    ["worker-src", workerSrc],
     ["connect-src", connectSrc],
     ["img-src", imgSrc],
     [

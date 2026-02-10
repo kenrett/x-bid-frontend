@@ -81,6 +81,9 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
 - `npm run lint`: Lints the codebase using ESLint.
 - `npm run test`: Runs the Vitest suite in watch mode (see `src/test/setup.ts` for the shared test setup).
 - `npm run test:ci`: Executes the Vitest suite once for CI environments.
+- `npm run test:e2e`: Runs the Playwright end-to-end suite.
+- `npm run test:e2e:prod-smoke`: Runs read-only Playwright smoke checks against `PLAYWRIGHT_BASE_URL` (required).
+  - Set `PROD_SMOKE_STRICT_CSP=true` to fail on known inline-script CSP violations.
 - `npm run preview`: Serves the production build locally for preview after `npm run build`.
 
 ## 🧱 Architecture

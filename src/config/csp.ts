@@ -79,6 +79,8 @@ export const getCsp = ({ env, apiBaseUrl, cableUrl }: CspOptions): string => {
     "data:",
     "blob:",
     apiOrigin,
+    "https://images.unsplash.com",
+    "https://placehold.co",
     "https://robohash.org",
     ...(env === "development" ? devImgSrc : []),
   ]);
@@ -95,11 +97,14 @@ export const getCsp = ({ env, apiBaseUrl, cableUrl }: CspOptions): string => {
     ...(env === "development" ? ["'unsafe-inline'"] : []),
   ]);
 
+  const workerSrc = uniq(["'self'", "blob:"]);
+
   return serialize([
     ["default-src", ["'self'"]],
     ["script-src", scriptSrc],
     ["script-src-elem", scriptSrc],
     ["style-src", styleSrc],
+    ["worker-src", workerSrc],
     ["connect-src", connectSrc],
     ["img-src", imgSrc],
     [
