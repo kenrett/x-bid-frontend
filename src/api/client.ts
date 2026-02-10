@@ -98,8 +98,80 @@ const getErrorReason = (data: unknown): string | undefined => {
   const record = data as Record<string, unknown>;
   const error = record.error;
   if (!error || typeof error !== "object") return undefined;
-  const reason = (error as Record<string, unknown>).reason;
-  return typeof reason === "string" ? reason : undefined;
+  const errorRecord = error as Record<string, unknown>;
+  const reason = errorRecord.reason;
+  if (typeof reason === "string") return reason;
+  const details = errorRecord.details;
+  if (!details || typeof details !== "object") return undefined;
+  const detailsReason = (details as Record<string, unknown>).reason;
+  return typeof detailsReason === "string" ? detailsReason : undefined;
+};
+
+const getRequestPath = (url: string | undefined): string | undefined => {
+  if (!url) return undefined;
+  try {
+    if (/^https?:\/\//i.test(url)) {
+      return new URL(url).pathname;
+    }
+    return url.split("?")[0] ?? undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const BACKGROUND_AUTH_PROBE_PATHS = new Set([
+  "/api/v1/logged_in",
+  "/api/v1/session/remaining",
+  "/api/v1/session/refresh",
+]);
+
+const MISSING_CREDENTIAL_REASONS = new Set([
+  "missing_authorization_header",
+  "missing_session_cookie",
+  "missing_credentials",
+  "unknown_credentials",
+]);
+
+const isSilentBackgroundAuthProbeFailure = ({
+  status,
+  code,
+  reason,
+  requestPath,
+}: {
+  status?: number;
+  code?: string;
+  reason?: string;
+  requestPath?: string;
+}) => {
+  if (status !== 401 && status !== 403) return false;
+  if (!requestPath || !BACKGROUND_AUTH_PROBE_PATHS.has(requestPath))
+    return false;
+  if (!code || code.toLowerCase() !== "invalid_token") return false;
+  return Boolean(
+    reason && MISSING_CREDENTIAL_REASONS.has(reason.toLowerCase()),
+  );
+};
+
+type UnauthorizedEventDetail = {
+  status: number;
+  code?: string;
+  reason?: string;
+  requestPath?: string;
+};
+
+const dispatchUnauthorized = ({
+  status,
+  code,
+  reason,
+  requestPath,
+}: UnauthorizedEventDetail) => {
+  if (sessionInvalidated) return;
+  sessionInvalidated = true;
+  window.dispatchEvent(
+    new CustomEvent("app:unauthorized", {
+      detail: { status, code, reason, requestPath },
+    }),
+  );
 };
 
 const buildApiPath = (path: string): string => {
@@ -483,14 +555,6 @@ authSessionStore.subscribe(() => {
   }
 });
 
-const dispatchUnauthorized = (status: number, code?: string) => {
-  if (sessionInvalidated) return;
-  sessionInvalidated = true;
-  window.dispatchEvent(
-    new CustomEvent("app:unauthorized", { detail: { status, code } }),
-  );
-};
-
 const dispatchForbidden = (status: number, code?: string) => {
   window.dispatchEvent(
     new CustomEvent("app:forbidden", { detail: { status, code } }),
@@ -593,6 +657,12 @@ export const handleResponseError = async (error: AxiosError) => {
 
   if (status === 401 || status === 403) {
     const code = extractErrorCode(error.response?.data);
+    const reason = getErrorReason(error.response?.data);
+    const requestPath = getRequestPath(
+      typeof originalRequest?.url === "string"
+        ? originalRequest.url
+        : undefined,
+    );
     if (status === 403 && isEmailUnverifiedError(error)) {
       dispatchEmailUnverified(status, code);
       return Promise.reject(error);
@@ -600,7 +670,17 @@ export const handleResponseError = async (error: AxiosError) => {
 
     if (isInvalidSessionError(error)) {
       authSessionStore.clear();
-      dispatchUnauthorized(status, code);
+      if (
+        isSilentBackgroundAuthProbeFailure({
+          status,
+          code,
+          reason,
+          requestPath,
+        })
+      ) {
+        return Promise.reject(error);
+      }
+      dispatchUnauthorized({ status, code, reason, requestPath });
       return Promise.reject(error);
     }
 
@@ -610,7 +690,17 @@ export const handleResponseError = async (error: AxiosError) => {
     }
 
     authSessionStore.clear();
-    dispatchUnauthorized(status, code);
+    if (
+      isSilentBackgroundAuthProbeFailure({
+        status,
+        code,
+        reason,
+        requestPath,
+      })
+    ) {
+      return Promise.reject(error);
+    }
+    dispatchUnauthorized({ status, code, reason, requestPath });
   }
 
   return Promise.reject(error);

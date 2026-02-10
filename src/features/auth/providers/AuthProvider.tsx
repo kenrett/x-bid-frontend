@@ -26,6 +26,20 @@ type LoggedInResponse = {
 
 const SESSION_POLL_INTERVAL_MS = 60_000;
 const SESSION_EXPIRED_TOAST = "Your session expired, please log in again.";
+const SILENT_UNAUTHORIZED_REASONS = new Set([
+  "missing_authorization_header",
+  "missing_session_cookie",
+  "missing_credentials",
+  "unknown_credentials",
+]);
+
+type UnauthorizedEventDetail = {
+  status?: number;
+  code?: string;
+  reason?: string;
+  requestPath?: string;
+  silent?: boolean;
+};
 
 const getSessionEventName = (payload: unknown): string | undefined => {
   if (typeof payload === "string") return payload;
@@ -408,10 +422,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [userId, handleSessionInvalidated]);
 
   useEffect(() => {
-    const onUnauthorized = () => handleSessionInvalidated("unauthorized");
+    const onUnauthorized = (event: Event) => {
+      const detail = (event as CustomEvent<UnauthorizedEventDetail>).detail;
+      if (detail?.silent) {
+        clearAuthState();
+        return;
+      }
+
+      if (
+        !authSessionStore.getSnapshot().user &&
+        detail?.reason &&
+        SILENT_UNAUTHORIZED_REASONS.has(detail.reason.toLowerCase())
+      ) {
+        clearAuthState();
+        return;
+      }
+
+      handleSessionInvalidated("unauthorized");
+    };
     window.addEventListener("app:unauthorized", onUnauthorized);
     return () => window.removeEventListener("app:unauthorized", onUnauthorized);
-  }, [handleSessionInvalidated]);
+  }, [clearAuthState, handleSessionInvalidated]);
 
   useEffect(() => {
     const onRefreshed = (event: Event) => {
