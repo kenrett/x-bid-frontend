@@ -25,7 +25,9 @@
     "test:e2e:prod-smoke": "playwright test --config=playwright.prod-smoke.config.ts",
     "test:e2e:prod-smoke:fast": "PROD_SMOKE_PRESET=fast playwright test --config=playwright.prod-smoke.config.ts",
     "test:e2e:prod-smoke:standard": "PROD_SMOKE_PRESET=standard playwright test --config=playwright.prod-smoke.config.ts",
-    "test:e2e:prod-smoke:deep": "PROD_SMOKE_PRESET=deep playwright test --config=playwright.prod-smoke.config.ts"
+    "test:e2e:prod-smoke:deep": "PROD_SMOKE_PRESET=deep playwright test --config=playwright.prod-smoke.config.ts",
+    "test:e2e:mutating-smoke": "playwright test --config=playwright.mutating-smoke.config.ts",
+    "test:e2e:mutating-smoke:prod": "MUTATING_SMOKE_ALLOW_PROD=true playwright test --config=playwright.mutating-smoke.config.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

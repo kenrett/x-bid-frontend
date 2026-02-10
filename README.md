@@ -91,6 +91,12 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
   - Set `PROD_SMOKE_STRICT_CSP=true` to fail on known inline-script CSP violations.
   - Set `PROD_SMOKE_STRICT_PERF=true` to fail on slow critical responses (threshold via `PROD_SMOKE_SLOW_MS`, default `3000`).
   - Set `PROD_SMOKE_AUCTIONS_TIMEOUT_MS` to tune auctions-list settle timeout (default `45000`).
+- `npm run test:e2e:mutating-smoke`: Runs mutating Playwright smoke checks with `playwright.mutating-smoke.config.ts`.
+- `npm run test:e2e:mutating-smoke:prod`: Runs mutating smoke checks with explicit prod opt-in enabled.
+  - Mutating smoke checks only run files matching `**/*.mutating-smoke.spec.ts`.
+  - Targets default to `PROD_SMOKE_TARGETS`; you can override with `MUTATING_SMOKE_TARGETS` using the same format (`key=https://host,key2=https://host2`).
+  - If any target is on `biddersweet.app`, runs are blocked unless `MUTATING_SMOKE_ALLOW_PROD=true`.
+  - Keep this lane manual/nightly while prod is the active target, and use dedicated smoke credentials.
 - `npm run preview`: Serves the production build locally for preview after `npm run build`.
 
 ## 🧱 Architecture
