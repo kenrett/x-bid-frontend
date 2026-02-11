@@ -223,8 +223,7 @@ export function useAuctionDetail(auctionId: number) {
     [auctionId],
   );
 
-  const { subscription: auctionSubscription, connectionState } =
-    useAuctionChannel(auctionId, onChannelData);
+  const { connectionState } = useAuctionChannel(auctionId, onChannelData);
 
   const placeUserBid = async () => {
     if (
@@ -232,8 +231,7 @@ export function useAuctionDetail(auctionId: number) {
       !user ||
       !isEmailVerified ||
       state.isBidding ||
-      user.id === state.auction.highest_bidder_id ||
-      !auctionSubscription
+      user.id === state.auction.highest_bidder_id
     ) {
       if (user && !isEmailVerified) {
         if (user.email_verified === false) {

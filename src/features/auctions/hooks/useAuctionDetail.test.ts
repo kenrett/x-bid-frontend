@@ -233,7 +233,7 @@ describe("useAuctionDetail", () => {
     expect(result.current.bids).toHaveLength(0);
   });
 
-  it("does not place bid if no subscription", async () => {
+  it("still places bid when live subscription is unavailable", async () => {
     mockedUseAuctionChannel.mockImplementation(() => ({
       subscription: null,
       connectionState: "disconnected",
@@ -245,6 +245,6 @@ describe("useAuctionDetail", () => {
       await result.current.placeUserBid();
     });
 
-    expect(mockedPlaceBid).not.toHaveBeenCalled();
+    expect(mockedPlaceBid).toHaveBeenCalledWith(1);
   });
 });
