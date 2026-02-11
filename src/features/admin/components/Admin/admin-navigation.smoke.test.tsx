@@ -91,9 +91,7 @@ describe("admin navigation smoke", () => {
     expect(screen.getByRole("link", { name: "Bid Packs" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Payments" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Settings" })).toBeInTheDocument();
-    expect(
-      screen.queryByRole("link", { name: "Users" }),
-    ).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Users" })).toBeInTheDocument();
     expect(screen.getByText(/admin dashboard/i)).toBeInTheDocument();
   });
 
@@ -109,6 +107,24 @@ describe("admin navigation smoke", () => {
     expect(await screen.findByText(/admin console/i)).toBeInTheDocument();
     expect(screen.getByText("payments page")).toBeInTheDocument();
     expect(showToast).not.toHaveBeenCalled();
+  });
+
+  it("lets admins access /admin/users and loads users", async () => {
+    mockUseAuth.mockReturnValue({
+      isReady: true,
+      user: { is_admin: true, is_superuser: false, name: "Admin", email: "" },
+      logout: vi.fn(),
+    });
+    mockedAdminUsersApi.getUsers.mockResolvedValue([]);
+
+    renderAdminRoute("/admin/users");
+
+    expect(await screen.findByText(/admin console/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Users" })).toBeInTheDocument();
+    expect(
+      await screen.findByText(/manage user access and account states/i),
+    ).toBeInTheDocument();
+    expect(mockedAdminUsersApi.getUsers).toHaveBeenCalledTimes(1);
   });
 
   it("lets superadmins access /admin and shows Users navigation", async () => {
@@ -129,28 +145,9 @@ describe("admin navigation smoke", () => {
     expect(await screen.findByText(/admin console/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Users" })).toBeInTheDocument();
     expect(
-      await screen.findByText(/manage user roles and access/i),
+      await screen.findByText(/manage user access and account states/i),
     ).toBeInTheDocument();
     expect(mockedAdminUsersApi.getUsers).toHaveBeenCalledTimes(1);
-  });
-
-  it("shows an access denied page for admins visiting superadmin-only routes", async () => {
-    mockUseAuth.mockReturnValue({
-      isReady: true,
-      user: { is_admin: true, is_superuser: false },
-      logout: vi.fn(),
-    });
-
-    renderAdminRoute("/admin/users");
-
-    expect(
-      await screen.findByText(/superadmin-only page/i),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/access denied/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /back to admin/i }),
-    ).toBeInTheDocument();
-    expect(mockedAdminUsersApi.getUsers).not.toHaveBeenCalled();
   });
 
   const makeApiError = (status: 401 | 403) =>
@@ -170,7 +167,7 @@ describe("admin navigation smoke", () => {
     renderAdminRoute("/admin/users");
 
     expect(
-      await screen.findByText(/manage user roles and access/i),
+      await screen.findByText(/manage user access and account states/i),
     ).toBeInTheDocument();
     await waitFor(() =>
       expect(showToast).toHaveBeenCalledWith(
@@ -191,7 +188,7 @@ describe("admin navigation smoke", () => {
     renderAdminRoute("/admin/users");
 
     expect(
-      await screen.findByText(/manage user roles and access/i),
+      await screen.findByText(/manage user access and account states/i),
     ).toBeInTheDocument();
     await waitFor(() =>
       expect(showToast).toHaveBeenCalledWith(

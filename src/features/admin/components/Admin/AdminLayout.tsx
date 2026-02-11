@@ -5,14 +5,11 @@ import { ADMIN_PATHS } from "./adminPaths";
 
 export const AdminLayout = () => {
   const { user, logout } = useAuth();
-  const isSuperuser = Boolean(user?.is_superuser);
 
   const navItems = [
     { label: "Auctions", to: `/admin/${ADMIN_PATHS.auctions}` },
     { label: "Bid Packs", to: `/admin/${ADMIN_PATHS.bidPacks}` },
-    ...(isSuperuser
-      ? [{ label: "Users", to: `/admin/${ADMIN_PATHS.users}` }]
-      : []),
+    { label: "Users", to: `/admin/${ADMIN_PATHS.users}` },
     { label: "Payments", to: `/admin/${ADMIN_PATHS.payments}` },
     { label: "Settings", to: `/admin/${ADMIN_PATHS.settings}` },
   ];

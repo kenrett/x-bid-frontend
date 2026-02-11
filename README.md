@@ -94,9 +94,12 @@ Make sure you have a running instance of the corresponding [XBid backend API](ht
 - `npm run test:e2e:mutating-smoke`: Runs mutating Playwright smoke checks with `playwright.mutating-smoke.config.ts`.
 - `npm run test:e2e:mutating-smoke:fast`: Runs `@m0` mutating smoke checks.
 - `npm run test:e2e:mutating-smoke:standard`: Runs `@m0` + `@m1` mutating smoke checks.
+- `npm run test:e2e:mutating-smoke:deep`: Runs `@m0` + `@m1` + `@m2` mutating smoke checks.
 - `npm run test:e2e:mutating-smoke:prod`: Runs mutating smoke checks with explicit prod opt-in enabled.
   - Mutating smoke checks only run files matching `**/*.mutating-smoke.spec.ts`.
   - Set `MUTATING_SMOKE_PRESET` to `fast`, `standard`, or `deep` (default `deep`).
+  - `@m2` bid-attempt coverage is opt-in and requires `MUTATING_SMOKE_ENABLE_BIDDING=true`.
+  - Set `MUTATING_SMOKE_STRICT_M2=true` to make `@m2` fail (instead of skip) when bid preconditions are not met.
   - Targets default to `PROD_SMOKE_TARGETS`; you can override with `MUTATING_SMOKE_TARGETS` using the same format (`key=https://host,key2=https://host2`).
   - If any target is on `biddersweet.app`, runs are blocked unless `MUTATING_SMOKE_ALLOW_PROD=true`.
   - Keep this lane manual/nightly while prod is the active target, and use dedicated smoke credentials.

@@ -17,6 +17,8 @@ const rawUser = {
   full_name: "User Name",
   role: "SUPERADMIN",
   status: "banned",
+  email_verified: true,
+  email_verified_at: "2026-01-01T00:00:00Z",
 };
 
 describe("adminUsersApi", () => {
@@ -38,6 +40,8 @@ describe("adminUsersApi", () => {
       name: "User Name",
       role: "superadmin",
       status: "disabled",
+      emailVerified: true,
+      emailVerifiedAt: "2026-01-01T00:00:00Z",
     });
     expect(second[0]).toEqual(first[0]);
   });
@@ -76,5 +80,30 @@ describe("adminUsersApi", () => {
       user: { name: "Updated" },
     });
     expect(result.id).toBe(5);
+  });
+
+  it("supports suspend/unsuspend and verifyEmail helpers", async () => {
+    mockedPatch.mockResolvedValue({ data: { user: rawUser } });
+
+    await adminUsersApi.suspendUser(5);
+    expect(mockedPatch).toHaveBeenCalledWith("/api/v1/admin/users/5", {
+      user: { status: "disabled" },
+    });
+
+    await adminUsersApi.unsuspendUser(5);
+    expect(mockedPatch).toHaveBeenCalledWith("/api/v1/admin/users/5", {
+      user: { status: "active" },
+    });
+
+    await adminUsersApi.verifyEmail(5);
+    expect(mockedPatch).toHaveBeenCalledWith(
+      "/api/v1/admin/users/5",
+      expect.objectContaining({
+        user: expect.objectContaining({
+          email_verified: true,
+          email_verified_at: expect.any(String),
+        }),
+      }),
+    );
   });
 });

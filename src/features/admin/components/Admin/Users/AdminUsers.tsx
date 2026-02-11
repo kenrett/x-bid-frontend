@@ -8,7 +8,10 @@ interface AdminUsersProps {
   isSuperAdmin: boolean;
   onPromote: (id: number) => void;
   onDemote: (id: number) => void;
+  onSuspend: (id: number) => void;
+  onUnsuspend: (id: number) => void;
   onBan: (id: number) => void;
+  onVerifyEmail: (id: number) => void;
   onRemoveSuper: (id: number) => void;
 }
 
@@ -19,7 +22,10 @@ export const AdminUsers = ({
   isSuperAdmin,
   onPromote,
   onDemote,
+  onSuspend,
+  onUnsuspend,
   onBan,
+  onVerifyEmail,
   onRemoveSuper,
 }: AdminUsersProps) => {
   const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
@@ -30,7 +36,7 @@ export const AdminUsers = ({
     <div className="bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] rounded-2xl p-4 space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-lg font-semibold text-[color:var(--sf-text)]">
-          Admin Users
+          User Accounts
         </h3>
         <input
           type="search"
@@ -43,7 +49,7 @@ export const AdminUsers = ({
       <div className="overflow-hidden rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)]">
         {users.length === 0 ? (
           <div className="p-4 text-sm text-[color:var(--sf-mutedText)]">
-            No matching admins.
+            No matching users.
           </div>
         ) : (
           <table className="min-w-full text-sm text-[color:var(--sf-mutedText)]">
@@ -53,6 +59,7 @@ export const AdminUsers = ({
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Role</th>
                 <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
@@ -87,6 +94,17 @@ export const AdminUsers = ({
                       {adminUser.status}
                     </span>
                   </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        adminUser.emailVerified
+                          ? "bg-green-900 text-green-100 border border-green-300/30"
+                          : "bg-amber-900 text-amber-100 border border-amber-300/30"
+                      }`}
+                    >
+                      {adminUser.emailVerified ? "verified" : "unverified"}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-right space-x-2">
                     {isSuperAdmin && adminUser.role === "superadmin" && (
                       <button
@@ -114,12 +132,38 @@ export const AdminUsers = ({
                         Remove admin
                       </button>
                     )}
-                    {isSuperAdmin && adminUser.role !== "superadmin" && (
+                    {isSuperAdmin && adminUser.role === "user" && (
                       <button
                         onClick={() => onBan(adminUser.id)}
                         className="text-sm text-red-300 hover:text-red-200 underline underline-offset-2"
                       >
                         Ban user
+                      </button>
+                    )}
+                    {adminUser.role === "user" &&
+                      adminUser.status === "active" && (
+                        <button
+                          onClick={() => onSuspend(adminUser.id)}
+                          className="text-sm text-amber-200 hover:text-amber-100 underline underline-offset-2"
+                        >
+                          Suspend user
+                        </button>
+                      )}
+                    {adminUser.role === "user" &&
+                      adminUser.status === "disabled" && (
+                        <button
+                          onClick={() => onUnsuspend(adminUser.id)}
+                          className="text-sm text-emerald-300 hover:text-emerald-200 underline underline-offset-2"
+                        >
+                          Unsuspend user
+                        </button>
+                      )}
+                    {adminUser.role === "user" && !adminUser.emailVerified && (
+                      <button
+                        onClick={() => onVerifyEmail(adminUser.id)}
+                        className="text-sm text-cyan-300 hover:text-cyan-200 underline underline-offset-2"
+                      >
+                        Mark email verified
                       </button>
                     )}
                   </td>

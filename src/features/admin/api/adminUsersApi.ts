@@ -28,9 +28,22 @@ const normalizeAdminUser = (raw: AdminUserRecord): AdminUser => {
   const statusValue =
     typeof data.status === "string" ? data.status.toLowerCase() : null;
   const status: AdminUser["status"] =
-    statusValue === "disabled" || statusValue === "banned"
+    statusValue === "disabled" ||
+    statusValue === "banned" ||
+    statusValue === "suspended"
       ? "disabled"
       : "active";
+
+  const emailVerifiedAtRaw =
+    typeof data.email_verified_at === "string"
+      ? data.email_verified_at
+      : typeof data.emailVerifiedAt === "string"
+        ? data.emailVerifiedAt
+        : null;
+  const emailVerified =
+    data.email_verified === true ||
+    data.emailVerified === true ||
+    Boolean(emailVerifiedAtRaw);
 
   const id =
     typeof data.id === "number"
@@ -59,12 +72,23 @@ const normalizeAdminUser = (raw: AdminUserRecord): AdminUser => {
     name,
     role,
     status,
+    emailVerified,
+    emailVerifiedAt: emailVerifiedAtRaw,
   };
 };
 
 type AdminUserResponse<P extends keyof paths, M extends keyof paths[P]> =
   | ApiJsonResponse<P, M>
   | { user?: AdminUserRecord };
+
+type AdminUserUpdatePayload = {
+  email_address?: string | null;
+  name?: string | null;
+  role?: string | null;
+  status?: "active" | "disabled";
+  email_verified?: boolean;
+  email_verified_at?: string | null;
+};
 
 export const adminUsersApi = {
   async getUsers(): Promise<AdminUser[]> {
@@ -127,12 +151,30 @@ export const adminUsersApi = {
     return normalizeAdminUser(data as AdminUserRecord);
   },
 
-  async updateUser(id: number, data: Partial<AdminUser>): Promise<AdminUser> {
+  async updateUser(
+    id: number,
+    data: AdminUserUpdatePayload,
+  ): Promise<AdminUser> {
     const response = await client.patch<
       AdminUserResponse<"/api/v1/admin/users/{id}", "patch">
     >(`/api/v1/admin/users/${id}`, { user: data });
     const payload =
       (response.data as { user?: AdminUserRecord })?.user ?? response.data;
     return normalizeAdminUser(payload as AdminUserRecord);
+  },
+
+  async suspendUser(id: number): Promise<AdminUser> {
+    return this.updateUser(id, { status: "disabled" });
+  },
+
+  async unsuspendUser(id: number): Promise<AdminUser> {
+    return this.updateUser(id, { status: "active" });
+  },
+
+  async verifyEmail(id: number): Promise<AdminUser> {
+    return this.updateUser(id, {
+      email_verified: true,
+      email_verified_at: new Date().toISOString(),
+    });
   },
 };

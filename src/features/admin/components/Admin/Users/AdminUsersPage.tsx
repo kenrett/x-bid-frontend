@@ -9,23 +9,27 @@ import { adminUsersApi } from "@features/admin/api/adminUsersApi";
 
 export const AdminUsersPage = () => {
   const { user } = useAuth();
+  const isAdmin = Boolean(user?.is_admin || user?.is_superuser);
   const isSuperAdmin = Boolean(user?.is_superuser);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [userSearch, setUserSearch] = useState("");
 
   const filteredUsers = useMemo(() => {
     const list = Array.isArray(users) ? users : [];
+    const scope = isSuperAdmin
+      ? list
+      : list.filter((candidate) => candidate.role === "user");
     const term = userSearch.toLowerCase();
 
-    return list.filter(
+    return scope.filter(
       (candidate) =>
         candidate.email.toLowerCase().includes(term) ||
         candidate.name.toLowerCase().includes(term),
     );
-  }, [users, userSearch]);
+  }, [isSuperAdmin, users, userSearch]);
 
   useEffect(() => {
-    if (!isSuperAdmin) return;
+    if (!isAdmin) return;
     let mounted = true;
 
     const fetchUsers = async () => {
@@ -42,7 +46,15 @@ export const AdminUsersPage = () => {
     return () => {
       mounted = false;
     };
-  }, [isSuperAdmin]);
+  }, [isAdmin]);
+
+  const requireAdmin = (action: () => void) => {
+    if (!isAdmin) {
+      showToast("Admin only action", "error");
+      return;
+    }
+    action();
+  };
 
   const requireSuper = (action: () => void) => {
     if (!isSuperAdmin) {
@@ -93,8 +105,12 @@ export const AdminUsersPage = () => {
     });
 
   const handleBan = (id: number) =>
-    requireSuper(() => {
+    requireAdmin(() => {
       const target = users.find((u) => u.id === id);
+      if (target?.role !== "user") {
+        showToast("Only non-admin users can be banned here", "error");
+        return;
+      }
       const confirmed = window.confirm(
         `Ban ${target?.email ?? "this user"}? This disables access.`,
       );
@@ -103,6 +119,48 @@ export const AdminUsersPage = () => {
         () => adminUsersApi.banUser(id),
         "user.ban",
         "User banned",
+      );
+    });
+
+  const handleSuspend = (id: number) =>
+    requireAdmin(() => {
+      const target = users.find((u) => u.id === id);
+      if (target?.role !== "user") {
+        showToast("Only non-admin users can be suspended here", "error");
+        return;
+      }
+      handleApiAction(
+        () => adminUsersApi.suspendUser(id),
+        "user.suspend",
+        "User suspended",
+      );
+    });
+
+  const handleUnsuspend = (id: number) =>
+    requireAdmin(() => {
+      const target = users.find((u) => u.id === id);
+      if (target?.role !== "user") {
+        showToast("Only non-admin users can be unsuspended here", "error");
+        return;
+      }
+      handleApiAction(
+        () => adminUsersApi.unsuspendUser(id),
+        "user.unsuspend",
+        "User unsuspended",
+      );
+    });
+
+  const handleVerifyEmail = (id: number) =>
+    requireAdmin(() => {
+      const target = users.find((u) => u.id === id);
+      if (target?.role !== "user") {
+        showToast("Only non-admin users can be verified here", "error");
+        return;
+      }
+      handleApiAction(
+        () => adminUsersApi.verifyEmail(id),
+        "user.verify_email",
+        "Email marked verified",
       );
     });
 
@@ -115,7 +173,7 @@ export const AdminUsersPage = () => {
       );
     });
 
-  if (!isSuperAdmin) {
+  if (!isAdmin) {
     return (
       <div className="space-y-4">
         <div>
@@ -123,10 +181,10 @@ export const AdminUsersPage = () => {
             Users
           </p>
           <h2 className="text-3xl font-serif font-bold text-[color:var(--sf-text)]">
-            Admin accounts
+            User accounts
           </h2>
           <p className="text-sm text-[color:var(--sf-mutedText)] mt-1">
-            Superadmin-only page.
+            Admin-only page.
           </p>
         </div>
         <div className="rounded-xl border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] p-4 text-[color:var(--sf-mutedText)]">
@@ -134,7 +192,7 @@ export const AdminUsersPage = () => {
             Access denied
           </p>
           <p className="text-sm text-[color:var(--sf-mutedText)] mt-1">
-            You don&apos;t have permission to view admin user management.
+            You don&apos;t have permission to view user management.
           </p>
           <div className="mt-4 flex gap-3">
             <Link
@@ -157,10 +215,10 @@ export const AdminUsersPage = () => {
             Users
           </p>
           <h2 className="text-3xl font-serif font-bold text-[color:var(--sf-text)]">
-            Admin accounts
+            User accounts
           </h2>
           <p className="text-sm text-[color:var(--sf-mutedText)] mt-1">
-            Manage user roles and access.
+            Manage user access and account states.
           </p>
         </div>
       </div>
@@ -172,7 +230,10 @@ export const AdminUsersPage = () => {
         isSuperAdmin={isSuperAdmin}
         onPromote={handlePromote}
         onDemote={handleDemote}
+        onSuspend={handleSuspend}
+        onUnsuspend={handleUnsuspend}
         onBan={handleBan}
+        onVerifyEmail={handleVerifyEmail}
         onRemoveSuper={handleRemoveSuper}
       />
     </div>

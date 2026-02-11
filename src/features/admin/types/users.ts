@@ -4,6 +4,8 @@ export type AdminUser = {
   name: string;
   role: "admin" | "superadmin" | "user";
   status: "active" | "disabled";
+  emailVerified: boolean;
+  emailVerifiedAt: string | null;
 };
 
 export type Payment = {

@@ -29,6 +29,7 @@
     "test:e2e:mutating-smoke": "playwright test --config=playwright.mutating-smoke.config.ts",
     "test:e2e:mutating-smoke:fast": "MUTATING_SMOKE_PRESET=fast playwright test --config=playwright.mutating-smoke.config.ts",
     "test:e2e:mutating-smoke:standard": "MUTATING_SMOKE_PRESET=standard playwright test --config=playwright.mutating-smoke.config.ts",
+    "test:e2e:mutating-smoke:deep": "MUTATING_SMOKE_PRESET=deep playwright test --config=playwright.mutating-smoke.config.ts",
     "test:e2e:mutating-smoke:prod": "MUTATING_SMOKE_ALLOW_PROD=true playwright test --config=playwright.mutating-smoke.config.ts"
   },
   "dependencies": {

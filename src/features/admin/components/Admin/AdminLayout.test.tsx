@@ -37,11 +37,11 @@ describe("AdminLayout", () => {
     expect(screen.getByText("admin@example.com")).toBeInTheDocument();
     expect(screen.getByLabelText("Admin navigation")).toBeInTheDocument();
     expect(screen.getByText("Auctions")).toBeInTheDocument();
-    expect(screen.queryByText("Users")).not.toBeInTheDocument();
+    expect(screen.getByText("Users")).toBeInTheDocument();
     expect(screen.getByText("child content")).toBeInTheDocument();
   });
 
-  it("shows Users nav only for superadmins", () => {
+  it("shows Users nav for superadmins", () => {
     mockUseAuth.mockReturnValue({
       user: {
         name: "Super Admin",
