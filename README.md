@@ -148,6 +148,7 @@ If you need to force a storefront in dev/tests, set `VITE_STOREFRONT_KEY` to `ma
 - Optional cookie-based refresh (when enabled) uses `withCredentials: true` only for `POST /api/v1/session/refresh`.
 - Login (example): `POST /api/v1/login` with `{ "session": { "email_address": "...", "password": "..." } }` returns `access_token`, `refresh_token`, `session_token_id`, and `user` (plus optional flags depending on backend contract).
 - Error shapes tolerated: `{error_code, message, details?}` (preferred), `{error: "text"}`, or `{error: {code, message}}` (rack-attack/throttling). Use `message` for user feedback when present.
+- Upload assets (`/api/v1/uploads/:signed_id`) loaded directly from a different origin may be blocked by browser CORP checks. Backend follow-up: send `Cross-Origin-Resource-Policy: cross-origin` (or another policy that explicitly permits the frontend origins) on upload responses if direct cross-origin asset URLs are expected.
 
 ### Maintenance Mode
 
