@@ -96,6 +96,13 @@ export default defineConfig(({ mode }) => {
         "afterdark.lvh.me",
         "localhost",
       ],
+      proxy: {
+        "/api/v1/uploads": {
+          target: "https://api.biddersweet.app",
+          changeOrigin: true,
+          secure: true,
+        },
+      },
       headers: { "Content-Security-Policy": csp },
     },
     preview:
