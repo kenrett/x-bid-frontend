@@ -26,6 +26,32 @@ export const requireEnv = (name: string): string => {
   return value.trim();
 };
 
+const LOGIN_RATE_LIMIT_PATTERNS = [
+  /too many failed attempts/i,
+  /too many attempts/i,
+  /try again later/i,
+  /rate limit/i,
+  /temporar(?:ily)? locked/i,
+];
+
+export const readMainAlertText = async (page: Page): Promise<string> =>
+  (
+    await page
+      .locator("main [role='alert']")
+      .first()
+      .innerText()
+      .catch(() => "")
+  ).trim();
+
+export const assertNoLoginRateLimit = (
+  alertText: string,
+  context: string,
+): void => {
+  if (LOGIN_RATE_LIMIT_PATTERNS.some((pattern) => pattern.test(alertText))) {
+    throw new Error(`${context}: ${alertText}`);
+  }
+};
+
 export const createRunId = (): string => {
   const timestamp = new Date().toISOString().replace(/\D/g, "").slice(0, 14);
   const random = Math.random().toString(36).slice(2, 8);

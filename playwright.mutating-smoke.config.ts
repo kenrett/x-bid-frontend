@@ -1,5 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
+import { loadEnv } from "vite";
 import { loadProdSmokeTargets } from "./e2e/prod/targets";
+
+const loadedEnv = loadEnv(process.env.NODE_ENV ?? "test", process.cwd(), "");
+for (const [key, value] of Object.entries(loadedEnv)) {
+  if (process.env[key] === undefined) {
+    process.env[key] = value;
+  }
+}
 
 const preset = (process.env.MUTATING_SMOKE_PRESET ?? "deep").toLowerCase();
 const rawMutatingTargets = process.env.MUTATING_SMOKE_TARGETS;

@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 import {
+  assertNoLoginRateLimit,
   attachMutationLedger,
+  readMainAlertText,
   requireEnv,
   startMutationCapture,
 } from "./prod/mutating";
@@ -76,13 +78,11 @@ test("@m2 mutating smoke: authenticated user can submit a bid attempt", async ({
     const loginRequest = await loginRequestPromise;
     if (!loginRequest) {
       const loginAlertText =
-        (
-          await page
-            .locator("main [role='alert']")
-            .first()
-            .innerText()
-            .catch(() => "")
-        ).trim() || "No login alert text found.";
+        (await readMainAlertText(page)) || "No login alert text found.";
+      assertNoLoginRateLimit(
+        loginAlertText,
+        "@m2 login blocked by rate limiting or account lockout",
+      );
       const signInButtonEnabled = await page
         .getByRole("button", { name: /Sign in|Signing in/i })
         .first()
@@ -113,13 +113,11 @@ test("@m2 mutating smoke: authenticated user can submit a bid attempt", async ({
       .catch(() => false);
     if (!landedOnAuctions) {
       const alertText =
-        (
-          await page
-            .locator("main [role='alert']")
-            .first()
-            .innerText()
-            .catch(() => "")
-        ).trim() || "No alert text found.";
+        (await readMainAlertText(page)) || "No alert text found.";
+      assertNoLoginRateLimit(
+        alertText,
+        "@m2 login blocked by rate limiting or account lockout",
+      );
       throw new Error(
         `Login did not reach /auctions (url=${page.url()}). UI alert: ${alertText}`,
       );

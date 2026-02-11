@@ -1,9 +1,11 @@
 import { expect, test } from "@playwright/test";
 import {
+  assertNoLoginRateLimit,
   attachMutationLedger,
   createCleanupRegistry,
   createRunId,
   namespacedLabel,
+  readMainAlertText,
   requireEnv,
   startMutationCapture,
 } from "./prod/mutating";
@@ -70,18 +72,70 @@ test("@m1 mutating smoke: admin can create, edit, and clean up bid pack", async 
     await page.getByLabel("Email address").fill(adminEmail);
     await page.getByLabel("Password").fill(adminPassword);
 
-    const loginResponsePromise = page.waitForResponse(
-      (response) =>
-        /\/api\/v1\/login(?:[/?#]|$)/i.test(response.url()) &&
-        response.request().method() === "POST",
-      { timeout: 15_000 },
-    );
-
+    const loginRequestPromise = page
+      .waitForRequest(
+        (request) =>
+          /\/api\/v1\/login(?:[/?#]|$)/i.test(request.url()) &&
+          request.method() === "POST",
+        { timeout: 10_000 },
+      )
+      .catch(() => null);
+    const loginResponsePromise = page
+      .waitForResponse(
+        (response) =>
+          /\/api\/v1\/login(?:[/?#]|$)/i.test(response.url()) &&
+          response.request().method() === "POST",
+        { timeout: 30_000 },
+      )
+      .catch(() => null);
     await page.getByRole("button", { name: "Sign in" }).click();
-    await expect(page).toHaveURL(/\/auctions(?:[/?#]|$)/);
-    await expect(page.getByRole("link", { name: "Admin" })).toBeVisible();
 
-    await loginResponsePromise;
+    const loginRequest = await loginRequestPromise;
+    if (!loginRequest) {
+      const loginAlertText = await readMainAlertText(page);
+      assertNoLoginRateLimit(
+        loginAlertText,
+        "@m1 bid-pack login blocked by rate limiting or account lockout",
+      );
+      const signInButtonEnabled = await page
+        .getByRole("button", { name: /Sign in|Signing in/i })
+        .first()
+        .isEnabled()
+        .catch(() => false);
+      throw new Error(
+        `Login request was not sent after clicking Sign in (url=${page.url()}, signInEnabled=${signInButtonEnabled}). ${loginAlertText || "No login alert text found."}`,
+      );
+    }
+
+    const loginResponse = await loginResponsePromise;
+    if (!loginResponse) {
+      const failure = loginRequest.failure()?.errorText ?? "unknown_failure";
+      throw new Error(
+        `Login request was sent but no response was observed (request=${loginRequest.url()}, failure=${failure}).`,
+      );
+    }
+    if (!loginResponse.ok()) {
+      const responseBody = await loginResponse.text().catch(() => "");
+      throw new Error(
+        `Login failed with ${loginResponse.status()}: ${responseBody}`,
+      );
+    }
+
+    const landedOnAuctions = await page
+      .waitForURL(/\/auctions(?:[/?#]|$)/, { timeout: 10_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!landedOnAuctions) {
+      const alertText = await readMainAlertText(page);
+      assertNoLoginRateLimit(
+        alertText,
+        "@m1 bid-pack login blocked by rate limiting or account lockout",
+      );
+      throw new Error(
+        `Login did not reach /auctions (url=${page.url()}). UI alert: ${alertText || "No alert text found."}`,
+      );
+    }
+    await expect(page.getByRole("link", { name: "Admin" })).toBeVisible();
 
     await page.goto("/admin/bid-packs/new", { waitUntil: "domcontentloaded" });
     await expect(

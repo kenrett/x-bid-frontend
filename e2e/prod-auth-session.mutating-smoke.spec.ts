@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 import {
+  assertNoLoginRateLimit,
   attachMutationLedger,
+  readMainAlertText,
   requireEnv,
   startMutationCapture,
 } from "./prod/mutating";
@@ -39,7 +41,20 @@ test("@m0 mutating smoke: auth session login/logout lifecycle", async ({
     await page.getByLabel("Password").fill(password);
     await page.getByRole("button", { name: "Sign in" }).click();
 
-    await expect(page).toHaveURL(/\/auctions(?:[/?#]|$)/);
+    const landedOnAuctions = await page
+      .waitForURL(/\/auctions(?:[/?#]|$)/, { timeout: 10_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!landedOnAuctions) {
+      const alertText = await readMainAlertText(page);
+      assertNoLoginRateLimit(
+        alertText,
+        "@m0 login blocked by rate limiting or account lockout",
+      );
+      throw new Error(
+        `Login did not reach /auctions (url=${page.url()}). UI alert: ${alertText || "No alert text found."}`,
+      );
+    }
     await expect(page.getByRole("button", { name: "Log Out" })).toBeVisible();
 
     await page.getByRole("button", { name: "Log Out" }).click();
