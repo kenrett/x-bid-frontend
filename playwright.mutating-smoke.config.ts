@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 import { loadProdSmokeTargets } from "./e2e/prod/targets";
 
+const preset = (process.env.MUTATING_SMOKE_PRESET ?? "deep").toLowerCase();
 const rawMutatingTargets = process.env.MUTATING_SMOKE_TARGETS;
 if (rawMutatingTargets && rawMutatingTargets.trim() !== "") {
   process.env.PROD_SMOKE_TARGETS = rawMutatingTargets;
@@ -28,9 +29,22 @@ if (touchesProd && process.env.MUTATING_SMOKE_ALLOW_PROD !== "true") {
   );
 }
 
+const grepByPreset: Record<string, RegExp | undefined> = {
+  fast: /@m0/,
+  standard: /@m0|@m1/,
+  deep: undefined,
+};
+
+if (!(preset in grepByPreset)) {
+  throw new Error(
+    `Invalid MUTATING_SMOKE_PRESET "${preset}". Use "fast", "standard", or "deep".`,
+  );
+}
+
 export default defineConfig({
   testDir: "./e2e",
   testMatch: "**/*.mutating-smoke.spec.ts",
+  grep: grepByPreset[preset],
   timeout: 90_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,
