@@ -38,13 +38,17 @@ export const updateAuction = async (
   id: number,
   updates: Partial<AuctionSummary>,
 ) => {
+  const auctionPayload: Partial<AuctionSummary> & {
+    status?: ReturnType<typeof statusToApi>;
+  } = { ...updates };
+  if (updates.status !== undefined) {
+    auctionPayload.status = statusToApi(updates.status);
+  }
+
   const res = await client.put<AdminAuctionResponse>(
     `/api/v1/admin/auctions/${id}`,
     {
-      auction: {
-        ...updates,
-        status: statusToApi(updates.status),
-      },
+      auction: auctionPayload,
     },
   );
   const data =

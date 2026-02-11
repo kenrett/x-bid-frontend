@@ -72,6 +72,19 @@ describe("api/admin/auctions", () => {
     expect(result.current_price).toBe(12.5);
   });
 
+  it("updates an auction without forcing status when omitted", async () => {
+    clientMocks.put.mockResolvedValue({ data: sampleAuction });
+
+    await updateAuction(5, { title: "Updated title" });
+
+    expect(clientMocks.put).toHaveBeenCalledWith("/api/v1/admin/auctions/5", {
+      auction: {
+        title: "Updated title",
+      },
+    });
+    expect(statusMocks.toApi).not.toHaveBeenCalled();
+  });
+
   it("deletes an auction", async () => {
     clientMocks.delete.mockResolvedValue({});
 
