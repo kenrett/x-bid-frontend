@@ -5,6 +5,7 @@ import type { UploadAdapter, UploadConstraints, UploadError } from "../types";
 import { normalizeUploadError } from "../uploadErrors";
 import { validateUploadFile } from "../uploadValidation";
 import { logUploadEvent } from "../uploadTelemetry";
+import { normalizeUploadAssetUrl } from "@utils/uploadAssetUrl";
 
 const BUTTON_CLASSES =
   "rounded-lg border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-3 py-2 text-xs font-semibold text-[color:var(--sf-text)] transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50";
@@ -57,6 +58,7 @@ export const FileUploadField = ({
   const [maxAttempts, setMaxAttempts] = useState(1);
 
   const accept = useMemo(() => constraints.accept.join(","), [constraints]);
+  const previewSrc = normalizeUploadAssetUrl(value);
 
   useEffect(() => {
     return () => {
@@ -323,7 +325,7 @@ export const FileUploadField = ({
               Uploaded image preview
             </div>
             <img
-              src={value}
+              src={previewSrc}
               alt="Uploaded preview"
               className="h-28 w-auto rounded-lg border border-[color:var(--sf-border)] object-cover"
             />

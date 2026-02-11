@@ -18,6 +18,7 @@ import type { AuctionDetail } from "../../types/auction";
 import type { Bid } from "../../types/bid";
 import type { AuctionConnectionState } from "@features/auctions/hooks/useAuctionChannel";
 import type { User as AuthUser } from "@features/auth/types/user";
+import { normalizeUploadAssetUrl } from "@utils/uploadAssetUrl";
 
 interface AuctionViewProps {
   auction: AuctionDetail;
@@ -45,6 +46,8 @@ const AuctionViewComponent = ({
   const navigate = useNavigate();
   const isConnected = connectionState === "connected";
   const isConnecting = connectionState === "connecting";
+  const imageSrc =
+    normalizeUploadAssetUrl(auction.image_url) || "/assets/BidderSweet.svg";
   const isEmailVerified =
     user?.email_verified !== false || Boolean(user?.email_verified_at);
   const isBiddingBlockedByEmail = Boolean(
@@ -121,7 +124,7 @@ const AuctionViewComponent = ({
         <div className="grid md:grid-cols-2 gap-12 items-start">
           <div className="rounded-2xl overflow-hidden shadow-2xl shadow-[#a020f0]/10">
             <img
-              src={auction.image_url || "/assets/BidderSweet.svg"}
+              src={imageSrc}
               alt={auction.title}
               loading="eager"
               fetchPriority="high"

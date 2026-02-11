@@ -1,4 +1,5 @@
 import { useStorefront } from "../../../../storefront/useStorefront";
+import { normalizeUploadAssetUrl } from "@utils/uploadAssetUrl";
 
 interface AuctionProps {
   id: number;
@@ -47,6 +48,7 @@ export function Auction({
 
   const loading = index < 2 ? "eager" : "lazy";
   const fetchPriority = index < 2 ? "high" : "low";
+  const imageSrc = normalizeUploadAssetUrl(image_url) || FALLBACK_IMAGE;
 
   const { key: storefrontKey } = useStorefront();
   const isMarketplace = storefrontKey === "marketplace";
@@ -63,7 +65,7 @@ export function Auction({
       }`}
     >
       <img
-        src={image_url || FALLBACK_IMAGE}
+        src={imageSrc}
         alt={title}
         loading={loading}
         fetchPriority={fetchPriority}
