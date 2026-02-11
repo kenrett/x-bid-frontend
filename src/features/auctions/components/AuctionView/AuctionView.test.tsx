@@ -118,6 +118,21 @@ describe("AuctionView Component", () => {
     await screen.findByTestId("bid-history");
   });
 
+  it("normalizes api upload image URLs to same-origin paths", async () => {
+    renderComponent({
+      auction: {
+        ...mockAuction,
+        image_url: "https://api.biddersweet.app/api/v1/uploads/signed-id-2",
+      },
+    });
+
+    expect(screen.getByAltText("Vintage Masterpiece")).toHaveAttribute(
+      "src",
+      "/api/v1/uploads/signed-id-2",
+    );
+    await screen.findByTestId("bid-history");
+  });
+
   it("renders the highest bidder's name when available", () => {
     renderComponent();
     expect(screen.getByText("Highest Bidder:")).toBeInTheDocument();

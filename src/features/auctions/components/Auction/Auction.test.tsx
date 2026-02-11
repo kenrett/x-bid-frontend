@@ -39,6 +39,18 @@ describe("Auction Component", () => {
     expect(image).toHaveAttribute("src", "https://example.com/poster.jpg");
   });
 
+  it("normalizes api upload URLs to same-origin paths", () => {
+    render(
+      <Auction
+        {...mockAuctionProps}
+        image_url="https://api.biddersweet.app/api/v1/uploads/signed-id-1"
+      />,
+    );
+
+    const image = screen.getByRole("img", { name: /Vintage Space Poster/i });
+    expect(image).toHaveAttribute("src", "/api/v1/uploads/signed-id-1");
+  });
+
   it("calls the onClick handler with the correct id when clicked", async () => {
     const handleClick = vi.fn();
     const user = userEvent.setup();

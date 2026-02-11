@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { FileUploadField } from "./FileUploadField";
 import type { UploadAdapter } from "../types";
 import { useAuth } from "@features/auth/hooks/useAuth";
@@ -38,6 +39,21 @@ const renderField = (adapter: UploadAdapter) =>
       adapter={adapter}
     />,
   );
+
+const ControlledUploadField = ({ adapter }: { adapter: UploadAdapter }) => {
+  const [value, setValue] = useState("");
+
+  return (
+    <FileUploadField
+      id="upload-input"
+      label="Upload image"
+      value={value}
+      onChange={setValue}
+      constraints={constraints}
+      adapter={adapter}
+    />
+  );
+};
 
 describe("FileUploadField", () => {
   beforeEach(() => {
@@ -190,5 +206,23 @@ describe("FileUploadField", () => {
       /please log in to upload/i,
     );
     expect(adapter.upload).not.toHaveBeenCalled();
+  });
+
+  it("normalizes uploaded api asset URL for preview", async () => {
+    const adapter: UploadAdapter = {
+      upload: vi.fn().mockResolvedValue({
+        url: "https://api.biddersweet.app/api/v1/uploads/signed-preview-id",
+      }),
+    };
+
+    render(<ControlledUploadField adapter={adapter} />);
+    const user = userEvent.setup();
+    const input = screen.getByLabelText("Upload image") as HTMLInputElement;
+    const file = new File(["test"], "image.png", { type: "image/png" });
+
+    await user.upload(input, file);
+
+    const preview = await screen.findByAltText("Uploaded preview");
+    expect(preview).toHaveAttribute("src", "/api/v1/uploads/signed-preview-id");
   });
 });
