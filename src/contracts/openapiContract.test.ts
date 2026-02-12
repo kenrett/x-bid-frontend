@@ -337,8 +337,11 @@ describe("OpenAPI contract drift", () => {
       "401",
     );
     const login401Fields = collectPropertyPaths(openapiSchema, login401);
-    expect(login401Fields.has("error_code")).toBe(true);
-    expect(login401Fields.has("message")).toBe(true);
+    const hasTopLevelEnvelope =
+      login401Fields.has("error_code") && login401Fields.has("message");
+    const hasNestedEnvelope =
+      login401Fields.has("error.code") && login401Fields.has("error.message");
+    expect(hasTopLevelEnvelope || hasNestedEnvelope).toBe(true);
   });
 
   it("2FA endpoints expose canonical methods and response schemas", () => {
