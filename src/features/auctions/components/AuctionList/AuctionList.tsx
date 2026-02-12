@@ -16,6 +16,9 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { CheckCircleIcon, PauseCircleIcon } from "@heroicons/react/24/solid";
 
+const isActiveAuction = (auction: Pick<AuctionSummary, "status">): boolean =>
+  auction.status === "active";
+
 const mergeAuctionUpdate = (
   current: AuctionSummary[],
   update: AuctionListUpdate,
@@ -42,6 +45,7 @@ const mergeAuctionUpdate = (
       winning_user_name: update.winning_user_name ?? null,
       bid_count: update.bid_count ?? 0,
     };
+    if (!isActiveAuction(nextAuction)) return current;
     return [...current, nextAuction];
   }
 
@@ -62,6 +66,9 @@ const mergeAuctionUpdate = (
       update.bid_count !== undefined ? update.bid_count : existing.bid_count,
     status: update.status ?? existing.status,
   };
+  if (!isActiveAuction(next[existingIndex])) {
+    next.splice(existingIndex, 1);
+  }
   return next;
 };
 
@@ -76,7 +83,7 @@ const AuctionList = () => {
       try {
         setLoading(true);
         const data = await getAuctions();
-        setAuctions(data);
+        setAuctions(data.filter(isActiveAuction));
       } catch (err) {
         setError(
           err instanceof UnexpectedResponseError

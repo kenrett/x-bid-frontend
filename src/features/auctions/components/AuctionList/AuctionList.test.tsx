@@ -61,7 +61,7 @@ const mockAuctions: AuctionSummary[] = [
     end_time: new Date().toISOString(),
     image_url: "",
     description: "",
-    status: "inactive",
+    status: "active",
     start_date: "",
     highest_bidder_id: 0,
     bid_count: 0,
@@ -74,6 +74,30 @@ const mockAuctions: AuctionSummary[] = [
     image_url: "",
     description: "",
     status: "inactive",
+    start_date: "",
+    highest_bidder_id: 0,
+    bid_count: 0,
+  },
+  {
+    id: 3,
+    title: "Scheduled Sculpture",
+    current_price: 220.0,
+    end_time: new Date().toISOString(),
+    image_url: "",
+    description: "",
+    status: "scheduled",
+    start_date: "",
+    highest_bidder_id: 0,
+    bid_count: 0,
+  },
+  {
+    id: 4,
+    title: "Completed Camera",
+    current_price: 410.0,
+    end_time: new Date().toISOString(),
+    image_url: "",
+    description: "",
+    status: "complete",
     start_date: "",
     highest_bidder_id: 0,
     bid_count: 0,
@@ -106,7 +130,7 @@ describe("AuctionList", () => {
     expect(screen.getByRole("status")).toHaveTextContent(/loading auctions/i);
   });
 
-  it("should display a list of auctions on successful fetch", async () => {
+  it("should display only active auctions on successful fetch", async () => {
     mockedGetAuctions.mockResolvedValue(mockAuctions);
     render(<AuctionList />);
 
@@ -114,7 +138,15 @@ describe("AuctionList", () => {
     expect(
       await screen.findByText(/Vintage Watch\s*-\s*150/),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Art Painting\s*-\s*300/)).toBeInTheDocument();
+    expect(
+      screen.queryByText(/Art Painting\s*-\s*300/),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Scheduled Sculpture\s*-\s*220/),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Completed Camera\s*-\s*410/),
+    ).not.toBeInTheDocument();
 
     // Ensure loading state is gone
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
@@ -235,6 +267,35 @@ describe("AuctionList", () => {
     });
 
     expect(await screen.findByText(/New Arrival\s*-\s*50/)).toBeInTheDocument();
+  });
+
+  it("ignores non-active auctions from live updates", async () => {
+    mockedGetAuctions.mockResolvedValue([mockAuctions[0]]);
+    render(<AuctionList />);
+    await screen.findByText(/Vintage Watch\s*-\s*150/);
+
+    liveUpdateHandler?.({
+      id: 5,
+      title: "Draft Item",
+      current_price: 10,
+      status: "inactive",
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText(/Draft Item\s*-\s*10/)).toBeNull();
+    });
+  });
+
+  it("removes an existing auction when live status changes away from active", async () => {
+    mockedGetAuctions.mockResolvedValue([mockAuctions[0]]);
+    render(<AuctionList />);
+    await screen.findByText(/Vintage Watch\s*-\s*150/);
+
+    liveUpdateHandler?.({ id: 1, status: "complete" });
+
+    await waitFor(() =>
+      expect(screen.queryByText(/Vintage Watch\s*-\s*150/)).toBeNull(),
+    );
   });
 
   it("removes cancelled auctions from live updates", async () => {
