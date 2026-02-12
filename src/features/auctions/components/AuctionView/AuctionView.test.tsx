@@ -149,6 +149,21 @@ describe("AuctionView Component", () => {
     await screen.findByTestId("bid-history");
   });
 
+  it("keeps stable same-origin upload image paths unchanged", async () => {
+    renderComponent({
+      auction: {
+        ...mockAuction,
+        image_url: "/api/v1/uploads/signed-id-2?disposition=inline",
+      },
+    });
+
+    expect(screen.getByAltText("Vintage Masterpiece")).toHaveAttribute(
+      "src",
+      "/api/v1/uploads/signed-id-2?disposition=inline",
+    );
+    await screen.findByTestId("bid-history");
+  });
+
   it("renders the highest bidder's name when available", () => {
     renderComponent();
     expect(screen.getByText("Highest Bidder:")).toBeInTheDocument();

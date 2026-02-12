@@ -16,6 +16,16 @@ describe("normalizeUploadAssetUrl", () => {
     );
   });
 
+  it("keeps raw S3 presigned URLs unchanged", () => {
+    expect(
+      normalizeUploadAssetUrl(
+        "https://biddersweet-active-storage-prod.s3.us-west-2.amazonaws.com/key?X-Amz-Signature=abc",
+      ),
+    ).toBe(
+      "https://biddersweet-active-storage-prod.s3.us-west-2.amazonaws.com/key?X-Amz-Signature=abc",
+    );
+  });
+
   it("keeps relative URLs unchanged", () => {
     expect(normalizeUploadAssetUrl("/assets/BidderSweet.svg")).toBe(
       "/assets/BidderSweet.svg",

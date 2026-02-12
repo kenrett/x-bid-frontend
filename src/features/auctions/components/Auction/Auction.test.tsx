@@ -51,6 +51,21 @@ describe("Auction Component", () => {
     expect(image).toHaveAttribute("src", "/api/v1/uploads/signed-id-1");
   });
 
+  it("keeps stable same-origin upload paths unchanged", () => {
+    render(
+      <Auction
+        {...mockAuctionProps}
+        image_url="/api/v1/uploads/signed-id-1?disposition=inline"
+      />,
+    );
+
+    const image = screen.getByRole("img", { name: /Vintage Space Poster/i });
+    expect(image).toHaveAttribute(
+      "src",
+      "/api/v1/uploads/signed-id-1?disposition=inline",
+    );
+  });
+
   it("calls the onClick handler with the correct id when clicked", async () => {
     const handleClick = vi.fn();
     const user = userEvent.setup();
