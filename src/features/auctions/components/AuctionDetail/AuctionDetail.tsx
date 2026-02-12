@@ -1,3 +1,4 @@
+import { useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { AuctionView } from "../AuctionView/AuctionView";
@@ -34,7 +35,23 @@ function AuctionDetailInner({ auctionId }: { auctionId: number }) {
     bids,
     onTimerEnd,
     connectionState,
+    refreshAuction,
   } = useAuctionDetail(auctionId);
+  const [hasRetriedImageLoad, setHasRetriedImageLoad] = useState(false);
+  const [forceFallbackImage, setForceFallbackImage] = useState(false);
+  const [imageRetryAttempt, setImageRetryAttempt] = useState(0);
+
+  const handleImageLoadError = useCallback(async () => {
+    if (!hasRetriedImageLoad) {
+      setHasRetriedImageLoad(true);
+      setForceFallbackImage(false);
+      await refreshAuction();
+      setImageRetryAttempt((attempt) => attempt + 1);
+      return;
+    }
+
+    setForceFallbackImage(true);
+  }, [hasRetriedImageLoad, refreshAuction]);
 
   if (error) return <ErrorScreen message={error} />;
   if (loading || !auction) return <LoadingScreen item="auction" />;
@@ -50,6 +67,9 @@ function AuctionDetailInner({ auctionId }: { auctionId: number }) {
       onPlaceBid={placeUserBid}
       onTimerEnd={onTimerEnd}
       bids={bids}
+      onImageLoadError={handleImageLoadError}
+      forceFallbackImage={forceFallbackImage}
+      imageRenderKey={`${auction.image_url ?? "fallback"}:${imageRetryAttempt}:${forceFallbackImage ? "fallback" : "live"}`}
     />
   );
 }

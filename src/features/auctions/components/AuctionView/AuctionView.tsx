@@ -30,6 +30,9 @@ interface AuctionViewProps {
   onPlaceBid: () => void;
   onTimerEnd: () => void;
   bids: Bid[];
+  onImageLoadError?: () => void | Promise<void>;
+  forceFallbackImage?: boolean;
+  imageRenderKey?: string;
 }
 
 const FALLBACK_IMAGE = "/assets/BidderSweet.svg";
@@ -44,11 +47,16 @@ const AuctionViewComponent = ({
   onPlaceBid,
   onTimerEnd,
   bids,
+  onImageLoadError,
+  forceFallbackImage = false,
+  imageRenderKey,
 }: AuctionViewProps) => {
   const navigate = useNavigate();
   const isConnected = connectionState === "connected";
   const isConnecting = connectionState === "connecting";
-  const imageSrc = normalizeUploadAssetUrl(auction.image_url) || FALLBACK_IMAGE;
+  const imageSrc = forceFallbackImage
+    ? FALLBACK_IMAGE
+    : normalizeUploadAssetUrl(auction.image_url) || FALLBACK_IMAGE;
   const isEmailVerified =
     user?.email_verified !== false || Boolean(user?.email_verified_at);
   const isBiddingBlockedByEmail = Boolean(
@@ -125,6 +133,7 @@ const AuctionViewComponent = ({
         <div className="grid md:grid-cols-2 gap-12 items-start">
           <div className="rounded-2xl overflow-hidden shadow-2xl shadow-[#a020f0]/10">
             <img
+              key={imageRenderKey}
               src={imageSrc}
               alt={auction.title}
               loading="eager"
@@ -133,6 +142,11 @@ const AuctionViewComponent = ({
               width={960}
               height={540}
               onError={(event) => {
+                if (onImageLoadError) {
+                  void onImageLoadError();
+                  return;
+                }
+
                 event.currentTarget.src = FALLBACK_IMAGE;
               }}
               className="w-full h-auto object-cover"
