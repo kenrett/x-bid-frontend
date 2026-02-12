@@ -148,7 +148,30 @@ If you need to force a storefront in dev/tests, set `VITE_STOREFRONT_KEY` to `ma
 - Optional cookie-based refresh (when enabled) uses `withCredentials: true` only for `POST /api/v1/session/refresh`.
 - Login (example): `POST /api/v1/login` with `{ "session": { "email_address": "...", "password": "..." } }` returns `access_token`, `refresh_token`, `session_token_id`, and `user` (plus optional flags depending on backend contract).
 - Error shapes tolerated: `{error_code, message, details?}` (preferred), `{error: "text"}`, or `{error: {code, message}}` (rack-attack/throttling). Use `message` for user feedback when present.
-- Upload assets (`/api/v1/uploads/:signed_id`) loaded directly from a different origin may be blocked by browser CORP checks. Backend follow-up: send `Cross-Origin-Resource-Policy: cross-origin` (or another policy that explicitly permits the frontend origins) on upload responses if direct cross-origin asset URLs are expected.
+
+### Upload Asset Delivery & Caching
+
+- Upload asset URLs are normalized to same-origin paths (`/api/v1/uploads/:signed_id`) in `src/utils/uploadAssetUrl.ts`.
+- In production, Vercel rewrites `/api/v1/uploads/:path*` to `https://api.biddersweet.app/api/v1/uploads/:path*` (see `vercel.json`). This avoids direct cross-origin image fetches from the browser and reduces CORP/CORS edge cases.
+- Frontend cache policy for rewritten upload asset responses is set in `vercel.json`:
+  - `Cache-Control: public, max-age=31536000, immutable`
+- This policy assumes backend upload URLs are immutable (a changed asset gets a new URL/signed id).
+- If backend cannot guarantee immutable upload URLs, change the Vercel header to:
+  - `Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800`
+  - Document why immutable caching is unsafe before switching.
+
+Verification:
+
+```sh
+curl -I https://www.biddersweet.app/api/v1/uploads/<signed_id>
+curl -I https://api.biddersweet.app/api/v1/uploads/<signed_id>
+```
+
+- Confirm `Cache-Control` on the frontend origin (`www.biddersweet.app`) matches the expected policy.
+- In browser DevTools (Network tab), open an upload image request and verify:
+  - request URL is same-origin `/api/v1/uploads/...`
+  - response includes expected `Cache-Control`
+  - subsequent navigations show cache hits as expected (memory/disk cache depending on browser behavior).
 
 ### Maintenance Mode
 
