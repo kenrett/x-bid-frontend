@@ -1,4 +1,5 @@
 import {
+  fireEvent,
   render,
   screen,
   waitForElementToBeRemoved,
@@ -115,6 +116,21 @@ describe("AuctionView Component", () => {
       "/test-image.jpg",
     );
 
+    await screen.findByTestId("bid-history");
+  });
+
+  it("falls back to default image when image load fails", async () => {
+    renderComponent({
+      auction: {
+        ...mockAuction,
+        image_url: "https://example.com/expired-presigned.jpg",
+      },
+    });
+
+    const image = screen.getByAltText("Vintage Masterpiece");
+    fireEvent.error(image);
+
+    expect(image).toHaveAttribute("src", "/assets/BidderSweet.svg");
     await screen.findByTestId("bid-history");
   });
 

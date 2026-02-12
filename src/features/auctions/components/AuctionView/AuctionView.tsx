@@ -32,6 +32,8 @@ interface AuctionViewProps {
   bids: Bid[];
 }
 
+const FALLBACK_IMAGE = "/assets/BidderSweet.svg";
+
 const AuctionViewComponent = ({
   auction,
   user,
@@ -46,8 +48,7 @@ const AuctionViewComponent = ({
   const navigate = useNavigate();
   const isConnected = connectionState === "connected";
   const isConnecting = connectionState === "connecting";
-  const imageSrc =
-    normalizeUploadAssetUrl(auction.image_url) || "/assets/BidderSweet.svg";
+  const imageSrc = normalizeUploadAssetUrl(auction.image_url) || FALLBACK_IMAGE;
   const isEmailVerified =
     user?.email_verified !== false || Boolean(user?.email_verified_at);
   const isBiddingBlockedByEmail = Boolean(
@@ -131,6 +132,9 @@ const AuctionViewComponent = ({
               decoding="async"
               width={960}
               height={540}
+              onError={(event) => {
+                event.currentTarget.src = FALLBACK_IMAGE;
+              }}
               className="w-full h-auto object-cover"
             />
           </div>
