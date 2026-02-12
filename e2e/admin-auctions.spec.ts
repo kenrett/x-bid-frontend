@@ -35,7 +35,9 @@ test("admin can create and edit an auction", async ({ page }) => {
       ];
       return fulfillJson(route, { id: 303, ...(capturedCreate as object) });
     }
-    return route.continue();
+    return isDocumentRequest(route)
+      ? route.continue()
+      : fulfillJson(route, auctionsPayload);
   });
 
   await page.goto("/admin/auctions/new");

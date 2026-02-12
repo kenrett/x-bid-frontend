@@ -2,6 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
+  testIgnore: ["**/*.prod-smoke.spec.ts", "**/*.mutating-smoke.spec.ts"],
   timeout: 90_000,
   expect: { timeout: 5_000 },
   fullyParallel: true,

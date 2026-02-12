@@ -27,7 +27,7 @@ test("admin auction form validates required fields", async ({ page }) => {
   await expect(page.getByText("Title is required.")).toBeVisible();
 });
 
-test("admin can create auction with schedule and image; shows on public feed", async ({
+test("admin can create scheduled auction with image; hidden on public feed until active", async ({
   page,
 }) => {
   await seedAuthState(page, adminUser);
@@ -87,9 +87,9 @@ test("admin can create auction with schedule and image; shows on public feed", a
     end_time: expect.stringMatching(/2025-06-02T12:00:00/),
   });
 
-  // Public feed reflects the new auction.
+  // Public feed only shows active auctions.
   await page.goto("/auctions");
-  await expect(page.getByText("Sunset Camera Bundle")).toBeVisible();
+  await expect(page.getByText("Sunset Camera Bundle")).toHaveCount(0);
 });
 
 test("admin can retry image upload", async ({ page }) => {
@@ -138,7 +138,7 @@ test("admin can retry image upload", async ({ page }) => {
   );
 });
 
-test("admin edits auction status/date and update appears on public feed", async ({
+test("admin edits auction status/date and inactive update is hidden on public feed", async ({
   page,
 }) => {
   await seedAuthState(page, adminUser);
@@ -213,5 +213,5 @@ test("admin edits auction status/date and update appears on public feed", async 
   });
 
   await page.goto("/auctions");
-  await expect(page.getByText("Mirrorless Kit")).toBeVisible();
+  await expect(page.getByText("Mirrorless Kit")).toHaveCount(0);
 });
