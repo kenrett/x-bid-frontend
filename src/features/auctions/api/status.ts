@@ -12,6 +12,6 @@ export const statusFromApi = (status: string | undefined): AuctionStatus => {
 
 export const statusToApi = (status: AuctionStatus | undefined) => {
   if (status === "scheduled") return "pending";
-  if (status === "complete") return "ended";
+  if (status === "complete") return "complete";
   return status ?? "inactive";
 };

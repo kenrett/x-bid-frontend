@@ -17,7 +17,7 @@ describe("api/status", () => {
   it("maps internal statuses to API statuses", () => {
     const cases: Array<[AuctionStatus | undefined, string]> = [
       ["scheduled", "pending"],
-      ["complete", "ended"],
+      ["complete", "complete"],
       ["active", "active"],
       ["inactive", "inactive"],
       ["cancelled", "cancelled"],
