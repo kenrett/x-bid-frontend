@@ -18,10 +18,14 @@ export const normalizeUploadError = (error: unknown): UploadError => {
     fallbackMessage: "Upload failed. Please try again.",
   });
 
-  if (normalized.status === 413) {
+  if (
+    normalized.status === 413 ||
+    normalized.code === "request_too_large" ||
+    normalized.code === "payload_too_large"
+  ) {
     return {
       code: "payload_too_large",
-      message: normalized.message,
+      message: "Upload is too large. Please choose a file under 1 MB.",
       retryable: false,
       status: normalized.status,
     };

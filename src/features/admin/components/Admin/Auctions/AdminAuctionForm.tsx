@@ -38,8 +38,8 @@ const STATUS_OPTIONS: AuctionStatus[] = [
 
 const AUCTION_IMAGE_CONSTRAINTS: UploadConstraints = {
   accept: ["image/jpeg", "image/png", "image/webp"],
-  maxBytes: 5 * 1024 * 1024,
-  guidance: "Recommended 1200x800px. JPG, PNG, or WebP up to 5 MB.",
+  maxBytes: 1 * 1024 * 1024,
+  guidance: "Recommended 1200x800px. JPG, PNG, or WebP up to 1 MB.",
 };
 
 const toFormState = (values?: Partial<AuctionSummary>): FormState => ({
