@@ -1605,8 +1605,10 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * View
+     * Serve upload content by signed id
      * @description GET /api/v1/uploads/:signed_id
+     *     Redirects to the Active Storage service URL for image rendering in public auction views.
+     *     Redirect responses include cache hints aligned to the signed URL expiration.
      */
     get: operations["GET__api_v1_uploads_{signed_id}"];
     put?: never;
@@ -1939,6 +1941,7 @@ export interface components {
       end_time: string;
       highest_bidder_id?: number | null;
       id: number;
+      /** @description Stable upload path (`/api/v1/uploads/:signed_id`) for authorized uploads; legacy external URLs may appear for older records. */
       image_url?: string | null;
       /** Format: date-time */
       start_date: string;
@@ -1955,6 +1958,7 @@ export interface components {
       /** Format: date-time */
       end_time: string;
       id: number;
+      /** @description Stable upload path (`/api/v1/uploads/:signed_id`) for authorized uploads; legacy external URLs may appear for older records. */
       image_url?: string | null;
       /** @enum {string} */
       status: "inactive" | "scheduled" | "active" | "complete" | "cancelled";
@@ -1970,6 +1974,7 @@ export interface components {
         description: string;
         /** Format: date-time */
         end_time?: string | null;
+        /** @description Auction image reference. Upload proxy paths and legacy upload URLs are accepted; stored values are normalized when possible. */
         image_url?: string | null;
         /** @description Marks the auction as adult inventory (restricted to afterdark storefront + age gate). */
         is_adult?: boolean | null;
@@ -4802,10 +4807,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      401: components["responses"]["resp_043"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
-      500: components["responses"]["resp_023"];
+      404: components["responses"]["resp_003"];
     };
   };
   POST__api_v1_users: {
