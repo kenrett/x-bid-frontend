@@ -3,9 +3,14 @@ import type { AuctionSummary } from "@features/auctions/types/auction";
 import { statusFromApi, statusToApi } from "@features/auctions/api/status";
 import type { ApiJsonResponse } from "@api/openapi-helpers";
 
+type AdminAuctionApiRecord =
+  ApiJsonResponse<"/api/v1/admin/auctions", "get"> extends Array<infer Item>
+    ? Item
+    : never;
+
 type AdminAuctionsListResponse =
   | ApiJsonResponse<"/api/v1/admin/auctions", "get">
-  | { auctions?: AuctionSummary[] };
+  | { auctions?: AdminAuctionApiRecord[] };
 
 type AdminAuctionResponse =
   | ApiJsonResponse<"/api/v1/auctions/{id}", "get">
@@ -14,10 +19,32 @@ type AdminAuctionResponse =
   | ApiJsonResponse<"/api/v1/auctions/{id}", "patch">
   | { auction?: AuctionSummary };
 
-const normalizeAuction = (auction: AuctionSummary): AuctionSummary => ({
-  ...auction,
-  status: statusFromApi(auction.status),
+type NormalizableAuction = {
+  id: number;
+  title: string;
+  current_price: number | string;
+  status?: string;
+  image_url?: string | null;
+  description?: string;
+  start_date?: string;
+  end_time?: string;
+  highest_bidder_id?: number | null;
+  winning_user_name?: string | null;
+  bid_count?: number;
+};
+
+const normalizeAuction = (auction: NormalizableAuction): AuctionSummary => ({
+  id: auction.id,
+  title: auction.title,
+  description: auction.description ?? "",
   current_price: parseFloat(String(auction.current_price)),
+  image_url: auction.image_url ?? "",
+  status: statusFromApi(auction.status),
+  start_date: auction.start_date ?? "",
+  end_time: auction.end_time ?? "",
+  highest_bidder_id: auction.highest_bidder_id ?? null,
+  winning_user_name: auction.winning_user_name ?? null,
+  bid_count: auction.bid_count,
 });
 
 export const getAdminAuctions = async () => {
@@ -28,7 +55,7 @@ export const getAdminAuctions = async () => {
   const auctions = Array.isArray(payload)
     ? payload
     : Array.isArray((payload as { auctions?: unknown }).auctions)
-      ? ((payload as { auctions: AuctionSummary[] }).auctions ?? [])
+      ? ((payload as { auctions: AdminAuctionApiRecord[] }).auctions ?? [])
       : [];
   return auctions.map(normalizeAuction);
 };
