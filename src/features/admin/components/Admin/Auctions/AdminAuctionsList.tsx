@@ -11,12 +11,44 @@ import {
   UnexpectedResponseError,
 } from "@services/unexpectedResponse";
 
+const getBackendErrorMessage = (err: unknown): string | null => {
+  if (!axios.isAxiosError(err)) return null;
+  const errorPayload = err.response?.data?.error;
+  if (typeof errorPayload === "string") return errorPayload;
+  if (errorPayload && typeof errorPayload === "object") {
+    const code =
+      typeof (errorPayload as { code?: unknown }).code === "string"
+        ? (errorPayload as { code: string }).code
+        : null;
+    const message =
+      typeof (errorPayload as { message?: unknown }).message === "string"
+        ? (errorPayload as { message: string }).message
+        : null;
+    if (code && message) return `${code}: ${message}`;
+    return message ?? code;
+  }
+  return null;
+};
+
+const showTransitionError = (
+  action: "Publish" | "Restore" | "Close",
+  currentStatus: AuctionSummary["status"],
+  err: unknown,
+) => {
+  const backendMessage =
+    getBackendErrorMessage(err) ?? "Transition was rejected by the server.";
+  showToast(
+    `${action} failed from ${currentStatus}: ${backendMessage}`,
+    "error",
+  );
+};
+
 export const AdminAuctionsList = () => {
   const [auctions, setAuctions] = useState<AuctionSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retiringId, setRetiringId] = useState<number | null>(null);
-  const [reactivatingId, setReactivatingId] = useState<number | null>(null);
+  const [restoringId, setRestoringId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<
     AuctionSummary["status"] | "all"
@@ -92,33 +124,31 @@ export const AdminAuctionsList = () => {
     }
   };
 
-  const handleReactivate = async (auction: AuctionSummary) => {
+  const handleRestore = async (auction: AuctionSummary) => {
     const label = auction.title ?? `Auction ${auction.id}`;
     const confirmed = window.confirm(
-      `Reactivate "${label}"? It will return to active state immediately.`,
+      `Restore "${label}" to scheduled? It can be published later when ready.`,
     );
     if (!confirmed) return;
 
     try {
-      setReactivatingId(auction.id);
-      await updateAuction(auction.id, { status: "active" });
-      logAdminAction("auction.reactivate", { id: auction.id });
-      showToast("Auction reactivated", "success");
+      setRestoringId(auction.id);
+      await updateAuction(auction.id, { status: "scheduled" });
+      logAdminAction("auction.restore", { id: auction.id });
+      showToast("Auction restored to scheduled", "success");
       await fetchAuctions();
     } catch (err) {
       console.error(err);
-      const message = axios.isAxiosError(err)
-        ? err.response?.data?.error
-        : null;
-      showToast(message || "Failed to reactivate auction", "error");
+      showTransitionError("Restore", auction.status, err);
     } finally {
-      setReactivatingId(null);
+      setRestoringId(null);
     }
   };
 
   const handleStatusChange = async (
     auction: AuctionSummary,
-    nextStatus: AuctionSummary["status"],
+    nextStatus: "active" | "complete",
+    action: "Publish" | "Close",
   ) => {
     const label = auction.title ?? `Auction ${auction.id}`;
     const confirmed = window.confirm(
@@ -133,14 +163,11 @@ export const AdminAuctionsList = () => {
         from: auction.status,
         to: nextStatus,
       });
-      showToast(`Status set to ${nextStatus}`, "success");
+      showToast(`${action} successful`, "success");
       await fetchAuctions();
     } catch (err) {
       console.error(err);
-      const message = axios.isAxiosError(err)
-        ? err.response?.data?.error
-        : null;
-      showToast(message || "Failed to update status", "error");
+      showTransitionError(action, auction.status, err);
     }
   };
 
@@ -435,10 +462,14 @@ export const AdminAuctionsList = () => {
                       >
                         Edit
                       </Link>
-                      {["inactive", "scheduled"].includes(auction.status) && (
+                      {auction.status === "scheduled" && (
                         <button
                           onClick={() =>
-                            void handleStatusChange(auction, "active")
+                            void handleStatusChange(
+                              auction,
+                              "active",
+                              "Publish",
+                            )
                           }
                           className="text-sm text-emerald-300 hover:text-emerald-200 underline underline-offset-2"
                         >
@@ -454,10 +485,14 @@ export const AdminAuctionsList = () => {
                           {retiringId === auction.id ? "Retiring..." : "Retire"}
                         </button>
                       )}
-                      {auction.status !== "complete" && (
+                      {auction.status === "active" && (
                         <button
                           onClick={() =>
-                            void handleStatusChange(auction, "complete")
+                            void handleStatusChange(
+                              auction,
+                              "complete",
+                              "Close",
+                            )
                           }
                           className="text-sm text-red-300 hover:text-red-200 underline underline-offset-2"
                         >
@@ -466,13 +501,13 @@ export const AdminAuctionsList = () => {
                       )}
                       {auction.status === "inactive" && (
                         <button
-                          onClick={() => void handleReactivate(auction)}
-                          disabled={reactivatingId === auction.id}
+                          onClick={() => void handleRestore(auction)}
+                          disabled={restoringId === auction.id}
                           className="text-sm text-emerald-300 hover:text-emerald-200 disabled:opacity-50 underline underline-offset-2"
                         >
-                          {reactivatingId === auction.id
-                            ? "Reactivating..."
-                            : "Reactivate"}
+                          {restoringId === auction.id
+                            ? "Restoring..."
+                            : "Restore to Scheduled"}
                         </button>
                       )}
                     </td>

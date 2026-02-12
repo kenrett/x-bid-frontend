@@ -16,16 +16,21 @@ describe("api/status", () => {
 
   it("maps internal statuses to API statuses", () => {
     const cases: Array<[AuctionStatus | undefined, string]> = [
-      ["scheduled", "pending"],
+      ["scheduled", "scheduled"],
       ["complete", "complete"],
       ["active", "active"],
       ["inactive", "inactive"],
       ["cancelled", "cancelled"],
-      [undefined, "inactive"],
     ];
 
     for (const [input, output] of cases) {
       expect(statusToApi(input)).toBe(output);
     }
+  });
+
+  it("throws for undefined internal status values", () => {
+    expect(() => statusToApi(undefined)).toThrow(
+      "Missing auction status for API payload",
+    );
   });
 });

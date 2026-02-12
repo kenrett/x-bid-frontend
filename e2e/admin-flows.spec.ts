@@ -81,8 +81,8 @@ test("admin can create auction with schedule and image; shows on public feed", a
     title: "Sunset Camera Bundle",
     description: "Full-frame camera with two lenses.",
     image_url: "https://example.com/sunset.jpg",
-    // scheduled converts to pending for API payload
-    status: "pending",
+    // scheduled passes through as scheduled for API payload
+    status: "scheduled",
     start_date: expect.stringMatching(/2025-06-01T12:00:00/),
     end_time: expect.stringMatching(/2025-06-02T12:00:00/),
   });

@@ -58,6 +58,19 @@ describe("api/admin/auctions", () => {
     });
   });
 
+  it("creates an auction without forcing status when omitted", async () => {
+    clientMocks.post.mockResolvedValue({ data: { auction: sampleAuction } });
+
+    await createAuction({ title: "Auction" });
+
+    expect(clientMocks.post).toHaveBeenCalledWith("/api/v1/admin/auctions", {
+      auction: {
+        title: "Auction",
+      },
+    });
+    expect(statusMocks.toApi).not.toHaveBeenCalled();
+  });
+
   it("updates an auction, converting status to API and normalizing response", async () => {
     clientMocks.put.mockResolvedValue({ data: sampleAuction });
 

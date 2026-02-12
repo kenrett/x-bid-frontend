@@ -19,13 +19,20 @@ const normalizeAuction = (auction: AuctionSummary): AuctionSummary => ({
 export const createAuction = async (
   payload: Partial<AuctionSummary> & { title: string },
 ) => {
+  const { status, ...restPayload } = payload;
+  const auctionPayload: Omit<Partial<AuctionSummary>, "status"> & {
+    status?: ReturnType<typeof statusToApi>;
+  } = {
+    ...restPayload,
+  };
+  if (status !== undefined) {
+    auctionPayload.status = statusToApi(status);
+  }
+
   const res = await client.post<AdminAuctionResponse>(
     "/api/v1/admin/auctions",
     {
-      auction: {
-        ...payload,
-        status: statusToApi(payload.status),
-      },
+      auction: auctionPayload,
     },
   );
   const data =

@@ -11,7 +11,8 @@ export const statusFromApi = (status: string | undefined): AuctionStatus => {
 };
 
 export const statusToApi = (status: AuctionStatus | undefined) => {
-  if (status === "scheduled") return "pending";
-  if (status === "complete") return "complete";
-  return status ?? "inactive";
+  if (status === undefined) {
+    throw new Error("Missing auction status for API payload");
+  }
+  return status;
 };

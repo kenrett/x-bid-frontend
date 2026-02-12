@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { AdminAuctionsList } from "./AdminAuctionsList";
@@ -43,6 +43,19 @@ const mockAuctions: AuctionSummary[] = [
     id: 2,
     title: "Signed Jersey",
     description: "Collector's item",
+    current_price: 150,
+    image_url: "",
+    status: "scheduled" as const,
+    start_date: "2024-01-15T00:00:00Z",
+    end_time: "2024-01-16T00:00:00Z",
+    highest_bidder_id: null,
+    winning_user_name: null,
+    bid_count: 0,
+  },
+  {
+    id: 3,
+    title: "Active Watch",
+    description: "Collector's item",
     current_price: 200,
     image_url: "",
     status: "active" as const,
@@ -51,6 +64,19 @@ const mockAuctions: AuctionSummary[] = [
     highest_bidder_id: 10,
     winning_user_name: "TopBidder",
     bid_count: 3,
+  },
+  {
+    id: 4,
+    title: "Completed Camera",
+    description: "Auction done",
+    current_price: 275,
+    image_url: "",
+    status: "complete" as const,
+    start_date: "2024-03-01T00:00:00Z",
+    end_time: "2024-03-02T00:00:00Z",
+    highest_bidder_id: 20,
+    winning_user_name: "Winner",
+    bid_count: 8,
   },
 ];
 
@@ -78,11 +104,83 @@ describe("AdminAuctionsList", () => {
     expect(screen.getByText("Signed Jersey")).toBeInTheDocument();
     expect(screen.getByText("TopBidder")).toBeInTheDocument();
 
-    expect(screen.getAllByText("View")).toHaveLength(2);
-    expect(screen.getAllByText("Edit")).toHaveLength(2);
+    expect(screen.getAllByText("View")).toHaveLength(4);
+    expect(screen.getAllByText("Edit")).toHaveLength(4);
   });
 
-  it("allows status change via table actions with confirmation", async () => {
+  it("shows status actions only for valid backend transitions", async () => {
+    render(
+      <MemoryRouter initialEntries={["/admin/auctions"]}>
+        <AdminAuctionsList />
+      </MemoryRouter>,
+    );
+
+    const inactiveRow = (await screen.findByText("Vintage Guitar")).closest(
+      "tr",
+    );
+    const scheduledRow = screen.getByText("Signed Jersey").closest("tr");
+    const activeRow = screen.getByText("TopBidder").closest("tr");
+    const completeRow = screen.getByText("Completed Camera").closest("tr");
+
+    expect(inactiveRow).toBeTruthy();
+    expect(scheduledRow).toBeTruthy();
+    expect(activeRow).toBeTruthy();
+    expect(completeRow).toBeTruthy();
+
+    expect(
+      within(inactiveRow as HTMLElement).getByRole("button", {
+        name: "Restore to Scheduled",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      within(inactiveRow as HTMLElement).queryByRole("button", {
+        name: "Publish",
+      }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(inactiveRow as HTMLElement).queryByRole("button", {
+        name: "Close",
+      }),
+    ).not.toBeInTheDocument();
+
+    expect(
+      within(scheduledRow as HTMLElement).getByRole("button", {
+        name: "Publish",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      within(scheduledRow as HTMLElement).queryByRole("button", {
+        name: "Restore to Scheduled",
+      }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(scheduledRow as HTMLElement).queryByRole("button", {
+        name: "Close",
+      }),
+    ).not.toBeInTheDocument();
+
+    expect(
+      within(activeRow as HTMLElement).getByRole("button", { name: "Close" }),
+    ).toBeInTheDocument();
+    expect(
+      within(activeRow as HTMLElement).queryByRole("button", {
+        name: "Publish",
+      }),
+    ).not.toBeInTheDocument();
+
+    expect(
+      within(completeRow as HTMLElement).queryByRole("button", {
+        name: "Publish",
+      }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(completeRow as HTMLElement).queryByRole("button", {
+        name: "Close",
+      }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("sends scheduled status payload for restore", async () => {
     const user = userEvent.setup();
 
     render(
@@ -91,14 +189,63 @@ describe("AdminAuctionsList", () => {
       </MemoryRouter>,
     );
 
-    const publishBtn = await screen.findByText("Publish");
+    const restoreBtn = await screen.findByRole("button", {
+      name: "Restore to Scheduled",
+    });
+    await user.click(restoreBtn);
+
+    await waitFor(() => {
+      expect(updateAuction).toHaveBeenCalledWith(1, { status: "scheduled" });
+    });
+  });
+
+  it("sends active status payload for publish", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/admin/auctions"]}>
+        <AdminAuctionsList />
+      </MemoryRouter>,
+    );
+
+    const publishBtn = await screen.findByRole("button", { name: "Publish" });
     await user.click(publishBtn);
 
     await waitFor(() => {
-      expect(updateAuction).toHaveBeenCalledWith(1, { status: "active" });
+      expect(updateAuction).toHaveBeenCalledWith(2, { status: "active" });
+    });
+    expect(showToast).toHaveBeenCalled();
+  });
+
+  it("shows transition errors with action, current status, and backend message", async () => {
+    const user = userEvent.setup();
+    vi.mocked(updateAuction).mockRejectedValueOnce({
+      isAxiosError: true,
+      response: {
+        data: {
+          error: {
+            code: "invalid_state",
+            message: "cannot start from inactive",
+          },
+        },
+      },
     });
 
-    expect(showToast).toHaveBeenCalled();
+    render(
+      <MemoryRouter initialEntries={["/admin/auctions"]}>
+        <AdminAuctionsList />
+      </MemoryRouter>,
+    );
+
+    const publishBtn = await screen.findByRole("button", { name: "Publish" });
+    await user.click(publishBtn);
+
+    await waitFor(() => {
+      expect(showToast).toHaveBeenCalledWith(
+        "Publish failed from scheduled: invalid_state: cannot start from inactive",
+        "error",
+      );
+    });
   });
 
   it("retires an active auction via the retire action", async () => {
@@ -113,7 +260,7 @@ describe("AdminAuctionsList", () => {
     await user.click(retireBtn);
 
     await waitFor(() => {
-      expect(deleteAuction).toHaveBeenCalledWith(2);
+      expect(deleteAuction).toHaveBeenCalledWith(3);
     });
     expect(showToast).toHaveBeenCalled();
   });
