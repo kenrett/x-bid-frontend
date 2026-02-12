@@ -81,6 +81,7 @@ export const getCsp = ({ env, apiBaseUrl, cableUrl }: CspOptions): string => {
     apiOrigin,
     "https://biddersweet-active-storage-prod.s3.us-west-2.amazonaws.com",
     "https://images.unsplash.com",
+    "https://via.placeholder.com",
     "https://placehold.co",
     "https://robohash.org",
     ...(env === "development" ? devImgSrc : []),
