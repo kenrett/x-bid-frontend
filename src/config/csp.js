@@ -98,6 +98,7 @@ export var getCsp = function (_a) {
         "data:",
         "blob:",
         apiOrigin,
+        "https://biddersweet-active-storage-prod.s3.us-west-2.amazonaws.com",
         "https://images.unsplash.com",
         "https://placehold.co",
         "https://robohash.org",

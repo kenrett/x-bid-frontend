@@ -79,6 +79,7 @@ export const getCsp = ({ env, apiBaseUrl, cableUrl }: CspOptions): string => {
     "data:",
     "blob:",
     apiOrigin,
+    "https://biddersweet-active-storage-prod.s3.us-west-2.amazonaws.com",
     "https://images.unsplash.com",
     "https://placehold.co",
     "https://robohash.org",
