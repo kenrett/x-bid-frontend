@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { AuctionSummary } from "@features/auctions/types/auction";
 
 const clientMocks = vi.hoisted(() => ({
+  get: vi.fn(),
   post: vi.fn(),
   put: vi.fn(),
   delete: vi.fn(),
@@ -9,6 +10,7 @@ const clientMocks = vi.hoisted(() => ({
 
 vi.mock("@api/client", () => ({
   default: {
+    get: clientMocks.get,
     post: clientMocks.post,
     put: clientMocks.put,
     delete: clientMocks.delete,
@@ -25,7 +27,12 @@ vi.mock("@features/auctions/api/status", () => ({
   statusToApi: (s: unknown) => statusMocks.toApi(s),
 }));
 
-import { createAuction, updateAuction, deleteAuction } from "./auctions";
+import {
+  createAuction,
+  deleteAuction,
+  getAdminAuctions,
+  updateAuction,
+} from "./auctions";
 
 describe("api/admin/auctions", () => {
   beforeEach(() => {
@@ -38,6 +45,21 @@ describe("api/admin/auctions", () => {
     status: "active",
     current_price: "12.5",
   } as unknown as AuctionSummary;
+
+  it("fetches admin auctions from the admin endpoint and normalizes status", async () => {
+    clientMocks.get.mockResolvedValue({ data: [sampleAuction] });
+
+    const result = await getAdminAuctions();
+
+    expect(clientMocks.get).toHaveBeenCalledWith("/api/v1/admin/auctions");
+    expect(result).toEqual([
+      {
+        ...sampleAuction,
+        status: "from:active",
+        current_price: 12.5,
+      },
+    ]);
+  });
 
   it("creates an auction, converting status to API and normalizing response", async () => {
     clientMocks.post.mockResolvedValue({ data: { auction: sampleAuction } });

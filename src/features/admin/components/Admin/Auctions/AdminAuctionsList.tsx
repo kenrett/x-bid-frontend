@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { getAuctions } from "@features/auctions/api/auctions";
-import { deleteAuction, updateAuction } from "@features/admin/api/auctions";
+import {
+  deleteAuction,
+  getAdminAuctions,
+  updateAuction,
+} from "@features/admin/api/auctions";
 import { showToast } from "@services/toast";
 import { logAdminAction } from "@features/admin/api/adminAudit";
 import type { AuctionSummary } from "@features/auctions/types/auction";
@@ -82,7 +85,7 @@ export const AdminAuctionsList = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getAuctions();
+      const data = await getAdminAuctions();
       setAuctions(data);
     } catch (err) {
       setError(

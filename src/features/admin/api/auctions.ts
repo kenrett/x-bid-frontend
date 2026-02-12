@@ -3,6 +3,10 @@ import type { AuctionSummary } from "@features/auctions/types/auction";
 import { statusFromApi, statusToApi } from "@features/auctions/api/status";
 import type { ApiJsonResponse } from "@api/openapi-helpers";
 
+type AdminAuctionsListResponse =
+  | ApiJsonResponse<"/api/v1/admin/auctions", "get">
+  | { auctions?: AuctionSummary[] };
+
 type AdminAuctionResponse =
   | ApiJsonResponse<"/api/v1/auctions/{id}", "get">
   | ApiJsonResponse<"/api/v1/auctions", "post">
@@ -15,6 +19,19 @@ const normalizeAuction = (auction: AuctionSummary): AuctionSummary => ({
   status: statusFromApi(auction.status),
   current_price: parseFloat(String(auction.current_price)),
 });
+
+export const getAdminAuctions = async () => {
+  const res = await client.get<AdminAuctionsListResponse>(
+    "/api/v1/admin/auctions",
+  );
+  const payload = res.data;
+  const auctions = Array.isArray(payload)
+    ? payload
+    : Array.isArray((payload as { auctions?: unknown }).auctions)
+      ? ((payload as { auctions: AuctionSummary[] }).auctions ?? [])
+      : [];
+  return auctions.map(normalizeAuction);
+};
 
 export const createAuction = async (
   payload: Partial<AuctionSummary> & { title: string },

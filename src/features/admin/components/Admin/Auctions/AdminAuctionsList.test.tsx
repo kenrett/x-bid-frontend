@@ -3,17 +3,17 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { AdminAuctionsList } from "./AdminAuctionsList";
-import { getAuctions } from "@features/auctions/api/auctions";
-import { updateAuction, deleteAuction } from "@features/admin/api/auctions";
+import {
+  deleteAuction,
+  getAdminAuctions,
+  updateAuction,
+} from "@features/admin/api/auctions";
 import { showToast } from "@services/toast";
 import type { AuctionSummary } from "@features/auctions/types/auction";
 
-vi.mock("@features/auctions/api/auctions", () => ({
-  getAuctions: vi.fn(),
-}));
-
 vi.mock("@features/admin/api/auctions", () => ({
   deleteAuction: vi.fn(),
+  getAdminAuctions: vi.fn(),
   updateAuction: vi.fn(),
 }));
 
@@ -83,7 +83,7 @@ const mockAuctions: AuctionSummary[] = [
 describe("AdminAuctionsList", () => {
   beforeEach(() => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
-    vi.mocked(getAuctions).mockResolvedValue(mockAuctions);
+    vi.mocked(getAdminAuctions).mockResolvedValue(mockAuctions);
     vi.mocked(updateAuction).mockResolvedValue(mockAuctions[0]);
     vi.mocked(deleteAuction).mockResolvedValue(undefined);
   });
