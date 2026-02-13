@@ -25,6 +25,7 @@ describe("AccountRoute", () => {
       {
         user: null,
         isReady: true,
+        reconnecting: false,
         sessionRemainingSeconds: null,
         login: vi.fn(),
         logout: vi.fn(),
@@ -51,6 +52,7 @@ describe("AccountRoute", () => {
           email_verified_at: null,
         },
         isReady: true,
+        reconnecting: false,
         sessionRemainingSeconds: null,
         login: vi.fn(),
         logout: vi.fn(),

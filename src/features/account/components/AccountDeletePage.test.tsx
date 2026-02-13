@@ -41,6 +41,7 @@ describe("AccountDeletePage", () => {
       logout: logoutMock,
       user: null,
       sessionRemainingSeconds: null,
+      reconnecting: false,
       login: vi.fn(),
       updateUser: vi.fn(),
       updateUserBalance: vi.fn(),

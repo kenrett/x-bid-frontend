@@ -24,6 +24,7 @@ describe("useAuth", () => {
       },
       sessionRemainingSeconds: 100,
       isReady: true,
+      reconnecting: false,
       login: vi.fn(),
       logout: vi.fn(),
       updateUser: vi.fn(),

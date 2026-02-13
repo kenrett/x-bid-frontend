@@ -8,6 +8,7 @@ export type AuthContextType = {
   user: User | null;
   sessionRemainingSeconds: number | null;
   isReady: boolean;
+  reconnecting: boolean;
   login: (payload: LoginPayload) => void;
   logout: () => void;
   updateUser: (updater: (current: User) => User) => void;

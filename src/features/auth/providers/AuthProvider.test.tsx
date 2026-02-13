@@ -72,6 +72,9 @@ const TestConsumer = () => {
       <div data-testid="remaining">
         {auth.sessionRemainingSeconds ?? "none"}
       </div>
+      <div data-testid="reconnecting">
+        {auth.reconnecting ? "reconnecting" : "stable"}
+      </div>
       <div data-testid="ready">{auth.isReady ? "ready" : "pending"}</div>
       <button onClick={() => auth.logout()}>logout</button>
       <button
@@ -98,6 +101,11 @@ const waitForReady = async () => {
 };
 
 const mockedClient = vi.mocked(client, true);
+
+const axiosError = (status: number) => ({
+  isAxiosError: true,
+  response: { status },
+});
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -171,7 +179,7 @@ describe("AuthProvider", () => {
     expect(authSessionStore.getSnapshot().user).toBeNull();
   });
 
-  it("logs out and clears in-memory auth state", async () => {
+  it("manual logout always calls logout immediately", async () => {
     render(
       <Wrapper>
         <TestConsumer />
@@ -268,42 +276,199 @@ describe("AuthProvider", () => {
     warnSpy.mockRestore();
   });
 
-  it("logs out when polling receives 401", async () => {
-    mockedClient.get.mockImplementation((url?: string) => {
-      if (typeof url === "string" && url.includes("/api/v1/logged_in")) {
-        return Promise.resolve({ data: { logged_in: false } });
-      }
-      if (
-        typeof url === "string" &&
-        url.includes("/api/v1/session/remaining")
-      ) {
-        return Promise.reject({
-          isAxiosError: true,
-          response: { status: 401 },
-        });
-      }
-      return Promise.resolve({ data: {} });
-    });
+  it("single 401 does not call logout endpoint; retries probe once", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      let remainingCalls = 0;
+      mockedClient.get.mockImplementation((url?: string) => {
+        if (typeof url === "string" && url.includes("/api/v1/logged_in")) {
+          return Promise.resolve({ data: { logged_in: false } });
+        }
+        if (
+          typeof url === "string" &&
+          url.includes("/api/v1/session/remaining")
+        ) {
+          remainingCalls += 1;
+          if (remainingCalls === 1) {
+            return Promise.reject(axiosError(401));
+          }
+          return Promise.resolve({ data: { remaining_seconds: 300 } });
+        }
+        return Promise.resolve({ data: {} });
+      });
 
-    render(
-      <Wrapper>
-        <TestConsumer />
-      </Wrapper>,
-    );
+      render(
+        <Wrapper>
+          <TestConsumer />
+        </Wrapper>,
+      );
 
-    await waitForReady();
-    await waitFor(() => {
-      screen.getByText("login").click();
-    });
+      await waitForReady();
+      await waitFor(() => {
+        screen.getByText("login").click();
+      });
 
-    await waitFor(() => {
-      expect(screen.getByTestId("user")).toHaveTextContent("none");
-    });
+      await waitFor(() => {
+        expect(screen.getByTestId("reconnecting")).toHaveTextContent(
+          "reconnecting",
+        );
+      });
+      expect(mockedClient.delete).not.toHaveBeenCalled();
 
-    expect(toastMocks.showToast).toHaveBeenCalledWith(
-      "Your session expired, please log in again.",
-      "error",
-    );
+      await vi.advanceTimersByTimeAsync(1_500);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("remaining")).toHaveTextContent("300");
+      });
+      expect(remainingCalls).toBe(2);
+      expect(mockedClient.delete).not.toHaveBeenCalled();
+      expect(screen.getByTestId("reconnecting")).toHaveTextContent("stable");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("two consecutive 401s calls logout endpoint", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      let remainingCalls = 0;
+      mockedClient.get.mockImplementation((url?: string) => {
+        if (typeof url === "string" && url.includes("/api/v1/logged_in")) {
+          return Promise.resolve({ data: { logged_in: false } });
+        }
+        if (
+          typeof url === "string" &&
+          url.includes("/api/v1/session/remaining")
+        ) {
+          remainingCalls += 1;
+          return Promise.reject(axiosError(401));
+        }
+        return Promise.resolve({ data: {} });
+      });
+
+      render(
+        <Wrapper>
+          <TestConsumer />
+        </Wrapper>,
+      );
+
+      await waitForReady();
+      await waitFor(() => {
+        screen.getByText("login").click();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId("reconnecting")).toHaveTextContent(
+          "reconnecting",
+        );
+      });
+
+      await vi.advanceTimersByTimeAsync(1_500);
+
+      await waitFor(() => {
+        expect(mockedClient.delete).toHaveBeenCalledWith("/api/v1/logout");
+      });
+      expect(remainingCalls).toBe(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("5xx response triggers reconnect loop and never calls logout", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      let remainingCalls = 0;
+      mockedClient.get.mockImplementation((url?: string) => {
+        if (typeof url === "string" && url.includes("/api/v1/logged_in")) {
+          return Promise.resolve({ data: { logged_in: false } });
+        }
+        if (
+          typeof url === "string" &&
+          url.includes("/api/v1/session/remaining")
+        ) {
+          remainingCalls += 1;
+          return Promise.reject(axiosError(503));
+        }
+        return Promise.resolve({ data: {} });
+      });
+
+      render(
+        <Wrapper>
+          <TestConsumer />
+        </Wrapper>,
+      );
+
+      await waitForReady();
+      await waitFor(() => {
+        screen.getByText("login").click();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId("reconnecting")).toHaveTextContent(
+          "reconnecting",
+        );
+      });
+
+      await vi.advanceTimersByTimeAsync(16_000);
+
+      await waitFor(() => {
+        expect(remainingCalls).toBe(6);
+      });
+      expect(mockedClient.delete).not.toHaveBeenCalled();
+      expect(screen.getByTestId("reconnecting")).toHaveTextContent(
+        "reconnecting",
+      );
+      expect(screen.getByTestId("user")).toHaveTextContent("user@example.com");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("network error triggers reconnect loop and never calls logout", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      let remainingCalls = 0;
+      mockedClient.get.mockImplementation((url?: string) => {
+        if (typeof url === "string" && url.includes("/api/v1/logged_in")) {
+          return Promise.resolve({ data: { logged_in: false } });
+        }
+        if (
+          typeof url === "string" &&
+          url.includes("/api/v1/session/remaining")
+        ) {
+          remainingCalls += 1;
+          return Promise.reject(new Error("network down"));
+        }
+        return Promise.resolve({ data: {} });
+      });
+
+      render(
+        <Wrapper>
+          <TestConsumer />
+        </Wrapper>,
+      );
+
+      await waitForReady();
+      await waitFor(() => {
+        screen.getByText("login").click();
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId("reconnecting")).toHaveTextContent(
+          "reconnecting",
+        );
+      });
+
+      await vi.advanceTimersByTimeAsync(16_000);
+
+      await waitFor(() => {
+        expect(remainingCalls).toBe(6);
+      });
+      expect(mockedClient.delete).not.toHaveBeenCalled();
+      expect(screen.getByTestId("reconnecting")).toHaveTextContent(
+        "reconnecting",
+      );
+      expect(screen.getByTestId("user")).toHaveTextContent("user@example.com");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("merges refreshed user data when session remaining returns user updates", async () => {

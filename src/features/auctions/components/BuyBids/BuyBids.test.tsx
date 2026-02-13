@@ -86,6 +86,7 @@ const createMockAuthReturn = (
   logout: vi.fn(),
   updateUser: vi.fn(),
   sessionRemainingSeconds: user ? 900 : null,
+  reconnecting: false,
   updateUserBalance: vi.fn(),
   isReady: true,
 });
