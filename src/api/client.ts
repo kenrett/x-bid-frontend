@@ -96,6 +96,15 @@ const createRequestId = () => {
 const getErrorReason = (data: unknown): string | undefined => {
   if (!data || typeof data !== "object") return undefined;
   const record = data as Record<string, unknown>;
+  const topLevelReason = record.reason;
+  if (typeof topLevelReason === "string") return topLevelReason;
+
+  const topLevelDetails = record.details;
+  if (topLevelDetails && typeof topLevelDetails === "object") {
+    const detailsReason = (topLevelDetails as Record<string, unknown>).reason;
+    if (typeof detailsReason === "string") return detailsReason;
+  }
+
   const error = record.error;
   if (!error || typeof error !== "object") return undefined;
   const errorRecord = error as Record<string, unknown>;
@@ -105,6 +114,19 @@ const getErrorReason = (data: unknown): string | undefined => {
   if (!details || typeof details !== "object") return undefined;
   const detailsReason = (details as Record<string, unknown>).reason;
   return typeof detailsReason === "string" ? detailsReason : undefined;
+};
+
+const getErrorMessage = (data: unknown): string | undefined => {
+  if (!data || typeof data !== "object") return undefined;
+  const record = data as Record<string, unknown>;
+
+  const topLevelMessage = record.message;
+  if (typeof topLevelMessage === "string") return topLevelMessage;
+
+  const error = record.error;
+  if (!error || typeof error !== "object") return undefined;
+  const nestedMessage = (error as Record<string, unknown>).message;
+  return typeof nestedMessage === "string" ? nestedMessage : undefined;
 };
 
 const getRequestPath = (url: string | undefined): string | undefined => {
@@ -408,9 +430,17 @@ const isUnsafeMethod = (method: string | undefined) => {
 };
 
 const isCsrfFailure = (error: AxiosError): boolean => {
-  const code = extractErrorCode(error.response?.data);
-  if (!code) return false;
-  return code.toLowerCase().includes("csrf");
+  const data = error.response?.data;
+  const code = extractErrorCode(data);
+  if (code && code.toLowerCase().includes("csrf")) return true;
+
+  const reason = getErrorReason(data);
+  if (reason && reason.toLowerCase().includes("csrf")) return true;
+
+  const message = getErrorMessage(data);
+  if (message && message.toLowerCase().includes("csrf")) return true;
+
+  return false;
 };
 
 client.interceptors.request.use(

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { AxiosHeaders, type AxiosError } from "axios";
+import { AxiosError, AxiosHeaders, type AxiosResponse } from "axios";
 import { authSessionStore } from "@features/auth/tokenStore";
 
 const originalEnv = { ...import.meta.env };
@@ -187,5 +187,79 @@ describe("api client", () => {
 
     expect(onUnauthorized).toHaveBeenCalledTimes(1);
     window.removeEventListener("app:unauthorized", onUnauthorized);
+  });
+
+  it("retries login when invalid_token response message indicates CSRF failure", async () => {
+    let csrfFetches = 0;
+    let loginAttempts = 0;
+    const loginTokens: string[] = [];
+
+    const adapter: NonNullable<typeof client.defaults.adapter> = async (
+      config,
+    ) => {
+      const url = typeof config.url === "string" ? config.url : "";
+      const csrfHeaderValue = new AxiosHeaders(config.headers).get(
+        "X-CSRF-Token",
+      );
+      const csrfHeader =
+        typeof csrfHeaderValue === "string" ? csrfHeaderValue : "";
+
+      const makeResponse = (
+        data: unknown,
+        status: number,
+        statusText: string,
+      ): AxiosResponse => ({
+        data,
+        status,
+        statusText,
+        headers: {},
+        config,
+      });
+
+      if (url.includes("/api/v1/csrf")) {
+        csrfFetches += 1;
+        return makeResponse({ csrf_token: `token-${csrfFetches}` }, 200, "OK");
+      }
+
+      if (url.includes("/api/v1/login")) {
+        loginAttempts += 1;
+        loginTokens.push(csrfHeader);
+
+        if (loginAttempts === 1) {
+          const response = makeResponse(
+            {
+              error: {
+                code: "invalid_token",
+                message: "CSRF token verification failed",
+                details: { reason: "csrf_token_verification_failed" },
+              },
+            },
+            401,
+            "Unauthorized",
+          );
+          return Promise.reject(
+            new AxiosError(
+              "Request failed with status code 401",
+              AxiosError.ERR_BAD_REQUEST,
+              config,
+              undefined,
+              response,
+            ),
+          );
+        }
+
+        return makeResponse({ ok: true }, 200, "OK");
+      }
+
+      return makeResponse({}, 200, "OK");
+    };
+
+    client.defaults.adapter = adapter;
+    const response = await client.post("/api/v1/login", {});
+
+    expect(response.status).toBe(200);
+    expect(csrfFetches).toBe(2);
+    expect(loginAttempts).toBe(2);
+    expect(loginTokens).toEqual(["token-1", "token-2"]);
   });
 });
