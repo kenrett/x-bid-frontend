@@ -262,6 +262,45 @@ describe("LoginForm", () => {
     });
   });
 
+  it("shows cookie guidance when login fails due to csrf invalid_token", async () => {
+    mockedClient.post.mockRejectedValueOnce({
+      isAxiosError: true,
+      response: {
+        status: 401,
+        data: {
+          error: {
+            code: "invalid_token",
+            message: "CSRF token verification failed",
+            details: {
+              reason: "csrf_token_verification_failed",
+            },
+          },
+        },
+      },
+    });
+
+    const user = userEvent.setup();
+    renderLogin();
+
+    await user.type(
+      screen.getByLabelText(/email address/i),
+      "test@example.com",
+    );
+    await user.type(screen.getByLabelText(/password/i), "password123");
+    await user.click(screen.getByRole("button", { name: /sign in/i }));
+
+    expect(
+      await screen.findByText(
+        /we couldn't verify your secure session\. refresh and try again\./i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /clear cookies for biddersweet\.app and api\.biddersweet\.app/i,
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("links validation errors via aria-describedby and focuses the first invalid field", async () => {
     mockedClient.post.mockRejectedValueOnce({
       isAxiosError: true,

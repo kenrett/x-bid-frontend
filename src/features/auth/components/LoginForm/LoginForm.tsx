@@ -15,6 +15,15 @@ import {
 const isUnexpectedAuthResponseError = (err: unknown) =>
   err instanceof Error && err.message.startsWith("Unexpected auth response:");
 
+const isLikelyCsrfAuthFailure = (code: string, message: string): boolean => {
+  const normalizedCode = code.toLowerCase();
+  const normalizedMessage = message.toLowerCase();
+  if (normalizedCode.includes("csrf")) return true;
+  return (
+    normalizedCode === "invalid_token" && normalizedMessage.includes("csrf")
+  );
+};
+
 export const LoginForm = () => {
   const [email_address, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -144,6 +153,12 @@ export const LoginForm = () => {
       }
 
       if (parsed.status === 401) {
+        if (isLikelyCsrfAuthFailure(parsed.code, parsed.message)) {
+          setError(
+            "We couldn't verify your secure session. Refresh and try again. If it keeps happening, clear cookies for biddersweet.app and api.biddersweet.app.",
+          );
+          return;
+        }
         setError("Invalid email or password. Please try again.");
       } else if (parsed.status === 422) {
         setError("Please check the highlighted fields and try again.");
