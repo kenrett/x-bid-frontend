@@ -13,6 +13,7 @@ import {
   UNEXPECTED_RESPONSE_MESSAGE,
   UnexpectedResponseError,
 } from "@services/unexpectedResponse";
+import { StorefrontBadge } from "@components/StorefrontBadge";
 
 const getBackendErrorMessage = (err: unknown): string | null => {
   if (!axios.isAxiosError(err)) return null;
@@ -47,6 +48,18 @@ const showTransitionError = (
 };
 
 export const AdminAuctionsList = () => {
+  type StorefrontFilter = NonNullable<AuctionSummary["storefront_key"]> | "all";
+
+  const storefrontFilterOptions: Array<{
+    value: StorefrontFilter;
+    label: string;
+  }> = [
+    { value: "all", label: "All" },
+    { value: "main", label: "Main" },
+    { value: "afterdark", label: "After Dark" },
+    { value: "marketplace", label: "Marketplace" },
+  ];
+
   const [auctions, setAuctions] = useState<AuctionSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +69,8 @@ export const AdminAuctionsList = () => {
   const [statusFilter, setStatusFilter] = useState<
     AuctionSummary["status"] | "all"
   >("all");
+  const [storefrontFilter, setStorefrontFilter] =
+    useState<StorefrontFilter>("all");
   const [startAfter, setStartAfter] = useState("");
   const [endBefore, setEndBefore] = useState("");
   const [sortKey, setSortKey] = useState<
@@ -66,6 +81,7 @@ export const AdminAuctionsList = () => {
   const resetFilters = () => {
     setSearch("");
     setStatusFilter("all");
+    setStorefrontFilter("all");
     setStartAfter("");
     setEndBefore("");
     setSortKey("start_date");
@@ -85,7 +101,9 @@ export const AdminAuctionsList = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getAdminAuctions();
+      const storefrontKey =
+        storefrontFilter === "all" ? undefined : storefrontFilter;
+      const data = await getAdminAuctions({ storefront_key: storefrontKey });
       setAuctions(data);
     } catch (err) {
       setError(
@@ -97,7 +115,7 @@ export const AdminAuctionsList = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [storefrontFilter]);
 
   useEffect(() => {
     void fetchAuctions();
@@ -294,7 +312,7 @@ export const AdminAuctionsList = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
           <input
             type="search"
             value={search}
@@ -302,6 +320,22 @@ export const AdminAuctionsList = () => {
             placeholder="Search title"
             className="rounded-lg bg-black/20 border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
           />
+          <div className="flex flex-wrap gap-2">
+            {storefrontFilterOptions.map((storefront) => (
+              <button
+                key={storefront.value}
+                type="button"
+                onClick={() => setStorefrontFilter(storefront.value)}
+                className={`text-sm px-3 py-2 rounded-lg border transition-colors ${
+                  storefrontFilter === storefront.value
+                    ? "bg-pink-600 border-pink-400 text-[color:var(--sf-text)]"
+                    : "bg-[color:var(--sf-surface)] border-[color:var(--sf-border)] text-[color:var(--sf-mutedText)] hover:bg-white/10"
+                }`}
+              >
+                {storefront.label}
+              </button>
+            ))}
+          </div>
           <div className="flex flex-wrap gap-2">
             {(
               [
@@ -381,6 +415,9 @@ export const AdminAuctionsList = () => {
                     Title
                   </th>
                   <th className="px-4 py-3 text-left text-[color:var(--sf-mutedText)] uppercase text-xs tracking-wide">
+                    Storefront
+                  </th>
+                  <th className="px-4 py-3 text-left text-[color:var(--sf-mutedText)] uppercase text-xs tracking-wide">
                     Status
                   </th>
                   <th className="px-4 py-3">
@@ -438,6 +475,31 @@ export const AdminAuctionsList = () => {
                   <tr key={auction.id} className="hover:bg-white/[0.04]">
                     <td className="px-4 py-3 font-semibold text-[color:var(--sf-text)]">
                       {auction.title}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-2">
+                        {auction.storefront_key ? (
+                          <StorefrontBadge
+                            storefrontKey={auction.storefront_key}
+                          />
+                        ) : (
+                          <span className="text-xs text-[color:var(--sf-mutedText)]">
+                            Unknown storefront
+                          </span>
+                        )}
+                        <div className="flex flex-wrap gap-1">
+                          <span className="text-[10px] uppercase tracking-wide rounded-full border border-[color:var(--sf-border)] px-2 py-0.5 text-[color:var(--sf-mutedText)]">
+                            {auction.is_marketplace
+                              ? "Marketplace inventory"
+                              : "Standard inventory"}
+                          </span>
+                          <span className="text-[10px] uppercase tracking-wide rounded-full border border-[color:var(--sf-border)] px-2 py-0.5 text-[color:var(--sf-mutedText)]">
+                            {auction.is_adult
+                              ? "Adult catalog"
+                              : "General catalog"}
+                          </span>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-4 py-3">{statusBadge(auction.status)}</td>
                     <td className="px-4 py-3 text-[color:var(--sf-mutedText)]">

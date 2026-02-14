@@ -1976,10 +1976,19 @@ export interface components {
       id: number;
       /** @description Stable upload path (`/api/v1/uploads/:signed_id`) for authorized uploads; legacy external URLs may appear for older records. */
       image_url?: string | null;
+      /** @description Whether this auction is restricted to adult-catalog storefront access. */
+      is_adult?: boolean;
+      /** @description Whether this auction is restricted to marketplace storefront listings. */
+      is_marketplace?: boolean;
       /** Format: date-time */
       start_date: string;
       /** @enum {string} */
       status: "inactive" | "scheduled" | "active" | "complete" | "cancelled";
+      /**
+       * @description Storefront partition this auction belongs to.
+       * @enum {string}
+       */
+      storefront_key?: "main" | "afterdark" | "marketplace";
       title: string;
       winning_user_id?: number | null;
       winning_user_name?: string | null;
@@ -2023,6 +2032,11 @@ export interface components {
           | "complete"
           | "cancelled"
           | null;
+        /**
+         * @description Storefront assignment for this auction.
+         * @enum {string|null}
+         */
+        storefront_key?: "main" | "afterdark" | "marketplace" | null;
         title: string;
       };
     };
@@ -3092,6 +3106,8 @@ export interface components {
     c96cce3d59cd4fa44833d2fd8dcb937c: string;
     /** @description Id of existing upload. */
     dd422988154b00c223c3f630b9ca2790: string;
+    /** @description Filter by storefront key (main, afterdark, marketplace) */
+    e0d944d02d590b58a7425c159e5428f2: string;
     /** @description ID of the bid pack to purchase */
     e47fcdce1e2038e964734571e689bfeb: number;
     /** @description Search by title or description */
@@ -3564,6 +3580,8 @@ export interface operations {
         sort?: components["parameters"]["3351e2e3c00563360e4e4fd54846fd80"];
         /** @description Sort direction (asc or desc) */
         direction?: components["parameters"]["2f283202ff70ebb99d8bc91461022917"];
+        /** @description Filter by storefront key (main, afterdark, marketplace) */
+        storefront_key?: components["parameters"]["e0d944d02d590b58a7425c159e5428f2"];
         /** @description Page number for pagination */
         page?: components["parameters"]["0abd227a13448d9299e1c1de37060965"];
         /** @description Number of records per page */

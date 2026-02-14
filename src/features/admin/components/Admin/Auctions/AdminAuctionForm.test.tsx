@@ -38,6 +38,9 @@ describe("AdminAuctionForm", () => {
     fireEvent.change(screen.getByLabelText(/Status/i), {
       target: { value: "active" },
     });
+    fireEvent.change(screen.getByLabelText(/Storefront/i), {
+      target: { value: "marketplace" },
+    });
     fireEvent.change(screen.getByLabelText(/Current Price/i), {
       target: { value: "12.50" },
     });
@@ -50,6 +53,7 @@ describe("AdminAuctionForm", () => {
     expect(onSubmit).toHaveBeenCalledWith({
       title: "My Auction",
       status: "active",
+      storefront_key: "marketplace",
       current_price: 12.5,
     });
   });
@@ -118,6 +122,7 @@ describe("AdminAuctionForm", () => {
         start_date: "2024-01-01T09:15:00-05:00",
         end_time: "2024-01-02T10:30:00-05:00",
         status: "scheduled",
+        storefront_key: "afterdark",
         current_price: 5,
       },
     });
@@ -136,6 +141,7 @@ describe("AdminAuctionForm", () => {
       format(parseISO("2024-01-02T10:30:00-05:00"), "HH:mm"),
     );
     expect(screen.getByDisplayValue("scheduled")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Storefront/i)).toHaveValue("afterdark");
     expect(screen.getByDisplayValue("5")).toBeInTheDocument();
   });
 });

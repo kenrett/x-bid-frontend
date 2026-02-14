@@ -33,6 +33,35 @@ type OverrideResponses = {
           bids?: Bid[];
         };
   };
+  "/api/v1/admin/auctions": {
+    get:
+      | AuctionSummary[]
+      | {
+          auctions?: AuctionSummary[];
+        };
+    post:
+      | AuctionSummary
+      | {
+          auction?: AuctionSummary;
+        };
+  };
+  "/api/v1/admin/auctions/{id}": {
+    get:
+      | AuctionSummary
+      | {
+          auction?: AuctionSummary;
+        };
+    put:
+      | AuctionSummary
+      | {
+          auction?: AuctionSummary;
+        };
+    patch:
+      | AuctionSummary
+      | {
+          auction?: AuctionSummary;
+        };
+  };
   "/api/v1/auctions/{auction_id}/bid_history": {
     get: {
       auction?: {

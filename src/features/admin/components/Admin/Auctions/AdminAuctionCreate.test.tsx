@@ -39,6 +39,9 @@ describe("AdminAuctionCreate", () => {
     fireEvent.change(screen.getByLabelText(/Title/i), {
       target: { value: "New Auction" },
     });
+    fireEvent.change(screen.getByLabelText(/Storefront/i), {
+      target: { value: "marketplace" },
+    });
     const form = container.querySelector("form");
     if (!form) throw new Error("Form not found");
     form.noValidate = true;
@@ -47,7 +50,10 @@ describe("AdminAuctionCreate", () => {
     await screen.findByText(/Create auction/i);
 
     expect(mockCreateAuction).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "New Auction" }),
+      expect.objectContaining({
+        title: "New Auction",
+        storefront_key: "marketplace",
+      }),
     );
     expect(mockLogAdminAction).toHaveBeenCalledWith("auction.create", {
       title: "New Auction",

@@ -29,6 +29,7 @@ vi.mock("@features/auctions/api/status", () => ({
 import {
   createAuction,
   deleteAuction,
+  getAdminAuction,
   getAdminAuctions,
   updateAuction,
 } from "./auctions";
@@ -43,6 +44,9 @@ describe("api/admin/auctions", () => {
     title: "Auction",
     status: "active",
     current_price: "12.5",
+    storefront_key: "main",
+    is_adult: false,
+    is_marketplace: false,
   };
 
   const normalizedAuction = {
@@ -54,6 +58,9 @@ describe("api/admin/auctions", () => {
     status: "from:active",
     start_date: "",
     end_time: "",
+    storefront_key: "main",
+    is_adult: false,
+    is_marketplace: false,
     highest_bidder_id: null,
     winning_user_name: null,
     bid_count: undefined,
@@ -68,15 +75,39 @@ describe("api/admin/auctions", () => {
     expect(result).toEqual([normalizedAuction]);
   });
 
+  it("passes storefront_key query param when filtering admin auctions", async () => {
+    clientMocks.get.mockResolvedValue({ data: [sampleAuction] });
+
+    await getAdminAuctions({ storefront_key: "marketplace" });
+
+    expect(clientMocks.get).toHaveBeenCalledWith("/api/v1/admin/auctions", {
+      params: { storefront_key: "marketplace" },
+    });
+  });
+
+  it("fetches a single admin auction by id", async () => {
+    clientMocks.get.mockResolvedValue({ data: { auction: sampleAuction } });
+
+    const result = await getAdminAuction(8);
+
+    expect(clientMocks.get).toHaveBeenCalledWith("/api/v1/admin/auctions/8");
+    expect(result).toEqual(normalizedAuction);
+  });
+
   it("creates an auction, converting status to API and normalizing response", async () => {
     clientMocks.post.mockResolvedValue({ data: { auction: sampleAuction } });
 
-    const result = await createAuction({ title: "Auction", status: "active" });
+    const result = await createAuction({
+      title: "Auction",
+      status: "active",
+      storefront_key: "main",
+    });
 
     expect(clientMocks.post).toHaveBeenCalledWith("/api/v1/admin/auctions", {
       auction: {
         title: "Auction",
         status: "to:active",
+        storefront_key: "main",
       },
     });
     expect(statusMocks.fromApi).toHaveBeenCalledWith("active");
@@ -97,17 +128,35 @@ describe("api/admin/auctions", () => {
   });
 
   it("updates an auction, converting status to API and normalizing response", async () => {
-    clientMocks.put.mockResolvedValue({ data: sampleAuction });
+    clientMocks.put.mockResolvedValue({
+      data: {
+        ...sampleAuction,
+        storefront_key: "marketplace",
+        is_marketplace: true,
+        is_adult: false,
+      },
+    });
 
-    const result = await updateAuction(5, { status: "active" });
+    const result = await updateAuction(5, {
+      status: "active",
+      storefront_key: "marketplace",
+      is_adult: true,
+      is_marketplace: false,
+    });
 
     expect(clientMocks.put).toHaveBeenCalledWith("/api/v1/admin/auctions/5", {
       auction: {
         status: "to:active",
+        storefront_key: "marketplace",
+        is_adult: true,
+        is_marketplace: false,
       },
     });
     expect(result.status).toBe("from:active");
     expect(result.current_price).toBe(12.5);
+    expect(result.storefront_key).toBe("marketplace");
+    expect(result.is_marketplace).toBe(true);
+    expect(result.is_adult).toBe(false);
   });
 
   it("updates an auction without forcing status when omitted", async () => {

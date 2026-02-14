@@ -26,6 +26,7 @@ type FormState = {
   start_date: string | null;
   end_time: string | null;
   status: AuctionStatus | "";
+  storefront_key: NonNullable<AuctionSummary["storefront_key"]> | "";
   current_price: string;
 };
 
@@ -34,6 +35,15 @@ const STATUS_OPTIONS: AuctionStatus[] = [
   "scheduled",
   "active",
   "complete",
+];
+
+const STOREFRONT_OPTIONS: Array<{
+  value: NonNullable<AuctionSummary["storefront_key"]>;
+  label: string;
+}> = [
+  { value: "main", label: "Main" },
+  { value: "afterdark", label: "After Dark" },
+  { value: "marketplace", label: "Marketplace" },
 ];
 
 const AUCTION_IMAGE_CONSTRAINTS: UploadConstraints = {
@@ -49,6 +59,7 @@ const toFormState = (values?: Partial<AuctionSummary>): FormState => ({
   start_date: values?.start_date ?? null,
   end_time: values?.end_time ?? null,
   status: values?.status ?? "",
+  storefront_key: values?.storefront_key ?? "",
   current_price:
     values?.current_price !== undefined && values?.current_price !== null
       ? String(values.current_price)
@@ -85,6 +96,9 @@ const compactPayload = (state: FormState): FormPayload => {
 
   if (state.status) {
     payload.status = state.status;
+  }
+  if (state.storefront_key) {
+    payload.storefront_key = state.storefront_key;
   }
 
   const price = state.current_price.trim();
@@ -169,6 +183,7 @@ export const AdminAuctionForm = ({
   };
 
   const statusOptions = useMemo(() => STATUS_OPTIONS, []);
+  const storefrontOptions = useMemo(() => STOREFRONT_OPTIONS, []);
   const scheduleCheck = validateSchedule(
     formState.start_date,
     formState.end_time,
@@ -244,6 +259,22 @@ export const AdminAuctionForm = ({
             {statusOptions.map((status) => (
               <option key={status} value={status}>
                 {status}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-2 text-sm text-[color:var(--sf-mutedText)]">
+          <span className="font-semibold">Storefront</span>
+          <select
+            value={formState.storefront_key}
+            onChange={handleChange("storefront_key")}
+            className="rounded-lg bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
+          >
+            <option value="">Select storefront</option>
+            {storefrontOptions.map((storefront) => (
+              <option key={storefront.value} value={storefront.value}>
+                {storefront.label}
               </option>
             ))}
           </select>

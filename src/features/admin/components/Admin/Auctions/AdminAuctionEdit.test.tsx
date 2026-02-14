@@ -9,10 +9,8 @@ const mockShowToast = vi.fn();
 const mockLogAdminAction = vi.fn();
 const mockNavigate = vi.fn();
 
-vi.mock("@features/auctions/api/auctions", () => ({
-  getAuction: (...args: unknown[]) => mockGetAuction(...args),
-}));
 vi.mock("@features/admin/api/auctions", () => ({
+  getAdminAuction: (...args: unknown[]) => mockGetAuction(...args),
   updateAuction: (...args: unknown[]) => mockUpdateAuction(...args),
 }));
 vi.mock("@services/toast", () => ({
@@ -56,6 +54,9 @@ describe("AdminAuctionEdit", () => {
       title: "Auction",
       status: "inactive",
       current_price: 10,
+      storefront_key: "afterdark",
+      is_adult: true,
+      is_marketplace: false,
     });
     mockUpdateAuction.mockResolvedValue({});
 
@@ -65,6 +66,10 @@ describe("AdminAuctionEdit", () => {
     fireEvent.change(screen.getByLabelText(/Title/i), {
       target: { value: "Updated Title" },
     });
+    expect(screen.getByLabelText(/Storefront/i)).toHaveValue("afterdark");
+    fireEvent.change(screen.getByLabelText(/Storefront/i), {
+      target: { value: "marketplace" },
+    });
     const form = container.querySelector("form");
     if (!form) throw new Error("Form not found");
     form.noValidate = true;
@@ -73,7 +78,10 @@ describe("AdminAuctionEdit", () => {
     await waitFor(() => {
       expect(mockUpdateAuction).toHaveBeenCalledWith(
         5,
-        expect.objectContaining({ title: "Updated Title" }),
+        expect.objectContaining({
+          title: "Updated Title",
+          storefront_key: "marketplace",
+        }),
       );
     });
     expect(mockLogAdminAction).toHaveBeenCalledWith("auction.update", {

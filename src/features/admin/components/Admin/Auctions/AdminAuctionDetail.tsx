@@ -6,6 +6,7 @@ import { ErrorScreen } from "@components/ErrorScreen";
 import { LoadingScreen } from "@components/LoadingScreen";
 import { showToast } from "@services/toast";
 import { logAdminAction } from "@features/admin/api/adminAudit";
+import { StorefrontBadge } from "@components/StorefrontBadge";
 
 export const AdminAuctionDetail = () => {
   const { id } = useParams();
@@ -77,6 +78,24 @@ export const AdminAuctionDetail = () => {
         <InfoCard label="End time" value={auction.end_time || "—"} />
         <InfoCard label="Start time" value={auction.start_date || "—"} />
         <InfoCard label="Auction ID" value={auction.id} />
+        <InfoCard
+          label="Storefront"
+          value={
+            auction.storefront_key ? (
+              <StorefrontBadge storefrontKey={auction.storefront_key} />
+            ) : (
+              "—"
+            )
+          }
+        />
+        <InfoCard
+          label="Adult Catalog"
+          value={auction.is_adult ? "Yes" : "No"}
+        />
+        <InfoCard
+          label="Marketplace Inventory"
+          value={auction.is_marketplace ? "Yes" : "No"}
+        />
         <InfoCard
           label="Highest bidder ID"
           value={auction.highest_bidder_id ?? "—"}

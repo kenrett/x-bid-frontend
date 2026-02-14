@@ -35,6 +35,9 @@ const mockAuctions: AuctionSummary[] = [
     status: "inactive" as const,
     start_date: "2024-01-01T00:00:00Z",
     end_time: "2024-01-02T00:00:00Z",
+    storefront_key: "main" as const,
+    is_adult: false,
+    is_marketplace: false,
     highest_bidder_id: 0,
     winning_user_name: null,
     bid_count: 0,
@@ -48,6 +51,9 @@ const mockAuctions: AuctionSummary[] = [
     status: "scheduled" as const,
     start_date: "2024-01-15T00:00:00Z",
     end_time: "2024-01-16T00:00:00Z",
+    storefront_key: "afterdark" as const,
+    is_adult: true,
+    is_marketplace: false,
     highest_bidder_id: null,
     winning_user_name: null,
     bid_count: 0,
@@ -61,6 +67,9 @@ const mockAuctions: AuctionSummary[] = [
     status: "active" as const,
     start_date: "2024-02-01T00:00:00Z",
     end_time: "2024-02-02T00:00:00Z",
+    storefront_key: "marketplace" as const,
+    is_adult: false,
+    is_marketplace: true,
     highest_bidder_id: 10,
     winning_user_name: "TopBidder",
     bid_count: 3,
@@ -74,6 +83,9 @@ const mockAuctions: AuctionSummary[] = [
     status: "complete" as const,
     start_date: "2024-03-01T00:00:00Z",
     end_time: "2024-03-02T00:00:00Z",
+    storefront_key: "main" as const,
+    is_adult: false,
+    is_marketplace: false,
     highest_bidder_id: 20,
     winning_user_name: "Winner",
     bid_count: 8,
@@ -103,9 +115,34 @@ describe("AdminAuctionsList", () => {
     expect(await screen.findByText("Vintage Guitar")).toBeInTheDocument();
     expect(screen.getByText("Signed Jersey")).toBeInTheDocument();
     expect(screen.getByText("TopBidder")).toBeInTheDocument();
+    expect(screen.getByText("Marketplace inventory")).toBeInTheDocument();
+    expect(screen.getByText("Adult catalog")).toBeInTheDocument();
 
     expect(screen.getAllByText("View")).toHaveLength(4);
     expect(screen.getAllByText("Edit")).toHaveLength(4);
+  });
+
+  it("uses storefront_key query param when storefront filter changes", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/admin/auctions"]}>
+        <AdminAuctionsList />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText("Vintage Guitar");
+    expect(getAdminAuctions).toHaveBeenCalledWith({
+      storefront_key: undefined,
+    });
+
+    await user.click(screen.getByRole("button", { name: "After Dark" }));
+
+    await waitFor(() => {
+      expect(getAdminAuctions).toHaveBeenLastCalledWith({
+        storefront_key: "afterdark",
+      });
+    });
   });
 
   it("shows status actions only for valid backend transitions", async () => {

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAuction } from "@features/auctions/api/auctions";
-import { updateAuction } from "@features/admin/api/auctions";
+import { getAdminAuction, updateAuction } from "@features/admin/api/auctions";
 import { showToast } from "@services/toast";
 import { logAdminAction } from "@features/admin/api/adminAudit";
 import type { AuctionSummary } from "@features/auctions/types/auction";
@@ -29,7 +28,7 @@ export const AdminAuctionEdit = () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await getAuction(auctionId);
+        const data = await getAdminAuction(auctionId);
         if (data.status === "active") {
           const confirmed = window.confirm(
             "This auction is active. Editing may affect live bidders. Continue?",
@@ -65,7 +64,8 @@ export const AdminAuctionEdit = () => {
     }
     try {
       setIsSubmitting(true);
-      await updateAuction(auctionId, payload);
+      const updatedAuction = await updateAuction(auctionId, payload);
+      setAuction(updatedAuction);
       logAdminAction("auction.update", { id: auctionId, title: payload.title });
       showToast("Auction updated", "success");
       navigate("/admin/auctions");

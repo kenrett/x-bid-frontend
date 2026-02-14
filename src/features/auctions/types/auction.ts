@@ -1,3 +1,4 @@
+import type { StorefrontKey } from "../../../storefront/getStorefrontKey";
 export type AuctionStatus =
   | "inactive"
   | "active"
@@ -15,6 +16,9 @@ export interface AuctionSummary {
   status: AuctionStatus;
   start_date: string;
   end_time: string;
+  storefront_key?: StorefrontKey | null;
+  is_adult?: boolean;
+  is_marketplace?: boolean;
   highest_bidder_id: number | null;
   winning_user_name?: string | null;
   bid_count?: number;
