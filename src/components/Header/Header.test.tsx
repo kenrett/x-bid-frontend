@@ -237,12 +237,12 @@ describe("Header Component", () => {
       ).toHaveAttribute("aria-expanded", "true");
     });
 
-    it("cycles global color mode and updates root attributes", async () => {
+    it("selects global color mode from menu and updates root attributes", async () => {
       const user = userEvent.setup();
       renderComponent();
 
       const modeButton = screen.getByRole("button", {
-        name: /color mode system/i,
+        name: /theme: system\. change theme\./i,
       });
       expect(document.documentElement.dataset.colorModePreference).toBe(
         "system",
@@ -250,6 +250,7 @@ describe("Header Component", () => {
       expect(document.documentElement.dataset.colorMode).toBe("light");
 
       await user.click(modeButton);
+      await user.click(screen.getByRole("menuitemradio", { name: /light/i }));
       expect(document.documentElement.dataset.colorModePreference).toBe(
         "light",
       );
@@ -257,6 +258,7 @@ describe("Header Component", () => {
       expect(window.localStorage.getItem("xbid-color-mode")).toBe("light");
 
       await user.click(modeButton);
+      await user.click(screen.getByRole("menuitemradio", { name: /dark/i }));
       expect(document.documentElement.dataset.colorModePreference).toBe("dark");
       expect(document.documentElement.dataset.colorMode).toBe("dark");
       expect(window.localStorage.getItem("xbid-color-mode")).toBe("dark");

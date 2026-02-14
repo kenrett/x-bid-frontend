@@ -7,11 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Skeleton } from "../Skeleton";
 import { useStorefront } from "../../storefront/useStorefront";
 import { getAppMode } from "../../appMode/appMode";
-import { useColorMode } from "../../theme/ColorModeProvider";
-import {
-  getColorModeLabel,
-  getNextColorModePreference,
-} from "../../theme/colorMode";
+import { ThemeToggleBulb } from "./ThemeToggleBulb";
 
 const STRINGS = {
   GREETING: "Hello",
@@ -82,9 +78,6 @@ const variants = {
   signInLink: cva(
     "inline-flex items-center justify-center text-sm bg-[color:var(--sf-primary)] text-[color:var(--sf-onPrimary)] px-4 py-2 rounded-[var(--sf-radius)] font-semibold shadow-[var(--sf-shadow)] transition hover:brightness-95 active:brightness-90 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]",
   ),
-  colorModeButton: cva(
-    "inline-flex items-center justify-center rounded-[var(--sf-radius)] border border-[color:var(--sf-border)] bg-[color:var(--sf-surface)] px-3 py-2 text-sm font-semibold text-[color:var(--sf-text)] transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]",
-  ),
 };
 
 const NAV_ITEMS = [
@@ -96,7 +89,6 @@ const NAV_ITEMS = [
 
 export function Header() {
   const { config: storefront } = useStorefront();
-  const { mode, modeLabel, setMode } = useColorMode();
   const appMode = getAppMode();
   const { user, logout, isReady } = useAuth();
   const isSuperAdmin = Boolean(user?.is_superuser);
@@ -139,8 +131,6 @@ export function Header() {
   );
 
   const location = useLocation();
-  const nextMode = getNextColorModePreference(mode);
-  const nextModeLabel = getColorModeLabel(nextMode);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -250,14 +240,7 @@ export function Header() {
               </NavItem>
             ))}
             <li>
-              <button
-                type="button"
-                className={variants.colorModeButton()}
-                onClick={() => setMode(nextMode)}
-                aria-label={`Color mode ${modeLabel}. Activate to switch to ${nextModeLabel}.`}
-              >
-                Theme: {modeLabel}
-              </button>
+              <ThemeToggleBulb />
             </li>
             {user ? (
               <>
