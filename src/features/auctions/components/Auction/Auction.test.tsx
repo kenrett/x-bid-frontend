@@ -3,6 +3,24 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { Auction } from "./Auction";
 
+const DEFAULT_API_ORIGIN = "https://api.biddersweet.app";
+const getExpectedApiOrigin = () => {
+  const rawApiBase =
+    typeof import.meta.env.VITE_API_BASE_URL === "string"
+      ? import.meta.env.VITE_API_BASE_URL.trim()
+      : "";
+
+  if (!rawApiBase || rawApiBase === "undefined" || rawApiBase === "null") {
+    return DEFAULT_API_ORIGIN;
+  }
+
+  try {
+    return new URL(rawApiBase).origin;
+  } catch {
+    return DEFAULT_API_ORIGIN;
+  }
+};
+
 const mockAuctionProps = {
   id: 101,
   title: "Vintage Space Poster",
@@ -39,7 +57,7 @@ describe("Auction Component", () => {
     expect(image).toHaveAttribute("src", "https://example.com/poster.jpg");
   });
 
-  it("normalizes api upload URLs to same-origin paths", () => {
+  it("keeps absolute API upload URLs unchanged", () => {
     render(
       <Auction
         {...mockAuctionProps}
@@ -48,10 +66,14 @@ describe("Auction Component", () => {
     );
 
     const image = screen.getByRole("img", { name: /Vintage Space Poster/i });
-    expect(image).toHaveAttribute("src", "/api/v1/uploads/signed-id-1");
+    expect(image).toHaveAttribute(
+      "src",
+      "https://api.biddersweet.app/api/v1/uploads/signed-id-1",
+    );
   });
 
-  it("keeps stable same-origin upload paths unchanged", () => {
+  it("promotes relative upload paths to canonical API-origin URLs", () => {
+    const expectedOrigin = getExpectedApiOrigin();
     render(
       <Auction
         {...mockAuctionProps}
@@ -62,7 +84,7 @@ describe("Auction Component", () => {
     const image = screen.getByRole("img", { name: /Vintage Space Poster/i });
     expect(image).toHaveAttribute(
       "src",
-      "/api/v1/uploads/signed-id-1?disposition=inline",
+      `${expectedOrigin}/api/v1/uploads/signed-id-1?disposition=inline`,
     );
   });
 

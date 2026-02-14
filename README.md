@@ -151,26 +151,21 @@ If you need to force a storefront in dev/tests, set `VITE_STOREFRONT_KEY` to `ma
 
 ### Upload Asset Delivery & Caching
 
-- Upload asset URLs are normalized to same-origin paths (`/api/v1/uploads/:signed_id`) in `src/utils/uploadAssetUrl.ts`.
-- In production, Vercel rewrites `/api/v1/uploads/:path*` to `https://api.biddersweet.app/api/v1/uploads/:path*` (see `vercel.json`). This avoids direct cross-origin image fetches from the browser and reduces CORP/CORS edge cases.
-- Frontend cache policy for rewritten upload asset responses is set in `vercel.json`:
-  - `Cache-Control: public, max-age=31536000, immutable`
-- This policy assumes backend upload URLs are immutable (a changed asset gets a new URL/signed id).
-- If backend cannot guarantee immutable upload URLs, change the Vercel header to:
-  - `Cache-Control: public, max-age=300, s-maxage=86400, stale-while-revalidate=604800`
-  - Document why immutable caching is unsafe before switching.
+- Upload asset URLs are normalized to canonical API-origin URLs in `src/utils/uploadAssetUrl.ts`.
+- Absolute URLs (API, S3, or external) are preserved as-is.
+- Relative upload paths (`/api/v1/uploads/:signed_id`) are promoted to absolute API URLs using `VITE_API_BASE_URL` when configured, otherwise `https://api.biddersweet.app`.
+- Storefront origins (`www`, `afterdark`, `marketplace`) do not proxy upload assets through same-origin rewrites.
+- Caching for upload assets is controlled by the API/S3 response headers.
 
 Verification:
 
 ```sh
-curl -I https://www.biddersweet.app/api/v1/uploads/<signed_id>
 curl -I https://api.biddersweet.app/api/v1/uploads/<signed_id>
 ```
 
-- Confirm `Cache-Control` on the frontend origin (`www.biddersweet.app`) matches the expected policy.
 - In browser DevTools (Network tab), open an upload image request and verify:
-  - request URL is same-origin `/api/v1/uploads/...`
-  - response includes expected `Cache-Control`
+  - request URL is absolute `https://api.biddersweet.app/api/v1/uploads/...` (or the configured API origin)
+  - response/cache headers come from the API redirect/S3 object response
   - subsequent navigations show cache hits as expected (memory/disk cache depending on browser behavior).
 
 ### Maintenance Mode

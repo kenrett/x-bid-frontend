@@ -223,6 +223,9 @@ describe("FileUploadField", () => {
     await user.upload(input, file);
 
     const preview = await screen.findByAltText("Uploaded preview");
-    expect(preview).toHaveAttribute("src", "/api/v1/uploads/signed-preview-id");
+    expect(preview).toHaveAttribute(
+      "src",
+      "https://api.biddersweet.app/api/v1/uploads/signed-preview-id",
+    );
   });
 });

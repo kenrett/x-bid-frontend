@@ -1,30 +1,37 @@
 const UPLOAD_PATH_PREFIX = "/api/v1/uploads/";
-const DEFAULT_API_HOST = "api.biddersweet.app";
+const DEFAULT_API_ORIGIN = "https://api.biddersweet.app";
 
-const parseHost = (rawUrl: string | undefined): string | undefined => {
-  if (!rawUrl) return undefined;
+const normalizeApiOrigin = (value: string | undefined): string | undefined => {
+  if (!value) return undefined;
+
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === "undefined" || trimmed === "null") {
+    return undefined;
+  }
+
   try {
-    return new URL(rawUrl).host;
+    const parsed = new URL(trimmed);
+    if (!/^https?:$/i.test(parsed.protocol)) return undefined;
+    return parsed.origin;
   } catch {
     return undefined;
   }
 };
 
-const getConfiguredApiHost = (): string | undefined => {
-  const rawBase =
+const getConfiguredApiOrigin = (): string | undefined =>
+  normalizeApiOrigin(
     typeof import.meta.env.VITE_API_BASE_URL === "string"
-      ? import.meta.env.VITE_API_BASE_URL.trim()
-      : "";
+      ? import.meta.env.VITE_API_BASE_URL
+      : undefined,
+  );
 
-  if (!rawBase || rawBase === "undefined" || rawBase === "null") {
-    return undefined;
-  }
+const getApiOrigin = (): string =>
+  getConfiguredApiOrigin() ?? DEFAULT_API_ORIGIN;
 
-  return parseHost(rawBase);
+const toAbsoluteApiUploadUrl = (path: string): string => {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return new URL(normalizedPath, getApiOrigin()).toString();
 };
-
-const getUploadPath = (url: URL): string =>
-  `${url.pathname}${url.search}${url.hash}`;
 
 export const normalizeUploadAssetUrl = (
   value: string | null | undefined,
@@ -34,22 +41,19 @@ export const normalizeUploadAssetUrl = (
   const trimmed = value.trim();
   if (!trimmed) return "";
 
-  if (!/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
 
-  let parsed: URL;
-  try {
-    parsed = new URL(trimmed);
-  } catch {
-    return trimmed;
+  if (
+    trimmed.startsWith(UPLOAD_PATH_PREFIX) ||
+    trimmed.startsWith(UPLOAD_PATH_PREFIX.slice(1))
+  ) {
+    try {
+      return toAbsoluteApiUploadUrl(trimmed);
+    } catch {
+      // Preserve input on malformed URL construction.
+      return trimmed;
+    }
   }
 
-  const configuredApiHost = getConfiguredApiHost();
-  const apiHosts = new Set<string>([DEFAULT_API_HOST]);
-  if (configuredApiHost) apiHosts.add(configuredApiHost);
-  const isApiUploadAsset =
-    apiHosts.has(parsed.host) && parsed.pathname.startsWith(UPLOAD_PATH_PREFIX);
-
-  if (!isApiUploadAsset) return trimmed;
-
-  return getUploadPath(parsed);
+  return trimmed;
 };

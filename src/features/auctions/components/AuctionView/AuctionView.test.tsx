@@ -11,6 +11,24 @@ import { AuctionView } from "./AuctionView";
 import type { AuctionDetail } from "../../types/auction";
 import type { Bid } from "../../types/bid";
 
+const DEFAULT_API_ORIGIN = "https://api.biddersweet.app";
+const getExpectedApiOrigin = () => {
+  const rawApiBase =
+    typeof import.meta.env.VITE_API_BASE_URL === "string"
+      ? import.meta.env.VITE_API_BASE_URL.trim()
+      : "";
+
+  if (!rawApiBase || rawApiBase === "undefined" || rawApiBase === "null") {
+    return DEFAULT_API_ORIGIN;
+  }
+
+  try {
+    return new URL(rawApiBase).origin;
+  } catch {
+    return DEFAULT_API_ORIGIN;
+  }
+};
+
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
@@ -134,7 +152,7 @@ describe("AuctionView Component", () => {
     await screen.findByTestId("bid-history");
   });
 
-  it("normalizes api upload image URLs to same-origin paths", async () => {
+  it("keeps absolute API upload image URLs unchanged", async () => {
     renderComponent({
       auction: {
         ...mockAuction,
@@ -144,12 +162,13 @@ describe("AuctionView Component", () => {
 
     expect(screen.getByAltText("Vintage Masterpiece")).toHaveAttribute(
       "src",
-      "/api/v1/uploads/signed-id-2",
+      "https://api.biddersweet.app/api/v1/uploads/signed-id-2",
     );
     await screen.findByTestId("bid-history");
   });
 
-  it("keeps stable same-origin upload image paths unchanged", async () => {
+  it("promotes relative upload image paths to canonical API-origin URLs", async () => {
+    const expectedOrigin = getExpectedApiOrigin();
     renderComponent({
       auction: {
         ...mockAuction,
@@ -159,7 +178,7 @@ describe("AuctionView Component", () => {
 
     expect(screen.getByAltText("Vintage Masterpiece")).toHaveAttribute(
       "src",
-      "/api/v1/uploads/signed-id-2?disposition=inline",
+      `${expectedOrigin}/api/v1/uploads/signed-id-2?disposition=inline`,
     );
     await screen.findByTestId("bid-history");
   });
