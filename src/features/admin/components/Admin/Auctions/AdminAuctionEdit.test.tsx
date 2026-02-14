@@ -40,6 +40,7 @@ describe("AdminAuctionEdit", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
   it("shows error for invalid id", () => {
@@ -87,9 +88,46 @@ describe("AdminAuctionEdit", () => {
     expect(mockLogAdminAction).toHaveBeenCalledWith("auction.update", {
       id: 5,
       title: "Updated Title",
+      storefront_from: "afterdark",
+      storefront_to: "marketplace",
     });
     expect(mockShowToast).toHaveBeenCalledWith("Auction updated", "success");
     expect(mockNavigate).toHaveBeenCalledWith("/admin/auctions");
+  });
+
+  it("does not submit when storefront reassignment is canceled", async () => {
+    mockGetAuction.mockResolvedValue({
+      id: 5,
+      title: "Auction",
+      status: "inactive",
+      current_price: 10,
+      storefront_key: "afterdark",
+      is_adult: true,
+      is_marketplace: false,
+    });
+    mockUpdateAuction.mockResolvedValue({});
+
+    const confirmSpy = vi.spyOn(window, "confirm");
+    confirmSpy.mockReturnValueOnce(false);
+
+    const { container } = renderEdit();
+
+    expect(await screen.findByText("Update auction")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/Storefront/i), {
+      target: { value: "marketplace" },
+    });
+
+    const form = container.querySelector("form");
+    if (!form) throw new Error("Form not found");
+    form.noValidate = true;
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(confirmSpy).toHaveBeenCalledWith(
+        "Reassign this auction to a different storefront? This changes where it is visible.",
+      );
+    });
+    expect(mockUpdateAuction).not.toHaveBeenCalled();
   });
 
   it("handles fetch failure", async () => {

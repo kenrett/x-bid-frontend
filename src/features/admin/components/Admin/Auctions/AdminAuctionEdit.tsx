@@ -62,11 +62,30 @@ export const AdminAuctionEdit = () => {
       if (!confirmed) return;
       setActiveEditConfirmed(true);
     }
+
+    const currentStorefront = auction?.storefront_key ?? null;
+    const nextStorefront = payload.storefront_key ?? currentStorefront;
+    const storefrontChanged =
+      currentStorefront !== null &&
+      nextStorefront !== null &&
+      currentStorefront !== nextStorefront;
+    if (storefrontChanged) {
+      const confirmed = window.confirm(
+        "Reassign this auction to a different storefront? This changes where it is visible.",
+      );
+      if (!confirmed) return;
+    }
+
     try {
       setIsSubmitting(true);
       const updatedAuction = await updateAuction(auctionId, payload);
       setAuction(updatedAuction);
-      logAdminAction("auction.update", { id: auctionId, title: payload.title });
+      logAdminAction("auction.update", {
+        id: auctionId,
+        title: payload.title,
+        storefront_from: currentStorefront,
+        storefront_to: nextStorefront,
+      });
       showToast("Auction updated", "success");
       navigate("/admin/auctions");
     } catch (err) {
