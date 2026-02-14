@@ -144,4 +144,24 @@ describe("AdminAuctionForm", () => {
     expect(screen.getByLabelText(/Storefront/i)).toHaveValue("afterdark");
     expect(screen.getByDisplayValue("5")).toBeInTheDocument();
   });
+
+  it("submits with a relative upload path image URL from edit state", () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    renderForm({
+      onSubmit,
+      initialValues: {
+        title: "Initial",
+        image_url: "/api/v1/uploads/signed-id-123",
+      },
+    });
+
+    const form = screen.getByText(/title \*/i).closest("form");
+    if (!form) throw new Error("Form not found");
+    fireEvent.submit(form);
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      title: "Initial",
+      image_url: "/api/v1/uploads/signed-id-123",
+    });
+  });
 });

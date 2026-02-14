@@ -309,11 +309,11 @@ export const AdminAuctionForm = ({
           <label className="flex flex-col gap-2 text-sm text-[color:var(--sf-mutedText)]">
             <span className="font-semibold">Image URL</span>
             <input
-              type="url"
+              type="text"
               value={formState.image_url}
               onChange={handleChange("image_url")}
               className="rounded-lg bg-[color:var(--sf-surface)] border border-[color:var(--sf-border)] px-3 py-2 text-[color:var(--sf-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--sf-focus-ring)]"
-              placeholder="https://example.com/image.jpg"
+              placeholder="https://example.com/image.jpg or /api/v1/uploads/<signed_id>"
             />
           </label>
         </div>
