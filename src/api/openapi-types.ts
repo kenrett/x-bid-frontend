@@ -231,7 +231,7 @@ export interface paths {
     /**
      * Change password for the current user
      * @description POST /api/v1/account/password
-     *     Revokes all other active sessions on success.
+     *     Revokes existing sessions on success.
      */
     post: operations["POST__api_v1_account_password"];
     delete?: never;
@@ -697,6 +697,27 @@ export interface paths {
      *     Ensures the ledger grant exists for an applied purchase without double-crediting.
      */
     post: operations["POST__api_v1_admin_payments_{id}_repair_credits"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/admin/sessions/revoke_all": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Revoke all active sessions globally
+     * @description POST /api/v1/admin/sessions/revoke_all
+     *     Emergency kill-switch that forces every currently authenticated user to re-authenticate.
+     */
+    post: operations["POST__api_v1_admin_sessions_revoke_all"];
     delete?: never;
     options?: never;
     head?: never;
@@ -1747,6 +1768,14 @@ export interface components {
       status?: string;
     };
     "264961f1d98ca80176fc486fdf41eaba": components["schemas"]["AccountDeleteRequest"];
+    "26f86f43c05fa9b7ad191b4a812ac567": {
+      reason?: string;
+      revoked_at?: string;
+      rotate_signing_secrets?: boolean;
+      secret_rotation_note?: string;
+      sessions_revoked?: number;
+      status?: string;
+    };
     "276c024e8515065c3bec759819bda57c": components["schemas"]["LoginRequest"];
     "2d935b114de85d13479f1b86247e8262": components["schemas"]["AccountSessionsResponse"];
     "2fcd9b5aab073fe3e7e089bfc0ede365": {
@@ -1768,6 +1797,10 @@ export interface components {
     "5fa0310957b5c0b33595a49f03b95e19": components["schemas"]["ChangePasswordRequest"];
     "6175057dd6ab3c3e45d847a73028d9c3": components["schemas"]["BidPlacementResponse"];
     "6383e51ee52c0c02bb879720dd1369ff": components["schemas"]["AccountProfile"];
+    "674aaed99c273be7c0cd2898b2e4ebed": {
+      reason?: string;
+      rotate_signing_secrets?: boolean;
+    };
     "6a66905fa98d3338490e0e1fa319f020": components["schemas"]["AuctionSummary"][];
     "70134c69417671cec9d55002f8014f03": {
       email_address?: string;
@@ -2295,11 +2328,12 @@ export interface components {
       name: string;
       role: string;
     };
-    /** @description Auth Contract v1 session details returned after signup/login/refresh. */
+    /** @description Auth Contract v1 session details returned after signup/login/refresh. Bearer tokens are omitted when bearer auth is disabled. */
     UserSession: {
-      /** @description JWT used for authenticated requests. */
-      access_token: string;
-      refresh_token: string;
+      /** @description JWT used for authenticated requests when bearer auth is enabled. */
+      access_token?: string;
+      /** @description Refresh token for bearer-token clients when bearer auth is enabled. */
+      refresh_token?: string;
       session_token_id: number | string;
       user: components["schemas"]["User"];
     };
@@ -2641,8 +2675,17 @@ export interface components {
         "application/json": components["schemas"]["0b27bc2d4f067d7b4e46fc6fbfbaf4c2"];
       };
     };
-    /** @description Win claimed */
+    /** @description Sessions revoked */
     resp_033: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
+        "application/json": components["schemas"]["26f86f43c05fa9b7ad191b4a812ac567"];
+      };
+    };
+    /** @description Win claimed */
+    resp_034: {
       headers: {
         [name: string]: unknown;
       };
@@ -2651,7 +2694,7 @@ export interface components {
       };
     };
     /** @description Session valid */
-    resp_034: {
+    resp_035: {
       headers: {
         [name: string]: unknown;
       };
@@ -2660,7 +2703,7 @@ export interface components {
       };
     };
     /** @description Success */
-    resp_035: {
+    resp_036: {
       headers: {
         [name: string]: unknown;
       };
@@ -2669,7 +2712,7 @@ export interface components {
       };
     };
     /** @description Template */
-    resp_036: {
+    resp_037: {
       headers: {
         [name: string]: unknown;
       };
@@ -2678,7 +2721,7 @@ export interface components {
       };
     };
     /** @description User updated */
-    resp_037: {
+    resp_038: {
       headers: {
         [name: string]: unknown;
       };
@@ -2687,7 +2730,7 @@ export interface components {
       };
     };
     /** @description Success */
-    resp_038: {
+    resp_039: {
       headers: {
         [name: string]: unknown;
       };
@@ -2696,7 +2739,7 @@ export interface components {
       };
     };
     /** @description Maintenance updated */
-    resp_039: {
+    resp_040: {
       headers: {
         [name: string]: unknown;
       };
@@ -2705,7 +2748,7 @@ export interface components {
       };
     };
     /** @description Success */
-    resp_040: {
+    resp_041: {
       headers: {
         [name: string]: unknown;
       };
@@ -2714,7 +2757,7 @@ export interface components {
       };
     };
     /** @description Win */
-    resp_041: {
+    resp_042: {
       headers: {
         [name: string]: unknown;
       };
@@ -2723,7 +2766,7 @@ export interface components {
       };
     };
     /** @description Updated */
-    resp_042: {
+    resp_043: {
       headers: {
         [name: string]: unknown;
       };
@@ -2732,7 +2775,7 @@ export interface components {
       };
     };
     /** @description You are not authorized to access this resource. You need to authenticate yourself first. */
-    resp_043: {
+    resp_044: {
       headers: {
         [name: string]: unknown;
       };
@@ -2741,7 +2784,7 @@ export interface components {
       };
     };
     /** @description Bid pack */
-    resp_044: {
+    resp_045: {
       headers: {
         [name: string]: unknown;
       };
@@ -2750,7 +2793,7 @@ export interface components {
       };
     };
     /** @description The requested resource could not be found. */
-    resp_045: {
+    resp_046: {
       headers: {
         [name: string]: unknown;
       };
@@ -2759,7 +2802,7 @@ export interface components {
       };
     };
     /** @description Success */
-    resp_046: {
+    resp_047: {
       headers: {
         [name: string]: unknown;
       };
@@ -2768,7 +2811,7 @@ export interface components {
       };
     };
     /** @description Validation error */
-    resp_047: {
+    resp_048: {
       headers: {
         [name: string]: unknown;
       };
@@ -2777,7 +2820,7 @@ export interface components {
       };
     };
     /** @description Current user */
-    resp_048: {
+    resp_049: {
       headers: {
         [name: string]: unknown;
       };
@@ -2786,7 +2829,7 @@ export interface components {
       };
     };
     /** @description Bid pack retired */
-    resp_049: {
+    resp_050: {
       headers: {
         [name: string]: unknown;
       };
@@ -2795,21 +2838,12 @@ export interface components {
       };
     };
     /** @description You are not allowed to access this resource. You do not have the necessary permissions. */
-    resp_050: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": components["schemas"]["d79407304a1f91dbdcfa03f0d06dc75e"];
-      };
-    };
-    /** @description Success */
     resp_051: {
       headers: {
         [name: string]: unknown;
       };
       content: {
-        "application/json": components["schemas"]["d51ee01d42ed6338e9e7caeec9bf5005"];
+        "application/json": components["schemas"]["d79407304a1f91dbdcfa03f0d06dc75e"];
       };
     };
     /** @description Success */
@@ -2818,11 +2852,20 @@ export interface components {
         [name: string]: unknown;
       };
       content: {
+        "application/json": components["schemas"]["d51ee01d42ed6338e9e7caeec9bf5005"];
+      };
+    };
+    /** @description Success */
+    resp_053: {
+      headers: {
+        [name: string]: unknown;
+      };
+      content: {
         "application/json": components["schemas"]["9716253bdd9047e146dd2c947db9ac87"];
       };
     };
     /** @description Purchase */
-    resp_053: {
+    resp_054: {
       headers: {
         [name: string]: unknown;
       };
@@ -2831,7 +2874,7 @@ export interface components {
       };
     };
     /** @description The server could not process the request due to semantic errors. Please check your input and try again. */
-    resp_054: {
+    resp_055: {
       headers: {
         [name: string]: unknown;
       };
@@ -2840,7 +2883,7 @@ export interface components {
       };
     };
     /** @description Success */
-    resp_055: {
+    resp_056: {
       headers: {
         [name: string]: unknown;
       };
@@ -2849,7 +2892,7 @@ export interface components {
       };
     };
     /** @description Logged out */
-    resp_056: {
+    resp_057: {
       headers: {
         [name: string]: unknown;
       };
@@ -2858,7 +2901,7 @@ export interface components {
       };
     };
     /** @description Forbidden */
-    resp_057: {
+    resp_058: {
       headers: {
         [name: string]: unknown;
       };
@@ -2867,7 +2910,7 @@ export interface components {
       };
     };
     /** @description Checkout session created */
-    resp_058: {
+    resp_059: {
       headers: {
         [name: string]: unknown;
       };
@@ -2876,7 +2919,7 @@ export interface components {
       };
     };
     /** @description CSRF token */
-    resp_059: {
+    resp_060: {
       headers: {
         [name: string]: unknown;
       };
@@ -2885,7 +2928,7 @@ export interface components {
       };
     };
     /** @description User banned */
-    resp_060: {
+    resp_061: {
       headers: {
         [name: string]: unknown;
       };
@@ -2894,7 +2937,7 @@ export interface components {
       };
     };
     /** @description Checkout status */
-    resp_061: {
+    resp_062: {
       headers: {
         [name: string]: unknown;
       };
@@ -2903,7 +2946,7 @@ export interface components {
       };
     };
     /** @description Notifications */
-    resp_062: {
+    resp_063: {
       headers: {
         [name: string]: unknown;
       };
@@ -2912,7 +2955,7 @@ export interface components {
       };
     };
     /** @description Success */
-    resp_063: {
+    resp_064: {
       headers: {
         [name: string]: unknown;
       };
@@ -2921,7 +2964,7 @@ export interface components {
       };
     };
     /** @description Bid placed */
-    resp_064: {
+    resp_065: {
       headers: {
         [name: string]: unknown;
       };
@@ -2930,7 +2973,7 @@ export interface components {
       };
     };
     /** @description Auction retired */
-    resp_065: {
+    resp_066: {
       headers: {
         [name: string]: unknown;
       };
@@ -2939,7 +2982,7 @@ export interface components {
       };
     };
     /** @description Unprocessable content */
-    resp_066: {
+    resp_067: {
       headers: {
         [name: string]: unknown;
       };
@@ -2948,7 +2991,7 @@ export interface components {
       };
     };
     /** @description Too many requests */
-    resp_067: {
+    resp_068: {
       headers: {
         [name: string]: unknown;
       };
@@ -2957,7 +3000,7 @@ export interface components {
       };
     };
     /** @description Auction created */
-    resp_068: {
+    resp_069: {
       headers: {
         [name: string]: unknown;
       };
@@ -2966,7 +3009,7 @@ export interface components {
       };
     };
     /** @description Accepted */
-    resp_069: {
+    resp_070: {
       headers: {
         [name: string]: unknown;
       };
@@ -2975,7 +3018,7 @@ export interface components {
       };
     };
     /** @description Unauthorized */
-    resp_070: {
+    resp_071: {
       headers: {
         [name: string]: unknown;
       };
@@ -2984,7 +3027,7 @@ export interface components {
       };
     };
     /** @description Maintenance status */
-    resp_071: {
+    resp_072: {
       headers: {
         [name: string]: unknown;
       };
@@ -2993,7 +3036,7 @@ export interface components {
       };
     };
     /** @description Success */
-    resp_072: {
+    resp_073: {
       headers: {
         [name: string]: unknown;
       };
@@ -3131,26 +3174,32 @@ export interface components {
         "application/json": components["schemas"]["a9e1a606eb82c3fa25a4df4f74ec3380"];
       };
     };
-    /** @description Verify payload */
+    /** @description Global revoke request */
     req_013: {
+      content: {
+        "application/json": components["schemas"]["674aaed99c273be7c0cd2898b2e4ebed"];
+      };
+    };
+    /** @description Verify payload */
+    req_014: {
       content: {
         "application/json": components["schemas"]["5873aa90c67f4c11a7daaa4d2302bb84"];
       };
     };
     /** @description Maintenance toggle */
-    req_014: {
+    req_015: {
       content: {
         "application/json": components["schemas"]["30d3c70eaf62d1e420cb43b97fdec55f"];
       };
     };
     /** @description Signup payload */
-    req_015: {
+    req_016: {
       content: {
         "application/json": components["schemas"]["fca7ae9c5b5a5fdbca32473db8333bdf"];
       };
     };
     /** @description Disable payload */
-    req_016: {
+    req_017: {
       content: {
         "application/json": components["schemas"]["7d23008fce7117726abc26fc1bdba80c"];
       };
@@ -3174,7 +3223,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_024"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
     };
   };
   GET__api_v1_account: {
@@ -3186,10 +3235,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_072"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      200: components["responses"]["resp_073"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3202,10 +3251,10 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_001"];
     responses: {
-      200: components["responses"]["resp_042"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      200: components["responses"]["resp_043"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       422: components["responses"]["resp_018"];
       500: components["responses"]["resp_023"];
     };
@@ -3219,10 +3268,10 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_008"];
     responses: {
-      200: components["responses"]["resp_040"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      200: components["responses"]["resp_041"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       422: components["responses"]["resp_018"];
       500: components["responses"]["resp_023"];
     };
@@ -3236,10 +3285,10 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_001"];
     responses: {
-      200: components["responses"]["resp_042"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      200: components["responses"]["resp_043"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       422: components["responses"]["resp_018"];
       500: components["responses"]["resp_023"];
     };
@@ -3253,10 +3302,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_046"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      200: components["responses"]["resp_047"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3267,11 +3316,11 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody: components["requestBodies"]["req_016"];
+    requestBody: components["requestBodies"]["req_017"];
     responses: {
-      200: components["responses"]["resp_052"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      200: components["responses"]["resp_053"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3284,9 +3333,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_051"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      200: components["responses"]["resp_052"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       422: components["responses"]["resp_018"];
       500: components["responses"]["resp_023"];
     };
@@ -3298,11 +3347,11 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody: components["requestBodies"]["req_013"];
+    requestBody: components["requestBodies"]["req_014"];
     responses: {
-      200: components["responses"]["resp_038"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      200: components["responses"]["resp_039"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3315,10 +3364,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_055"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      200: components["responses"]["resp_056"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3332,9 +3381,9 @@ export interface operations {
     requestBody?: never;
     responses: {
       202: components["responses"]["resp_031"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
-      422: components["responses"]["resp_054"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
+      422: components["responses"]["resp_055"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3347,11 +3396,11 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_006"];
     responses: {
-      202: components["responses"]["resp_069"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      202: components["responses"]["resp_070"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       422: components["responses"]["resp_018"];
-      429: components["responses"]["resp_067"];
+      429: components["responses"]["resp_068"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3365,8 +3414,8 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_002"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3379,10 +3428,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_035"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      200: components["responses"]["resp_036"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3395,10 +3444,10 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_007"];
     responses: {
-      200: components["responses"]["resp_035"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      200: components["responses"]["resp_036"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       422: components["responses"]["resp_018"];
       500: components["responses"]["resp_023"];
     };
@@ -3412,9 +3461,9 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_010"];
     responses: {
-      200: components["responses"]["resp_063"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      200: components["responses"]["resp_064"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       422: components["responses"]["resp_018"];
       500: components["responses"]["resp_023"];
     };
@@ -3429,9 +3478,9 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_029"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3445,8 +3494,8 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_008"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3459,9 +3508,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_063"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      200: components["responses"]["resp_064"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3474,9 +3523,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_063"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      200: components["responses"]["resp_064"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3492,10 +3541,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_040"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
-      404: components["responses"]["resp_045"];
+      200: components["responses"]["resp_041"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
+      404: components["responses"]["resp_046"];
       422: components["responses"]["resp_018"];
       500: components["responses"]["resp_023"];
     };
@@ -3527,8 +3576,8 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_019"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3541,10 +3590,10 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_003"];
     responses: {
-      201: components["responses"]["resp_068"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
-      422: components["responses"]["resp_047"];
+      201: components["responses"]["resp_069"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3561,8 +3610,8 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_009"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
       500: components["responses"]["resp_023"];
     };
@@ -3580,10 +3629,10 @@ export interface operations {
     requestBody: components["requestBodies"]["req_003"];
     responses: {
       200: components["responses"]["resp_028"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3599,11 +3648,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      204: components["responses"]["resp_065"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      204: components["responses"]["resp_066"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3620,10 +3669,10 @@ export interface operations {
     requestBody: components["requestBodies"]["req_003"];
     responses: {
       200: components["responses"]["resp_028"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3640,10 +3689,10 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_015"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3657,9 +3706,9 @@ export interface operations {
     requestBody: components["requestBodies"]["req_012"];
     responses: {
       201: components["responses"]["resp_007"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
-      422: components["responses"]["resp_047"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3673,8 +3722,8 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_020"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3688,9 +3737,9 @@ export interface operations {
     requestBody: components["requestBodies"]["req_011"];
     responses: {
       201: components["responses"]["resp_011"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
-      422: components["responses"]["resp_047"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3703,9 +3752,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_036"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      200: components["responses"]["resp_037"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3721,9 +3770,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_044"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      200: components["responses"]["resp_045"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
       500: components["responses"]["resp_023"];
     };
@@ -3741,10 +3790,10 @@ export interface operations {
     requestBody: components["requestBodies"]["req_011"];
     responses: {
       200: components["responses"]["resp_001"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3760,11 +3809,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_049"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      200: components["responses"]["resp_050"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3781,10 +3830,10 @@ export interface operations {
     requestBody: components["requestBodies"]["req_011"];
     responses: {
       200: components["responses"]["resp_001"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3800,9 +3849,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_044"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      200: components["responses"]["resp_045"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
       500: components["responses"]["resp_023"];
     };
@@ -3819,8 +3868,8 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      401: components["responses"]["resp_043"];
-      403: components["responses"]["resp_050"];
+      401: components["responses"]["resp_044"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3836,8 +3885,8 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      401: components["responses"]["resp_043"];
-      403: components["responses"]["resp_050"];
+      401: components["responses"]["resp_044"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3853,8 +3902,8 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      401: components["responses"]["resp_043"];
-      403: components["responses"]["resp_050"];
+      401: components["responses"]["resp_044"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3867,10 +3916,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_071"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
-      404: components["responses"]["resp_045"];
+      200: components["responses"]["resp_072"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
+      404: components["responses"]["resp_046"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3884,14 +3933,14 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody?: components["requestBodies"]["req_014"];
+    requestBody?: components["requestBodies"]["req_015"];
     responses: {
-      200: components["responses"]["resp_039"];
+      200: components["responses"]["resp_040"];
       400: components["responses"]["resp_022"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
-      404: components["responses"]["resp_045"];
-      422: components["responses"]["resp_054"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
+      404: components["responses"]["resp_046"];
+      422: components["responses"]["resp_055"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3908,8 +3957,8 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_021"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3925,9 +3974,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      401: components["responses"]["resp_043"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      401: components["responses"]["resp_044"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3944,10 +3993,10 @@ export interface operations {
     requestBody?: components["requestBodies"]["req_005"];
     responses: {
       200: components["responses"]["resp_030"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3963,8 +4012,24 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      401: components["responses"]["resp_043"];
-      403: components["responses"]["resp_050"];
+      401: components["responses"]["resp_044"];
+      403: components["responses"]["resp_051"];
+      500: components["responses"]["resp_023"];
+    };
+  };
+  POST__api_v1_admin_sessions_revoke_all: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: components["requestBodies"]["req_013"];
+    responses: {
+      200: components["responses"]["resp_033"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
+      422: components["responses"]["resp_018"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3978,8 +4043,8 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_013"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -3995,11 +4060,11 @@ export interface operations {
     };
     requestBody?: components["requestBodies"]["req_009"];
     responses: {
-      200: components["responses"]["resp_037"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      200: components["responses"]["resp_038"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4015,11 +4080,11 @@ export interface operations {
     };
     requestBody?: components["requestBodies"]["req_009"];
     responses: {
-      200: components["responses"]["resp_037"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      200: components["responses"]["resp_038"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4035,11 +4100,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_060"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      200: components["responses"]["resp_061"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4056,10 +4121,10 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_026"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4076,10 +4141,10 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_026"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4096,10 +4161,10 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_026"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4116,10 +4181,10 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_026"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4133,8 +4198,8 @@ export interface operations {
     requestBody?: never;
     responses: {
       204: components["responses"]["resp_027"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4151,7 +4216,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_024"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
     };
   };
   POST__api_v1_auctions: {
@@ -4163,10 +4228,10 @@ export interface operations {
     };
     requestBody: components["requestBodies"]["req_003"];
     responses: {
-      201: components["responses"]["resp_068"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
-      422: components["responses"]["resp_047"];
+      201: components["responses"]["resp_069"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4183,7 +4248,7 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_016"];
-      403: components["responses"]["resp_057"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
     };
   };
@@ -4199,11 +4264,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_064"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      200: components["responses"]["resp_065"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4236,10 +4301,10 @@ export interface operations {
     requestBody: components["requestBodies"]["req_003"];
     responses: {
       200: components["responses"]["resp_028"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4255,11 +4320,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      204: components["responses"]["resp_065"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      204: components["responses"]["resp_066"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4276,10 +4341,10 @@ export interface operations {
     requestBody: components["requestBodies"]["req_003"];
     responses: {
       200: components["responses"]["resp_028"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4296,10 +4361,10 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_015"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4315,9 +4380,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      401: components["responses"]["resp_043"];
-      403: components["responses"]["resp_050"];
-      422: components["responses"]["resp_054"];
+      401: components["responses"]["resp_044"];
+      403: components["responses"]["resp_051"];
+      422: components["responses"]["resp_055"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4333,9 +4398,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      401: components["responses"]["resp_043"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      401: components["responses"]["resp_044"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4348,9 +4413,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      401: components["responses"]["resp_043"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      401: components["responses"]["resp_044"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4378,9 +4443,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_061"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      200: components["responses"]["resp_062"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       404: components["responses"]["resp_003"];
       500: components["responses"]["resp_023"];
     };
@@ -4398,8 +4463,8 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_006"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       404: components["responses"]["resp_003"];
       500: components["responses"]["resp_023"];
     };
@@ -4416,11 +4481,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_058"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      200: components["responses"]["resp_059"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4433,8 +4498,8 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_059"];
-      404: components["responses"]["resp_045"];
+      200: components["responses"]["resp_060"];
+      404: components["responses"]["resp_046"];
     };
   };
   GET__api_v1_diagnostics_auth: {
@@ -4446,8 +4511,8 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      401: components["responses"]["resp_043"];
-      403: components["responses"]["resp_050"];
+      401: components["responses"]["resp_044"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4460,10 +4525,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      202: components["responses"]["resp_069"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
-      429: components["responses"]["resp_067"];
+      202: components["responses"]["resp_070"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
+      429: components["responses"]["resp_068"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4479,7 +4544,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_040"];
+      200: components["responses"]["resp_041"];
       422: components["responses"]["resp_018"];
     };
   };
@@ -4492,9 +4557,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      401: components["responses"]["resp_043"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      401: components["responses"]["resp_044"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4507,9 +4572,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_034"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      200: components["responses"]["resp_035"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4524,9 +4589,9 @@ export interface operations {
     responses: {
       200: components["responses"]["resp_005"];
       400: components["responses"]["resp_022"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
-      422: components["responses"]["resp_054"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
+      422: components["responses"]["resp_055"];
     };
   };
   DELETE__api_v1_logout: {
@@ -4538,10 +4603,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_056"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      200: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4554,8 +4619,8 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_071"];
-      404: components["responses"]["resp_045"];
+      200: components["responses"]["resp_072"];
+      404: components["responses"]["resp_046"];
     };
   };
   GET__api_v1_me: {
@@ -4567,10 +4632,10 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_048"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      200: components["responses"]["resp_049"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4583,8 +4648,8 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      401: components["responses"]["resp_043"];
-      403: components["responses"]["resp_050"];
+      401: components["responses"]["resp_044"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4597,9 +4662,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_062"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      200: components["responses"]["resp_063"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4613,8 +4678,8 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_014"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4630,9 +4695,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_053"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      200: components["responses"]["resp_054"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       404: components["responses"]["resp_003"];
       500: components["responses"]["resp_023"];
     };
@@ -4647,8 +4712,8 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_012"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4664,9 +4729,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_041"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      200: components["responses"]["resp_042"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       404: components["responses"]["resp_003"];
       500: components["responses"]["resp_023"];
     };
@@ -4683,11 +4748,11 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      200: components["responses"]["resp_033"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      200: components["responses"]["resp_034"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       404: components["responses"]["resp_003"];
-      422: components["responses"]["resp_047"];
+      422: components["responses"]["resp_048"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4700,9 +4765,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      202: components["responses"]["resp_069"];
+      202: components["responses"]["resp_070"];
       400: components["responses"]["resp_022"];
-      422: components["responses"]["resp_054"];
+      422: components["responses"]["resp_055"];
     };
   };
   POST__api_v1_password_reset: {
@@ -4716,10 +4781,10 @@ export interface operations {
     responses: {
       200: components["responses"]["resp_004"];
       400: components["responses"]["resp_022"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
-      404: components["responses"]["resp_045"];
-      422: components["responses"]["resp_047"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
+      404: components["responses"]["resp_046"];
+      422: components["responses"]["resp_048"];
     };
   };
   POST__api_v1_session_refresh: {
@@ -4733,8 +4798,8 @@ export interface operations {
     responses: {
       200: components["responses"]["resp_017"];
       400: components["responses"]["resp_022"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_057"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_058"];
     };
   };
   GET__api_v1_session_remaining: {
@@ -4747,8 +4812,8 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_010"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4759,10 +4824,10 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody: components["requestBodies"]["req_015"];
+    requestBody: components["requestBodies"]["req_016"];
     responses: {
       201: components["responses"]["resp_005"];
-      422: components["responses"]["resp_066"];
+      422: components["responses"]["resp_067"];
     };
   };
   POST__api_v1_stripe_webhooks: {
@@ -4774,9 +4839,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      401: components["responses"]["resp_043"];
-      403: components["responses"]["resp_050"];
-      422: components["responses"]["resp_054"];
+      401: components["responses"]["resp_044"];
+      403: components["responses"]["resp_051"];
+      422: components["responses"]["resp_055"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4789,9 +4854,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      401: components["responses"]["resp_043"];
-      403: components["responses"]["resp_050"];
-      422: components["responses"]["resp_054"];
+      401: components["responses"]["resp_044"];
+      403: components["responses"]["resp_051"];
+      422: components["responses"]["resp_055"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4817,10 +4882,10 @@ export interface operations {
       path?: never;
       cookie?: never;
     };
-    requestBody: components["requestBodies"]["req_015"];
+    requestBody: components["requestBodies"]["req_016"];
     responses: {
       201: components["responses"]["resp_005"];
-      422: components["responses"]["resp_066"];
+      422: components["responses"]["resp_067"];
     };
   };
   GET__api_v1_wallet: {
@@ -4833,9 +4898,9 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_025"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4854,8 +4919,8 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: components["responses"]["resp_032"];
-      401: components["responses"]["resp_070"];
-      403: components["responses"]["resp_050"];
+      401: components["responses"]["resp_071"];
+      403: components["responses"]["resp_051"];
       500: components["responses"]["resp_023"];
     };
   };
@@ -4868,9 +4933,9 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      401: components["responses"]["resp_043"];
-      403: components["responses"]["resp_050"];
-      404: components["responses"]["resp_045"];
+      401: components["responses"]["resp_044"];
+      403: components["responses"]["resp_051"];
+      404: components["responses"]["resp_046"];
       500: components["responses"]["resp_023"];
     };
   };
