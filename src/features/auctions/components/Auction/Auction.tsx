@@ -1,5 +1,7 @@
 import { useStorefront } from "../../../../storefront/useStorefront";
 import { normalizeUploadAssetUrl } from "@utils/uploadAssetUrl";
+import { Countdown } from "../Countdown/Countdown";
+import type { AuctionStatus } from "../../types/auction";
 
 interface AuctionProps {
   id: number;
@@ -7,6 +9,8 @@ interface AuctionProps {
   description: string;
   current_price: number;
   image_url: string;
+  end_time: string;
+  status: AuctionStatus;
   onClick: (id: number) => void;
   index: number;
 }
@@ -32,6 +36,7 @@ const STAGGER_DELAY_CLASSES = [
   "[animation-delay:1.4s]",
   "[animation-delay:1.5s]",
 ] as const;
+const NOOP = () => {};
 
 export function Auction({
   id,
@@ -39,6 +44,8 @@ export function Auction({
   description,
   current_price,
   image_url,
+  end_time,
+  status,
   onClick,
   index,
 }: AuctionProps) {
@@ -49,6 +56,7 @@ export function Auction({
   const loading = index < 2 ? "eager" : "lazy";
   const fetchPriority = index < 2 ? "high" : "low";
   const imageSrc = normalizeUploadAssetUrl(image_url) || FALLBACK_IMAGE;
+  const hasValidEndTime = Number.isFinite(new Date(end_time).getTime());
 
   const { key: storefrontKey } = useStorefront();
   const isMarketplace = storefrontKey === "marketplace";
@@ -90,6 +98,14 @@ export function Auction({
         <p className="text-lg font-semibold text-[color:var(--sf-primary)]">
           Current Price: ${current_price.toFixed(2)}
         </p>
+        {hasValidEndTime ? (
+          <div className="mt-3">
+            <p className="text-xs uppercase tracking-wide text-[color:var(--sf-mutedText)]">
+              Time Left
+            </p>
+            <Countdown endTime={end_time} status={status} onEnd={NOOP} />
+          </div>
+        ) : null}
       </div>
     </button>
   );

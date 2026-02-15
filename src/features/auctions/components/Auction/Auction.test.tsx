@@ -27,6 +27,8 @@ const mockAuctionProps = {
   description: "A rare original poster from the Apollo missions.",
   current_price: 42.5,
   image_url: "https://example.com/poster.jpg",
+  end_time: new Date(Date.now() + 60_000).toISOString(),
+  status: "active" as const,
   onClick: vi.fn(),
   index: 3,
 };
@@ -47,6 +49,9 @@ describe("Auction Component", () => {
 
     // Check for formatted price
     expect(screen.getByText("Current Price: $42.50")).toBeInTheDocument();
+
+    // Check for countdown label
+    expect(screen.getByText("Time Left")).toBeInTheDocument();
   });
 
   it("renders the image with the correct src and alt text", () => {
